@@ -67,7 +67,7 @@ function App() {
                 <Sidenav username={auth!.username} onLogout={handleLogout} />
                 <main className="main">
                     <div className="main_header">
-                        <Link to={-1} className="return_icon">
+                        <Link to="-1" className="return_icon">
                             <ArrowLeftIcon size={16}></ArrowLeftIcon>
                         </Link>
                         <div className="page_title">{getPageTitle()}</div>

@@ -252,7 +252,7 @@ body {
     font-weight: 500;
     color: var(--error-font);
     padding: 10px 12px;
-    border-radius: 10px;
+    border-radius: 8px;
     border: 1px solid var(--error-border);
     background-color: var(--error-background);
 }
@@ -352,7 +352,7 @@ body {
     height: 64px;
     background-size: contain;
     background-repeat: no-repeat;
-    background-image: url(logo.png);
+    background-image: url(/logo.png);
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content {
@@ -413,7 +413,7 @@ body {
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input {
     cursor: pointer;
-    width: 140px;
+    width: 142px;
     height: 7px;
     border-radius: 20px;
     background-color: var(--bg-color);
