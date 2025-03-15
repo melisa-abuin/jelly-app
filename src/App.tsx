@@ -92,7 +92,56 @@ function App() {
                         </Routes>
                     </div>
                     <div className="main_footer">
-                        Playback area, current song title, artist, from which album - playlist
+                        <div className="playback">
+                            <div className="progress">
+                                <input
+                                    type="range"
+                                    id="track-progress"
+                                    name="track-progress"
+                                    min="0"
+                                    max="1"
+                                    step="0.1"
+                                    defaultValue={0}
+                                />
+                            </div>
+                            <div className="container">
+                                <div className="track-info">
+                                    <div className="track-name">Moon River</div>
+                                    <div className="artist">Audrey Hepburn</div>
+                                    <div className="album">
+                                        <div className="text">Breakfast At Tiffany's</div>
+                                        <div className="album-icon">
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 22 22"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <path
+                                                    d="M10.9912 19.7422C15.9746 19.7422 20.0879 15.6289 20.0879 10.6543C20.0879 5.67969 15.9658 1.56641 10.9824 1.56641C6.00781 1.56641 1.90332 5.67969 1.90332 10.6543C1.90332 15.6289 6.0166 19.7422 10.9912 19.7422ZM11 14.0996C12.9072 14.0996 14.4453 12.5615 14.4453 10.6455C14.4453 8.74707 12.9072 7.2002 11 7.2002C9.08398 7.2002 7.5459 8.74707 7.5459 10.6455C7.5459 12.5615 9.08398 14.0996 11 14.0996Z"
+                                                    fill="black"
+                                                />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="controls">
+                                    <div className="knobs">
+                                        <div className="previous"></div>
+                                        <div className="play"></div>
+                                        <div className="next"></div>
+                                    </div>
+                                    <div className="additional">
+                                        <div className="shuffle"></div>
+                                    </div>
+                                    <div className="duration">
+                                        <div className="current">0:24</div>
+                                        <div className="divider">/</div>
+                                        <div className="total">3:59</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </main>
             </div>
