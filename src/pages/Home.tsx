@@ -76,8 +76,14 @@ const Home = ({ user, serverUrl, token }: HomePageProps) => {
                                         <div className="media-state">
                                             <img src={getThumbnailUrl(item)} alt={item.Name} className="thumbnail" />
                                             <div className="overlay">
-                                                <div className="play-button"></div>
-                                                <div className="pause-button"></div>
+                                                <div className="container">
+                                                    <div className="play">
+                                                        <div className="play-icon"></div>
+                                                    </div>
+                                                    <div className="pause">
+                                                        <div className="pause-icon"></div>
+                                                    </div>
+                                                </div>
                                                 <div className="play-state-animation">
                                                     <svg
                                                         width="28"
@@ -168,8 +174,14 @@ const Home = ({ user, serverUrl, token }: HomePageProps) => {
                                         <div className="media-state">
                                             <img src={getThumbnailUrl(item)} alt={item.Name} className="thumbnail" />
                                             <div className="overlay">
-                                                <div className="play-button"></div>
-                                                <div className="pause-button"></div>
+                                                <div className="container">
+                                                    <div className="play">
+                                                        <div className="play-icon"></div>
+                                                    </div>
+                                                    <div className="pause">
+                                                        <div className="pause-icon"></div>
+                                                    </div>
+                                                </div>
                                                 <div className="play-state-animation">
                                                     <svg
                                                         width="28"
@@ -260,8 +272,14 @@ const Home = ({ user, serverUrl, token }: HomePageProps) => {
                                         <div className="media-state">
                                             <img src={getThumbnailUrl(item)} alt={item.Name} className="thumbnail" />
                                             <div className="overlay">
-                                                <div className="play-button"></div>
-                                                <div className="pause-button"></div>
+                                                <div className="container">
+                                                    <div className="play">
+                                                        <div className="play-icon"></div>
+                                                    </div>
+                                                    <div className="pause">
+                                                        <div className="pause-icon"></div>
+                                                    </div>
+                                                </div>
                                                 <div className="play-state-animation">
                                                     <svg
                                                         width="28"

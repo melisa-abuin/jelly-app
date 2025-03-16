@@ -119,22 +119,39 @@ function App() {
                                             >
                                                 <path
                                                     d="M10.9912 19.7422C15.9746 19.7422 20.0879 15.6289 20.0879 10.6543C20.0879 5.67969 15.9658 1.56641 10.9824 1.56641C6.00781 1.56641 1.90332 5.67969 1.90332 10.6543C1.90332 15.6289 6.0166 19.7422 10.9912 19.7422ZM11 14.0996C12.9072 14.0996 14.4453 12.5615 14.4453 10.6455C14.4453 8.74707 12.9072 7.2002 11 7.2002C9.08398 7.2002 7.5459 8.74707 7.5459 10.6455C7.5459 12.5615 9.08398 14.0996 11 14.0996Z"
-                                                    fill="black"
+                                                    className="record"
                                                 />
+                                                <circle className="spindle-hole" cx="11" cy="10.6455" r="1.5" />
                                             </svg>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="controls">
                                     <div className="knobs">
-                                        <div className="previous"></div>
-                                        <div className="play"></div>
-                                        <div className="next"></div>
+                                        <div className="shuffle">
+                                            <div className="shuffle-icon"></div>
+                                        </div>
+                                        <div className="primary">
+                                            <div className="previous">
+                                                <div className="previous-icon"></div>
+                                            </div>
+                                            <div className="container">
+                                                <div className="play">
+                                                    <div className="play-icon"></div>
+                                                </div>
+                                                <div className="pause">
+                                                    <div className="pause-icon"></div>
+                                                </div>
+                                            </div>
+                                            <div className="next">
+                                                <div className="next-icon"></div>
+                                            </div>
+                                        </div>
+                                        <div className="repeat">
+                                            <div className="repeat-icon"></div>
+                                        </div>
                                     </div>
-                                    <div className="additional">
-                                        <div className="shuffle"></div>
-                                    </div>
-                                    <div className="duration">
+                                    <div className="duration noSelect">
                                         <div className="current">0:24</div>
                                         <div className="divider">/</div>
                                         <div className="total">3:59</div>

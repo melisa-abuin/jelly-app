@@ -133,6 +133,7 @@ svg {
 
 /* Music App */
 
+/* Site Theme */
 :root {
     --system-fonts: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     --inter-font: 'Inter', sans-serif;
@@ -142,7 +143,8 @@ svg {
     --bg-color-quaternary: #bbbbbb;
     --bg-color-quinary: #a1a1a1;
     --font-color: #303030;
-    --font-color-secondary: #767676;
+    --font-color-secondary: #555555;
+    --font-color-tertiary: #767676;
     --font-color-inverted: #ffffff;
     --border-color: #ececec;
     --border-color-secondary: #dddddd;
@@ -160,7 +162,6 @@ html {
     overflow: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    scrollbar-gutter: stable both-edges;
 }
 
 html,
@@ -182,10 +183,16 @@ body {
     height: 100%;
 }
 
+body {
+    margin-right: calc(-1 * (100vw - 100%)) !important;
+    width: auto;
+}
+
 #root {
     height: 100%;
 }
 
+/* Interface */
 .music-app {
     position: relative;
     display: flex;
@@ -308,7 +315,7 @@ body {
     padding: 12px 20px;
     font-size: 0.725rem;
     font-weight: 300;
-    color: var(--font-color-secondary);
+    color: var(--font-color-tertiary);
 }
 
 /* Sidenav */
@@ -395,6 +402,7 @@ body {
     background-color: var(--bg-color-secondary);
 }
 
+/* Player volume */
 .sidenav > .sidenav_wrapper > .sidenav_footer > .volume {
     display: flex;
     flex-direction: column;
@@ -404,7 +412,7 @@ body {
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .indicator {
     font-size: 0.75rem;
-    color: var(--font-color-secondary);
+    color: var(--font-color-tertiary);
     margin-bottom: 6px;
 }
 
@@ -450,7 +458,7 @@ body {
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .status > .indicator {
-    color: var(--font-color-secondary);
+    color: var(--font-color-tertiary);
     margin-bottom: 2px;
 }
 
@@ -523,7 +531,9 @@ body {
     background-color: var(--bg-color);
 }
 
+/* Playback area */
 .main > .main_footer > .playback {
+    position: relative;
 }
 
 .main > .main_footer > .playback > .progress {
@@ -568,21 +578,29 @@ body {
     padding: 16px 20px;
 }
 
+/* Track details */
 .main > .main_footer > .playback > .container > .track-info {
     position: relative;
+    max-width: 260px;
 }
 
 .main > .main_footer > .playback > .container > .track-info > .track-name {
     font-size: 0.875rem;
     font-weight: 600;
     margin-bottom: 3px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .main > .main_footer > .playback > .container > .track-info > .artist {
     font-size: 0.75rem;
     font-weight: 600;
-    color: var(--font-color-secondary);
+    color: var(--font-color-tertiary);
     margin-bottom: 1px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .main > .main_footer > .playback > .container > .track-info > .album {
@@ -590,18 +608,17 @@ body {
     align-items: flex-start;
     font-size: 0.75rem;
     font-weight: 500;
-    color: var(--font-color-secondary);
+    color: var(--font-color-tertiary);
+}
+
+.main > .main_footer > .playback > .container > .track-info > .album > .text {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .main > .main_footer > .playback > .container > .track-info > .album > .album-icon {
     margin-left: 2px;
-    /*
-    width: 22px;
-    height: 22px;
-    background-color: var(--font-color-secondary);
-    mask-image: url(/album-fill.svg);
-    transition: opacity 0.2s ease-out;
-    */
 }
 
 .main > .main_footer > .playback > .container > .track-info > .album > .album-icon > svg {
@@ -609,23 +626,192 @@ body {
 }
 
 .main > .main_footer > .playback > .container > .track-info > .album > .album-icon > svg > path {
-    fill: var(--font-color-secondary);
+    fill: var(--font-color-tertiary);
 }
 
+.main > .main_footer > .playback > .container > .track-info > .album > .album-icon > svg > .spindle-hole {
+    fill: var(--font-color-tertiary);
+}
+
+/* Player controls */
 .main > .main_footer > .playback > .container > .controls {
+    display: flex;
+    align-items: center;
 }
 
+.main > .main_footer > .playback > .container > .controls > .knobs {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-right: 16px;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .shuffle {
+    cursor: pointer;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .shuffle > .shuffle-icon {
+    display: block;
+    width: 32px;
+    height: 28px;
+    background-color: var(--font-color-secondary);
+    mask-repeat: no-repeat;
+    mask-image: url(/player-shuffle.svg);
+    transition: background-color 0.2s ease-out;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .shuffle:hover > .shuffle-icon {
+    background-color: var(--font-color);
+}
+
+/* Primary controls */
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous {
+    cursor: pointer;
+    transform: rotate(180deg);
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous > .previous-icon {
+    display: block;
+    width: 28px;
+    height: 24px;
+    background-color: var(--font-color-secondary);
+    mask-size: cover;
+    mask-repeat: no-repeat;
+    mask-image: url(/player-next.svg);
+    transition: opacity 0.2s ease-out;
+    transition: background-color 0.2s ease-out;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous:hover > .previous-icon {
+    background-color: var(--font-color);
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .container {
+    position: relative;
+    width: 36px;
+    height: 32px;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .container > .play {
+    position: absolute;
+    cursor: pointer;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+/* Hide play button when a track is playing */
+.main > .main_footer > .playback.playing > .container > .controls > .knobs > .primary > .container > .play {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .container > .play > .play-icon {
+    display: block;
+    width: 36px;
+    height: 32px;
+    background-color: var(--font-color-secondary);
+    mask-repeat: no-repeat;
+    mask-image: url(/play.svg);
+    transition: background-color 0.2s ease-out;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .container > .play:hover > .play-icon {
+    background-color: var(--font-color);
+}
+
+/* Hide pause button by default */
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .container > .pause {
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+    cursor: pointer;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+/* Show pause button when a track is playing */
+.main > .main_footer > .playback.playing > .container > .controls > .knobs > .primary > .container > .pause {
+    opacity: 1;
+    visibility: visible;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .container > .pause > .pause-icon {
+    display: block;
+    width: 36px;
+    height: 32px;
+    background-color: var(--font-color-secondary);
+    mask-repeat: no-repeat;
+    mask-image: url(/pause.svg);
+    transition: background-color 0.2s ease-out;
+}
+
+.main
+    > .main_footer
+    > .playback
+    > .container
+    > .controls
+    > .knobs
+    > .primary
+    > .container
+    > .pause:hover
+    > .pause-icon {
+    background-color: var(--font-color);
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next {
+    cursor: pointer;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next > .next-icon {
+    display: block;
+    width: 28px;
+    height: 24px;
+    background-color: var(--font-color-secondary);
+    mask-size: cover;
+    mask-repeat: no-repeat;
+    mask-image: url(/player-next.svg);
+    transition: background-color 0.2s ease-out;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next:hover > .next-icon {
+    background-color: var(--font-color);
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .repeat {
+    cursor: pointer;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .repeat > .repeat-icon {
+    display: block;
+    width: 32px;
+    height: 28px;
+    background-color: var(--font-color-secondary);
+    mask-repeat: no-repeat;
+    mask-image: url(/player-repeat.svg);
+    transition: background-color 0.2s ease-out;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .repeat:hover > .repeat-icon {
+    background-color: var(--font-color);
+}
+
+/* Duration */
 .main > .main_footer > .playback > .container > .controls > .duration {
     display: flex;
     font-size: 0.75rem;
-    color: var(--font-color-secondary);
+    font-weight: 500;
+    color: var(--font-color-tertiary);
 }
 
 .main > .main_footer > .playback > .container > .controls > .duration > .divider {
     margin: 0 4px;
 }
 
-/* Home */
+/* Home page specific */
 .home {
 }
 
@@ -646,17 +832,18 @@ body {
 .section_desc {
     font-size: 0.75rem;
     font-weight: 500;
-    color: var(--font-color-secondary);
+    color: var(--font-color-tertiary);
     margin-bottom: 10px;
 }
 
+/* Media list for home page, needs to be generalized for individual playlist page and favorite tracks/tracks? */
 .media-list {
     list-style: none;
     padding: 0;
 }
 
 .media-list > .empty {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 
 .media-list > .media-item {
@@ -690,6 +877,7 @@ body {
     border-radius: 6px;
 }
 
+/* Hide thumbnail overlay by defualt */
 .media-list > .media-item > .media-state > .overlay {
     position: absolute;
     opacity: 0;
@@ -706,84 +894,119 @@ body {
     transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
 }
 
+/* Show thumbnail overlay when hovering a track/playlist/item */
 .media-list > .media-item:hover > .media-state > .overlay {
     opacity: 1;
     visibility: visible;
 }
 
+/* Show thumbnail overlay (and it's children divs, important!) when a track is playing or paused */
 .media-list > .media-item.playing > .media-state > .overlay,
 .media-list > .media-item.paused > .media-state > .overlay {
     opacity: 1;
     visibility: visible;
 }
 
-.media-list > .media-item > .media-state > .overlay > .play-button {
+.media-list > .media-item > .media-state > .overlay > .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.media-list > .media-item > .media-state > .overlay > .container > .play {
     position: absolute;
+    cursor: pointer;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+/* Hide play button when a track is playing or paused */
+.media-list > .media-item.playing > .media-state > .overlay > .container > .play,
+.media-list > .media-item.paused > .media-state > .overlay > .container > .play {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Show play button when a track is paused and you hover the track/playlist/item */
+.media-list > .media-item.paused:hover > .media-state > .overlay > .container > .play {
+    opacity: 1;
+    visibility: visible;
+}
+
+.media-list > .media-item > .media-state > .overlay > .container > .play > .play-icon {
+    display: block;
     width: 26px;
-    height: 26px;
+    height: 23px;
     background-color: #ffffff;
+    mask-repeat: no-repeat;
     mask-image: url(/play.svg);
-    transition: opacity 0.2s ease-out;
 }
 
-.media-list > .media-item.playing > .media-state > .overlay > .play-button,
-.media-list > .media-item.paused > .media-state > .overlay > .play-button {
-    /* display: none; */
-    opacity: 0;
-}
-
-.media-list > .media-item.paused:hover > .media-state > .overlay > .play-button {
-    /* display: block; */
-    opacity: 1;
-}
-
-.media-list > .media-item > .media-state > .overlay > .pause-button {
+/* Hide pause button by default */
+.media-list > .media-item > .media-state > .overlay > .container > .pause {
     position: absolute;
-    /* display: none; */
     opacity: 0;
-    width: 26px;
-    height: 26px;
-    background-color: #ffffff;
-    mask-image: url(/pause.svg);
-    transition: opacity 0.2s ease-out;
+    visibility: hidden;
+    cursor: pointer;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
 }
 
-.media-list > .media-item.paused > .media-state > .overlay > .pause-button {
-    /* display: none; */
+/* Hide pause button when a track is paused */
+.media-list > .media-item.paused > .media-state > .overlay > .container > .pause {
     opacity: 0;
+    visibility: hidden;
 }
 
-.media-list > .media-item.playing:hover > .media-state > .overlay > .pause-button {
-    /* display: block; */
+/* Show pause button when a track is playing and you hover the track/playlist/item */
+.media-list > .media-item.playing:hover > .media-state > .overlay > .container > .pause {
     opacity: 1;
+    visibility: visible;
 }
 
+.media-list > .media-item > .media-state > .overlay > .container > .pause > .pause-icon {
+    display: block;
+    width: 26px;
+    height: 23px;
+    background-color: #ffffff;
+    mask-repeat: no-repeat;
+    mask-image: url(/pause.svg);
+}
+
+/* Hide play-state animation by default */
 .media-list > .media-item > .media-state > .overlay > .play-state-animation {
     position: absolute;
-    /* display: none; */
     opacity: 0;
-    transition: opacity 0.2s ease-out;
+    visibility: hidden;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
 }
 
+/* Show play-state animation when a track is playing or paused */
 .media-list > .media-item.playing > .media-state > .overlay > .play-state-animation,
 .media-list > .media-item.paused > .media-state > .overlay > .play-state-animation {
-    /* display: block; */
     opacity: 1;
+    visibility: visible;
 }
 
+/* Hide play-state animation when you hover the track/playlist/item */
 .media-list > .media-item:hover > .media-state > .overlay > .play-state-animation {
-    /* display: none; */
     opacity: 0;
+    visibility: hidden;
 }
 
+/* Play-state animation */
+/* Animation is active when a track is playing */
 .media-list > .media-item.playing > .media-state > .overlay > .play-state-animation > .sound-bars {
     animation-play-state: running;
 }
 
+/* Animation is paused when a track is stopped */
 .media-list > .media-item.paused > .media-state > .overlay > .play-state-animation > .sound-bars {
     animation-play-state: paused;
 }
 
+/* The individual sound-bars will inherit the play state from parent */
 .media-list > .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar {
     animation-play-state: inherit !important;
     transform-origin: bottom;
@@ -843,7 +1066,7 @@ body {
     display: inline-block;
     font-size: 0.75rem;
     font-weight: 600;
-    color: var(--font-color-secondary);
+    color: var(--font-color-tertiary);
 }
 
 .media-list > .media-item > .media-details > .container > .divider {
@@ -854,14 +1077,14 @@ body {
     margin: 0 4px;
     margin-top: 2px;
     border-radius: 50%;
-    background-color: var(--font-color-secondary);
+    background-color: var(--font-color-tertiary);
 }
 
 .media-list > .media-item > .media-details > .container > .album {
     display: inline;
     font-size: 0.75rem;
     font-weight: 500;
-    color: var(--font-color-secondary);
+    color: var(--font-color-tertiary);
 }
 
 /* Loader */
