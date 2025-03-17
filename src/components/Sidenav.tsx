@@ -4,7 +4,6 @@ import '../App.css';
 
 interface SidenavProps {
     username: string;
-    onLogout: () => void; // Keep for now, though unused?future-proofing
 }
 
 const Sidenav = ({ username }: SidenavProps) => (

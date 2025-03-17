@@ -2,6 +2,7 @@ import { ArrowLeftIcon } from '@primer/octicons-react';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import './App.css';
+import './components/MediaList.css';
 import Sidenav from './components/Sidenav';
 import Albums from './pages/Albums';
 import Favorites from './pages/Favorites';
@@ -38,7 +39,9 @@ function App() {
     };
 
     useEffect(() => {
-        if (!auth) localStorage.removeItem('auth');
+        if (!auth) {
+            localStorage.removeItem('auth');
+        }
         console.log('Current auth state:', auth);
     }, [auth]);
 
@@ -64,7 +67,7 @@ function App() {
 
         return (
             <div className="interface">
-                <Sidenav username={auth!.username} onLogout={handleLogout} />
+                <Sidenav username={auth!.username} />
                 <main className="main">
                     <div className="main_header">
                         <Link to="-1" className="return_icon">
@@ -84,9 +87,36 @@ function App() {
                                     />
                                 }
                             />
-                            <Route path="/tracks" element={<Tracks />} />
-                            <Route path="/albums" element={<Albums />} />
-                            <Route path="/favorites" element={<Favorites />} />
+                            <Route
+                                path="/tracks"
+                                element={
+                                    <Tracks
+                                        user={{ userId: auth!.userId, username: auth!.username }}
+                                        serverUrl={auth!.serverUrl}
+                                        token={auth!.token}
+                                    />
+                                }
+                            />
+                            <Route
+                                path="/albums"
+                                element={
+                                    <Albums
+                                        user={{ userId: auth!.userId, username: auth!.username }}
+                                        serverUrl={auth!.serverUrl}
+                                        token={auth!.token}
+                                    />
+                                }
+                            />
+                            <Route
+                                path="/favorites"
+                                element={
+                                    <Favorites
+                                        user={{ userId: auth!.userId, username: auth!.username }}
+                                        serverUrl={auth!.serverUrl}
+                                        token={auth!.token}
+                                    />
+                                }
+                            />
                             <Route path="/settings" element={<Settings onLogout={handleLogout} />} />
                             <Route path="*" element={<Navigate to="/" />} />
                         </Routes>

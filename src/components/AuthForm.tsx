@@ -1,6 +1,6 @@
 import axios from 'axios'; // Add for better error typing
-import { FormEvent, useState } from 'react';
-import { loginToJellyfin } from '../api';
+import { FormEvent, useEffect, useState } from 'react';
+import { loginToJellyfin } from '../api/jellyfin';
 
 interface AuthFormProps {
     onLogin: (authData: { serverUrl: string; token: string; userId: string; username: string }) => void;
@@ -12,6 +12,14 @@ const AuthForm = ({ onLogin }: AuthFormProps) => {
     const [password, setPassword] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
+
+    // Load the last used serverUrl from localStorage on mount
+    useEffect(() => {
+        const savedServerUrl = localStorage.getItem('lastServerUrl');
+        if (savedServerUrl) {
+            setServerUrl(savedServerUrl);
+        }
+    }, []);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -35,6 +43,8 @@ const AuthForm = ({ onLogin }: AuthFormProps) => {
 
         try {
             const { token, userId, username: fetchedUsername } = await loginToJellyfin(serverUrl, username, password);
+            // Save the serverUrl to localStorage on successful login
+            localStorage.setItem('lastServerUrl', serverUrl);
             onLogin({ serverUrl, token, userId, username: fetchedUsername });
         } catch (err) {
             if (axios.isAxiosError(err)) {

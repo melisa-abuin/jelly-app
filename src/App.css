@@ -158,11 +158,13 @@ svg {
     --overlay-bg: rgb(0 0 0 / 45%);
 }
 
+/* Moving scroll to the body as it's way more standard, think libraries... it's also needed for react-virtuoso to work!
 html {
     overflow: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
 }
+*/
 
 html,
 body {
@@ -186,6 +188,9 @@ body {
 body {
     margin-right: calc(-1 * (100vw - 100%)) !important;
     width: auto;
+    overflow: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 #root {
@@ -496,6 +501,7 @@ body {
     display: flex;
     align-items: center;
     padding: 12px;
+    max-height: 53px;
     background-color: var(--bg-color);
     border-bottom: 1px solid var(--border-color);
 }
@@ -575,13 +581,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
+    padding: 14px 20px;
 }
 
 /* Track details */
 .main > .main_footer > .playback > .container > .track-info {
     position: relative;
-    max-width: 260px;
+    max-width: 270px;
 }
 
 .main > .main_footer > .playback > .container > .track-info > .track-name {
@@ -642,8 +648,8 @@ body {
 .main > .main_footer > .playback > .container > .controls > .knobs {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-right: 16px;
+    gap: 12px;
+    margin-right: 10px;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle {
@@ -668,7 +674,7 @@ body {
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous {
@@ -836,255 +842,11 @@ body {
     margin-bottom: 10px;
 }
 
-/* Media list for home page, needs to be generalized for individual playlist page and favorite tracks/tracks? */
-.media-list {
-    list-style: none;
-    padding: 0;
-}
-
-.media-list > .empty {
-    font-size: 0.75rem;
-}
-
-.media-list > .media-item {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    margin: 0 -8px;
-    border-radius: 8px;
-    transition: background-color 0.2s ease-out;
-}
-
-.media-list > .media-item:hover {
-    background-color: var(--bg-color-secondary);
-}
-
-.media-list > .media-item > .media-state {
-    position: relative;
-    flex-shrink: 0;
-    width: 48px;
-    height: 48px;
-    margin-right: 12px;
-    border-radius: 6px;
-}
-
-.media-list > .media-item > .media-state > .thumbnail {
-    display: block;
-    width: 48px;
-    height: 48px;
-    object-fit: cover;
-    border-radius: 6px;
-}
-
-/* Hide thumbnail overlay by defualt */
-.media-list > .media-item > .media-state > .overlay {
-    position: absolute;
-    opacity: 0;
-    visibility: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 6px;
-    background-color: var(--overlay-bg);
-    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
-}
-
-/* Show thumbnail overlay when hovering a track/playlist/item */
-.media-list > .media-item:hover > .media-state > .overlay {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Show thumbnail overlay (and it's children divs, important!) when a track is playing or paused */
-.media-list > .media-item.playing > .media-state > .overlay,
-.media-list > .media-item.paused > .media-state > .overlay {
-    opacity: 1;
-    visibility: visible;
-}
-
-.media-list > .media-item > .media-state > .overlay > .container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-.media-list > .media-item > .media-state > .overlay > .container > .play {
-    position: absolute;
-    cursor: pointer;
-    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
-}
-
-/* Hide play button when a track is playing or paused */
-.media-list > .media-item.playing > .media-state > .overlay > .container > .play,
-.media-list > .media-item.paused > .media-state > .overlay > .container > .play {
-    opacity: 0;
-    visibility: hidden;
-}
-
-/* Show play button when a track is paused and you hover the track/playlist/item */
-.media-list > .media-item.paused:hover > .media-state > .overlay > .container > .play {
-    opacity: 1;
-    visibility: visible;
-}
-
-.media-list > .media-item > .media-state > .overlay > .container > .play > .play-icon {
-    display: block;
-    width: 26px;
-    height: 23px;
-    background-color: #ffffff;
-    mask-repeat: no-repeat;
-    mask-image: url(/play.svg);
-}
-
-/* Hide pause button by default */
-.media-list > .media-item > .media-state > .overlay > .container > .pause {
-    position: absolute;
-    opacity: 0;
-    visibility: hidden;
-    cursor: pointer;
-    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
-}
-
-/* Hide pause button when a track is paused */
-.media-list > .media-item.paused > .media-state > .overlay > .container > .pause {
-    opacity: 0;
-    visibility: hidden;
-}
-
-/* Show pause button when a track is playing and you hover the track/playlist/item */
-.media-list > .media-item.playing:hover > .media-state > .overlay > .container > .pause {
-    opacity: 1;
-    visibility: visible;
-}
-
-.media-list > .media-item > .media-state > .overlay > .container > .pause > .pause-icon {
-    display: block;
-    width: 26px;
-    height: 23px;
-    background-color: #ffffff;
-    mask-repeat: no-repeat;
-    mask-image: url(/pause.svg);
-}
-
-/* Hide play-state animation by default */
-.media-list > .media-item > .media-state > .overlay > .play-state-animation {
-    position: absolute;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
-}
-
-/* Show play-state animation when a track is playing or paused */
-.media-list > .media-item.playing > .media-state > .overlay > .play-state-animation,
-.media-list > .media-item.paused > .media-state > .overlay > .play-state-animation {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Hide play-state animation when you hover the track/playlist/item */
-.media-list > .media-item:hover > .media-state > .overlay > .play-state-animation {
-    opacity: 0;
-    visibility: hidden;
-}
-
-/* Play-state animation */
-/* Animation is active when a track is playing */
-.media-list > .media-item.playing > .media-state > .overlay > .play-state-animation > .sound-bars {
-    animation-play-state: running;
-}
-
-/* Animation is paused when a track is stopped */
-.media-list > .media-item.paused > .media-state > .overlay > .play-state-animation > .sound-bars {
-    animation-play-state: paused;
-}
-
-/* The individual sound-bars will inherit the play state from parent */
-.media-list > .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar {
-    animation-play-state: inherit !important;
-    transform-origin: bottom;
-}
-
-.media-list > .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar1 {
-    animation: bounce 0.5s infinite ease-in-out;
-}
-
-.media-list > .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar2 {
-    animation: bounce 0.55s infinite ease-in-out;
-}
-
-.media-list > .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar3 {
-    animation: bounce 0.45s infinite ease-in-out;
-}
-
-.media-list > .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar4 {
-    animation: bounce 0.6s infinite ease-in-out;
-}
-
-.media-list > .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar5 {
-    animation: bounce 0.5s infinite ease-in-out;
-}
-
-.media-list > .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar6 {
-    animation: bounce 0.55s infinite ease-in-out;
-}
-
-@keyframes bounce {
-    0%,
-    100% {
-        transform: scaleY(1);
-    }
-    50% {
-        transform: scaleY(1.8);
-    }
-}
-
-.media-list > .media-item > .media-details {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.media-list > .media-item > .media-details > .container {
-    line-height: 1;
-}
-
-.media-list > .media-item > .media-details > .song-name,
-.media-list > .media-item > .media-details > .container > .album-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.media-list > .media-item > .media-details > .container > .artist {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--font-color-tertiary);
-}
-
-.media-list > .media-item > .media-details > .container > .divider {
-    display: inline-block;
-    vertical-align: middle;
-    width: 2px;
-    height: 2px;
-    margin: 0 4px;
-    margin-top: 2px;
-    border-radius: 50%;
-    background-color: var(--font-color-tertiary);
-}
-
-.media-list > .media-item > .media-details > .container > .album {
-    display: inline;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--font-color-tertiary);
+/* Other page specific */
+.albums-page,
+.favorites-page,
+.tracks-page {
+    margin-top: -4px;
 }
 
 /* Loader */
