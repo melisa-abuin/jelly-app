@@ -67,7 +67,7 @@ class MediaList extends Component<MediaListProps, MediaListState> {
 
     setupResizeObservers = () => {
         this.resizeObservers = this.rowRefs.map((ref, index) => {
-            const observer = new ResizeObserver(entries => {
+            const observer = new ResizeObserver(() => {
                 if (ref.current) {
                     // Measure natural height without constraint
                     const originalHeight = ref.current.style.height;
