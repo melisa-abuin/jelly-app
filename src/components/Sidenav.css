@@ -1,0 +1,185 @@
+.sidenav {
+    position: relative;
+    flex-basis: 200px;
+    transition: flex-basis 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidenav > .sidenav_wrapper {
+    position: fixed;
+    z-index: 4;
+    width: 200px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-color-secondary);
+    border-right: 1px solid var(--border-color);
+    overflow: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    transform: translate(0);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_header {
+    position: sticky;
+    top: -12px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px 12px;
+    margin-bottom: 14px;
+    background-color: var(--bg-color-secondary);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_header > .logo {
+    display: block;
+    width: 64px;
+    height: 64px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url(/logo.png);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content {
+    position: relative;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > ul {
+    list-style: none;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > ul > li {
+    margin-bottom: 4px;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > ul > li > a {
+    display: flex;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 7px 12px;
+    margin: 0 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease-out;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > ul > li > a:hover {
+    background-color: var(--bg-color-tertiary);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > ul > li > a.active {
+    background-color: var(--bg-color-tertiary);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    padding: 12px;
+    margin-top: auto;
+    background-color: var(--bg-color-secondary);
+}
+
+/* Player volume */
+.sidenav > .sidenav_wrapper > .sidenav_footer > .volume {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .indicator {
+    font-size: 0.75rem;
+    color: var(--font-color-tertiary);
+    margin-bottom: 6px;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control {
+    display: flex;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input {
+    cursor: pointer;
+    width: 142px;
+    height: 7px;
+    border-radius: 20px;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 100%;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+    background-color: var(--bg-color-quaternary);
+    transition: background-color 0.2s ease-out;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input::-webkit-slider-thumb:focus,
+.sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input::-webkit-slider-thumb:active {
+    background-color: var(--bg-color-quinary);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 18px;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .status {
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .status > .indicator {
+    color: var(--font-color-tertiary);
+    margin-bottom: 2px;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .status > .username {
+    font-weight: 500;
+    max-width: 116px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .settings {
+    padding: 6px;
+    margin-right: -6px;
+    border-radius: 20px;
+    transition: background-color 0.2s ease-out;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .settings:hover {
+    background-color: var(--bg-color-tertiary);
+}
+
+/* Responsive */
+@media only screen and (max-width: 700px) {
+    .sidenav {
+        flex-basis: 0;
+    }
+
+    .sidenav > .sidenav_wrapper {
+        transform: translate(-200px);
+    }
+
+    .sidenav > .sidenav_wrapper.active {
+        transform: translateX(0);
+    }
+
+    .sidenav > .sidenav_wrapper > .sidenav_header {
+        padding: 20px 20px 6px;
+        top: -14px;
+    }
+
+    .sidenav > .sidenav_wrapper > .sidenav_header > .logo {
+        width: 32px;
+        height: 32px;
+    }
+}

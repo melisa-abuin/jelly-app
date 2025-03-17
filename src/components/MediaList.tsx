@@ -263,7 +263,7 @@ class MediaList extends Component<MediaListProps, MediaListState> {
                     itemContent={this.renderItem}
                     endReached={hasMore ? loadMore : undefined}
                     overscan={400}
-                    increaseViewportBy={{ bottom: 400, top: 0 }}
+                    increaseViewportBy={400}
                 />
             </ul>
         );
