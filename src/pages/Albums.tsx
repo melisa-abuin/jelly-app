@@ -1,14 +1,14 @@
-import MediaList from '../components/MediaList';
-import { useJellyfinAlbumsData } from '../hooks/useJellyfinAlbumsData';
+import MediaList from '../components/MediaList'
+import { useJellyfinAlbumsData } from '../hooks/useJellyfinAlbumsData'
 
 interface AlbumsProps {
-    user: { userId: string; username: string };
-    serverUrl: string;
-    token: string;
+    user: { userId: string; username: string }
+    serverUrl: string
+    token: string
 }
 
 const Albums = ({ user, serverUrl, token }: AlbumsProps) => {
-    const { allAlbums, loading, error, loadMore, hasMore } = useJellyfinAlbumsData(serverUrl, user.userId, token);
+    const { allAlbums, loading, error, loadMore, hasMore } = useJellyfinAlbumsData(serverUrl, user.userId, token)
 
     return (
         <div className="albums-page">
@@ -22,7 +22,7 @@ const Albums = ({ user, serverUrl, token }: AlbumsProps) => {
             />
             {error && <div className="error">{error}</div>}
         </div>
-    );
-};
+    )
+}
 
-export default Albums;
+export default Albums

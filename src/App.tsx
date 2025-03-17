@@ -1,50 +1,50 @@
-import { ArrowLeftIcon } from '@primer/octicons-react';
-import { useEffect, useState } from 'react';
-import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
-import './App.css';
-import './components/MediaList.css';
-import Sidenav from './components/Sidenav';
-import { useSidenav } from './hooks/useSidenav';
-import Albums from './pages/Albums';
-import Favorites from './pages/Favorites';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Settings from './pages/Settings';
-import Tracks from './pages/Tracks';
+import { ArrowLeftIcon } from '@primer/octicons-react'
+import { useEffect, useState } from 'react'
+import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom'
+import './App.css'
+import './components/MediaList.css'
+import Sidenav from './components/Sidenav'
+import { useSidenav } from './hooks/useSidenav'
+import Albums from './pages/Albums'
+import Favorites from './pages/Favorites'
+import Home from './pages/Home'
+import Login from './pages/Login'
+import Settings from './pages/Settings'
+import Tracks from './pages/Tracks'
 
 interface AuthData {
-    serverUrl: string;
-    token: string;
-    userId: string;
-    username: string;
+    serverUrl: string
+    token: string
+    userId: string
+    username: string
 }
 
 const App = () => {
     const [auth, setAuth] = useState<AuthData | null>(() => {
-        const savedAuth = localStorage.getItem('auth');
-        const parsedAuth = savedAuth ? JSON.parse(savedAuth) : null;
-        console.log('Initial auth from localStorage:', parsedAuth);
-        return parsedAuth;
-    });
+        const savedAuth = localStorage.getItem('auth')
+        const parsedAuth = savedAuth ? JSON.parse(savedAuth) : null
+        console.log('Initial auth from localStorage:', parsedAuth)
+        return parsedAuth
+    })
 
     const handleLogin = (authData: AuthData) => {
-        console.log('Logging in with:', authData);
-        setAuth(authData);
-        localStorage.setItem('auth', JSON.stringify(authData));
-    };
+        console.log('Logging in with:', authData)
+        setAuth(authData)
+        localStorage.setItem('auth', JSON.stringify(authData))
+    }
 
     const handleLogout = () => {
-        console.log('Logging out');
-        setAuth(null);
-        localStorage.removeItem('auth');
-    };
+        console.log('Logging out')
+        setAuth(null)
+        localStorage.removeItem('auth')
+    }
 
     useEffect(() => {
         if (!auth) {
-            localStorage.removeItem('auth');
+            localStorage.removeItem('auth')
         }
-        console.log('Current auth state:', auth);
-    }, [auth]);
+        console.log('Current auth state:', auth)
+    }, [auth])
 
     return (
         <Router>
@@ -60,29 +60,29 @@ const App = () => {
                 </Routes>
             </div>
         </Router>
-    );
-};
+    )
+}
 
 const MainLayout = (props: { auth: AuthData; handleLogout: () => void }) => {
-    const location = useLocation();
-    const { showSidenav, toggleSidenav, closeSidenav } = useSidenav(location);
+    const location = useLocation()
+    const { showSidenav, toggleSidenav, closeSidenav } = useSidenav(location)
 
     const getPageTitle = () => {
         switch (location.pathname) {
             case '/':
-                return 'Home';
+                return 'Home'
             case '/tracks':
-                return 'Tracks';
+                return 'Tracks'
             case '/albums':
-                return 'Albums';
+                return 'Albums'
             case '/favorites':
-                return 'Favorites';
+                return 'Favorites'
             case '/settings':
-                return 'Settings';
+                return 'Settings'
             default:
-                return 'Home';
+                return 'Home'
         }
-    };
+    }
 
     return (
         <div className="interface">
@@ -222,7 +222,7 @@ const MainLayout = (props: { auth: AuthData; handleLogout: () => void }) => {
                 </div>
             </main>
         </div>
-    );
-};
+    )
+}
 
-export default App;
+export default App

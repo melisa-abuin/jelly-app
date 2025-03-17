@@ -1,12 +1,12 @@
-import { GearIcon } from '@primer/octicons-react';
-import { NavLink } from 'react-router-dom';
-import '../App.css';
-import './Sidenav.css';
+import { GearIcon } from '@primer/octicons-react'
+import { NavLink } from 'react-router-dom'
+import '../App.css'
+import './Sidenav.css'
 
 interface SidenavProps {
-    username: string;
-    showSidenav: boolean;
-    closeSidenav: () => void;
+    username: string
+    showSidenav: boolean
+    closeSidenav: () => void
 }
 
 const Sidenav = (props: SidenavProps) => {
@@ -67,7 +67,7 @@ const Sidenav = (props: SidenavProps) => {
                 </div>
             </div>
         </aside>
-    );
-};
+    )
+}
 
-export default Sidenav;
+export default Sidenav

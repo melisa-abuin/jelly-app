@@ -1,7 +1,7 @@
-import AuthForm from '../components/AuthForm';
+import AuthForm from '../components/AuthForm'
 
 interface LoginProps {
-    onLogin: (authData: { serverUrl: string; token: string; userId: string; username: string }) => void;
+    onLogin: (authData: { serverUrl: string; token: string; userId: string; username: string }) => void
 }
 
 const Login = ({ onLogin }: LoginProps) => {
@@ -13,7 +13,7 @@ const Login = ({ onLogin }: LoginProps) => {
             <AuthForm onLogin={onLogin} />
             <div className="disclaimer">Jellyfin Music App - Version 0.1</div>
         </div>
-    );
-};
+    )
+}
 
-export default Login;
+export default Login

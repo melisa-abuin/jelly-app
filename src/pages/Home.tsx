@@ -1,10 +1,10 @@
-import MediaList from '../components/MediaList';
-import { useJellyfinHomeData } from '../hooks/useJellyfinHomeData';
+import MediaList from '../components/MediaList'
+import { useJellyfinHomeData } from '../hooks/useJellyfinHomeData'
 
 interface HomePageProps {
-    user: { userId: string; username: string };
-    serverUrl: string;
-    token: string;
+    user: { userId: string; username: string }
+    serverUrl: string
+    token: string
 }
 
 const Home = ({ user, serverUrl, token }: HomePageProps) => {
@@ -12,7 +12,7 @@ const Home = ({ user, serverUrl, token }: HomePageProps) => {
         serverUrl,
         user.userId,
         token
-    );
+    )
 
     return (
         <div className="home-page">
@@ -32,7 +32,7 @@ const Home = ({ user, serverUrl, token }: HomePageProps) => {
                 <MediaList items={recentlyAdded} type="album" loading={loading} serverUrl={serverUrl} />
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default Home;
+export default Home

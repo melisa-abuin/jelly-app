@@ -1,10 +1,10 @@
-import MediaList from '../components/MediaList';
-import { useJellyfinFavoritesData } from '../hooks/useJellyfinFavoritesData';
+import MediaList from '../components/MediaList'
+import { useJellyfinFavoritesData } from '../hooks/useJellyfinFavoritesData'
 
 interface FavoritesProps {
-    user: { userId: string; username: string };
-    serverUrl: string;
-    token: string;
+    user: { userId: string; username: string }
+    serverUrl: string
+    token: string
 }
 
 const Favorites = ({ user, serverUrl, token }: FavoritesProps) => {
@@ -12,7 +12,7 @@ const Favorites = ({ user, serverUrl, token }: FavoritesProps) => {
         serverUrl,
         user.userId,
         token
-    );
+    )
 
     return (
         <div className="favorites-page">
@@ -26,7 +26,7 @@ const Favorites = ({ user, serverUrl, token }: FavoritesProps) => {
             />
             {error && <div className="error">{error}</div>}
         </div>
-    );
-};
+    )
+}
 
-export default Favorites;
+export default Favorites

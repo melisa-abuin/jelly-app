@@ -1,16 +1,16 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 
 interface SettingsProps {
-    onLogout: () => void;
+    onLogout: () => void
 }
 
 const Settings = ({ onLogout }: SettingsProps) => {
-    const navigate = useNavigate();
+    const navigate = useNavigate()
 
     const handleLogout = () => {
-        onLogout();
-        navigate('/login');
-    };
+        onLogout()
+        navigate('/login')
+    }
 
     return (
         <div className="settings">
@@ -31,7 +31,7 @@ const Settings = ({ onLogout }: SettingsProps) => {
                 Logout
             </button>
         </div>
-    );
-};
+    )
+}
 
-export default Settings;
+export default Settings
