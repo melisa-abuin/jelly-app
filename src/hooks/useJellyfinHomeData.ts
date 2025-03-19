@@ -28,7 +28,6 @@ export const useJellyfinHomeData = (serverUrl: string, userId: string, token: st
         const fetchData = async () => {
             setData(prev => ({ ...prev, loading: true, error: null }))
             try {
-                console.log('Fetching home data from Jellyfin...')
                 const [played, frequent, added] = await Promise.all([
                     getRecentlyPlayed(serverUrl, userId, token),
                     getFrequentlyPlayed(serverUrl, userId, token),

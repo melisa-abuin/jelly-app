@@ -7,16 +7,35 @@ interface SidenavProps {
     username: string
     showSidenav: boolean
     closeSidenav: () => void
+    volume: number
+    setVolume: (volume: number) => void
 }
 
 const Sidenav = (props: SidenavProps) => {
+    const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newVolume = parseFloat(e.target.value)
+        props.setVolume(newVolume)
+    }
+
+    const handleVolumeScroll = (e: React.WheelEvent<HTMLInputElement>) => {
+        e.stopPropagation() // Stop event from bubbling up
+        const delta = e.deltaY > 0 ? -0.05 : 0.05 // Adjust volume based on scroll direction
+        const newVolume = Math.max(0, Math.min(1, props.volume + delta))
+        props.setVolume(newVolume)
+    }
+
+    // Prevent touch scroll propagation
+    const handleTouchMove = (e: React.TouchEvent<HTMLInputElement>) => {
+        e.stopPropagation() // Stop event from bubbling to parent elements
+    }
+
     return (
         <aside className="sidenav">
             <div className={props.showSidenav ? 'sidenav_wrapper active' : 'sidenav_wrapper'}>
                 <div className="sidenav_header">
                     <div className="logo"></div>
                 </div>
-                <nav className="sidenav_content">
+                <nav className="sidenav_content noSelect">
                     <ul>
                         <li>
                             <NavLink to="/" onClick={props.closeSidenav}>
@@ -42,7 +61,7 @@ const Sidenav = (props: SidenavProps) => {
                 </nav>
                 <div className="sidenav_footer">
                     <div className="volume">
-                        <div className="indicator">Volume: 20%</div>
+                        <div className="indicator">Volume: {(props.volume * 100).toFixed(0)}%</div>
                         <div className="control">
                             <input
                                 type="range"
@@ -51,7 +70,10 @@ const Sidenav = (props: SidenavProps) => {
                                 min="0"
                                 max="1"
                                 step="0.01"
-                                defaultValue={0.1}
+                                value={props.volume}
+                                onChange={handleVolumeChange}
+                                onWheel={handleVolumeScroll}
+                                onTouchMove={handleTouchMove}
                             />
                         </div>
                     </div>

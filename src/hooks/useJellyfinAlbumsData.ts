@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { getAllAlbums, MediaItem } from '../api/jellyfin'
 
 interface JellyfinAlbumsData {
@@ -16,9 +16,25 @@ export const useJellyfinAlbumsData = (serverUrl: string, userId: string, token: 
         error: null,
         hasMore: true,
     })
-
     const [page, setPage] = useState(0)
     const itemsPerPage = 20
+    const seenIds = useRef(new Set<string>())
+    const isInitialMount = useRef(true)
+    const isLoadingMore = useRef(false)
+
+    useEffect(() => {
+        if (isInitialMount.current) {
+            setData({
+                allAlbums: [],
+                loading: true,
+                error: null,
+                hasMore: true,
+            })
+            setPage(0)
+            seenIds.current.clear()
+            isInitialMount.current = false
+        }
+    }, [serverUrl, userId, token])
 
     useEffect(() => {
         if (!serverUrl || !token) {
@@ -29,15 +45,26 @@ export const useJellyfinAlbumsData = (serverUrl: string, userId: string, token: 
         const fetchData = async () => {
             setData(prev => ({ ...prev, loading: true, error: null }))
             try {
-                console.log(`Fetching albums data from Jellyfin (page ${page})...`)
-                const albums = await getAllAlbums(serverUrl, userId, token, page * itemsPerPage, itemsPerPage)
+                const startIndex = page * itemsPerPage
+                const albums = await getAllAlbums(serverUrl, userId, token, startIndex, itemsPerPage)
 
-                setData(prev => ({
-                    allAlbums: [...prev.allAlbums, ...albums],
-                    loading: false,
-                    error: null,
-                    hasMore: albums.length === itemsPerPage,
-                }))
+                const newAlbums = albums.filter(album => {
+                    if (seenIds.current.has(album.Id)) {
+                        return false
+                    }
+                    seenIds.current.add(album.Id)
+                    return true
+                })
+
+                setData(prev => {
+                    const updatedAlbums = [...prev.allAlbums, ...newAlbums]
+                    return {
+                        allAlbums: updatedAlbums,
+                        loading: false,
+                        error: null,
+                        hasMore: albums.length === itemsPerPage,
+                    }
+                })
             } catch (error) {
                 console.error('Failed to fetch albums data:', error)
                 if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -52,11 +79,25 @@ export const useJellyfinAlbumsData = (serverUrl: string, userId: string, token: 
         fetchData()
     }, [serverUrl, userId, token, page])
 
-    const loadMore = () => {
-        if (!data.loading && data.hasMore) {
-            setPage(prev => prev + 1)
+    const loadMore = useCallback(() => {
+        if (isLoadingMore.current) {
+            return
         }
-    }
+
+        if (!data.loading && data.hasMore) {
+            isLoadingMore.current = true
+            setPage(prev => {
+                const nextPage = prev + 1
+                return nextPage
+            })
+        }
+    }, [data.loading, data.hasMore])
+
+    useEffect(() => {
+        if (!data.loading) {
+            isLoadingMore.current = false
+        }
+    }, [data.loading])
 
     return { ...data, loadMore }
 }

@@ -42,7 +42,7 @@ export const loginToJellyfin = async (
             { Username: username, Pw: password },
             {
                 headers: {
-                    'X-Emby-Authorization': `MediaBrowser Client="Jellyfin Music Client", Device="Web", DeviceId="${deviceId}", Version="1.0.0"`,
+                    'X-Emby-Authorization': `MediaBrowser Client="Jellyfin Music App", Device="Web", DeviceId="${deviceId}", Version="0.1"`,
                 },
             }
         )
@@ -61,10 +61,10 @@ export interface MediaItem {
     Name: string
     Album?: string
     AlbumArtist?: string
-    AlbumArtists?: any[]
+    AlbumArtists?: Array<{ Id: string; Name: string }>
     AlbumId?: string
     AlbumPrimaryImageTag?: string
-    ArtistItems?: any[]
+    ArtistItems?: Array<{ Id: string; Name: string }>
     Artists?: string[]
     Type: string
     ImageTags?: { Primary?: string }
@@ -75,7 +75,7 @@ export interface MediaItem {
 
 export const getRecentlyPlayed = async (serverUrl: string, userId: string, token: string): Promise<MediaItem[]> => {
     const response = await api.get<{ Items: MediaItem[] }>(
-        `${serverUrl}/Users/${userId}/Items?SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=10&Fields=PrimaryImageAspectRatio,ParentId,ImageTags`,
+        `${serverUrl}/Users/${userId}/Items?SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=12&Fields=PrimaryImageAspectRatio,ParentId,ImageTags`,
         { headers: { 'X-Emby-Token': token } }
     )
     return response.data.Items
@@ -83,7 +83,7 @@ export const getRecentlyPlayed = async (serverUrl: string, userId: string, token
 
 export const getFrequentlyPlayed = async (serverUrl: string, userId: string, token: string): Promise<MediaItem[]> => {
     const response = await api.get<{ Items: MediaItem[] }>(
-        `${serverUrl}/Users/${userId}/Items?SortBy=PlayCount&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=10&Fields=PrimaryImageAspectRatio,ParentId,ImageTags`,
+        `${serverUrl}/Users/${userId}/Items?SortBy=PlayCount&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=12&Fields=PrimaryImageAspectRatio,ParentId,ImageTags`,
         { headers: { 'X-Emby-Token': token } }
     )
     return response.data.Items
@@ -91,7 +91,7 @@ export const getFrequentlyPlayed = async (serverUrl: string, userId: string, tok
 
 export const getRecentlyAdded = async (serverUrl: string, userId: string, token: string): Promise<MediaItem[]> => {
     const response = await api.get<{ Items: MediaItem[] }>(
-        `${serverUrl}/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=MusicAlbum&Recursive=true&Limit=10&Fields=PrimaryImageAspectRatio,ParentId,ImageTags`,
+        `${serverUrl}/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=MusicAlbum&Recursive=true&Limit=12&Fields=PrimaryImageAspectRatio,ParentId,ImageTags`,
         { headers: { 'X-Emby-Token': token } }
     )
     return response.data.Items
@@ -119,7 +119,7 @@ export const getAllTracks = async (
     limit = 20
 ): Promise<MediaItem[]> => {
     const response = await api.get<{ Items: MediaItem[] }>(
-        `${serverUrl}/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&StartIndex=${startIndex}&Limit=${limit}`,
+        `${serverUrl}/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&StartIndex=${startIndex}&Limit=${limit}&Fields=PrimaryImageAspectRatio,ParentId,ImageTags`,
         { headers: { 'X-Emby-Token': token } }
     )
     return response.data.Items

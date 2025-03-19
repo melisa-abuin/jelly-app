@@ -1,8 +1,10 @@
 import { ArrowLeftIcon } from '@primer/octicons-react'
 import { useEffect, useState } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom'
+import { MediaItem } from './api/jellyfin'
 import './App.css'
 import './components/MediaList.css'
+import PlaybackManager from './components/PlaybackManager'
 import Sidenav from './components/Sidenav'
 import { useSidenav } from './hooks/useSidenav'
 import Albums from './pages/Albums'
@@ -17,33 +19,62 @@ interface AuthData {
     token: string
     userId: string
     username: string
+    lastPlayedTrack?: MediaItem | null
+    volume?: number
 }
 
 const App = () => {
     const [auth, setAuth] = useState<AuthData | null>(() => {
         const savedAuth = localStorage.getItem('auth')
         const parsedAuth = savedAuth ? JSON.parse(savedAuth) : null
-        console.log('Initial auth from localStorage:', parsedAuth)
+        const defaultVolume = 0.5
         return parsedAuth
+            ? {
+                  ...parsedAuth,
+                  volume:
+                      parsedAuth.volume !== undefined && !isNaN(parsedAuth.volume) ? parsedAuth.volume : defaultVolume,
+              }
+            : null
     })
 
     const handleLogin = (authData: AuthData) => {
-        console.log('Logging in with:', authData)
-        setAuth(authData)
-        localStorage.setItem('auth', JSON.stringify(authData))
+        const defaultVolume = 0.5
+        const updatedAuth = {
+            ...authData,
+            volume: authData.volume !== undefined && !isNaN(authData.volume) ? authData.volume : defaultVolume,
+        }
+        setAuth(updatedAuth)
+        localStorage.setItem('auth', JSON.stringify(updatedAuth))
     }
 
     const handleLogout = () => {
-        console.log('Logging out')
         setAuth(null)
         localStorage.removeItem('auth')
+    }
+
+    const updateLastPlayed = (track: MediaItem) => {
+        if (auth) {
+            const updatedAuth = { ...auth, lastPlayedTrack: track }
+            setAuth(updatedAuth)
+            localStorage.setItem('auth', JSON.stringify(updatedAuth))
+        }
+    }
+
+    const updateVolume = (volume: number) => {
+        if (auth) {
+            const validatedVolume = Math.max(0, Math.min(1, volume))
+            const updatedAuth = { ...auth, volume: validatedVolume }
+            setAuth(updatedAuth)
+            localStorage.setItem('auth', JSON.stringify(updatedAuth))
+        }
     }
 
     useEffect(() => {
         if (!auth) {
             localStorage.removeItem('auth')
+        } else if (auth.volume === undefined || isNaN(auth.volume)) {
+            updateVolume(auth.volume === 0 ? 0 : 0.5)
         }
-        console.log('Current auth state:', auth)
     }, [auth])
 
     return (
@@ -54,7 +85,58 @@ const App = () => {
                     <Route
                         path="/*"
                         element={
-                            auth ? <MainLayout auth={auth} handleLogout={handleLogout} /> : <Navigate to="/login" />
+                            auth ? (
+                                <PlaybackManager
+                                    serverUrl={auth.serverUrl}
+                                    token={auth.token}
+                                    userId={auth.userId}
+                                    initialVolume={auth.volume || 0.5}
+                                    updateLastPlayed={updateLastPlayed}
+                                >
+                                    {({
+                                        currentTrack,
+                                        isPlaying,
+                                        togglePlayPause,
+                                        progress,
+                                        duration,
+                                        buffered,
+                                        handleSeek,
+                                        formatTime,
+                                        volume,
+                                        setVolume: internalSetVolume,
+                                        playTrack,
+                                    }) => {
+                                        useEffect(() => {
+                                            if (auth?.volume !== undefined && auth.volume !== volume) {
+                                                internalSetVolume(auth.volume)
+                                            }
+                                        }, [auth?.volume])
+
+                                        return (
+                                            <MainLayout
+                                                auth={auth}
+                                                handleLogout={handleLogout}
+                                                currentTrack={currentTrack ?? auth.lastPlayedTrack ?? null}
+                                                isPlaying={isPlaying}
+                                                togglePlayPause={togglePlayPause}
+                                                progress={progress}
+                                                duration={duration}
+                                                buffered={buffered}
+                                                handleSeek={handleSeek}
+                                                formatTime={formatTime}
+                                                volume={auth.volume || volume}
+                                                setVolume={newVolume => {
+                                                    updateVolume(newVolume)
+                                                    internalSetVolume(newVolume)
+                                                }}
+                                                playTrack={playTrack}
+                                            />
+                                        )
+                                    }}
+                                </PlaybackManager>
+                            ) : (
+                                <Navigate to="/login" />
+                            )
                         }
                     />
                 </Routes>
@@ -63,9 +145,41 @@ const App = () => {
     )
 }
 
-const MainLayout = (props: { auth: AuthData; handleLogout: () => void }) => {
+const MainLayout = ({
+    auth,
+    handleLogout,
+    currentTrack,
+    isPlaying,
+    togglePlayPause,
+    progress,
+    duration,
+    buffered,
+    handleSeek,
+    formatTime,
+    volume,
+    setVolume,
+    playTrack,
+}: {
+    auth: AuthData
+    handleLogout: () => void
+    currentTrack: MediaItem | null
+    isPlaying: boolean
+    togglePlayPause: () => void
+    progress: number
+    duration: number
+    buffered: number
+    handleSeek: (e: React.ChangeEvent<HTMLInputElement>) => void
+    formatTime: (seconds: number) => string
+    volume: number
+    setVolume: (volume: number) => void
+    playTrack: (track: MediaItem) => void
+}) => {
     const location = useLocation()
     const { showSidenav, toggleSidenav, closeSidenav } = useSidenav(location)
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' })
+    }, [location.pathname])
 
     const getPageTitle = () => {
         switch (location.pathname) {
@@ -84,9 +198,18 @@ const MainLayout = (props: { auth: AuthData; handleLogout: () => void }) => {
         }
     }
 
+    const progressPercent = duration ? (progress / duration) * 100 : 0
+    const bufferedPercent = duration ? (buffered / duration) * 100 : 0
+
     return (
         <div className="interface">
-            <Sidenav username={props.auth.username} showSidenav={showSidenav} closeSidenav={closeSidenav} />
+            <Sidenav
+                username={auth.username}
+                showSidenav={showSidenav}
+                closeSidenav={closeSidenav}
+                volume={volume}
+                setVolume={setVolume}
+            />
             <div className={showSidenav ? 'dimmer active' : 'dimmer'} onClick={toggleSidenav}></div>
             <main className="main">
                 <div className="main_header">
@@ -111,9 +234,13 @@ const MainLayout = (props: { auth: AuthData; handleLogout: () => void }) => {
                             path="/"
                             element={
                                 <Home
-                                    user={{ userId: props.auth.userId, username: props.auth.username }}
-                                    serverUrl={props.auth.serverUrl}
-                                    token={props.auth.token}
+                                    user={{ userId: auth.userId, username: auth.username }}
+                                    serverUrl={auth.serverUrl}
+                                    token={auth.token}
+                                    playTrack={playTrack}
+                                    currentTrack={currentTrack}
+                                    isPlaying={isPlaying}
+                                    togglePlayPause={togglePlayPause}
                                 />
                             }
                         />
@@ -121,9 +248,13 @@ const MainLayout = (props: { auth: AuthData; handleLogout: () => void }) => {
                             path="/tracks"
                             element={
                                 <Tracks
-                                    user={{ userId: props.auth.userId, username: props.auth.username }}
-                                    serverUrl={props.auth.serverUrl}
-                                    token={props.auth.token}
+                                    user={{ userId: auth.userId, username: auth.username }}
+                                    serverUrl={auth.serverUrl}
+                                    token={auth.token}
+                                    playTrack={playTrack}
+                                    currentTrack={currentTrack}
+                                    isPlaying={isPlaying}
+                                    togglePlayPause={togglePlayPause}
                                 />
                             }
                         />
@@ -131,9 +262,9 @@ const MainLayout = (props: { auth: AuthData; handleLogout: () => void }) => {
                             path="/albums"
                             element={
                                 <Albums
-                                    user={{ userId: props.auth.userId, username: props.auth.username }}
-                                    serverUrl={props.auth.serverUrl}
-                                    token={props.auth.token}
+                                    user={{ userId: auth.userId, username: auth.username }}
+                                    serverUrl={auth.serverUrl}
+                                    token={auth.token}
                                 />
                             }
                         />
@@ -141,35 +272,56 @@ const MainLayout = (props: { auth: AuthData; handleLogout: () => void }) => {
                             path="/favorites"
                             element={
                                 <Favorites
-                                    user={{ userId: props.auth.userId, username: props.auth.username }}
-                                    serverUrl={props.auth.serverUrl}
-                                    token={props.auth.token}
+                                    user={{ userId: auth.userId, username: auth.username }}
+                                    serverUrl={auth.serverUrl}
+                                    token={auth.token}
+                                    playTrack={playTrack}
+                                    currentTrack={currentTrack}
+                                    isPlaying={isPlaying}
+                                    togglePlayPause={togglePlayPause}
                                 />
                             }
                         />
-                        <Route path="/settings" element={<Settings onLogout={props.handleLogout} />} />
+                        <Route path="/settings" element={<Settings onLogout={handleLogout} />} />
                         <Route path="*" element={<Navigate to="/" />} />
                     </Routes>
                 </div>
                 <div className="main_footer">
-                    <div className="playback">
+                    <div className={isPlaying ? 'playback playing' : currentTrack ? 'playback paused' : 'playback'}>
                         <div className="progress">
                             <input
                                 type="range"
                                 id="track-progress"
                                 name="track-progress"
                                 min="0"
-                                max="1"
-                                step="0.1"
-                                defaultValue={0}
+                                max={duration || 1}
+                                step="0.01"
+                                value={progress}
+                                style={
+                                    {
+                                        '--progress-width': `${progressPercent}%`,
+                                        '--buffered-width': `${bufferedPercent}%`,
+                                    } as React.CSSProperties
+                                }
+                                onChange={handleSeek}
                             />
                         </div>
                         <div className="container">
                             <div className="track-info">
-                                <div className="track-name">Moon River</div>
-                                <div className="artist">Audrey Hepburn</div>
+                                <div className="track-name">
+                                    {currentTrack?.Name || auth?.lastPlayedTrack?.Name || 'No Track Played'}
+                                </div>
+                                <div className="artist">
+                                    {currentTrack?.Artists?.join(', ') ||
+                                        currentTrack?.AlbumArtist ||
+                                        auth?.lastPlayedTrack?.Artists?.join(', ') ||
+                                        auth?.lastPlayedTrack?.AlbumArtist ||
+                                        'No Artist'}
+                                </div>
                                 <div className="album">
-                                    <div className="text">Breakfast At Tiffany's</div>
+                                    <div className="text">
+                                        {currentTrack?.Album || auth?.lastPlayedTrack?.Album || 'No Album'}
+                                    </div>
                                     <div className="album-icon">
                                         <svg
                                             width="16"
@@ -196,10 +348,10 @@ const MainLayout = (props: { auth: AuthData; handleLogout: () => void }) => {
                                             <div className="previous-icon"></div>
                                         </div>
                                         <div className="container">
-                                            <div className="play">
+                                            <div className="play" onClick={togglePlayPause}>
                                                 <div className="play-icon"></div>
                                             </div>
-                                            <div className="pause">
+                                            <div className="pause" onClick={togglePlayPause}>
                                                 <div className="pause-icon"></div>
                                             </div>
                                         </div>
@@ -212,9 +364,9 @@ const MainLayout = (props: { auth: AuthData; handleLogout: () => void }) => {
                                     </div>
                                 </div>
                                 <div className="duration noSelect">
-                                    <div className="current">0:24</div>
+                                    <div className="current">{formatTime(progress)}</div>
                                     <div className="divider">/</div>
-                                    <div className="total">3:59</div>
+                                    <div className="total">{formatTime(duration)}</div>
                                 </div>
                             </div>
                         </div>

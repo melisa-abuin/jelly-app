@@ -1,9 +1,9 @@
-import React, { Component } from 'react'
+import React, { useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import Loader from './Loader'
 
-// Extend MediaItem interface locally if needed
 interface ExtendedMediaItem extends MediaItem {
     AlbumId?: string
     AlbumPrimaryImageTag?: string
@@ -16,142 +16,180 @@ interface MediaListProps {
     serverUrl: string
     loadMore?: () => void
     hasMore?: boolean
+    playTrack: (track: MediaItem) => void
+    currentTrack: MediaItem | null
+    isPlaying: boolean
+    togglePlayPause: () => void
 }
 
-interface MediaListState {
-    currentAudio: HTMLAudioElement | null
-    sizeMap: { [index: number]: number }
-}
+const MediaList = ({
+    items,
+    type,
+    loading,
+    serverUrl,
+    loadMore,
+    hasMore,
+    playTrack,
+    currentTrack,
+    isPlaying,
+    togglePlayPause,
+}: MediaListProps) => {
+    const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
+    const resizeObservers = useRef<ResizeObserver[]>([])
+    const navigate = useNavigate()
+    const sizeMap = useRef<{ [index: number]: number }>({})
 
-class MediaList extends Component<MediaListProps, MediaListState> {
-    private rowRefs: React.RefObject<HTMLLIElement | null>[] = []
-    private resizeObservers: ResizeObserver[] = []
-
-    constructor(props: MediaListProps) {
-        super(props)
-        this.state = {
-            currentAudio: null,
-            sizeMap: {},
-        }
-        this.updateRowRefs()
-    }
-
-    componentDidMount() {
-        this.measureInitialHeights()
-        this.setupResizeObservers()
+    useEffect(() => {
+        rowRefs.current = items.map(() => null)
+        measureInitialHeights()
+        setupResizeObservers()
         document.body.style.overflowY = 'auto'
-        window.addEventListener('resize', this.handleResize)
-    }
+        window.addEventListener('resize', handleResize)
 
-    componentDidUpdate(prevProps: MediaListProps) {
-        if (prevProps.items !== this.props.items) {
-            this.cleanupResizeObservers()
-            this.updateRowRefs()
-            this.measureInitialHeights()
-            this.setupResizeObservers()
+        return () => {
+            cleanupResizeObservers()
+            window.removeEventListener('resize', handleResize)
         }
+    }, [items])
+
+    useEffect(() => {
+        if (items.length !== rowRefs.current.length) {
+            cleanupResizeObservers()
+            rowRefs.current = items.map(() => null)
+            measureInitialHeights()
+            setupResizeObservers()
+        }
+    }, [items])
+
+    const handleResize = () => {
+        measureInitialHeights()
     }
 
-    componentWillUnmount() {
-        this.cleanupResizeObservers()
-        window.removeEventListener('resize', this.handleResize)
-    }
-
-    handleResize = () => {
-        this.measureInitialHeights()
-    }
-
-    updateRowRefs = () => {
-        this.rowRefs = this.props.items.map(() => React.createRef<HTMLLIElement>())
-    }
-
-    setupResizeObservers = () => {
-        this.resizeObservers = this.rowRefs.map((ref, index) => {
+    const setupResizeObservers = () => {
+        resizeObservers.current = rowRefs.current.map((ref, index) => {
             const observer = new ResizeObserver(() => {
-                if (ref.current) {
-                    // Measure natural height without constraint
-                    const originalHeight = ref.current.style.height
-                    ref.current.style.height = 'auto'
-                    const height = ref.current.getBoundingClientRect().height
-                    ref.current.style.height = originalHeight || `${height}px` // Restore or set height
-                    if (height !== this.state.sizeMap[index]) {
-                        this.setSize(index, height)
+                if (ref) {
+                    const originalHeight = ref.style.height
+                    ref.style.height = 'auto'
+                    const height = ref.getBoundingClientRect().height
+                    ref.style.height = originalHeight || `${height}px`
+                    if (height !== sizeMap.current[index]) {
+                        setSize(index, height)
                     }
                 }
             })
-            if (ref.current) observer.observe(ref.current)
+            if (ref) observer.observe(ref)
             return observer
         })
     }
 
-    cleanupResizeObservers = () => {
-        this.resizeObservers.forEach(observer => observer.disconnect())
-        this.resizeObservers = []
+    const cleanupResizeObservers = () => {
+        resizeObservers.current.forEach(observer => observer.disconnect())
+        resizeObservers.current = []
     }
 
-    measureInitialHeights = () => {
-        this.rowRefs.forEach((ref, index) => {
-            if (ref.current) {
-                // Measure natural height without constraint
-                const originalHeight = ref.current.style.height
-                ref.current.style.height = 'auto'
-                const height = ref.current.getBoundingClientRect().height
-                ref.current.style.height = originalHeight || `${height}px` // Restore or set height
-                if (height !== this.state.sizeMap[index]) {
-                    this.setSize(index, height)
+    const measureInitialHeights = () => {
+        rowRefs.current.forEach((ref, index) => {
+            if (ref) {
+                const originalHeight = ref.style.height
+                ref.style.height = 'auto'
+                const height = ref.getBoundingClientRect().height
+                ref.style.height = originalHeight || `${height}px`
+                if (height !== sizeMap.current[index]) {
+                    setSize(index, height)
                 }
             }
         })
     }
 
-    setSize = (index: number, height: number) => {
-        this.setState(prevState => ({
-            sizeMap: { ...prevState.sizeMap, [index]: height },
-        }))
+    const setSize = (index: number, height: number) => {
+        sizeMap.current = { ...sizeMap.current, [index]: height }
     }
 
-    playTrack = (item: MediaItem) => {
-        if (this.state.currentAudio) {
-            this.state.currentAudio.pause()
-            this.setState({ currentAudio: null })
-        }
-
-        if (item.Type === 'Audio') {
-            const token = localStorage.getItem('auth') ? JSON.parse(localStorage.getItem('auth')!).token : ''
-            const audioUrl = `${this.props.serverUrl}/Audio/${item.Id}/stream?api_key=${token}&format=flac`
-
-            const audio = new Audio(audioUrl)
-            audio.play().catch(err => {
-                console.error('Failed to play audio:', err)
-            })
-            this.setState({ currentAudio: audio })
+    const handleSongClick = (item: MediaItem) => {
+        if (type === 'song') {
+            if (currentTrack?.Id === item.Id) {
+                togglePlayPause()
+            } else {
+                playTrack(item)
+            }
         }
     }
 
-    renderItem = (index: number) => {
-        const item = this.props.items[index] as ExtendedMediaItem
+    const handleSongThumbnailClick = (item: MediaItem, e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (type === 'song') {
+            if (currentTrack?.Id === item.Id && isPlaying) {
+                togglePlayPause()
+            } else {
+                playTrack(item)
+            }
+        }
+    }
+
+    const handleEndReached = () => {
+        if (hasMore && loadMore) {
+            loadMore()
+        }
+    }
+
+    const renderItem = (index: number) => {
+        const item = items[index] as ExtendedMediaItem
         const token = localStorage.getItem('auth') ? JSON.parse(localStorage.getItem('auth')!).token : ''
         const imageUrl = item.ImageTags?.Primary
-            ? `${this.props.serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=90&fillWidth=128&fillHeight=128&format=webp&api_key=${token}`
+            ? `${serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=90&fillWidth=192&fillHeight=192&format=webp&api_key=${token}`
             : item.AlbumPrimaryImageTag && item.AlbumId
-            ? `${this.props.serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=90&fillWidth=128&fillHeight=128&format=webp&api_key=${token}`
+            ? `${serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=90&fillWidth=192&fillHeight=192&format=webp&api_key=${token}`
             : '/default-thumbnail.png'
 
-        console.log(`Item ${item.Name} - Image URL: ${imageUrl}, Full Item:`, item)
+        const itemClass = type === 'song' && currentTrack?.Id === item.Id ? (isPlaying ? 'playing' : 'paused') : ''
 
-        return (
-            <li
-                ref={this.rowRefs[index]}
-                className="media-item"
-                onClick={() => this.playTrack(item)}
-                key={`${item.Id}-${index}`}
+        return type === 'album' ? (
+            <div
+                className={`media-item album-item`}
+                key={item.Id}
+                onClick={() => navigate(`/albums/${item.Id}`)}
+                ref={el => {
+                    rowRefs.current[index] = el
+                }}
             >
                 <div className="media-state">
                     <img
                         src={imageUrl}
                         alt={item.Name}
                         className="thumbnail"
-                        onError={e => console.error(`Image load failed for ${item.Name}:`, e, 'URL:', imageUrl)}
+                        onError={e => {
+                            console.error(`Image load failed for ${item.Name}:`, e, 'URL:', imageUrl)
+                            ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
+                        }}
+                    />
+                </div>
+                <div className="media-details">
+                    <span className="song-name">{item.Name}</span>
+                    <div className="container">
+                        <div className="artist">{item.AlbumArtist || 'Unknown Artist'}</div>
+                    </div>
+                </div>
+            </div>
+        ) : (
+            <li
+                className={`media-item song-item ${itemClass}`}
+                onClick={() => handleSongClick(item)}
+                key={item.Id}
+                ref={el => {
+                    rowRefs.current[index] = el
+                }}
+            >
+                <div className="media-state">
+                    <img
+                        src={imageUrl}
+                        alt={item.Name}
+                        className="thumbnail"
+                        onError={e => {
+                            console.error(`Image load failed for ${item.Name}:`, e, 'URL:', imageUrl)
+                            ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
+                        }}
+                        onClick={e => handleSongThumbnailClick(item, e)}
                     />
                     <div className="overlay">
                         <div className="container">
@@ -226,48 +264,38 @@ class MediaList extends Component<MediaListProps, MediaListState> {
                     <span className="song-name">{item.Name}</span>
                     <div className="container">
                         <div className="artist">
-                            {this.props.type === 'song'
-                                ? item.Artists && item.Artists.length > 0
-                                    ? item.Artists.join(', ')
-                                    : 'Unknown Artist'
-                                : item.AlbumArtist || 'Unknown Artist'}
+                            {item.Artists && item.Artists.length > 0 ? item.Artists.join(', ') : 'Unknown Artist'}
                         </div>
-                        {this.props.type === 'song' && (
-                            <>
-                                <div className="divider"></div>
-                                <div className="album">{item.Album || 'Unknown Album'}</div>
-                            </>
-                        )}
+                        <>
+                            <div className="divider"></div>
+                            <div className="album">{item.Album || 'Unknown Album'}</div>
+                        </>
                     </div>
                 </div>
             </li>
         )
     }
 
-    render() {
-        const { items, type, loading, hasMore, loadMore } = this.props
-
-        if (loading && items.length === 0) {
-            return <Loader />
-        }
-
-        if (items.length === 0) {
-            return <div className="empty">{type === 'song' ? 'No tracks' : 'No albums'}</div>
-        }
-
-        return (
-            <ul className="media-list noSelect">
-                <Virtuoso
-                    useWindowScroll
-                    totalCount={items.length}
-                    itemContent={this.renderItem}
-                    endReached={hasMore ? loadMore : undefined}
-                    overscan={400}
-                    increaseViewportBy={400}
-                />
-            </ul>
-        )
+    if (loading && items.length === 0) {
+        return <Loader />
     }
+
+    if (items.length === 0) {
+        return <div className="empty">{type === 'song' ? 'No tracks' : 'No albums'}</div>
+    }
+
+    return (
+        <ul className="media-list noSelect">
+            <Virtuoso
+                data={items}
+                useWindowScroll
+                totalCount={items.length}
+                itemContent={(index: number) => renderItem(index)}
+                endReached={handleEndReached}
+                overscan={350}
+            />
+        </ul>
+    )
 }
 
 export default MediaList

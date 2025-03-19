@@ -156,7 +156,7 @@ svg {
     --brand-color: #9a83eb;
     --success-color: #34a52c; /* Not used */
     --overlay-bg: rgb(0 0 0 / 45%);
-    --bg-color-dimmer: rgb(0 0 0 / 60%);
+    --bg-color-dimmer: rgba(22, 11, 37, 0.4);
 }
 
 /* Moving scroll to the body as it's way more standard, think libraries... it's also needed for react-virtuoso to work!
@@ -334,7 +334,7 @@ body {
     flex-direction: column;
     width: 100%;
     max-width: calc(100% - 200px);
-    transition: max-width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: max-width 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease;
 }
 
 .main > .main_header {
@@ -424,35 +424,74 @@ body {
     display: flex;
 }
 
+/* Progress bar */
 .main > .main_footer > .playback > .progress > input {
     cursor: pointer;
     width: 100%;
     height: 8px;
-    background-color: var(--bg-color);
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0);
+    margin-top: -4px;
 }
 
+/* Progress, buffered, seeking, visualized bar for webkit browsers */
+.main > .main_footer > .playback > .progress > input::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    transform: scaleY(0.6);
+    background: linear-gradient(
+        to right,
+        var(--bg-color-quaternary) 0%,
+        var(--bg-color-quaternary) var(--progress-width),
+        var(--bg-color-tertiary) var(--progress-width),
+        var(--bg-color-tertiary) var(--buffered-width),
+        var(--bg-color-secondary) var(--buffered-width)
+    );
+    transition: transform 0.12s ease;
+}
+
+.main > .main_footer > .playback > .progress:hover > input::-webkit-slider-runnable-track,
+.main > .main_footer > .playback > .progress:active > input::-webkit-slider-runnable-track {
+    transform: scaleY(1);
+}
+
+/* Progress, buffered, seeking, visualized bar for firefox */
+.main > .main_footer > .playback > .progress > input::-moz-range-track {
+    width: 100%;
+    height: 8px;
+    transform: scaleY(0.6);
+    background: linear-gradient(
+        to right,
+        var(--bg-color-quaternary) 0%,
+        var(--bg-color-quaternary) var(--progress-width),
+        var(--bg-color-tertiary) var(--progress-width),
+        var(--bg-color-tertiary) var(--buffered-width),
+        var(--bg-color-secondary) var(--buffered-width)
+    );
+    transition: transform 0.12s ease;
+}
+
+.main > .main_footer > .playback > .progress:hover > input::-moz-range-track,
+.main > .main_footer > .playback > .progress:active > input::-moz-range-track {
+    transform: scaleY(1);
+}
+
+/* Hiding the input slider thumbs for different browsers */
 .main > .main_footer > .playback > .progress > input::-webkit-slider-thumb {
     -webkit-appearance: none;
-    opacity: 0;
-    visibility: hidden;
-    width: 8px;
-    height: 16px;
-    border-radius: 4px;
-    border: 1px solid var(--border-color-secondary);
-    background-color: var(--bg-color-quaternary);
-    transition: background-color 0.2s ease-out;
+    appearance: none;
+    width: 0;
+    height: 0;
 }
 
-.main > .main_footer > .playback > .progress > input::-webkit-slider-thumb:focus,
-.main > .main_footer > .playback > .progress > input::-webkit-slider-thumb:active {
-    background-color: var(--bg-color-quinary);
+.main > .main_footer > .playback > .progress > input::-moz-range-thumb {
+    width: 0;
+    height: 0;
+    border: none;
 }
 
-.main > .main_footer > .playback > .progress:hover > input::-webkit-slider-thumb {
-    opacity: 1;
-    visibility: visible;
+.main > .main_footer > .playback > .progress > input::-ms-thumb {
+    width: 0;
+    height: 0;
 }
 
 .main > .main_footer > .playback > .container {
@@ -460,6 +499,8 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 14px 20px;
+    /* Prevents layout shifting from asian symbols increasing line heights...*/
+    max-height: 80px;
 }
 
 /* Track details */
@@ -688,6 +729,7 @@ body {
     display: flex;
     font-size: 0.75rem;
     font-weight: 500;
+    font-variant-numeric: tabular-nums; /* Don't like how the font looks, but needed to prevent layout shift when numbers change */
     color: var(--font-color-tertiary);
 }
 
@@ -824,6 +866,10 @@ body {
     .dimmer.active {
         opacity: 1;
         visibility: visible;
+    }
+
+    .dimmer.active ~ .main {
+        filter: blur(8px);
     }
 
     .main {
