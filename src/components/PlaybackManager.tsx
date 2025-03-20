@@ -44,7 +44,7 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
     currentTrackIndex: initialTrackIndex = -1,
     loadMore,
     hasMore,
-    clearOnLogout = false,
+    //clearOnLogout = false,
     children,
 }) => {
     const [currentTrack, setCurrentTrack] = useState<MediaItem | null>(null)
@@ -99,7 +99,7 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                 audioRef.current.load()
             }
         } else if (!token) {
-            console.warn('No token available to restore last played track')
+            console.error('No token available to restore last played track')
             setCurrentTrack(null)
             setCurrentTrackIndex(-1)
         }
@@ -267,7 +267,7 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                     })
             }
         } else {
-            console.log('No track to play. Please select a track.')
+            console.error('No track to play. Please select a track.')
         }
     }
 

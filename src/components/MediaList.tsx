@@ -33,7 +33,7 @@ const MediaList = ({
     hasMore,
     playTrack,
     currentTrack,
-    currentTrackIndex,
+    //currentTrackIndex,
     isPlaying,
     togglePlayPause,
     playlist = [],
@@ -120,7 +120,7 @@ const MediaList = ({
                 if (playlistIndex !== -1) {
                     playTrack(item, playlistIndex)
                 } else {
-                    console.warn('Track not found in playlist:', item)
+                    console.error('Track not found in playlist:', item)
                     playTrack(item, index)
                 }
             }
@@ -138,7 +138,7 @@ const MediaList = ({
                 if (playlistIndex !== -1) {
                     playTrack(item, playlistIndex)
                 } else {
-                    console.warn('Track not found in playlist:', item)
+                    console.error('Track not found in playlist:', item)
                     playTrack(item, index)
                 }
             }
