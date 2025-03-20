@@ -18,15 +18,10 @@ const Sidenav = (props: SidenavProps) => {
     }
 
     const handleVolumeScroll = (e: React.WheelEvent<HTMLInputElement>) => {
-        e.stopPropagation() // Stop event from bubbling up
-        const delta = e.deltaY > 0 ? -0.05 : 0.05 // Adjust volume based on scroll direction
+        e.stopPropagation()
+        const delta = e.deltaY > 0 ? -0.05 : 0.05
         const newVolume = Math.max(0, Math.min(1, props.volume + delta))
         props.setVolume(newVolume)
-    }
-
-    // Prevent touch scroll propagation
-    const handleTouchMove = (e: React.TouchEvent<HTMLInputElement>) => {
-        e.stopPropagation() // Stop event from bubbling to parent elements
     }
 
     return (
@@ -73,7 +68,6 @@ const Sidenav = (props: SidenavProps) => {
                                 value={props.volume}
                                 onChange={handleVolumeChange}
                                 onWheel={handleVolumeScroll}
-                                onTouchMove={handleTouchMove}
                             />
                         </div>
                     </div>

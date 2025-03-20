@@ -6,13 +6,23 @@ interface AlbumsProps {
     user: { userId: string; username: string }
     serverUrl: string
     token: string
-    playTrack?: (track: MediaItem) => void // Optional, not used for albums
-    currentTrack?: MediaItem | null // Optional
-    isPlaying?: boolean // Optional
-    togglePlayPause?: () => void // Optional
+    playTrack?: (track: MediaItem, index: number) => void
+    currentTrack?: MediaItem | null
+    currentTrackIndex?: number
+    isPlaying?: boolean
+    togglePlayPause?: () => void
 }
 
-const Albums = ({ user, serverUrl, token, playTrack, currentTrack, isPlaying, togglePlayPause }: AlbumsProps) => {
+const Albums = ({
+    user,
+    serverUrl,
+    token,
+    playTrack,
+    currentTrack,
+    currentTrackIndex,
+    isPlaying,
+    togglePlayPause,
+}: AlbumsProps) => {
     const { allAlbums, loading, error, loadMore, hasMore } = useJellyfinAlbumsData(serverUrl, user.userId, token)
 
     return (
@@ -26,6 +36,7 @@ const Albums = ({ user, serverUrl, token, playTrack, currentTrack, isPlaying, to
                 hasMore={hasMore}
                 playTrack={playTrack || (() => {})}
                 currentTrack={currentTrack || null}
+                currentTrackIndex={currentTrackIndex || -1}
                 isPlaying={isPlaying || false}
                 togglePlayPause={togglePlayPause || (() => {})}
             />

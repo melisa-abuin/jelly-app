@@ -16,10 +16,12 @@ interface MediaListProps {
     serverUrl: string
     loadMore?: () => void
     hasMore?: boolean
-    playTrack: (track: MediaItem) => void
+    playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
+    currentTrackIndex: number
     isPlaying: boolean
     togglePlayPause: () => void
+    playlist?: MediaItem[]
 }
 
 const MediaList = ({
@@ -31,8 +33,10 @@ const MediaList = ({
     hasMore,
     playTrack,
     currentTrack,
+    currentTrackIndex,
     isPlaying,
     togglePlayPause,
+    playlist = [],
 }: MediaListProps) => {
     const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
@@ -106,23 +110,37 @@ const MediaList = ({
         sizeMap.current = { ...sizeMap.current, [index]: height }
     }
 
-    const handleSongClick = (item: MediaItem) => {
+    const handleSongClick = (item: MediaItem, index: number) => {
         if (type === 'song') {
             if (currentTrack?.Id === item.Id) {
                 togglePlayPause()
             } else {
-                playTrack(item)
+                // Find the index of the item in the playlist
+                const playlistIndex = playlist.findIndex(track => track.Id === item.Id)
+                if (playlistIndex !== -1) {
+                    playTrack(item, playlistIndex)
+                } else {
+                    console.warn('Track not found in playlist:', item)
+                    playTrack(item, index)
+                }
             }
         }
     }
 
-    const handleSongThumbnailClick = (item: MediaItem, e: React.MouseEvent) => {
+    const handleSongThumbnailClick = (item: MediaItem, index: number, e: React.MouseEvent) => {
         e.stopPropagation()
         if (type === 'song') {
             if (currentTrack?.Id === item.Id && isPlaying) {
                 togglePlayPause()
             } else {
-                playTrack(item)
+                // Find the index of the item in the playlist
+                const playlistIndex = playlist.findIndex(track => track.Id === item.Id)
+                if (playlistIndex !== -1) {
+                    playTrack(item, playlistIndex)
+                } else {
+                    console.warn('Track not found in playlist:', item)
+                    playTrack(item, index)
+                }
             }
         }
     }
@@ -174,7 +192,7 @@ const MediaList = ({
         ) : (
             <li
                 className={`media-item song-item ${itemClass}`}
-                onClick={() => handleSongClick(item)}
+                onClick={() => handleSongClick(item, index)}
                 key={item.Id}
                 ref={el => {
                     rowRefs.current[index] = el
@@ -189,7 +207,7 @@ const MediaList = ({
                             console.error(`Image load failed for ${item.Name}:`, e, 'URL:', imageUrl)
                             ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
                         }}
-                        onClick={e => handleSongThumbnailClick(item, e)}
+                        onClick={e => handleSongThumbnailClick(item, index, e)}
                     />
                     <div className="overlay">
                         <div className="container">

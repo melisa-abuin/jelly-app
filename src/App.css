@@ -148,12 +148,12 @@ svg {
     --font-color-inverted: #ffffff;
     --border-color: #ececec;
     --border-color-secondary: #dddddd;
-    --link-color: #916aeb;
-    --link-color-active: #a384eb;
+    --link-color: #a386e7;
+    --link-color-active: #b5a1e7;
     --error-font: #f15a5a;
     --error-border: #ffd6d6;
     --error-background: #fff0f0;
-    --brand-color: #9a83eb;
+    --brand-color: #947bee;
     --success-color: #34a52c; /* Not used */
     --overlay-bg: rgb(0 0 0 / 45%);
     --bg-color-dimmer: rgba(22, 11, 37, 0.4);
@@ -357,6 +357,7 @@ body {
 }
 
 .main > .main_header > .primary > .return_icon {
+    cursor: pointer;
     padding: 6px;
     margin-right: 12px;
     border-radius: 20px;
@@ -446,7 +447,7 @@ body {
         var(--bg-color-tertiary) var(--buffered-width),
         var(--bg-color-secondary) var(--buffered-width)
     );
-    transition: transform 0.12s ease;
+    transition: transform 0.1s ease;
 }
 
 .main > .main_footer > .playback > .progress:hover > input::-webkit-slider-runnable-track,
@@ -467,7 +468,7 @@ body {
         var(--bg-color-tertiary) var(--buffered-width),
         var(--bg-color-secondary) var(--buffered-width)
     );
-    transition: transform 0.12s ease;
+    transition: transform 0.1s ease;
 }
 
 .main > .main_footer > .playback > .progress:hover > input::-moz-range-track,
@@ -587,6 +588,10 @@ body {
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle:hover > .shuffle-icon {
     background-color: var(--font-color);
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .shuffle.active > .shuffle-icon {
+    background-color: var(--brand-color);
 }
 
 /* Primary controls */
@@ -720,8 +725,24 @@ body {
     transition: background-color 0.2s ease-out;
 }
 
-.main > .main_footer > .playback > .container > .controls > .knobs > .repeat:hover > .repeat-icon {
+.main > .main_footer > .playback > .container > .controls > .knobs > .repeat > .repeat-icon-one {
+    display: block;
+    width: 32px;
+    height: 28px;
+    background-color: var(--font-color-secondary);
+    mask-repeat: no-repeat;
+    mask-image: url(/player-repeat-one.svg);
+    transition: background-color 0.2s ease-out;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .repeat:hover > .repeat-icon,
+.main > .main_footer > .playback > .container > .controls > .knobs > .repeat:hover > .repeat-icon-one {
     background-color: var(--font-color);
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .repeat.active > .repeat-icon,
+.main > .main_footer > .playback > .container > .controls > .knobs > .repeat.active > .repeat-icon-one {
+    background-color: var(--brand-color);
 }
 
 /* Duration */

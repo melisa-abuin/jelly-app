@@ -20,7 +20,7 @@ export const useJellyfinTracksData = (serverUrl: string, userId: string, token: 
     const itemsPerPage = 20
     const seenIds = useRef(new Set<string>())
     const isInitialMount = useRef(true)
-    const isLoadingMore = useRef(false) // Track if a loadMore operation is in progress
+    const isLoadingMore = useRef(false)
 
     useEffect(() => {
         if (isInitialMount.current) {
@@ -93,12 +93,25 @@ export const useJellyfinTracksData = (serverUrl: string, userId: string, token: 
         }
     }, [data.loading, data.hasMore])
 
-    // Reset isLoadingMore when the fetch completes
     useEffect(() => {
         if (!data.loading) {
             isLoadingMore.current = false
         }
     }, [data.loading])
+
+    // Automatically load more tracks if the user is approaching the end of the current list
+    useEffect(() => {
+        const checkAndLoadMore = () => {
+            if (data.allTracks.length > 0 && data.hasMore && !data.loading) {
+                const threshold = 5 // Load more when 5 tracks are left
+                if (data.allTracks.length - page * itemsPerPage <= threshold) {
+                    loadMore()
+                }
+            }
+        }
+
+        checkAndLoadMore()
+    }, [data.allTracks, data.hasMore, data.loading, loadMore, page])
 
     return { ...data, loadMore }
 }

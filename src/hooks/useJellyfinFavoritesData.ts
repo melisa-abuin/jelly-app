@@ -99,5 +99,19 @@ export const useJellyfinFavoritesData = (serverUrl: string, userId: string, toke
         }
     }, [data.loading])
 
+    // Automatically load more favorites if the user is approaching the end of the current list
+    useEffect(() => {
+        const checkAndLoadMore = () => {
+            if (data.allFavorites.length > 0 && data.hasMore && !data.loading) {
+                const threshold = 5 // Load more when 5 favorites are left
+                if (data.allFavorites.length - page * itemsPerPage <= threshold) {
+                    loadMore()
+                }
+            }
+        }
+
+        checkAndLoadMore()
+    }, [data.allFavorites, data.hasMore, data.loading, loadMore, page])
+
     return { ...data, loadMore }
 }

@@ -225,7 +225,7 @@
 }
 
 .media-list .media-item > .media-details > .container > .artist {
-    display: inline-block;
+    display: inline;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--font-color-tertiary);

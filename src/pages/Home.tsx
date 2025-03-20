@@ -7,13 +7,25 @@ interface HomePageProps {
     user: { userId: string; username: string }
     serverUrl: string
     token: string
-    playTrack: (track: MediaItem) => void
+    playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
+    currentTrackIndex: number
     isPlaying: boolean
     togglePlayPause: () => void
+    setCurrentPlaylist: (playlist: MediaItem[]) => void
 }
 
-const Home = ({ user, serverUrl, token, playTrack, currentTrack, isPlaying, togglePlayPause }: HomePageProps) => {
+const Home = ({
+    user,
+    serverUrl,
+    token,
+    playTrack,
+    currentTrack,
+    currentTrackIndex,
+    isPlaying,
+    togglePlayPause,
+    setCurrentPlaylist,
+}: HomePageProps) => {
     const { recentlyPlayed, frequentlyPlayed, recentlyAdded, loading, error } = useJellyfinHomeData(
         serverUrl,
         user.userId,
@@ -38,10 +50,15 @@ const Home = ({ user, serverUrl, token, playTrack, currentTrack, isPlaying, togg
                     type="song"
                     loading={loading}
                     serverUrl={serverUrl}
-                    playTrack={playTrack}
+                    playTrack={(track, index) => {
+                        setCurrentPlaylist(recentlyPlayed)
+                        playTrack(track, index)
+                    }}
                     currentTrack={currentTrack}
+                    currentTrackIndex={currentTrackIndex}
                     isPlaying={isPlaying}
                     togglePlayPause={togglePlayPause}
+                    playlist={recentlyPlayed}
                 />
             </div>
             <div className="section">
@@ -52,10 +69,15 @@ const Home = ({ user, serverUrl, token, playTrack, currentTrack, isPlaying, togg
                     type="song"
                     loading={loading}
                     serverUrl={serverUrl}
-                    playTrack={playTrack}
+                    playTrack={(track, index) => {
+                        setCurrentPlaylist(frequentlyPlayed)
+                        playTrack(track, index)
+                    }}
                     currentTrack={currentTrack}
+                    currentTrackIndex={currentTrackIndex}
                     isPlaying={isPlaying}
                     togglePlayPause={togglePlayPause}
+                    playlist={frequentlyPlayed}
                 />
             </div>
             <div className="section">
@@ -68,6 +90,7 @@ const Home = ({ user, serverUrl, token, playTrack, currentTrack, isPlaying, togg
                     serverUrl={serverUrl}
                     playTrack={playTrack}
                     currentTrack={currentTrack}
+                    currentTrackIndex={currentTrackIndex}
                     isPlaying={isPlaying}
                     togglePlayPause={togglePlayPause}
                 />
