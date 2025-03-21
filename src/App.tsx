@@ -39,14 +39,11 @@ const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     useEffect(() => {
         const currentPath = location.pathname
 
-        // Only proceed if the path is valid and has changed
         if (validRoutes.includes(currentPath) && currentPath !== prevLocationRef.current) {
             setHistoryStack(prev => {
-                // Avoid duplicates if the current path is already the last one
                 if (prev[prev.length - 1] === currentPath) {
                     return prev
                 }
-                // Add the new path to the stack
                 return [...prev, currentPath]
             })
             prevLocationRef.current = currentPath
@@ -56,7 +53,7 @@ const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     const goBack = () => {
         if (historyStack.length > 1) {
             setHistoryStack(prev => {
-                const newStack = prev.slice(0, -1) // Remove the current route
+                const newStack = prev.slice(0, -1)
                 const previousRoute = newStack[newStack.length - 1]
                 navigate(previousRoute)
                 return newStack
@@ -149,6 +146,10 @@ const MainLayout = ({
         localStorage.setItem('currentPlaylist', JSON.stringify(currentPlaylist))
     }, [currentPlaylist])
 
+    const handleSetCurrentPlaylist = (newPlaylist: MediaItem[]) => {
+        setCurrentPlaylist(newPlaylist)
+    }
+
     const getPageTitle = () => {
         switch (location.pathname) {
             case '/':
@@ -175,7 +176,9 @@ const MainLayout = ({
                 token={auth.token}
                 userId={auth.userId}
                 initialVolume={0.5}
-                updateLastPlayed={() => {}}
+                updateLastPlayed={(track: MediaItem) => {
+                    localStorage.setItem('lastPlayedTrack', JSON.stringify(track))
+                }}
                 playlist={currentPlaylist}
                 loadMore={loadMoreCallback}
                 hasMore={hasMoreState}
@@ -241,7 +244,7 @@ const MainLayout = ({
                                                 currentTrackIndex={currentTrackIndex}
                                                 isPlaying={isPlaying}
                                                 togglePlayPause={togglePlayPause}
-                                                setCurrentPlaylist={setCurrentPlaylist}
+                                                setCurrentPlaylist={handleSetCurrentPlaylist}
                                             />
                                         }
                                     />
@@ -257,7 +260,7 @@ const MainLayout = ({
                                                 currentTrackIndex={currentTrackIndex}
                                                 isPlaying={isPlaying}
                                                 togglePlayPause={togglePlayPause}
-                                                setCurrentPlaylist={setCurrentPlaylist}
+                                                setCurrentPlaylist={handleSetCurrentPlaylist}
                                                 setLoadMoreCallback={setLoadMoreCallback}
                                                 setHasMoreState={setHasMoreState}
                                             />
@@ -285,7 +288,7 @@ const MainLayout = ({
                                                 currentTrackIndex={currentTrackIndex}
                                                 isPlaying={isPlaying}
                                                 togglePlayPause={togglePlayPause}
-                                                setCurrentPlaylist={setCurrentPlaylist}
+                                                setCurrentPlaylist={handleSetCurrentPlaylist}
                                                 setLoadMoreCallback={setLoadMoreCallback}
                                                 setHasMoreState={setHasMoreState}
                                             />

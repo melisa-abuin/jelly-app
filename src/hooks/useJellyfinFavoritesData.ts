@@ -24,14 +24,9 @@ export const useJellyfinFavoritesData = (serverUrl: string, userId: string, toke
 
     useEffect(() => {
         if (isInitialMount.current) {
-            setData({
-                allFavorites: [],
-                loading: true,
-                error: null,
-                hasMore: true,
-            })
             setPage(0)
             seenIds.current.clear()
+            setData(prev => ({ ...prev, allFavorites: [], hasMore: true }))
             isInitialMount.current = false
         }
     }, [serverUrl, userId, token])
@@ -56,15 +51,12 @@ export const useJellyfinFavoritesData = (serverUrl: string, userId: string, toke
                     return true
                 })
 
-                setData(prev => {
-                    const updatedFavorites = [...prev.allFavorites, ...newFavorites]
-                    return {
-                        allFavorites: updatedFavorites,
-                        loading: false,
-                        error: null,
-                        hasMore: favorites.length === itemsPerPage,
-                    }
-                })
+                setData(prev => ({
+                    allFavorites: [...prev.allFavorites, ...newFavorites],
+                    loading: false,
+                    error: null,
+                    hasMore: favorites.length === itemsPerPage,
+                }))
             } catch (error) {
                 console.error('Failed to fetch favorites data:', error)
                 if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -86,10 +78,7 @@ export const useJellyfinFavoritesData = (serverUrl: string, userId: string, toke
 
         if (!data.loading && data.hasMore) {
             isLoadingMore.current = true
-            setPage(prev => {
-                const nextPage = prev + 1
-                return nextPage
-            })
+            setPage(prev => prev + 1)
         }
     }, [data.loading, data.hasMore])
 
@@ -98,20 +87,6 @@ export const useJellyfinFavoritesData = (serverUrl: string, userId: string, toke
             isLoadingMore.current = false
         }
     }, [data.loading])
-
-    // Automatically load more favorites if the user is approaching the end of the current list
-    useEffect(() => {
-        const checkAndLoadMore = () => {
-            if (data.allFavorites.length > 0 && data.hasMore && !data.loading) {
-                const threshold = 5 // Load more when 5 favorites are left
-                if (data.allFavorites.length - page * itemsPerPage <= threshold) {
-                    loadMore()
-                }
-            }
-        }
-
-        checkAndLoadMore()
-    }, [data.allFavorites, data.hasMore, data.loading, loadMore, page])
 
     return { ...data, loadMore }
 }

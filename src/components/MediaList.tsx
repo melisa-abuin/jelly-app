@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react'
+import React, { Ref, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Virtuoso } from 'react-virtuoso'
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import Loader from './Loader'
 
@@ -10,6 +10,7 @@ interface ExtendedMediaItem extends MediaItem {
 }
 
 interface MediaListProps {
+    virtuosoRef?: Ref<VirtuosoHandle>
     items: MediaItem[]
     type: 'song' | 'album'
     loading: boolean
@@ -25,6 +26,7 @@ interface MediaListProps {
 }
 
 const MediaList = ({
+    virtuosoRef,
     items,
     type,
     loading,
@@ -33,7 +35,6 @@ const MediaList = ({
     hasMore,
     playTrack,
     currentTrack,
-    //currentTrackIndex,
     isPlaying,
     togglePlayPause,
     playlist = [],
@@ -44,7 +45,10 @@ const MediaList = ({
     const sizeMap = useRef<{ [index: number]: number }>({})
 
     useEffect(() => {
+        // Initialize refs for new items
         rowRefs.current = items.map(() => null)
+        // Clean up previous observers before setting up new ones
+        cleanupResizeObservers()
         measureInitialHeights()
         setupResizeObservers()
         document.body.style.overflowY = 'auto'
@@ -53,15 +57,6 @@ const MediaList = ({
         return () => {
             cleanupResizeObservers()
             window.removeEventListener('resize', handleResize)
-        }
-    }, [items])
-
-    useEffect(() => {
-        if (items.length !== rowRefs.current.length) {
-            cleanupResizeObservers()
-            rowRefs.current = items.map(() => null)
-            measureInitialHeights()
-            setupResizeObservers()
         }
     }, [items])
 
@@ -115,12 +110,10 @@ const MediaList = ({
             if (currentTrack?.Id === item.Id) {
                 togglePlayPause()
             } else {
-                // Find the index of the item in the playlist
                 const playlistIndex = playlist.findIndex(track => track.Id === item.Id)
                 if (playlistIndex !== -1) {
                     playTrack(item, playlistIndex)
                 } else {
-                    console.error('Track not found in playlist:', item)
                     playTrack(item, index)
                 }
             }
@@ -133,12 +126,10 @@ const MediaList = ({
             if (currentTrack?.Id === item.Id && isPlaying) {
                 togglePlayPause()
             } else {
-                // Find the index of the item in the playlist
                 const playlistIndex = playlist.findIndex(track => track.Id === item.Id)
                 if (playlistIndex !== -1) {
                     playTrack(item, playlistIndex)
                 } else {
-                    console.error('Track not found in playlist:', item)
                     playTrack(item, index)
                 }
             }
@@ -177,7 +168,6 @@ const MediaList = ({
                         alt={item.Name}
                         className="thumbnail"
                         onError={e => {
-                            console.error(`Image load failed for ${item.Name}:`, e, 'URL:', imageUrl)
                             ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
                         }}
                     />
@@ -204,7 +194,6 @@ const MediaList = ({
                         alt={item.Name}
                         className="thumbnail"
                         onError={e => {
-                            console.error(`Image load failed for ${item.Name}:`, e, 'URL:', imageUrl)
                             ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
                         }}
                         onClick={e => handleSongThumbnailClick(item, index, e)}
@@ -298,16 +287,17 @@ const MediaList = ({
         return <Loader />
     }
 
-    if (items.length === 0) {
+    if (items.length === 0 && !loading) {
         return <div className="empty">{type === 'song' ? 'No tracks' : 'No albums'}</div>
     }
 
     return (
         <ul className="media-list noSelect">
+            {loading && <div>Loading more tracks...</div>}
             <Virtuoso
+                ref={virtuosoRef}
                 data={items}
                 useWindowScroll
-                totalCount={items.length}
                 itemContent={(index: number) => renderItem(index)}
                 endReached={handleEndReached}
                 overscan={350}

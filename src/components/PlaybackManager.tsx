@@ -44,10 +44,12 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
     currentTrackIndex: initialTrackIndex = -1,
     loadMore,
     hasMore,
-    //clearOnLogout = false,
     children,
 }) => {
-    const [currentTrack, setCurrentTrack] = useState<MediaItem | null>(null)
+    const [currentTrack, setCurrentTrack] = useState<MediaItem | null>(() => {
+        const savedTrack = localStorage.getItem('lastPlayedTrack')
+        return savedTrack ? JSON.parse(savedTrack) : null
+    })
     const [currentTrackIndex, setCurrentTrackIndex] = useState(() => {
         const savedIndex = localStorage.getItem('currentTrackIndex')
         return savedIndex ? parseInt(savedIndex, 10) : initialTrackIndex
@@ -69,14 +71,12 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
     const shuffledPlaylist = useRef<number[]>([])
     const currentShuffledIndex = useRef<number>(-1)
     const playedIndices = useRef<Set<number>>(new Set())
-    const [isPreloading, setIsPreloading] = useState(false)
+    const hasRestored = useRef(false)
 
-    // Persist volume to localStorage
     useEffect(() => {
         localStorage.setItem('volume', volume.toString())
     }, [volume])
 
-    // Persist repeat to localStorage
     useEffect(() => {
         localStorage.setItem('repeatMode', repeat)
     }, [repeat])
@@ -85,38 +85,42 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
         localStorage.setItem('currentTrackIndex', currentTrackIndex.toString())
     }, [currentTrackIndex])
 
-    // Restore last played track (but don't auto-play)
     useEffect(() => {
+        if (playlist.length > 0 && currentTrack) {
+            const indexInPlaylist = playlist.findIndex(track => track.Id === currentTrack.Id)
+            if (indexInPlaylist !== -1 && indexInPlaylist !== currentTrackIndex) {
+                setCurrentTrackIndex(indexInPlaylist)
+            }
+        }
+    }, [playlist, currentTrack])
+
+    useEffect(() => {
+        if (hasRestored.current) return
+
         const savedLastPlayedTrack = localStorage.getItem('lastPlayedTrack')
         const savedIndex = localStorage.getItem('currentTrackIndex')
         if (savedLastPlayedTrack && token) {
             const lastPlayedTrack = JSON.parse(savedLastPlayedTrack)
             setCurrentTrack(lastPlayedTrack)
-            setCurrentTrackIndex(savedIndex ? parseInt(savedIndex, 10) : -1)
+            const indexInPlaylist = playlist.findIndex(track => track.Id === lastPlayedTrack.Id)
+            if (indexInPlaylist !== -1) {
+                setCurrentTrackIndex(indexInPlaylist)
+            } else if (savedIndex) {
+                setCurrentTrackIndex(parseInt(savedIndex, 10))
+            } else {
+                setCurrentTrackIndex(-1)
+            }
             if (audioRef.current) {
                 const streamUrl = `${serverUrl}/Audio/${lastPlayedTrack.Id}/universal?UserId=${userId}&api_key=${token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
                 audioRef.current.src = streamUrl
                 audioRef.current.load()
             }
         } else if (!token) {
-            console.error('No token available to restore last played track')
             setCurrentTrack(null)
             setCurrentTrackIndex(-1)
         }
-    }, [serverUrl, userId, token])
-
-    useEffect(() => {
-        if (isPreloading && hasMore && loadMore) {
-            const targetTrackCount = Math.min(100, playlist.length + (hasMore ? 100 : 0))
-            if (playlist.length < targetTrackCount) {
-                const currentScrollPosition = window.scrollY
-                loadMore()
-                window.scrollTo({ top: currentScrollPosition, behavior: 'smooth' })
-            } else {
-                setIsPreloading(false)
-            }
-        }
-    }, [playlist.length, isPreloading, hasMore, loadMore])
+        hasRestored.current = true
+    }, [serverUrl, userId, token, playlist])
 
     useEffect(() => {
         if (shuffle && hasMore && loadMore) {
@@ -164,27 +168,41 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
             setBuffered(0)
         }
 
-        const handleEnded = () => {
-            if (repeat === 'one') {
-                playTrack(currentTrack!, currentTrackIndex)
-            } else {
-                nextTrack()
-            }
-        }
-
         audio.addEventListener('timeupdate', updateProgress)
         audio.addEventListener('loadedmetadata', updateProgress)
         audio.addEventListener('error', handleError)
-        audio.addEventListener('ended', handleEnded)
 
         return () => {
             audio.pause()
             audio.removeEventListener('timeupdate', updateProgress)
             audio.removeEventListener('loadedmetadata', updateProgress)
             audio.removeEventListener('error', handleError)
-            audio.removeEventListener('ended', handleEnded)
         }
     }, [])
+
+    useEffect(() => {
+        if (!audioRef.current) return
+
+        const audio = audioRef.current
+        const handleEnded = () => {
+            if (!currentTrack || currentTrackIndex === -1 || !playlist || playlist.length === 0) {
+                setIsPlaying(false)
+                return
+            }
+
+            if (repeat === 'one') {
+                playTrack(currentTrack, currentTrackIndex)
+            } else {
+                nextTrack()
+            }
+        }
+
+        audio.addEventListener('ended', handleEnded)
+
+        return () => {
+            audio.removeEventListener('ended', handleEnded)
+        }
+    }, [currentTrack, currentTrackIndex, repeat, playlist])
 
     useEffect(() => {
         if (audioRef.current) {
@@ -197,7 +215,6 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
             const audio = audioRef.current
             audio.pause()
             audio.currentTime = 0
-            setIsPlaying(false)
 
             try {
                 const streamUrl = `${serverUrl}/Audio/${track.Id}/universal?UserId=${userId}&api_key=${token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
@@ -218,8 +235,8 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                 setIsPlaying(true)
                 updateLastPlayed(track)
 
-                // Persist the last played track to localStorage
                 localStorage.setItem('lastPlayedTrack', JSON.stringify(track))
+                localStorage.setItem('currentTrackIndex', index.toString())
 
                 if (shuffle) {
                     currentShuffledIndex.current = shuffledPlaylist.current.indexOf(index)
@@ -245,7 +262,6 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                 audio.pause()
                 setIsPlaying(false)
             } else {
-                // Ensure the audio source is set before playing
                 if (!audio.src) {
                     const streamUrl = `${serverUrl}/Audio/${currentTrack.Id}/universal?UserId=${userId}&api_key=${token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
                     audio.src = streamUrl
@@ -266,13 +282,11 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                         setBuffered(0)
                     })
             }
-        } else {
-            console.error('No track to play. Please select a track.')
         }
     }
 
     const nextTrack = () => {
-        if (!playlist || playlist.length === 0 || currentTrackIndex === -1) {
+        if (!playlist || playlist.length === 0 || currentTrackIndex === -1 || !currentTrack) {
             if (audioRef.current) {
                 audioRef.current.pause()
             }
@@ -312,13 +326,13 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
         } else {
             nextIndex = currentTrackIndex + 1
             if (nextIndex >= playlist.length) {
-                if (repeat === 'all') {
-                    nextIndex = 0
-                } else if (hasMore && loadMore) {
+                if (hasMore && loadMore) {
                     const currentScrollPosition = window.scrollY
                     loadMore()
                     window.scrollTo({ top: currentScrollPosition, behavior: 'smooth' })
                     return
+                } else if (repeat === 'all') {
+                    nextIndex = 0
                 } else {
                     if (audioRef.current) {
                         audioRef.current.pause()
@@ -328,11 +342,19 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                 }
             }
         }
-        playTrack(playlist[nextIndex], nextIndex)
+
+        if (nextIndex >= 0 && nextIndex < playlist.length && playlist[nextIndex]) {
+            playTrack(playlist[nextIndex], nextIndex)
+        } else {
+            if (audioRef.current) {
+                audioRef.current.pause()
+            }
+            setIsPlaying(false)
+        }
     }
 
     const previousTrack = () => {
-        if (!playlist || playlist.length === 0 || currentTrackIndex === -1) {
+        if (!playlist || playlist.length === 0 || currentTrackIndex === -1 || !currentTrack) {
             if (audioRef.current) {
                 audioRef.current.pause()
             }
@@ -378,7 +400,15 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                 }
             }
         }
-        playTrack(playlist[prevIndex], prevIndex)
+
+        if (prevIndex >= 0 && prevIndex < playlist.length && playlist[prevIndex]) {
+            playTrack(playlist[prevIndex], prevIndex)
+        } else {
+            if (audioRef.current) {
+                audioRef.current.pause()
+            }
+            setIsPlaying(false)
+        }
     }
 
     const toggleShuffle = () => {
@@ -394,8 +424,6 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                 }
                 currentShuffledIndex.current = 0
 
-                setIsPreloading(true)
-
                 if (currentTrack && currentTrackIndex !== -1) {
                     playTrack(currentTrack, currentTrackIndex)
                 }
@@ -403,7 +431,6 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                 shuffledPlaylist.current = []
                 currentShuffledIndex.current = -1
                 playedIndices.current.clear()
-                setIsPreloading(false)
             }
             return newShuffle
         })

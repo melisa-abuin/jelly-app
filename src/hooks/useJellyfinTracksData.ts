@@ -24,14 +24,9 @@ export const useJellyfinTracksData = (serverUrl: string, userId: string, token: 
 
     useEffect(() => {
         if (isInitialMount.current) {
-            setData({
-                allTracks: [],
-                loading: true,
-                error: null,
-                hasMore: true,
-            })
             setPage(0)
             seenIds.current.clear()
+            setData(prev => ({ ...prev, allTracks: [], hasMore: true }))
             isInitialMount.current = false
         }
     }, [serverUrl, userId, token])
@@ -56,15 +51,12 @@ export const useJellyfinTracksData = (serverUrl: string, userId: string, token: 
                     return true
                 })
 
-                setData(prev => {
-                    const updatedTracks = [...prev.allTracks, ...newTracks]
-                    return {
-                        allTracks: updatedTracks,
-                        loading: false,
-                        error: null,
-                        hasMore: tracks.length === itemsPerPage,
-                    }
-                })
+                setData(prev => ({
+                    allTracks: [...prev.allTracks, ...newTracks],
+                    loading: false,
+                    error: null,
+                    hasMore: tracks.length === itemsPerPage,
+                }))
             } catch (error) {
                 console.error('Failed to fetch tracks data:', error)
                 if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -86,10 +78,7 @@ export const useJellyfinTracksData = (serverUrl: string, userId: string, token: 
 
         if (!data.loading && data.hasMore) {
             isLoadingMore.current = true
-            setPage(prev => {
-                const nextPage = prev + 1
-                return nextPage
-            })
+            setPage(prev => prev + 1)
         }
     }, [data.loading, data.hasMore])
 
@@ -98,20 +87,6 @@ export const useJellyfinTracksData = (serverUrl: string, userId: string, token: 
             isLoadingMore.current = false
         }
     }, [data.loading])
-
-    // Automatically load more tracks if the user is approaching the end of the current list
-    useEffect(() => {
-        const checkAndLoadMore = () => {
-            if (data.allTracks.length > 0 && data.hasMore && !data.loading) {
-                const threshold = 5 // Load more when 5 tracks are left
-                if (data.allTracks.length - page * itemsPerPage <= threshold) {
-                    loadMore()
-                }
-            }
-        }
-
-        checkAndLoadMore()
-    }, [data.allTracks, data.hasMore, data.loading, loadMore, page])
 
     return { ...data, loadMore }
 }

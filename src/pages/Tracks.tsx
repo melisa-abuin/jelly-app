@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
 import MediaList from '../components/MediaList'
 import { useJellyfinTracksData } from '../hooks/useJellyfinTracksData'
@@ -31,23 +31,56 @@ const Tracks = ({
     setHasMoreState,
 }: TracksProps) => {
     const { allTracks, loading, error, loadMore, hasMore } = useJellyfinTracksData(serverUrl, user.userId, token)
+    const virtuosoRef = useRef<any>(null)
+    const hasPreloaded = useRef(false)
+    const [isPreloading, setIsPreloading] = useState(false)
 
-    // Update the playlist whenever allTracks changes (e.g., after scrolling)
-    useEffect(() => {
-        if (allTracks.length > 0) {
-            setCurrentPlaylist(allTracks)
-        }
-    }, [allTracks, setCurrentPlaylist])
-
-    // Pass loadMore and hasMore to App.tsx
     useEffect(() => {
         setLoadMoreCallback(() => loadMore)
         setHasMoreState(hasMore)
     }, [loadMore, hasMore, setLoadMoreCallback, setHasMoreState])
 
+    useEffect(() => {
+        if (hasPreloaded.current || isPreloading) return
+
+        const savedIndex = localStorage.getItem('currentTrackIndex')
+        if (savedIndex) {
+            const index = parseInt(savedIndex, 10)
+            if (index >= 0 && allTracks.length <= index && hasMore) {
+                setIsPreloading(true)
+
+                const loadAdditionalTracks = async () => {
+                    if (allTracks.length > index || !hasMore) {
+                        setIsPreloading(false)
+                        hasPreloaded.current = true
+                        return
+                    }
+
+                    if (loading) {
+                        setTimeout(loadAdditionalTracks, 100)
+                        return
+                    }
+
+                    await loadMore()
+                    setTimeout(loadAdditionalTracks, 100)
+                }
+
+                loadAdditionalTracks()
+            } else {
+                hasPreloaded.current = true
+                setIsPreloading(false)
+            }
+        } else {
+            hasPreloaded.current = true
+            setIsPreloading(false)
+        }
+    }, [allTracks.length, hasMore, loading, loadMore])
+
     return (
         <div className="tracks-page">
+            {error && <div className="error">{error}</div>}
             <MediaList
+                virtuosoRef={virtuosoRef}
                 items={allTracks}
                 type="song"
                 loading={loading}
@@ -64,7 +97,6 @@ const Tracks = ({
                 togglePlayPause={togglePlayPause}
                 playlist={allTracks}
             />
-            {error && <div className="error">{error}</div>}
         </div>
     )
 }

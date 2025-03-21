@@ -88,11 +88,15 @@ const Home = ({
                     type="album"
                     loading={loading}
                     serverUrl={serverUrl}
-                    playTrack={playTrack}
+                    playTrack={(track, index) => {
+                        setCurrentPlaylist(recentlyAdded)
+                        playTrack(track, index)
+                    }}
                     currentTrack={currentTrack}
                     currentTrackIndex={currentTrackIndex}
                     isPlaying={isPlaying}
                     togglePlayPause={togglePlayPause}
+                    playlist={recentlyAdded}
                 />
             </div>
         </div>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
 import MediaList from '../components/MediaList'
 import { useJellyfinFavoritesData } from '../hooks/useJellyfinFavoritesData'
@@ -31,23 +31,56 @@ const Favorites = ({
     setHasMoreState,
 }: FavoritesProps) => {
     const { allFavorites, loading, error, loadMore, hasMore } = useJellyfinFavoritesData(serverUrl, user.userId, token)
+    const virtuosoRef = useRef<any>(null)
+    const hasPreloaded = useRef(false)
+    const [isPreloading, setIsPreloading] = useState(false)
 
-    // Update the playlist whenever allFavorites changes (e.g., after scrolling)
-    useEffect(() => {
-        if (allFavorites.length > 0) {
-            setCurrentPlaylist(allFavorites)
-        }
-    }, [allFavorites, setCurrentPlaylist])
-
-    // Pass loadMore and hasMore to App.tsx
     useEffect(() => {
         setLoadMoreCallback(() => loadMore)
         setHasMoreState(hasMore)
     }, [loadMore, hasMore, setLoadMoreCallback, setHasMoreState])
 
+    useEffect(() => {
+        if (hasPreloaded.current || isPreloading) return
+
+        const savedIndex = localStorage.getItem('currentTrackIndex')
+        if (savedIndex) {
+            const index = parseInt(savedIndex, 10)
+            if (index >= 0 && allFavorites.length <= index && hasMore) {
+                setIsPreloading(true)
+
+                const loadAdditionalTracks = async () => {
+                    if (allFavorites.length > index || !hasMore) {
+                        setIsPreloading(false)
+                        hasPreloaded.current = true
+                        return
+                    }
+
+                    if (loading) {
+                        setTimeout(loadAdditionalTracks, 100)
+                        return
+                    }
+
+                    await loadMore()
+                    setTimeout(loadAdditionalTracks, 100)
+                }
+
+                loadAdditionalTracks()
+            } else {
+                hasPreloaded.current = true
+                setIsPreloading(false)
+            }
+        } else {
+            hasPreloaded.current = true
+            setIsPreloading(false)
+        }
+    }, [allFavorites.length, hasMore, loading, loadMore])
+
     return (
         <div className="favorites-page">
+            {error && <div className="error">{error}</div>}
             <MediaList
+                virtuosoRef={virtuosoRef}
                 items={allFavorites}
                 type="song"
                 loading={loading}
@@ -64,7 +97,6 @@ const Favorites = ({
                 togglePlayPause={togglePlayPause}
                 playlist={allFavorites}
             />
-            {error && <div className="error">{error}</div>}
         </div>
     )
 }
