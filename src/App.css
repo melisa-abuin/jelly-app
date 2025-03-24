@@ -147,7 +147,7 @@ svg {
     --font-color-tertiary: #767676;
     --font-color-inverted: #ffffff;
     --border-color: #ececec;
-    --border-color-secondary: #dddddd;
+    --border-color-secondary: #d6d6d6;
     --link-color: #a386e7;
     --link-color-active: #b5a1e7;
     --error-font: #f15a5a;
@@ -344,7 +344,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
     padding: 12px;
     max-height: 53px;
     background-color: var(--bg-color);
@@ -354,12 +353,19 @@ body {
 .main > .main_header > .primary {
     display: flex;
     align-items: center;
+    width: 100%;
+    max-width: calc(100% - 28px);
+}
+
+.main > .main_header > .primary > .container {
+    position: relative;
+    max-width: calc(100% - 14px);
 }
 
 .main > .main_header > .primary > .return_icon {
     cursor: pointer;
     padding: 6px;
-    margin-right: 12px;
+    margin-right: 10px;
     border-radius: 20px;
     transition: background-color 0.2s ease-out;
 }
@@ -371,6 +377,30 @@ body {
 .main > .main_header > .primary > .container > .page_title {
     font-size: 1rem;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.page_title > .text {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.main > .main_header > .primary > .container > .page_title > .album-icon {
+    margin-left: 4px;
+}
+
+.main > .main_header > .primary > .container > .page_title > .album-icon > svg {
+    fill-rule: evenodd;
+}
+
+.main > .main_header > .primary > .container > .page_title > .album-icon > svg > path {
+    fill: var(--font-color);
+}
+
+.main > .main_header > .primary > .container > .page_title > .album-icon > svg > .spindle-hole {
+    fill: var(--font-color);
 }
 
 .main > .main_header > .secondary {
@@ -501,26 +531,35 @@ body {
     justify-content: space-between;
     padding: 14px 20px;
     /* Prevents layout shifting from asian symbols increasing line heights...*/
-    max-height: 80px;
+    max-height: 76px;
 }
 
 /* Track details */
 .main > .main_footer > .playback > .container > .track-info {
     position: relative;
-    max-width: calc(100% - 280px);
+    max-width: calc(100% - 264px);
 }
 
 .main > .main_footer > .playback > .container > .track-info > .track-name {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     font-weight: 600;
+    display: flex;
+    align-items: center;
     margin-bottom: 3px;
+}
+
+.main > .main_footer > .playback > .container > .track-info > .track-name > .text {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
 
+.main > .main_footer > .playback > .container > .track-info > .track-name > .favorited {
+    margin-left: 4px;
+}
+
 .main > .main_footer > .playback > .container > .track-info > .artist {
-    font-size: 0.75rem;
+    font-size: 0.725rem;
     font-weight: 600;
     color: var(--font-color-tertiary);
     margin-bottom: 1px;
@@ -532,7 +571,7 @@ body {
 .main > .main_footer > .playback > .container > .track-info > .album {
     display: flex;
     align-items: flex-start;
-    font-size: 0.75rem;
+    font-size: 0.725rem;
     font-weight: 500;
     color: var(--font-color-tertiary);
 }
@@ -568,8 +607,8 @@ body {
 .main > .main_footer > .playback > .container > .controls > .knobs {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-right: 10px;
+    gap: 10px;
+    margin-right: 8px;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle {
@@ -598,7 +637,7 @@ body {
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous {
@@ -748,7 +787,7 @@ body {
 /* Duration */
 .main > .main_footer > .playback > .container > .controls > .duration {
     display: flex;
-    font-size: 0.75rem;
+    font-size: 0.725rem;
     font-weight: 500;
     font-variant-numeric: tabular-nums; /* Don't like how the font looks, but needed to prevent layout shift when numbers change */
     color: var(--font-color-tertiary);
@@ -759,9 +798,6 @@ body {
 }
 
 /* Home page specific */
-.home {
-}
-
 .section {
     margin-bottom: 60px;
 }
@@ -771,7 +807,7 @@ body {
 }
 
 .section_title {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     margin-bottom: 2px;
 }
@@ -839,13 +875,14 @@ body {
 
 /* Settings Page */
 .logout-button {
-    padding: 8px 16px;
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--font-color-inverted);
+    padding: 7px 13px;
+    border-radius: 6px;
+    background-color: #dc3545;
+    transition: background-color 0.2s ease-out;
 }
 
 .logout-button:hover {
@@ -895,6 +932,10 @@ body {
 
     .main {
         max-width: 100%;
+    }
+
+    .main > .main_header > .primary > .container {
+        max-width: calc(100% - 50px);
     }
 
     .main > .main_header > .secondary {

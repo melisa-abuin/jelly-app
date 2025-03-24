@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from '@primer/octicons-react'
+import { ArrowLeftIcon, HeartFillIcon } from '@primer/octicons-react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { MediaItem } from './api/jellyfin'
@@ -7,12 +7,35 @@ import './components/MediaList.css'
 import PlaybackManager from './components/PlaybackManager'
 import Sidenav from './components/Sidenav'
 import { useSidenav } from './hooks/useSidenav'
+import Album from './pages/Album'
 import Albums from './pages/Albums'
 import Favorites from './pages/Favorites'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Settings from './pages/Settings'
 import Tracks from './pages/Tracks'
+
+// Create a context for the page title
+interface PageTitleContextType {
+    pageTitle: string
+    setPageTitle: (title: string) => void
+}
+
+const PageTitleContext = createContext<PageTitleContextType | undefined>(undefined)
+
+const PageTitleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [pageTitle, setPageTitle] = useState<string>('')
+
+    return <PageTitleContext.Provider value={{ pageTitle, setPageTitle }}>{children}</PageTitleContext.Provider>
+}
+
+export const usePageTitle = () => {
+    const context = useContext(PageTitleContext)
+    if (!context) {
+        throw new Error('usePageTitle must be used within a PageTitleProvider')
+    }
+    return context
+}
 
 interface AuthData {
     serverUrl: string
@@ -34,12 +57,15 @@ const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     const location = useLocation()
     const prevLocationRef = useRef<string | null>(null)
 
-    const validRoutes = ['/', '/tracks', '/albums', '/favorites', '/settings']
+    const validRoutes = ['/', '/tracks', '/albums', '/favorites', '/settings', '/album']
 
     useEffect(() => {
         const currentPath = location.pathname
 
-        if (validRoutes.includes(currentPath) && currentPath !== prevLocationRef.current) {
+        if (
+            validRoutes.some(route => currentPath === route || currentPath.startsWith(route + '/')) &&
+            currentPath !== prevLocationRef.current
+        ) {
             setHistoryStack(prev => {
                 if (prev[prev.length - 1] === currentPath) {
                     return prev
@@ -100,21 +126,30 @@ const App = () => {
     return (
         <Router>
             <HistoryProvider>
-                <div className="music-app">
-                    <Routes>
-                        <Route path="/login" element={auth ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
-                        <Route
-                            path="/*"
-                            element={
-                                auth ? (
-                                    <MainLayout auth={auth} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
-                                ) : (
-                                    <Navigate to="/login" />
-                                )
-                            }
-                        />
-                    </Routes>
-                </div>
+                <PageTitleProvider>
+                    <div className="music-app">
+                        <Routes>
+                            <Route
+                                path="/login"
+                                element={auth ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
+                            />
+                            <Route
+                                path="/*"
+                                element={
+                                    auth ? (
+                                        <MainLayout
+                                            auth={auth}
+                                            handleLogout={handleLogout}
+                                            isLoggingOut={isLoggingOut}
+                                        />
+                                    ) : (
+                                        <Navigate to="/login" />
+                                    )
+                                }
+                            />
+                        </Routes>
+                    </div>
+                </PageTitleProvider>
             </HistoryProvider>
         </Router>
     )
@@ -137,6 +172,7 @@ const MainLayout = ({
     })
     const [loadMoreCallback, setLoadMoreCallback] = useState<(() => void) | undefined>(undefined)
     const [hasMoreState, setHasMoreState] = useState<boolean>(false)
+    const { pageTitle } = usePageTitle() // Use the page title from context
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
@@ -151,6 +187,9 @@ const MainLayout = ({
     }
 
     const getPageTitle = () => {
+        if (location.pathname.startsWith('/album/')) {
+            return pageTitle || 'Album' // Use the dynamic title if available, otherwise fallback to 'Album'
+        }
         switch (location.pathname) {
             case '/':
                 return 'Home'
@@ -220,7 +259,27 @@ const MainLayout = ({
                                         <ArrowLeftIcon size={16}></ArrowLeftIcon>
                                     </div>
                                     <div className="container">
-                                        <div className="page_title">{getPageTitle()}</div>
+                                        <div className="page_title">
+                                            <div className="text" title={getPageTitle()}>
+                                                {getPageTitle()}
+                                            </div>
+                                            {location.pathname.startsWith('/album/') && pageTitle && (
+                                                <div className="album-icon" title="Album">
+                                                    <svg
+                                                        width="18"
+                                                        height="18"
+                                                        viewBox="0 0 22 22"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            d="M10.9912 19.7422C15.9746 19.7422 20.0879 15.6289 20.0879 10.6543C20.0879 5.67969 15.9658 1.56641 10.9824 1.56641C6.00781 1.56641 1.90332 5.67969 1.90332 10.6543C1.90332 15.6289 6.0166 19.7422 10.9912 19.7422ZM11 14.0996C12.9072 14.0996 14.4453 12.5615 14.4453 10.6455C14.4453 8.74707 12.9072 7.2002 11 7.2002C9.08398 7.2002 7.5459 8.74707 7.5459 10.6455C7.5459 12.5615 9.08398 14.0996 11 14.0996Z"
+                                                            className="record"
+                                                        />
+                                                        <circle className="spindle-hole" cx="11" cy="10.6455" r="1.5" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="secondary">
@@ -277,6 +336,21 @@ const MainLayout = ({
                                         }
                                     />
                                     <Route
+                                        path="/album/:albumId"
+                                        element={
+                                            <Album
+                                                user={{ userId: auth.userId, username: auth.username }}
+                                                serverUrl={auth.serverUrl}
+                                                token={auth.token}
+                                                playTrack={playTrack}
+                                                currentTrack={currentTrack}
+                                                isPlaying={isPlaying}
+                                                togglePlayPause={togglePlayPause}
+                                                setCurrentPlaylist={handleSetCurrentPlaylist}
+                                            />
+                                        }
+                                    />
+                                    <Route
                                         path="/favorites"
                                         element={
                                             <Favorites
@@ -328,18 +402,36 @@ const MainLayout = ({
                                     </div>
                                     <div className="container">
                                         <div className="track-info">
-                                            <div className="track-name">{currentTrack?.Name || 'No Track Played'}</div>
-                                            <div className="artist">
+                                            <div className="track-name">
+                                                <div className="text" title={currentTrack?.Name || 'No Track Played'}>
+                                                    {currentTrack?.Name || 'No Track Played'}
+                                                </div>
+                                                {currentTrack?.UserData?.IsFavorite && (
+                                                    <span className="favorited" title="Favorited">
+                                                        <HeartFillIcon size={12}></HeartFillIcon>
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div
+                                                className="artist"
+                                                title={
+                                                    currentTrack?.Artists?.join(', ') ||
+                                                    currentTrack?.AlbumArtist ||
+                                                    'No Artist'
+                                                }
+                                            >
                                                 {currentTrack?.Artists?.join(', ') ||
                                                     currentTrack?.AlbumArtist ||
                                                     'No Artist'}
                                             </div>
                                             <div className="album">
-                                                <div className="text">{currentTrack?.Album || 'No Album'}</div>
-                                                <div className="album-icon">
+                                                <div className="text" title={currentTrack?.Album || 'No Album'}>
+                                                    {currentTrack?.Album || 'No Album'}
+                                                </div>
+                                                <div className="album-icon" title="Album">
                                                     <svg
-                                                        width="16"
-                                                        height="16"
+                                                        width="14"
+                                                        height="14"
                                                         viewBox="0 0 22 22"
                                                         xmlns="http://www.w3.org/2000/svg"
                                                     >

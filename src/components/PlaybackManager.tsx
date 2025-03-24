@@ -44,6 +44,7 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
     currentTrackIndex: initialTrackIndex = -1,
     loadMore,
     hasMore,
+    clearOnLogout,
     children,
 }) => {
     const [currentTrack, setCurrentTrack] = useState<MediaItem | null>(() => {
@@ -67,148 +68,11 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
         const savedRepeat = localStorage.getItem('repeatMode')
         return savedRepeat === 'all' || savedRepeat === 'one' ? savedRepeat : 'off'
     })
-    const audioRef = useRef<HTMLAudioElement | null>(null)
+    const audioRef = useRef<HTMLAudioElement>(new Audio())
     const shuffledPlaylist = useRef<number[]>([])
     const currentShuffledIndex = useRef<number>(-1)
     const playedIndices = useRef<Set<number>>(new Set())
     const hasRestored = useRef(false)
-
-    useEffect(() => {
-        localStorage.setItem('volume', volume.toString())
-    }, [volume])
-
-    useEffect(() => {
-        localStorage.setItem('repeatMode', repeat)
-    }, [repeat])
-
-    useEffect(() => {
-        localStorage.setItem('currentTrackIndex', currentTrackIndex.toString())
-    }, [currentTrackIndex])
-
-    useEffect(() => {
-        if (playlist.length > 0 && currentTrack) {
-            const indexInPlaylist = playlist.findIndex(track => track.Id === currentTrack.Id)
-            if (indexInPlaylist !== -1 && indexInPlaylist !== currentTrackIndex) {
-                setCurrentTrackIndex(indexInPlaylist)
-            }
-        }
-    }, [playlist, currentTrack])
-
-    useEffect(() => {
-        if (hasRestored.current) return
-
-        const savedLastPlayedTrack = localStorage.getItem('lastPlayedTrack')
-        const savedIndex = localStorage.getItem('currentTrackIndex')
-        if (savedLastPlayedTrack && token) {
-            const lastPlayedTrack = JSON.parse(savedLastPlayedTrack)
-            setCurrentTrack(lastPlayedTrack)
-            const indexInPlaylist = playlist.findIndex(track => track.Id === lastPlayedTrack.Id)
-            if (indexInPlaylist !== -1) {
-                setCurrentTrackIndex(indexInPlaylist)
-            } else if (savedIndex) {
-                setCurrentTrackIndex(parseInt(savedIndex, 10))
-            } else {
-                setCurrentTrackIndex(-1)
-            }
-            if (audioRef.current) {
-                const streamUrl = `${serverUrl}/Audio/${lastPlayedTrack.Id}/universal?UserId=${userId}&api_key=${token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
-                audioRef.current.src = streamUrl
-                audioRef.current.load()
-            }
-        } else if (!token) {
-            setCurrentTrack(null)
-            setCurrentTrackIndex(-1)
-        }
-        hasRestored.current = true
-    }, [serverUrl, userId, token, playlist])
-
-    useEffect(() => {
-        if (shuffle && hasMore && loadMore) {
-            const threshold = 5
-            if (currentShuffledIndex.current >= shuffledPlaylist.current.length - threshold) {
-                const currentScrollPosition = window.scrollY
-                loadMore()
-                window.scrollTo({ top: currentScrollPosition, behavior: 'smooth' })
-            }
-        }
-    }, [currentShuffledIndex, shuffle, hasMore, loadMore])
-
-    useEffect(() => {
-        if (shuffle) {
-            const currentTrackIndexInShuffled = shuffledPlaylist.current[currentShuffledIndex.current]
-            shuffledPlaylist.current = [...Array(playlist.length).keys()]
-                .filter(i => i !== currentTrackIndexInShuffled)
-                .sort(() => Math.random() - 0.5)
-            if (currentTrackIndexInShuffled !== undefined) {
-                shuffledPlaylist.current.unshift(currentTrackIndexInShuffled)
-                currentShuffledIndex.current = 0
-            }
-        }
-    }, [playlist, shuffle])
-
-    useEffect(() => {
-        audioRef.current = new Audio()
-        audioRef.current.volume = volume
-
-        const audio = audioRef.current
-        const updateProgress = () => {
-            setProgress(audio.currentTime)
-            setDuration(audio.duration || 0)
-            const bufferedEnd = audio.buffered.length > 0 ? audio.buffered.end(audio.buffered.length - 1) : 0
-            setBuffered(bufferedEnd)
-        }
-
-        const handleError = (e: Event) => {
-            console.error('Audio error during playback:', e)
-            setIsPlaying(false)
-            setCurrentTrack(null)
-            setCurrentTrackIndex(-1)
-            setProgress(0)
-            setDuration(0)
-            setBuffered(0)
-        }
-
-        audio.addEventListener('timeupdate', updateProgress)
-        audio.addEventListener('loadedmetadata', updateProgress)
-        audio.addEventListener('error', handleError)
-
-        return () => {
-            audio.pause()
-            audio.removeEventListener('timeupdate', updateProgress)
-            audio.removeEventListener('loadedmetadata', updateProgress)
-            audio.removeEventListener('error', handleError)
-        }
-    }, [])
-
-    useEffect(() => {
-        if (!audioRef.current) return
-
-        const audio = audioRef.current
-        const handleEnded = () => {
-            if (!currentTrack || currentTrackIndex === -1 || !playlist || playlist.length === 0) {
-                setIsPlaying(false)
-                return
-            }
-
-            if (repeat === 'one') {
-                playTrack(currentTrack, currentTrackIndex)
-            } else {
-                nextTrack()
-            }
-        }
-
-        audio.addEventListener('ended', handleEnded)
-
-        return () => {
-            audio.removeEventListener('ended', handleEnded)
-        }
-    }, [currentTrack, currentTrackIndex, repeat, playlist])
-
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = volume
-        }
-    }, [volume])
 
     const playTrack = async (track: MediaItem, index: number) => {
         if (audioRef.current) {
@@ -243,6 +107,37 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                 }
 
                 playedIndices.current.add(index)
+
+                // Update Media Session metadata with artwork
+                if ('mediaSession' in navigator) {
+                    // Construct URLs for song and album thumbnails, matching MediaList
+                    const songThumbnailUrl =
+                        track.Id && track.ImageTags?.Primary
+                            ? `${serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${token}`
+                            : null
+                    const albumThumbnailUrl =
+                        track.AlbumPrimaryImageTag && track.AlbumId
+                            ? `${serverUrl}/Items/${track.AlbumId}/Images/Primary?tag=${track.AlbumPrimaryImageTag}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${token}`
+                            : null
+
+                    // Use song thumbnail if available, otherwise fall back to album thumbnail
+                    const artworkUrl = songThumbnailUrl || albumThumbnailUrl
+
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: track.Name || 'Unknown Track',
+                        artist: track.Artists?.join(', ') || track.AlbumArtist || 'Unknown Artist',
+                        album: track.Album || 'Unknown Album',
+                        artwork: artworkUrl
+                            ? [
+                                  {
+                                      src: artworkUrl,
+                                      sizes: '512x512',
+                                      type: 'image/webp',
+                                  },
+                              ]
+                            : [],
+                    })
+                }
             } catch (error) {
                 console.error('Error playing track:', error)
                 setIsPlaying(false)
@@ -453,10 +348,230 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
 
     const formatTime = (seconds: number) => {
         if (isNaN(seconds) || seconds === 0) return '0:00'
-        const mins = Math.floor(seconds / 60)
+        const hrs = Math.floor(seconds / 3600)
+        const mins = Math.floor((seconds % 3600) / 60)
         const secs = Math.floor(seconds % 60)
+
+        if (hrs > 0) {
+            return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`
+        }
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`
     }
+
+    // Set initial volume
+    useEffect(() => {
+        audioRef.current.volume = volume
+    }, [])
+
+    // Attach play/pause event listeners
+    useEffect(() => {
+        const audio = audioRef.current
+        const handlePlay = () => {
+            setIsPlaying(true)
+        }
+        const handlePause = () => {
+            setIsPlaying(false)
+        }
+        audio.addEventListener('play', handlePlay)
+        audio.addEventListener('pause', handlePause)
+        return () => {
+            audio.removeEventListener('play', handlePlay)
+            audio.removeEventListener('pause', handlePause)
+        }
+    }, [])
+
+    // Attach progress, metadata, and error event listeners
+    useEffect(() => {
+        const audio = audioRef.current
+        const updateProgress = () => {
+            setProgress(audio.currentTime)
+            setDuration(audio.duration || 0)
+            const bufferedEnd = audio.buffered.length > 0 ? audio.buffered.end(audio.buffered.length - 1) : 0
+            setBuffered(bufferedEnd)
+        }
+
+        const handleError = (e: Event) => {
+            console.error('Audio error during playback:', e)
+            setIsPlaying(false)
+            setCurrentTrack(null)
+            setCurrentTrackIndex(-1)
+            setProgress(0)
+            setDuration(0)
+            setBuffered(0)
+        }
+
+        audio.addEventListener('timeupdate', updateProgress)
+        audio.addEventListener('loadedmetadata', updateProgress)
+        audio.addEventListener('error', handleError)
+
+        return () => {
+            audio.pause()
+            audio.removeEventListener('timeupdate', updateProgress)
+            audio.removeEventListener('loadedmetadata', updateProgress)
+            audio.removeEventListener('error', handleError)
+        }
+    }, [])
+
+    // Set up Media Session API for next/previous actions
+    useEffect(() => {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                nextTrack()
+            })
+
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                previousTrack()
+            })
+
+            navigator.mediaSession.setActionHandler('play', () => {
+                togglePlayPause()
+            })
+
+            navigator.mediaSession.setActionHandler('pause', () => {
+                togglePlayPause()
+            })
+
+            return () => {
+                navigator.mediaSession.setActionHandler('nexttrack', null)
+                navigator.mediaSession.setActionHandler('previoustrack', null)
+                navigator.mediaSession.setActionHandler('play', null)
+                navigator.mediaSession.setActionHandler('pause', null)
+            }
+        }
+    }, [nextTrack, previousTrack, togglePlayPause])
+
+    // Add media key hotkey listener for next/previous (for redundancy)
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'MediaTrackNext') {
+                event.preventDefault()
+                nextTrack()
+            } else if (event.key === 'MediaTrackPrevious') {
+                event.preventDefault()
+                previousTrack()
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [nextTrack, previousTrack])
+
+    useEffect(() => {
+        localStorage.setItem('volume', volume.toString())
+        if (audioRef.current) {
+            audioRef.current.volume = volume
+        }
+    }, [volume])
+
+    useEffect(() => {
+        localStorage.setItem('repeatMode', repeat)
+    }, [repeat])
+
+    useEffect(() => {
+        localStorage.setItem('currentTrackIndex', currentTrackIndex.toString())
+    }, [currentTrackIndex])
+
+    useEffect(() => {
+        if (playlist.length > 0 && currentTrack) {
+            const indexInPlaylist = playlist.findIndex(track => track.Id === currentTrack.Id)
+            if (indexInPlaylist !== -1 && indexInPlaylist !== currentTrackIndex) {
+                setCurrentTrackIndex(indexInPlaylist)
+            }
+        }
+    }, [playlist, currentTrack])
+
+    useEffect(() => {
+        if (hasRestored.current) return
+
+        const savedLastPlayedTrack = localStorage.getItem('lastPlayedTrack')
+        const savedIndex = localStorage.getItem('currentTrackIndex')
+        if (savedLastPlayedTrack && token) {
+            const lastPlayedTrack = JSON.parse(savedLastPlayedTrack)
+            setCurrentTrack(lastPlayedTrack)
+            const indexInPlaylist = playlist.findIndex(track => track.Id === lastPlayedTrack.Id)
+            if (indexInPlaylist !== -1) {
+                setCurrentTrackIndex(indexInPlaylist)
+            } else if (savedIndex) {
+                setCurrentTrackIndex(parseInt(savedIndex, 10))
+            } else {
+                setCurrentTrackIndex(-1)
+            }
+            if (audioRef.current) {
+                const streamUrl = `${serverUrl}/Audio/${lastPlayedTrack.Id}/universal?UserId=${userId}&api_key=${token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
+                audioRef.current.src = streamUrl
+                audioRef.current.load()
+            }
+        } else if (!token) {
+            setCurrentTrack(null)
+            setCurrentTrackIndex(-1)
+        }
+        hasRestored.current = true
+    }, [serverUrl, userId, token, playlist])
+
+    useEffect(() => {
+        if (shuffle && hasMore && loadMore) {
+            const threshold = 5
+            if (currentShuffledIndex.current >= shuffledPlaylist.current.length - threshold) {
+                const currentScrollPosition = window.scrollY
+                loadMore()
+                window.scrollTo({ top: currentScrollPosition, behavior: 'smooth' })
+            }
+        }
+    }, [currentShuffledIndex, shuffle, hasMore, loadMore])
+
+    useEffect(() => {
+        if (shuffle) {
+            const currentTrackIndexInShuffled = shuffledPlaylist.current[currentShuffledIndex.current]
+            shuffledPlaylist.current = [...Array(playlist.length).keys()]
+                .filter(i => i !== currentTrackIndexInShuffled)
+                .sort(() => Math.random() - 0.5)
+            if (currentTrackIndexInShuffled !== undefined) {
+                shuffledPlaylist.current.unshift(currentTrackIndexInShuffled)
+                currentShuffledIndex.current = 0
+            }
+        }
+    }, [playlist, shuffle])
+
+    useEffect(() => {
+        if (!audioRef.current) return
+
+        const audio = audioRef.current
+        const handleEnded = () => {
+            if (!currentTrack || currentTrackIndex === -1 || !playlist || playlist.length === 0) {
+                setIsPlaying(false)
+                return
+            }
+
+            if (repeat === 'one') {
+                playTrack(currentTrack, currentTrackIndex)
+            } else {
+                nextTrack()
+            }
+        }
+
+        audio.addEventListener('ended', handleEnded)
+
+        return () => {
+            audio.removeEventListener('ended', handleEnded)
+        }
+    }, [currentTrack, currentTrackIndex, repeat, playlist])
+
+    useEffect(() => {
+        if (clearOnLogout) {
+            setCurrentTrack(null)
+            setCurrentTrackIndex(-1)
+            setIsPlaying(false)
+            setProgress(0)
+            setDuration(0)
+            setBuffered(0)
+            if (audioRef.current) {
+                audioRef.current.pause()
+                audioRef.current.src = ''
+            }
+        }
+    }, [clearOnLogout])
 
     return children({
         currentTrack,

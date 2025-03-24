@@ -1,0 +1,371 @@
+.album-page {
+    margin-top: 4px;
+}
+
+.album-page > .album-header {
+    display: flex;
+    align-items: center;
+    margin-left: 26px;
+    margin-bottom: 14px;
+}
+
+.album-page > .album-header > .thumbnail {
+    display: block;
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    margin-right: 20px;
+}
+
+.album-page > .album-header > .album-details > .artist {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.album-page > .album-header > .album-details > .date {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--font-color-tertiary);
+    margin-bottom: 4px;
+}
+
+.album-page > .album-header > .album-details > .stats {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--font-color-tertiary);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.album-page > .album-header > .album-details > .stats > .track-amount > .number {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.album-page > .album-header > .album-details > .stats > .divider {
+    width: 2px;
+    height: 2px;
+    margin: 0 4px;
+    margin-top: 2px;
+    border-radius: 50%;
+    background-color: var(--font-color-tertiary);
+}
+
+.album-page > .album-header > .album-details > .stats > .length > .number {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.album-page > .album-header > .album-details > .stats > .plays > .number {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.album-page > .album-header > .album-details > .actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.album-page > .album-header > .album-details > .actions > .play-album {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 6px 11px;
+    border-radius: 6px;
+    background-color: var(--bg-color-secondary);
+    transition: background-color 0.2s ease-out;
+}
+
+.album-page > .album-header > .album-details > .actions > .play-album:hover {
+    background-color: var(--bg-color-tertiary);
+}
+
+.album-page > .album-header > .album-details > .actions > .play-album > .play-icon {
+    display: block;
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    background-color: var(--brand-color);
+    mask-repeat: no-repeat;
+    mask-image: url(/play.fill.svg);
+}
+
+.album-page > .album-header > .album-details > .actions > .play-album > .text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--brand-color);
+}
+
+.album-page > .album-header > .album-details > .actions > .favorite-state {
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 20px;
+    transition: background-color 0.2s ease-out;
+}
+
+.album-page > .album-header > .album-details > .actions > .favorite-state:hover {
+    background-color: var(--bg-color-tertiary);
+}
+
+.album-page > .album-header > .album-details > .actions > .favorite-state > svg {
+    color: var(--brand-color);
+}
+
+.album-page > .tracklist {
+    position: relative;
+}
+
+.album-page > .tracklist > .track-item {
+    display: flex;
+    position: relative;
+    cursor: pointer;
+    padding: 8px 10px;
+    margin: 0 -10px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease-out;
+}
+
+.album-page > .tracklist > .track-item:hover {
+    background-color: var(--bg-color-secondary);
+}
+
+.album-page > .tracklist > .track-item > .track-indiactor {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 28px;
+}
+
+.album-page > .tracklist > .track-item > .track-indiactor > .track-number {
+    position: relative;
+    font-size: 0.725rem;
+    font-weight: 500;
+    color: var(--font-color-tertiary);
+    margin-top: 1px;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+.album-page > .tracklist > .track-item.most-played > .track-indiactor > .track-number {
+    color: var(--brand-color);
+}
+
+/* Hide track-number when a track is hovered/playing/paused */
+.album-page > .tracklist > .track-item:hover > .track-indiactor > .track-number,
+.album-page > .tracklist > .track-item.playing > .track-indiactor > .track-number,
+.album-page > .tracklist > .track-item.paused > .track-indiactor > .track-number {
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Hide track-state by defualt */
+.album-page > .tracklist > .track-item > .track-indiactor > .track-state {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+/* Show track-state when a track is hovered/playing/paused */
+.album-page > .tracklist > .track-item:hover > .track-indiactor > .track-state,
+.album-page > .tracklist > .track-item.playing > .track-indiactor > .track-state,
+.album-page > .tracklist > .track-item.paused > .track-indiactor > .track-state {
+    position: relative;
+    opacity: 1;
+    visibility: visible;
+}
+
+.album-page > .tracklist > .track-item > .track-indiactor > .track-state > .play {
+    position: absolute;
+    cursor: pointer;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+/* Hide play button when a track is playing or paused */
+.album-page > .tracklist > .track-item.playing > .track-indiactor > .track-state > .play,
+.album-page > .tracklist > .track-item.paused > .track-indiactor > .track-state > .play {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Show play button when a track is paused and you hover the track */
+.album-page > .tracklist > .track-item.paused:hover > .track-indiactor > .track-state > .play {
+    opacity: 1;
+    visibility: visible;
+}
+
+.album-page > .tracklist > .track-item > .track-indiactor > .track-state > .play > .play-icon {
+    display: block;
+    width: 20px;
+    height: 14px;
+    background-color: var(--font-color-tertiary);
+    mask-repeat: no-repeat;
+    mask-image: url(/play.fill.svg);
+}
+
+/* Hide pause button by default */
+.album-page > .tracklist > .track-item > .track-indiactor > .track-state > .pause {
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+    cursor: pointer;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+/* Hide pause button when a track is paused */
+.album-page > .tracklist > .track-item.paused > .track-indiactor > .track-state > .pause {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Show pause button when a track is playing and you hover the track */
+.album-page > .tracklist > .track-item.playing:hover > .track-indiactor > .track-state > .pause {
+    opacity: 1;
+    visibility: visible;
+}
+
+.album-page > .tracklist > .track-item > .track-indiactor > .track-state > .pause > .pause-icon {
+    display: block;
+    width: 20px;
+    height: 14px;
+    background-color: var(--font-color-tertiary);
+    mask-repeat: no-repeat;
+    mask-image: url(/pause.fill.svg);
+}
+
+/* Hide play-state animation by default */
+.album-page > .tracklist > .track-item > .track-indiactor > .track-state > .play-state-animation {
+    position: absolute;
+    margin-left: -8px;
+    margin-bottom: 6px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+/* Show play-state animation when the track is playing or paused */
+.album-page > .tracklist > .track-item.playing > .track-indiactor > .track-state > .play-state-animation,
+.album-page > .tracklist > .track-item.paused > .track-indiactor > .track-state > .play-state-animation {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Hide play-state animation when you hover the track */
+.album-page > .tracklist > .track-item:hover > .track-indiactor > .track-state > .play-state-animation {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Play-state animation */
+/* Animation is active when a track is playing */
+.album-page > .tracklist > .track-item.playing > .track-indiactor > .track-state > .play-state-animation > .sound-bars {
+    animation-play-state: running;
+}
+
+/* Animation is paused when a track is stopped */
+.album-page > .tracklist > .track-item.paused > .track-indiactor > .track-state > .play-state-animation > .sound-bars {
+    animation-play-state: paused;
+}
+
+/* The individual sound-bars will inherit the play state from parent */
+.album-page > .tracklist > .track-item > .track-indiactor > .track-state > .play-state-animation > .sound-bars > .bar {
+    animation-play-state: inherit !important;
+    transform-origin: bottom;
+    fill: var(--brand-color);
+}
+
+.album-page > .tracklist > .track-item > .track-indiactor > .track-state > .play-state-animation > .sound-bars > .bar1 {
+    animation: bounce 0.5s infinite ease-in-out;
+}
+.album-page > .tracklist > .track-item > .track-indiactor > .track-state > .play-state-animation > .sound-bars > .bar2 {
+    animation: bounce 0.55s infinite ease-in-out;
+}
+.album-page > .tracklist > .track-item > .track-indiactor > .track-state > .play-state-animation > .sound-bars > .bar3 {
+    animation: bounce 0.45s infinite ease-in-out;
+}
+.album-page > .tracklist > .track-item > .track-indiactor > .track-state > .play-state-animation > .sound-bars > .bar4 {
+    animation: bounce 0.6s infinite ease-in-out;
+}
+
+@keyframes bounce {
+    0%,
+    100% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(1.8);
+    }
+}
+
+.album-page > .tracklist > .track-item > .track-details {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.album-page > .tracklist > .track-item > .track-details > .container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.album-page > .tracklist > .track-item > .track-details > .container > .name {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.album-page > .tracklist > .track-item > .track-details > .container > .name::after {
+    content: '';
+    display: block;
+    flex-grow: 1;
+    margin: 0 10px;
+    border-bottom: 1px dashed var(--border-color);
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+.album-page > .tracklist > .track-item:hover > .track-details > .container > .name::after {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.album-page > .tracklist > .track-item.playing > .track-details > .container > .name::after,
+.album-page > .tracklist > .track-item.paused > .track-details > .container > .name::after {
+    border-color: var(--border-color-secondary);
+}
+
+.album-page > .tracklist > .track-item > .track-details > .container > .name > .text {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.album-page > .tracklist > .track-item > .track-details > .container > .artist {
+    font-size: 0.725rem;
+    font-weight: 600;
+    color: var(--font-color-tertiary);
+}
+
+.album-page > .tracklist > .track-item > .track-details > .duration {
+    font-size: 0.725rem;
+    font-weight: 500;
+    color: var(--font-color-tertiary);
+    margin-top: 1px;
+}
+
+.album-page > .tracklist > .track-item > .track-details > .favorited {
+    margin-top: 2px;
+    margin-right: 6px;
+    color: var(--font-color-tertiary);
+}

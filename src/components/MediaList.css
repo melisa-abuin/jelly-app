@@ -25,16 +25,16 @@
 .media-list .media-item > .media-state {
     position: relative;
     flex-shrink: 0;
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
     margin-right: 12px;
     border-radius: 6px;
 }
 
 .media-list .media-item > .media-state > .thumbnail {
     display: block;
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
     object-fit: cover;
     border-radius: 6px;
     background-color: var(--bg-color-secondary);
@@ -102,7 +102,7 @@
     display: block;
     width: 26px;
     height: 23px;
-    background-color: #ffffff;
+    background-color: var(--font-color-inverted);
     mask-repeat: no-repeat;
     mask-image: url(/play.svg);
 }
@@ -132,7 +132,7 @@
     display: block;
     width: 26px;
     height: 23px;
-    background-color: #ffffff;
+    background-color: var(--font-color-inverted);
     mask-repeat: no-repeat;
     mask-image: url(/pause.svg);
 }
@@ -221,13 +221,13 @@
 
 .media-list .media-item > .media-details > .song-name,
 .media-list .media-item > .media-details > .container > .album-name {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     font-weight: 600;
 }
 
 .media-list .media-item > .media-details > .container > .artist {
     display: inline;
-    font-size: 0.75rem;
+    font-size: 0.725rem;
     font-weight: 600;
     color: var(--font-color-tertiary);
 }
@@ -245,7 +245,12 @@
 
 .media-list .media-item > .media-details > .container > .album {
     display: inline;
-    font-size: 0.75rem;
+    font-size: 0.725rem;
     font-weight: 500;
+    color: var(--font-color-tertiary);
+}
+
+.media-list .media-item > .favorited {
+    padding: 6px;
     color: var(--font-color-tertiary);
 }

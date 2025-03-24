@@ -57,6 +57,7 @@ export const loginToJellyfin = async (
 }
 
 export interface MediaItem {
+    Genres?: string[]
     Id: string
     Name: string
     Album?: string
@@ -70,7 +71,9 @@ export interface MediaItem {
     ImageTags?: { Primary?: string }
     DateCreated?: string
     PlayCount?: number
-    UserData?: { IsFavorite: boolean }
+    UserData?: { IsFavorite: boolean; PlayCount?: number }
+    RunTimeTicks?: number
+    ChildCount?: number
 }
 
 export const getRecentlyPlayed = async (serverUrl: string, userId: string, token: string): Promise<MediaItem[]> => {
@@ -105,7 +108,7 @@ export const getAllAlbums = async (
     limit = 20
 ): Promise<MediaItem[]> => {
     const response = await api.get<{ Items: MediaItem[] }>(
-        `${serverUrl}/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=MusicAlbum&Recursive=true&StartIndex=${startIndex}&Limit=${limit}`,
+        `${serverUrl}/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=MusicAlbum&Recursive=true&StartIndex=${startIndex}&Limit=${limit}&Fields=ChildCount,ImageTags`,
         { headers: { 'X-Emby-Token': token } }
     )
     return response.data.Items
@@ -137,4 +140,27 @@ export const getFavoriteTracks = async (
         { headers: { 'X-Emby-Token': token } }
     )
     return response.data.Items
+}
+
+export const getAlbumDetails = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    albumId: string
+): Promise<{ album: MediaItem; tracks: MediaItem[] }> => {
+    // Fetch album details
+    const albumResponse = await api.get<MediaItem>(
+        `${serverUrl}/Users/${userId}/Items/${albumId}?Fields=ChildCount,ImageTags,DateCreated`,
+        { headers: { 'X-Emby-Token': token } }
+    )
+    const album = albumResponse.data
+
+    // Fetch tracks for the album
+    const tracksResponse = await api.get<{ Items: MediaItem[] }>(
+        `${serverUrl}/Users/${userId}/Items?ParentId=${albumId}&IncludeItemTypes=Audio&SortBy=IndexNumber&SortOrder=Ascending&Fields=RunTimeTicks`,
+        { headers: { 'X-Emby-Token': token } }
+    )
+    const tracks = tracksResponse.data.Items
+
+    return { album, tracks }
 }

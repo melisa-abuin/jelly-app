@@ -1,5 +1,6 @@
+import { HeartFillIcon } from '@primer/octicons-react'
 import React, { Ref, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom' // Add useLocation import
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import Loader from './Loader'
@@ -19,7 +20,7 @@ interface MediaListProps {
     hasMore?: boolean
     playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
-    currentTrackIndex: number
+    currentTrackIndex?: number
     isPlaying: boolean
     togglePlayPause: () => void
     playlist?: MediaItem[]
@@ -42,12 +43,11 @@ const MediaList = ({
     const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
     const navigate = useNavigate()
+    const location = useLocation() // Get the current route
     const sizeMap = useRef<{ [index: number]: number }>({})
 
     useEffect(() => {
-        // Initialize refs for new items
         rowRefs.current = items.map(() => null)
-        // Clean up previous observers before setting up new ones
         cleanupResizeObservers()
         measureInitialHeights()
         setupResizeObservers()
@@ -146,9 +146,9 @@ const MediaList = ({
         const item = items[index] as ExtendedMediaItem
         const token = localStorage.getItem('auth') ? JSON.parse(localStorage.getItem('auth')!).token : ''
         const imageUrl = item.ImageTags?.Primary
-            ? `${serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=90&fillWidth=192&fillHeight=192&format=webp&api_key=${token}`
+            ? `${serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
             : item.AlbumPrimaryImageTag && item.AlbumId
-            ? `${serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=90&fillWidth=192&fillHeight=192&format=webp&api_key=${token}`
+            ? `${serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
             : '/default-thumbnail.png'
 
         const itemClass = type === 'song' && currentTrack?.Id === item.Id ? (isPlaying ? 'playing' : 'paused') : ''
@@ -157,7 +157,7 @@ const MediaList = ({
             <div
                 className={`media-item album-item`}
                 key={item.Id}
-                onClick={() => navigate(`/albums/${item.Id}`)}
+                onClick={() => navigate(`/album/${item.Id}`)}
                 ref={el => {
                     rowRefs.current[index] = el
                 }}
@@ -178,6 +178,11 @@ const MediaList = ({
                         <div className="artist">{item.AlbumArtist || 'Unknown Artist'}</div>
                     </div>
                 </div>
+                {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
+                    <div className="favorited" title="Favorited">
+                        <HeartFillIcon size={16} />
+                    </div>
+                )}
             </div>
         ) : (
             <li
@@ -279,6 +284,11 @@ const MediaList = ({
                         </>
                     </div>
                 </div>
+                {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
+                    <div className="favorited" title="Favorited">
+                        <HeartFillIcon size={16} />
+                    </div>
+                )}
             </li>
         )
     }
@@ -293,14 +303,14 @@ const MediaList = ({
 
     return (
         <ul className="media-list noSelect">
-            {loading && <div>Loading more tracks...</div>}
+            {loading}
             <Virtuoso
                 ref={virtuosoRef}
                 data={items}
                 useWindowScroll
                 itemContent={(index: number) => renderItem(index)}
                 endReached={handleEndReached}
-                overscan={350}
+                overscan={300}
             />
         </ul>
     )
