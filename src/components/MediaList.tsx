@@ -214,60 +214,12 @@ const MediaList = ({
                         </div>
                         <div className="play-state-animation">
                             <svg width="28" height="20" viewBox="0 0 28 20" className="sound-bars">
-                                <rect
-                                    x="2"
-                                    y="12"
-                                    width="2"
-                                    height="8"
-                                    rx="1"
-                                    fill="#ffffff"
-                                    className="bar bar1"
-                                ></rect>
-                                <rect
-                                    x="6"
-                                    y="10"
-                                    width="2"
-                                    height="10"
-                                    rx="1"
-                                    fill="#ffffff"
-                                    className="bar bar2"
-                                ></rect>
-                                <rect
-                                    x="10"
-                                    y="14"
-                                    width="2"
-                                    height="6"
-                                    rx="1"
-                                    fill="#ffffff"
-                                    className="bar bar3"
-                                ></rect>
-                                <rect
-                                    x="14"
-                                    y="11"
-                                    width="2"
-                                    height="9"
-                                    rx="1"
-                                    fill="#ffffff"
-                                    className="bar bar4"
-                                ></rect>
-                                <rect
-                                    x="18"
-                                    y="13"
-                                    width="2"
-                                    height="7"
-                                    rx="1"
-                                    fill="#ffffff"
-                                    className="bar bar5"
-                                ></rect>
-                                <rect
-                                    x="22"
-                                    y="12"
-                                    width="2"
-                                    height="8"
-                                    rx="1"
-                                    fill="#ffffff"
-                                    className="bar bar6"
-                                ></rect>
+                                <rect x="2" y="12" width="2" height="8" rx="1" className="bar bar1"></rect>
+                                <rect x="6" y="10" width="2" height="10" rx="1" className="bar bar2"></rect>
+                                <rect x="10" y="14" width="2" height="6" rx="1" className="bar bar3"></rect>
+                                <rect x="14" y="11" width="2" height="9" rx="1" className="bar bar4"></rect>
+                                <rect x="18" y="13" width="2" height="7" rx="1" className="bar bar5"></rect>
+                                <rect x="22" y="12" width="2" height="8" rx="1" className="bar bar6"></rect>
                             </svg>
                         </div>
                     </div>

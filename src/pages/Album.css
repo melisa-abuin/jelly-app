@@ -147,7 +147,7 @@
     font-weight: 500;
     color: var(--font-color-tertiary);
     margin-top: 1px;
-    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out, transform 0.2s ease-out;
 }
 
 .album-page > .tracklist > .track-item.most-played > .track-indiactor > .track-number {
@@ -161,6 +161,7 @@
     position: absolute;
     opacity: 0;
     visibility: hidden;
+    transform: translateY(10px);
 }
 
 /* Hide track-state by defualt */
@@ -333,7 +334,7 @@
     flex-grow: 1;
     margin: 0 10px;
     border-bottom: 1px dashed var(--border-color);
-    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out, border-color 0.2s ease-out;
 }
 
 .album-page > .tracklist > .track-item:hover > .track-details > .container > .name::after {

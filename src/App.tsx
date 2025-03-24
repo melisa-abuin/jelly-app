@@ -1,6 +1,6 @@
 import { ArrowLeftIcon, HeartFillIcon } from '@primer/octicons-react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
-import { Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { MediaItem } from './api/jellyfin'
 import './App.css'
 import './components/MediaList.css'
@@ -10,8 +10,10 @@ import { useSidenav } from './hooks/useSidenav'
 import Album from './pages/Album'
 import Albums from './pages/Albums'
 import Favorites from './pages/Favorites'
+import FrequentlyPlayed from './pages/FrequentlyPlayed'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import RecentlyPlayed from './pages/RecentlyPlayed'
 import Settings from './pages/Settings'
 import Tracks from './pages/Tracks'
 
@@ -57,7 +59,7 @@ const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     const location = useLocation()
     const prevLocationRef = useRef<string | null>(null)
 
-    const validRoutes = ['/', '/tracks', '/albums', '/favorites', '/settings', '/album']
+    const validRoutes = ['/', '/tracks', '/albums', '/favorites', '/settings', '/album', '/recently', '/frequently']
 
     useEffect(() => {
         const currentPath = location.pathname
@@ -172,7 +174,7 @@ const MainLayout = ({
     })
     const [loadMoreCallback, setLoadMoreCallback] = useState<(() => void) | undefined>(undefined)
     const [hasMoreState, setHasMoreState] = useState<boolean>(false)
-    const { pageTitle } = usePageTitle() // Use the page title from context
+    const { pageTitle } = usePageTitle()
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
@@ -188,7 +190,7 @@ const MainLayout = ({
 
     const getPageTitle = () => {
         if (location.pathname.startsWith('/album/')) {
-            return pageTitle || 'Album' // Use the dynamic title if available, otherwise fallback to 'Album'
+            return pageTitle || 'Album'
         }
         switch (location.pathname) {
             case '/':
@@ -201,6 +203,10 @@ const MainLayout = ({
                 return 'Favorites'
             case '/settings':
                 return 'Settings'
+            case '/recently':
+                return 'Recently Played'
+            case '/frequently':
+                return 'Frequently Played'
             default:
                 return 'Home'
         }
@@ -368,6 +374,42 @@ const MainLayout = ({
                                             />
                                         }
                                     />
+                                    <Route
+                                        path="/recently"
+                                        element={
+                                            <RecentlyPlayed
+                                                serverUrl={auth.serverUrl}
+                                                userId={auth.userId}
+                                                token={auth.token}
+                                                playTrack={playTrack}
+                                                currentTrack={currentTrack}
+                                                currentTrackIndex={currentTrackIndex}
+                                                isPlaying={isPlaying}
+                                                togglePlayPause={togglePlayPause}
+                                                setCurrentPlaylist={handleSetCurrentPlaylist}
+                                                setLoadMoreCallback={setLoadMoreCallback}
+                                                setHasMoreState={setHasMoreState}
+                                            />
+                                        }
+                                    />
+                                    <Route
+                                        path="/frequently"
+                                        element={
+                                            <FrequentlyPlayed
+                                                serverUrl={auth.serverUrl}
+                                                userId={auth.userId}
+                                                token={auth.token}
+                                                playTrack={playTrack}
+                                                currentTrack={currentTrack}
+                                                currentTrackIndex={currentTrackIndex}
+                                                isPlaying={isPlaying}
+                                                togglePlayPause={togglePlayPause}
+                                                setCurrentPlaylist={handleSetCurrentPlaylist}
+                                                setLoadMoreCallback={setLoadMoreCallback}
+                                                setHasMoreState={setHasMoreState}
+                                            />
+                                        }
+                                    />
                                     <Route path="/settings" element={<Settings onLogout={handleLogout} />} />
                                     <Route path="*" element={<Navigate to="/" />} />
                                 </Routes>
@@ -425,9 +467,13 @@ const MainLayout = ({
                                                     'No Artist'}
                                             </div>
                                             <div className="album">
-                                                <div className="text" title={currentTrack?.Album || 'No Album'}>
+                                                <Link
+                                                    to={`/album/${currentTrack?.AlbumId}`}
+                                                    className="text"
+                                                    title={currentTrack?.Album || 'No Album'}
+                                                >
                                                     {currentTrack?.Album || 'No Album'}
-                                                </div>
+                                                </Link>
                                                 <div className="album-icon" title="Album">
                                                     <svg
                                                         width="14"

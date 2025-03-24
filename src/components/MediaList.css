@@ -173,6 +173,7 @@
 .media-list .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar {
     animation-play-state: inherit !important;
     transform-origin: bottom;
+    fill: var(--font-color-inverted);
 }
 
 .media-list .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar1 {

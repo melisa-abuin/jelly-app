@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom' // Add this import
 import { MediaItem } from '../api/jellyfin'
 import Loader from '../components/Loader'
 import MediaList from '../components/MediaList'
@@ -43,8 +44,15 @@ const Home = ({
     return (
         <div className="home-page">
             <div className="section">
-                <div className="section_title">Recently Played</div>
-                <div className="section_desc">Songs you queued up lately</div>
+                <div className="section-header">
+                    <div className="container">
+                        <div className="section_title">Recently Played</div>
+                        <div className="section_desc">Songs you queued up lately</div>
+                    </div>
+                    <Link to="/recently" className="see-more">
+                        See more
+                    </Link>
+                </div>
                 <MediaList
                     items={recentlyPlayed}
                     type="song"
@@ -62,8 +70,15 @@ const Home = ({
                 />
             </div>
             <div className="section">
-                <div className="section_title">Frequently Played</div>
-                <div className="section_desc">Songs you listen to often</div>
+                <div className="section-header">
+                    <div className="container">
+                        <div className="section_title">Frequently Played</div>
+                        <div className="section_desc">Songs you listen to often</div>
+                    </div>
+                    <Link to="/frequently" className="see-more">
+                        See more
+                    </Link>
+                </div>
                 <MediaList
                     items={frequentlyPlayed}
                     type="song"
@@ -81,8 +96,12 @@ const Home = ({
                 />
             </div>
             <div className="section">
-                <div className="section_title">Recently Added</div>
-                <div className="section_desc">Albums recently added to the Library</div>
+                <div className="section-header">
+                    <div className="container">
+                        <div className="section_title">Recently Added</div>
+                        <div className="section_desc">Albums recently added to the Library</div>
+                    </div>
+                </div>
                 <MediaList
                     items={recentlyAdded}
                     type="album"
