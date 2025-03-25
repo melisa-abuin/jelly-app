@@ -81,6 +81,7 @@ const Album = ({
     }
 
     const totalPlays = tracks.reduce((total, track) => total + (track.UserData?.PlayCount || 0), 0)
+    const trackCount = album.ChildCount || tracks.length
 
     return (
         <div className="album-page">
@@ -102,7 +103,8 @@ const Album = ({
                     <div className="date">{formatDate(album.DateCreated)}</div>
                     <div className="stats">
                         <div className="track-amount">
-                            <span className="number">{album.ChildCount || tracks.length}</span> <span>Tracks</span>
+                            <span className="number">{trackCount}</span>{' '}
+                            <span>{trackCount === 1 ? 'Track' : 'Tracks'}</span>
                         </div>
                         <div className="divider"></div>
                         <div className="length">
@@ -112,7 +114,7 @@ const Album = ({
                             <>
                                 <div className="divider"></div>
                                 <div className="plays">
-                                    <span className="number">{totalPlays}</span> Plays
+                                    <span className="number">{totalPlays}</span> {totalPlays === 1 ? 'Play' : 'Plays'}
                                 </div>
                             </>
                         )}

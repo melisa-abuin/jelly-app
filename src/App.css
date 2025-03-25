@@ -1,3 +1,6 @@
+/* Full variable Inter font with all axes included */
+@import '@fontsource-variable/inter/standard.css';
+
 /* MISC changes to base styles */
 * {
     margin: 0;
@@ -136,7 +139,7 @@ svg {
 /* Site Theme */
 :root {
     --system-fonts: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-    --inter-font: 'Inter', sans-serif;
+    --inter-font: 'Inter Variable', sans-serif;
     --bg-color: #ffffff;
     --bg-color-secondary: #f8f8f8;
     --bg-color-tertiary: #ececec;
@@ -972,38 +975,31 @@ body {
 
 @media only screen and (max-width: 500px) {
     .main > .main_footer > .playback > .container > .track-info {
-        max-width: calc(100% - 200px);
+        max-width: calc(100% - 190px);
+    }
+
+    .main > .main_footer > .playback > .container > .controls {
+        align-items: end;
+        flex-direction: column-reverse;
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs {
-        margin-right: 16px;
+        margin-top: 6px;
+        margin-right: -6px;
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    .main > .main_footer > .playback > .container > .track-info {
+        max-width: calc(100% - 110px);
     }
 
-    .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle {
-        display: none;
+    .main > .main_footer > .playback > .container > .controls > .knobs {
+        margin-right: -2px;
     }
 
+    .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle,
     .main > .main_footer > .playback > .container > .controls > .knobs > .repeat {
-        display: none;
-    }
-}
-
-@media only screen and (max-width: 420px) {
-    .main > .main_footer > .playback > .container > .track-info {
-        max-width: calc(100% - 164px);
-    }
-
-    .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous {
-        display: none;
-    }
-}
-
-@media only screen and (max-width: 360px) {
-    .main > .main_footer > .playback > .container > .track-info {
-        max-width: calc(100% - 132px);
-    }
-
-    .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next {
         display: none;
     }
 }

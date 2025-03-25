@@ -1,3 +1,4 @@
+import '@fontsource-variable/inter'
 import { ArrowLeftIcon, HeartFillIcon } from '@primer/octicons-react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'

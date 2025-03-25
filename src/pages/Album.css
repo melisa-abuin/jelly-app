@@ -370,3 +370,10 @@
     margin-right: 6px;
     color: var(--font-color-tertiary);
 }
+
+/* Responsive */
+@media only screen and (max-width: 400px) {
+    .album-page > .album-header {
+        margin-left: 0;
+    }
+}

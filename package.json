@@ -11,6 +11,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@fontsource-variable/inter": "^5.2.5",
         "@primer/octicons-react": "^19.15.1",
         "axios": "^1.8.3",
         "axios-retry": "^4.5.0",
