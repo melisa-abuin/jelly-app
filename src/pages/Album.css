@@ -143,6 +143,8 @@
 
 .album-page > .tracklist > .track-item > .track-indiactor > .track-number {
     position: relative;
+    height: 100%;
+    width: 100%;
     font-size: 0.725rem;
     font-weight: 500;
     color: var(--font-color-tertiary);
@@ -161,7 +163,7 @@
     position: absolute;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(10px);
+    transform: translateY(calc(50% - 8px));
 }
 
 /* Hide track-state by defualt */
@@ -372,7 +374,7 @@
 }
 
 /* Responsive */
-@media only screen and (max-width: 400px) {
+@media only screen and (max-width: 390px) {
     .album-page > .album-header {
         margin-left: 0;
     }

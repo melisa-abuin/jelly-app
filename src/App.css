@@ -984,18 +984,22 @@ body {
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs {
-        margin-top: 6px;
+        margin-top: 8px;
         margin-right: -6px;
+    }
+
+    .main > .main_footer > .playback > .container > .controls > .knobs > .primary {
+        gap: 4px;
     }
 }
 
-@media only screen and (max-width: 400px) {
+@media only screen and (max-width: 390px) {
     .main > .main_footer > .playback > .container > .track-info {
         max-width: calc(100% - 110px);
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs {
-        margin-right: -2px;
+        margin-right: -1px;
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle,

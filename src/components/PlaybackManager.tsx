@@ -74,6 +74,37 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
     const playedIndices = useRef<Set<number>>(new Set())
     const hasRestored = useRef(false)
 
+    // Update Media Session metadata
+    const updateMediaSessionMetadata = (track: MediaItem) => {
+        if ('mediaSession' in navigator) {
+            const songThumbnailUrl =
+                track.Id && track.ImageTags?.Primary
+                    ? `${serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${token}`
+                    : null
+            const albumThumbnailUrl =
+                track.AlbumPrimaryImageTag && track.AlbumId
+                    ? `${serverUrl}/Items/${track.AlbumId}/Images/Primary?tag=${track.AlbumPrimaryImageTag}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${token}`
+                    : null
+
+            const artworkUrl = songThumbnailUrl || albumThumbnailUrl
+
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: track.Name || 'Unknown Track',
+                artist: track.Artists?.join(', ') || track.AlbumArtist || 'Unknown Artist',
+                album: track.Album || 'Unknown Album',
+                artwork: artworkUrl
+                    ? [
+                          {
+                              src: artworkUrl,
+                              sizes: '512x512',
+                              type: 'image/webp',
+                          },
+                      ]
+                    : [],
+            })
+        }
+    }
+
     const playTrack = async (track: MediaItem, index: number) => {
         if (audioRef.current) {
             const audio = audioRef.current
@@ -108,36 +139,7 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
 
                 playedIndices.current.add(index)
 
-                // Update Media Session metadata with artwork
-                if ('mediaSession' in navigator) {
-                    // Construct URLs for song and album thumbnails, matching MediaList
-                    const songThumbnailUrl =
-                        track.Id && track.ImageTags?.Primary
-                            ? `${serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${token}`
-                            : null
-                    const albumThumbnailUrl =
-                        track.AlbumPrimaryImageTag && track.AlbumId
-                            ? `${serverUrl}/Items/${track.AlbumId}/Images/Primary?tag=${track.AlbumPrimaryImageTag}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${token}`
-                            : null
-
-                    // Use song thumbnail if available, otherwise fall back to album thumbnail
-                    const artworkUrl = songThumbnailUrl || albumThumbnailUrl
-
-                    navigator.mediaSession.metadata = new MediaMetadata({
-                        title: track.Name || 'Unknown Track',
-                        artist: track.Artists?.join(', ') || track.AlbumArtist || 'Unknown Artist',
-                        album: track.Album || 'Unknown Album',
-                        artwork: artworkUrl
-                            ? [
-                                  {
-                                      src: artworkUrl,
-                                      sizes: '512x512',
-                                      type: 'image/webp',
-                                  },
-                              ]
-                            : [],
-                    })
-                }
+                updateMediaSessionMetadata(track)
             } catch (error) {
                 console.error('Error playing track:', error)
                 setIsPlaying(false)
@@ -503,6 +505,7 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                 audioRef.current.src = streamUrl
                 audioRef.current.load()
             }
+            updateMediaSessionMetadata(lastPlayedTrack)
         } else if (!token) {
             setCurrentTrack(null)
             setCurrentTrackIndex(-1)
