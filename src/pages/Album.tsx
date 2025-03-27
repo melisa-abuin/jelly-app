@@ -100,7 +100,7 @@ const Album = ({
                 />
                 <div className="album-details">
                     <div className="artist">{album.AlbumArtist || 'Unknown Artist'}</div>
-                    <div className="date">{formatDate(album.DateCreated)}</div>
+                    <div className="date">{formatDate(album.PremiereDate)}</div>
                     <div className="stats">
                         <div className="track-amount">
                             <span className="number">{trackCount}</span>{' '}

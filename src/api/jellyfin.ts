@@ -70,6 +70,7 @@ export interface MediaItem {
     Type: string
     ImageTags?: { Primary?: string }
     DateCreated?: string
+    PremiereDate?: string
     PlayCount?: number
     UserData?: { IsFavorite: boolean; PlayCount?: number }
     RunTimeTicks?: number
@@ -148,14 +149,12 @@ export const getAlbumDetails = async (
     token: string,
     albumId: string
 ): Promise<{ album: MediaItem; tracks: MediaItem[] }> => {
-    // Fetch album details
     const albumResponse = await api.get<MediaItem>(
-        `${serverUrl}/Users/${userId}/Items/${albumId}?Fields=ChildCount,ImageTags,DateCreated`,
+        `${serverUrl}/Users/${userId}/Items/${albumId}?Fields=ChildCount,ImageTags,DateCreated,PremiereDate`,
         { headers: { 'X-Emby-Token': token } }
     )
     const album = albumResponse.data
 
-    // Fetch tracks for the album
     const tracksResponse = await api.get<{ Items: MediaItem[] }>(
         `${serverUrl}/Users/${userId}/Items?ParentId=${albumId}&IncludeItemTypes=Audio&SortBy=IndexNumber&SortOrder=Ascending&Fields=RunTimeTicks`,
         { headers: { 'X-Emby-Token': token } }
