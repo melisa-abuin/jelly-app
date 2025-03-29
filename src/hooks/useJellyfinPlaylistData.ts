@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { api, axios, getPlaylistDetails, MediaItem } from '../api/jellyfin'
+import { api, axios, getPlaylist, getPlaylistTracks, MediaItem } from '../api/jellyfin'
 
 interface JellyfinPlaylistData {
     playlist: MediaItem | null
@@ -49,6 +49,22 @@ export const useJellyfinPlaylistData = (
                 totalPlays: 0,
             }))
             isInitialMount.current = false
+
+            // Fetch playlist metadata only once
+            const fetchPlaylistMetadata = async () => {
+                try {
+                    const fetchedPlaylist = await getPlaylist(serverUrl, userId, token, playlistId)
+                    setData(prev => ({
+                        ...prev,
+                        playlist: fetchedPlaylist,
+                    }))
+                } catch (error) {
+                    console.error('Failed to fetch playlist metadata:', error)
+                    setData(prev => ({ ...prev, loading: false, error: 'Failed to fetch playlist metadata' }))
+                }
+            }
+
+            fetchPlaylistMetadata()
         }
     }, [serverUrl, userId, token, playlistId])
 
@@ -58,18 +74,25 @@ export const useJellyfinPlaylistData = (
             return
         }
 
-        const fetchPlaylistData = async () => {
+        const fetchPlaylistTracks = async () => {
             setData(prev => ({ ...prev, loading: true, error: null }))
             try {
                 let totalPlaytime = 0
                 let totalTrackCount = 0
                 let totalPlays = 0
 
-                if (page === 0) {
-                    const totalResponse = await api.get<{ Items: MediaItem[]; TotalRecordCount: number }>(
-                        `${serverUrl}/Users/${userId}/Items?ParentId=${playlistId}&IncludeItemTypes=Audio&Fields=RunTimeTicks,UserData`,
-                        { headers: { 'X-Emby-Token': token } }
-                    )
+                const startIndex = page * itemsPerPage
+
+                // Fetch totalResponse only on the first page
+                const totalResponse =
+                    page === 0
+                        ? await api.get<{ Items: MediaItem[]; TotalRecordCount: number }>(
+                              `${serverUrl}/Users/${userId}/Items?ParentId=${playlistId}&IncludeItemTypes=Audio&Fields=RunTimeTicks,UserData`,
+                              { headers: { 'X-Emby-Token': token } }
+                          )
+                        : null
+
+                if (totalResponse) {
                     const totalTracks = totalResponse.data.Items
                     totalTrackCount = totalResponse.data.TotalRecordCount
                     totalPlaytime = totalTracks.reduce(
@@ -82,8 +105,8 @@ export const useJellyfinPlaylistData = (
                     )
                 }
 
-                const startIndex = page * itemsPerPage
-                const { playlist: fetchedPlaylist, tracks: fetchedTracks } = await getPlaylistDetails(
+                // Fetch tracks for the current page
+                const fetchedTracks = await getPlaylistTracks(
                     serverUrl,
                     userId,
                     token,
@@ -100,9 +123,9 @@ export const useJellyfinPlaylistData = (
                     return true
                 })
 
+                // Update state with the fetched data
                 setData(prev => ({
                     ...prev,
-                    playlist: fetchedPlaylist,
                     tracks: [...prev.tracks, ...newTracks],
                     loading: false,
                     error: null,
@@ -112,17 +135,17 @@ export const useJellyfinPlaylistData = (
                     totalPlays: page === 0 ? totalPlays : prev.totalPlays,
                 }))
             } catch (error) {
-                console.error('Failed to fetch playlist data:', error)
+                console.error('Failed to fetch playlist tracks:', error)
                 if (axios.isAxiosError(error) && error.response?.status === 401) {
                     localStorage.removeItem('auth')
                     window.location.href = '/login'
                 } else {
-                    setData(prev => ({ ...prev, loading: false, error: 'Failed to fetch playlist data' }))
+                    setData(prev => ({ ...prev, loading: false, error: 'Failed to fetch playlist tracks' }))
                 }
             }
         }
 
-        fetchPlaylistData()
+        fetchPlaylistTracks()
     }, [serverUrl, userId, token, playlistId, page])
 
     const loadMore = useCallback(() => {
