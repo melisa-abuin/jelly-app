@@ -1,0 +1,227 @@
+.artist-page {
+    margin-top: 4px;
+}
+
+.artist-page > .artist-header {
+    display: flex;
+    align-items: center;
+    margin-left: 26px;
+    margin-bottom: 14px;
+}
+
+.artist-page > .artist-header > .thumbnail {
+    display: block;
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    margin-right: 20px;
+}
+
+.artist-page > .artist-header > .artist-details > .artist {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.artist-page > .artist-header > .artist-details > .genres {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--font-color-tertiary);
+    margin-bottom: 4px;
+}
+
+.artist-page > .artist-header > .artist-details > .stats {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--font-color-tertiary);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.artist-page > .artist-header > .artist-details > .stats > .track-amount > .number,
+.artist-page > .artist-header > .artist-details > .stats > .album-amount > .number {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.artist-page > .artist-header > .artist-details > .stats > .divider {
+    width: 2px;
+    height: 2px;
+    margin: 0 4px;
+    margin-top: 2px;
+    border-radius: 50%;
+    background-color: var(--font-color-tertiary);
+}
+
+.artist-page > .artist-header > .artist-details > .stats > .length > .number {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.artist-page > .artist-header > .artist-details > .stats > .plays > .number {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.artist-page > .artist-header > .artist-details > .actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.artist-page > .artist-header > .artist-details > .actions > .play-artist {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 6px 11px;
+    border-radius: 6px;
+    background-color: var(--bg-color-secondary);
+    transition: background-color 0.2s ease-out;
+}
+
+.artist-page > .artist-header > .artist-details > .actions > .play-artist:hover {
+    background-color: var(--bg-color-tertiary);
+}
+
+.artist-page > .artist-header > .artist-details > .actions > .play-artist > .play-icon {
+    display: block;
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    background-color: var(--brand-color);
+    mask-repeat: no-repeat;
+    mask-image: url(/play.fill.svg);
+}
+
+.artist-page > .artist-header > .artist-details > .actions > .play-artist > .text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--brand-color);
+}
+
+.artist-page > .artist-header > .artist-details > .actions > .favorite-state {
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 20px;
+    transition: background-color 0.2s ease-out;
+}
+
+.artist-page > .artist-header > .artist-details > .actions > .favorite-state:hover {
+    background-color: var(--bg-color-tertiary);
+}
+
+.artist-page > .artist-header > .artist-details > .actions > .favorite-state > svg {
+    color: var(--brand-color);
+}
+
+.artist-page > .artist-content > .section {
+    margin-bottom: 40px;
+}
+
+.artist-page > .artist-content > .section:last-of-type {
+    margin-bottom: 0;
+}
+
+.artist-page > .artist-content > .section > .title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.artist-page > .artist-content > .section > .desc {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--font-color-tertiary);
+    margin-bottom: 4px;
+}
+
+.artist-page > .artist-content > .section > .section-list > .section-item {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    margin: 0 -8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease-out;
+}
+
+.artist-page > .artist-content > .section > .section-list > .section-item:hover {
+    background-color: var(--bg-color-secondary);
+}
+
+.artist-page > .artist-content > .section > .section-list > .section-item > .thumbnail {
+    display: block;
+    width: 46px;
+    height: 46px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-right: 12px;
+    background-color: var(--bg-color-secondary);
+}
+
+.artist-page > .artist-content > .section > .section-list > .section-item > .section-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .date,
+.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .track-amount {
+    font-size: 0.725rem;
+    font-weight: 600;
+    color: var(--font-color-tertiary);
+}
+
+.artist-page > .artist-content > .section.appears-in > .section-list > .section-item > .section-info > .name {
+    margin-bottom: 0;
+}
+
+.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .container {
+    line-height: 1;
+}
+
+.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .container > .year {
+    display: inline;
+    font-size: 0.725rem;
+    font-weight: 600;
+    color: var(--font-color-tertiary);
+}
+
+.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .container > .divider {
+    display: inline-block;
+    vertical-align: middle;
+    width: 2px;
+    height: 2px;
+    margin: 0 4px;
+    margin-top: 2px;
+    border-radius: 50%;
+    background-color: var(--font-color-tertiary);
+}
+
+.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .container > .artist {
+    display: inline;
+    font-size: 0.725rem;
+    font-weight: 500;
+    color: var(--font-color-tertiary);
+}
+
+.artist-page > .artist-content > .section > .section-list > .section-item > .favorited {
+    padding: 6px;
+    color: var(--font-color-tertiary);
+}
+
+/* Responsive */
+@media only screen and (max-width: 390px) {
+    .artist-page > .artist-header {
+        margin-left: 0;
+    }
+}

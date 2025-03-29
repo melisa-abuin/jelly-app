@@ -1,15 +1,21 @@
-.album-page {
+.playlist-page {
     margin-top: 4px;
 }
 
-.album-page > .album-header {
+.playlist-page > .empty {
+    font-size: 0.85rem;
+    margin: 4px 0;
+    margin-left: 26px;
+}
+
+.playlist-page > .playlist-header {
     display: flex;
     align-items: center;
     margin-left: 26px;
     margin-bottom: 14px;
 }
 
-.album-page > .album-header > .thumbnail {
+.playlist-page > .playlist-header > .thumbnail {
     display: block;
     width: 100px;
     height: 100px;
@@ -17,20 +23,20 @@
     margin-right: 20px;
 }
 
-.album-page > .album-header > .album-details > .artist {
+.playlist-page > .playlist-header > .playlist-details > .title {
     font-size: 0.9rem;
     font-weight: 600;
     margin-bottom: 4px;
 }
 
-.album-page > .album-header > .album-details > .date {
+.playlist-page > .playlist-header > .playlist-details > .date {
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--font-color-tertiary);
     margin-bottom: 4px;
 }
 
-.album-page > .album-header > .album-details > .stats {
+.playlist-page > .playlist-header > .playlist-details > .stats {
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--font-color-tertiary);
@@ -39,12 +45,13 @@
     flex-wrap: wrap;
 }
 
-.album-page > .album-header > .album-details > .stats > .track-amount > .number {
+.playlist-page > .playlist-header > .playlist-details > .stats > .track-amount > .number,
+.playlist-page > .playlist-header > .playlist-details > .stats > .album-amount > .number {
     font-weight: 600;
     letter-spacing: 0.5px;
 }
 
-.album-page > .album-header > .album-details > .stats > .divider {
+.playlist-page > .playlist-header > .playlist-details > .stats > .divider {
     width: 2px;
     height: 2px;
     margin: 0 4px;
@@ -53,17 +60,17 @@
     background-color: var(--font-color-tertiary);
 }
 
-.album-page > .album-header > .album-details > .stats > .length > .number {
+.playlist-page > .playlist-header > .playlist-details > .stats > .length > .number {
     font-weight: 600;
     letter-spacing: 0.5px;
 }
 
-.album-page > .album-header > .album-details > .stats > .plays > .number {
+.playlist-page > .playlist-header > .playlist-details > .stats > .plays > .number {
     font-weight: 600;
     letter-spacing: 0.5px;
 }
 
-.album-page > .album-header > .album-details > .actions {
+.playlist-page > .playlist-header > .playlist-details > .actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -71,7 +78,7 @@
     margin-top: 12px;
 }
 
-.album-page > .album-header > .album-details > .actions > .play-album {
+.playlist-page > .playlist-header > .playlist-details > .actions > .play-playlist {
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -81,11 +88,11 @@
     transition: background-color 0.2s ease-out;
 }
 
-.album-page > .album-header > .album-details > .actions > .play-album:hover {
+.playlist-page > .playlist-header > .playlist-details > .actions > .play-playlist:hover {
     background-color: var(--bg-color-tertiary);
 }
 
-.album-page > .album-header > .album-details > .actions > .play-album > .play-icon {
+.playlist-page > .playlist-header > .playlist-details > .actions > .play-playlist > .play-icon {
     display: block;
     width: 12px;
     height: 12px;
@@ -95,30 +102,23 @@
     mask-image: url(/play.fill.svg);
 }
 
-.album-page > .album-header > .album-details > .actions > .play-album > .text {
+.playlist-page > .playlist-header > .playlist-details > .actions > .play-playlist > .text {
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--brand-color);
 }
 
-.album-page > .album-header > .album-details > .actions > .favorite-state {
+.playlist-page > .playlist-header > .playlist-details > .actions > .favorite-state {
     cursor: pointer;
     padding: 6px;
     border-radius: 20px;
     transition: background-color 0.2s ease-out;
 }
 
-.album-page > .album-header > .album-details > .actions > .favorite-state:hover {
+.playlist-page > .playlist-header > .playlist-details > .actions > .favorite-state:hover {
     background-color: var(--bg-color-tertiary);
 }
 
-.album-page > .album-header > .album-details > .actions > .favorite-state > svg {
+.playlist-page > .playlist-header > .playlist-details > .actions > .favorite-state > svg {
     color: var(--brand-color);
-}
-
-/* Responsive */
-@media only screen and (max-width: 390px) {
-    .album-page > .album-header {
-        margin-left: 0;
-    }
 }

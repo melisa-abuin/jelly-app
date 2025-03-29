@@ -17,7 +17,7 @@ export const useJellyfinRecentlyPlayedData = (serverUrl: string, userId: string,
         hasMore: true,
     })
     const [page, setPage] = useState(0)
-    const itemsPerPage = 20
+    const itemsPerPage = 40
     const seenIds = useRef(new Set<string>())
     const isInitialMount = useRef(true)
     const isLoadingMore = useRef(false)

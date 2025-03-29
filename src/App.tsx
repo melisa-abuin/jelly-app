@@ -1,5 +1,5 @@
 import '@fontsource-variable/inter'
-import { ArrowLeftIcon, HeartFillIcon } from '@primer/octicons-react'
+import { ArrowLeftIcon, BookmarkFillIcon, HeartFillIcon } from '@primer/octicons-react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { MediaItem } from './api/jellyfin'
@@ -10,10 +10,13 @@ import Sidenav from './components/Sidenav'
 import { useSidenav } from './hooks/useSidenav'
 import Album from './pages/Album'
 import Albums from './pages/Albums'
+import Artist from './pages/Artist'
 import Favorites from './pages/Favorites'
 import FrequentlyPlayed from './pages/FrequentlyPlayed'
+import Genre from './pages/Genre'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import Playlist from './pages/Playlist'
 import RecentlyPlayed from './pages/RecentlyPlayed'
 import Settings from './pages/Settings'
 import Tracks from './pages/Tracks'
@@ -60,7 +63,19 @@ const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     const location = useLocation()
     const prevLocationRef = useRef<string | null>(null)
 
-    const validRoutes = ['/', '/tracks', '/albums', '/favorites', '/settings', '/album', '/recently', '/frequently']
+    const validRoutes = [
+        '/',
+        '/tracks',
+        '/albums',
+        '/favorites',
+        '/settings',
+        '/album',
+        '/recently',
+        '/frequently',
+        '/artist',
+        '/genre',
+        '/playlist',
+    ]
 
     useEffect(() => {
         const currentPath = location.pathname
@@ -193,6 +208,15 @@ const MainLayout = ({
         if (location.pathname.startsWith('/album/')) {
             return pageTitle || 'Album'
         }
+        if (location.pathname.startsWith('/artist/')) {
+            return pageTitle || 'Artist'
+        }
+        if (location.pathname.startsWith('/genre/')) {
+            return pageTitle || 'Genre'
+        }
+        if (location.pathname.startsWith('/playlist/')) {
+            return pageTitle || 'Playlist'
+        }
         switch (location.pathname) {
             case '/':
                 return 'Home'
@@ -271,7 +295,7 @@ const MainLayout = ({
                                                 {getPageTitle()}
                                             </div>
                                             {location.pathname.startsWith('/album/') && pageTitle && (
-                                                <div className="album-icon" title="Album">
+                                                <div className="page-icon album" title="Album">
                                                     <svg
                                                         width="18"
                                                         height="18"
@@ -283,6 +307,36 @@ const MainLayout = ({
                                                             className="record"
                                                         />
                                                         <circle className="spindle-hole" cx="11" cy="10.6455" r="1.5" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                            {location.pathname.startsWith('/artist/') && pageTitle && (
+                                                <div className="page-icon artist" title="Artist">
+                                                    <svg
+                                                        width="18"
+                                                        height="18"
+                                                        viewBox="0 0 22 22"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path d="M10.9912 19.7422C15.9746 19.7422 20.0879 15.6289 20.0879 10.6543C20.0879 5.67969 15.9658 1.56641 10.9824 1.56641C6.00781 1.56641 1.90332 5.67969 1.90332 10.6543C1.90332 15.6289 6.0166 19.7422 10.9912 19.7422ZM10.9912 13.6953C8.5127 13.6953 6.58789 14.583 5.65625 15.6025C4.46094 14.3105 3.73145 12.5703 3.73145 10.6543C3.73145 6.62012 6.95703 3.38574 10.9824 3.38574C15.0166 3.38574 18.2598 6.62012 18.2686 10.6543C18.2686 12.5703 17.5391 14.3105 16.335 15.6113C15.4033 14.583 13.4785 13.6953 10.9912 13.6953ZM10.9912 12.2539C12.6963 12.2715 14.0234 10.8125 14.0234 8.93164C14.0234 7.15625 12.6875 5.6709 10.9912 5.6709C9.30371 5.6709 7.95898 7.15625 7.96777 8.93164C7.97656 10.8125 9.29492 12.2451 10.9912 12.2539Z" />
+                                                    </svg>
+                                                </div>
+                                            )}
+
+                                            {location.pathname.startsWith('/genre/') && pageTitle && (
+                                                <div className="page-icon genre" title="Genre">
+                                                    <BookmarkFillIcon size={16} />
+                                                </div>
+                                            )}
+                                            {location.pathname.startsWith('/playlist/') && pageTitle && (
+                                                <div className="page-icon playlist" title="Playlist">
+                                                    <svg
+                                                        width="18"
+                                                        height="18"
+                                                        viewBox="0 0 52 54"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path d="M 41.83984375,16.7578125 L 41.83984375,9.302734375 C 41.83984375,8.099609375 40.89453125,7.3046875 39.712890625,7.5625 L 28.390625,9.990234375 C 27.015625,10.291015625 26.328125,10.978515625 26.328125,12.1171875 L 26.478515625,34.9765625 C 26.478515625,36.05078125 25.94140625,36.759765625 24.99609375,36.953125 L 21.623046875,37.662109375 C 17.43359375,38.54296875 15.478515625,40.6484375 15.478515625,43.806640625 C 15.478515625,46.986328125 17.90625,49.19921875 21.365234375,49.19921875 C 24.458984375,49.19921875 29.03515625,46.96484375 29.03515625,40.86328125 L 29.03515625,22.193359375 C 29.03515625,21.033203125 29.271484375,20.796875 30.32421875,20.5390625 L 40.59375,18.283203125 C 41.3671875,18.1328125 41.83984375,17.53125 41.83984375,16.7578125 Z" />
                                                     </svg>
                                                 </div>
                                             )}
@@ -351,6 +405,53 @@ const MainLayout = ({
                                                 token={auth.token}
                                                 playTrack={playTrack}
                                                 currentTrack={currentTrack}
+                                                isPlaying={isPlaying}
+                                                togglePlayPause={togglePlayPause}
+                                                setCurrentPlaylist={handleSetCurrentPlaylist}
+                                            />
+                                        }
+                                    />
+                                    <Route
+                                        path="/artist/:artistId"
+                                        element={
+                                            <Artist
+                                                user={{ userId: auth.userId, username: auth.username }}
+                                                serverUrl={auth.serverUrl}
+                                                token={auth.token}
+                                                playTrack={playTrack}
+                                                currentTrack={currentTrack}
+                                                isPlaying={isPlaying}
+                                                togglePlayPause={togglePlayPause}
+                                                setCurrentPlaylist={handleSetCurrentPlaylist}
+                                            />
+                                        }
+                                    />
+                                    <Route
+                                        path="/genre/:genre"
+                                        element={
+                                            <Genre
+                                                user={{ userId: auth.userId, username: auth.username }}
+                                                serverUrl={auth.serverUrl}
+                                                token={auth.token}
+                                                playTrack={playTrack}
+                                                currentTrack={currentTrack}
+                                                currentTrackIndex={currentTrackIndex}
+                                                isPlaying={isPlaying}
+                                                togglePlayPause={togglePlayPause}
+                                                setCurrentPlaylist={handleSetCurrentPlaylist}
+                                            />
+                                        }
+                                    />
+                                    <Route
+                                        path="/playlist/:playlistId"
+                                        element={
+                                            <Playlist
+                                                user={{ userId: auth.userId, username: auth.username }}
+                                                serverUrl={auth.serverUrl}
+                                                token={auth.token}
+                                                playTrack={playTrack}
+                                                currentTrack={currentTrack}
+                                                currentTrackIndex={currentTrackIndex}
                                                 isPlaying={isPlaying}
                                                 togglePlayPause={togglePlayPause}
                                                 setCurrentPlaylist={handleSetCurrentPlaylist}
@@ -463,9 +564,23 @@ const MainLayout = ({
                                                     'No Artist'
                                                 }
                                             >
-                                                {currentTrack?.Artists?.join(', ') ||
-                                                    currentTrack?.AlbumArtist ||
-                                                    'No Artist'}
+                                                {currentTrack &&
+                                                currentTrack.ArtistItems &&
+                                                currentTrack.ArtistItems.length > 0
+                                                    ? (() => {
+                                                          const artistItems = currentTrack.ArtistItems
+                                                          return artistItems.map((artist, index) => (
+                                                              <span key={artist.Id}>
+                                                                  <Link to={`/artist/${artist.Id}`} className="text">
+                                                                      {artist.Name}
+                                                                  </Link>
+                                                                  {index < artistItems.length - 1 && ', '}
+                                                              </span>
+                                                          ))
+                                                      })()
+                                                    : currentTrack?.Artists?.join(', ') ||
+                                                      currentTrack?.AlbumArtist ||
+                                                      'No Artist'}
                                             </div>
                                             <div className="album">
                                                 <Link

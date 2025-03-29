@@ -1,6 +1,6 @@
 import { HeartFillIcon } from '@primer/octicons-react'
-import React, { Ref, useEffect, useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom' // Add useLocation import
+import { Ref, useEffect, useRef } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import Loader from './Loader'
@@ -20,10 +20,11 @@ interface MediaListProps {
     hasMore?: boolean
     playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
-    currentTrackIndex?: number
+    currentTrackIndex: number
     isPlaying: boolean
     togglePlayPause: () => void
     playlist?: MediaItem[]
+    setCurrentPlaylist?: (playlist: MediaItem[]) => void
 }
 
 const MediaList = ({
@@ -36,14 +37,16 @@ const MediaList = ({
     hasMore,
     playTrack,
     currentTrack,
+    currentTrackIndex,
     isPlaying,
     togglePlayPause,
     playlist = [],
+    setCurrentPlaylist,
 }: MediaListProps) => {
     const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
     const navigate = useNavigate()
-    const location = useLocation() // Get the current route
+    const location = useLocation()
     const sizeMap = useRef<{ [index: number]: number }>({})
 
     useEffect(() => {
@@ -111,27 +114,11 @@ const MediaList = ({
                 togglePlayPause()
             } else {
                 const playlistIndex = playlist.findIndex(track => track.Id === item.Id)
-                if (playlistIndex !== -1) {
-                    playTrack(item, playlistIndex)
-                } else {
-                    playTrack(item, index)
+                if (setCurrentPlaylist) {
+                    setCurrentPlaylist(items)
                 }
-            }
-        }
-    }
-
-    const handleSongThumbnailClick = (item: MediaItem, index: number, e: React.MouseEvent) => {
-        e.stopPropagation()
-        if (type === 'song') {
-            if (currentTrack?.Id === item.Id && isPlaying) {
-                togglePlayPause()
-            } else {
-                const playlistIndex = playlist.findIndex(track => track.Id === item.Id)
-                if (playlistIndex !== -1) {
-                    playTrack(item, playlistIndex)
-                } else {
-                    playTrack(item, index)
-                }
+                const effectiveIndex = playlistIndex !== -1 && currentTrackIndex !== -1 ? playlistIndex : index
+                playTrack(item, effectiveIndex)
             }
         }
     }
@@ -167,6 +154,7 @@ const MediaList = ({
                         src={imageUrl}
                         alt={item.Name}
                         className="thumbnail"
+                        loading="lazy"
                         onError={e => {
                             ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
                         }}
@@ -198,10 +186,10 @@ const MediaList = ({
                         src={imageUrl}
                         alt={item.Name}
                         className="thumbnail"
+                        loading="lazy"
                         onError={e => {
                             ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
                         }}
-                        onClick={e => handleSongThumbnailClick(item, index, e)}
                     />
                     <div className="overlay">
                         <div className="container">
@@ -250,7 +238,7 @@ const MediaList = ({
     }
 
     if (items.length === 0 && !loading) {
-        return <div className="empty">{type === 'song' ? 'No tracks' : 'No albums'}</div>
+        return <div className="empty">{type === 'song' ? 'No tracks were found' : 'No albums were found'}</div>
     }
 
     return (
@@ -262,7 +250,7 @@ const MediaList = ({
                 useWindowScroll
                 itemContent={(index: number) => renderItem(index)}
                 endReached={handleEndReached}
-                overscan={300}
+                overscan={800}
             />
         </ul>
     )

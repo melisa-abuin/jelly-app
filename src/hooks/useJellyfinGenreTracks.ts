@@ -1,20 +1,27 @@
 import axios from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getFavoriteTracks, MediaItem } from '../api/jellyfin'
+import { getGenreTracks, MediaItem } from '../api/jellyfin'
 
-interface JellyfinFavoritesData {
-    allFavorites: MediaItem[]
+interface JellyfinGenreTracksData {
+    tracks: MediaItem[]
     loading: boolean
     error: string | null
     hasMore: boolean
+    loadMore: () => void
 }
 
-export const useJellyfinFavoritesData = (serverUrl: string, userId: string, token: string) => {
-    const [data, setData] = useState<JellyfinFavoritesData>({
-        allFavorites: [],
+export const useJellyfinGenreTracks = (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    genre: string
+): JellyfinGenreTracksData => {
+    const [data, setData] = useState<JellyfinGenreTracksData>({
+        tracks: [],
         loading: true,
         error: null,
         hasMore: true,
+        loadMore: () => {},
     })
     const [page, setPage] = useState(0)
     const itemsPerPage = 40
@@ -26,50 +33,51 @@ export const useJellyfinFavoritesData = (serverUrl: string, userId: string, toke
         if (isInitialMount.current) {
             setPage(0)
             seenIds.current.clear()
-            setData(prev => ({ ...prev, allFavorites: [], hasMore: true }))
+            setData(prev => ({ ...prev, tracks: [], hasMore: true }))
             isInitialMount.current = false
         }
-    }, [serverUrl, userId, token])
+    }, [serverUrl, userId, token, genre])
 
     useEffect(() => {
-        if (!serverUrl || !token) {
-            setData(prev => ({ ...prev, loading: true, error: 'No serverUrl or token' }))
+        if (!serverUrl || !token || !genre) {
+            setData(prev => ({ ...prev, loading: true, error: 'No serverUrl, token, or genre' }))
             return
         }
 
-        const fetchData = async () => {
+        const fetchTracks = async () => {
             setData(prev => ({ ...prev, loading: true, error: null }))
             try {
                 const startIndex = page * itemsPerPage
-                const favorites = await getFavoriteTracks(serverUrl, userId, token, startIndex, itemsPerPage)
+                const fetchedTracks = await getGenreTracks(serverUrl, userId, token, genre, startIndex, itemsPerPage)
 
-                const newFavorites = favorites.filter(favorite => {
-                    if (seenIds.current.has(favorite.Id)) {
+                const newTracks = fetchedTracks.filter(track => {
+                    if (seenIds.current.has(track.Id)) {
                         return false
                     }
-                    seenIds.current.add(favorite.Id)
+                    seenIds.current.add(track.Id)
                     return true
                 })
 
                 setData(prev => ({
-                    allFavorites: [...prev.allFavorites, ...newFavorites],
+                    ...prev,
+                    tracks: [...prev.tracks, ...newTracks],
                     loading: false,
                     error: null,
-                    hasMore: favorites.length === itemsPerPage,
+                    hasMore: fetchedTracks.length === itemsPerPage,
                 }))
             } catch (error) {
-                console.error('Failed to fetch favorites data:', error)
+                console.error('Failed to fetch genre tracks:', error)
                 if (axios.isAxiosError(error) && error.response?.status === 401) {
                     localStorage.removeItem('auth')
                     window.location.href = '/login'
                 } else {
-                    setData(prev => ({ ...prev, loading: false, error: 'Failed to fetch favorites data' }))
+                    setData(prev => ({ ...prev, loading: false, error: 'Failed to fetch genre tracks' }))
                 }
             }
         }
 
-        fetchData()
-    }, [serverUrl, userId, token, page])
+        fetchTracks()
+    }, [serverUrl, userId, token, genre, page])
 
     const loadMore = useCallback(() => {
         if (isLoadingMore.current) {
