@@ -1,6 +1,7 @@
 import { GearIcon } from '@primer/octicons-react'
 import { NavLink } from 'react-router-dom'
 import '../App.css'
+import { useScrollContext } from '../context/ScrollContext'
 import { useJellyfinPlaylistsList } from '../hooks/useJellyfinPlaylistsList'
 import './Sidenav.css'
 
@@ -17,6 +18,7 @@ interface SidenavProps {
 
 const Sidenav = (props: SidenavProps) => {
     const { playlists, loading, error } = useJellyfinPlaylistsList(props.serverUrl, props.userId, props.token)
+    const { disabled, setDisabled } = useScrollContext()
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(e.target.value)
@@ -32,7 +34,7 @@ const Sidenav = (props: SidenavProps) => {
 
     return (
         <aside className="sidenav">
-            <div className={props.showSidenav ? 'sidenav_wrapper active' : 'sidenav_wrapper'}>
+            <div className={'sidenav_wrapper' + (props.showSidenav ? ' active' : '') + (disabled ? ' lockscroll' : '')}>
                 <div className="sidenav_header">
                     <div className="logo"></div>
                 </div>
@@ -108,6 +110,8 @@ const Sidenav = (props: SidenavProps) => {
                                 value={props.volume}
                                 onChange={handleVolumeChange}
                                 onWheel={handleVolumeScroll}
+                                onMouseEnter={() => setDisabled(true)}
+                                onMouseLeave={() => setDisabled(false)}
                             />
                         </div>
                     </div>

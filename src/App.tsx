@@ -7,6 +7,7 @@ import './App.css'
 import './components/MediaList.css'
 import PlaybackManager from './components/PlaybackManager'
 import Sidenav from './components/Sidenav'
+import { ScrollContextProvider } from './context/ScrollContext'
 import { useSidenav } from './hooks/useSidenav'
 import Album from './pages/Album'
 import Albums from './pages/Albums'
@@ -157,28 +158,30 @@ const App = () => {
         <Router>
             <HistoryProvider>
                 <PageTitleProvider>
-                    <div className="music-app">
-                        <Routes>
-                            <Route
-                                path="/login"
-                                element={auth ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
-                            />
-                            <Route
-                                path="/*"
-                                element={
-                                    auth ? (
-                                        <MainLayout
-                                            auth={auth}
-                                            handleLogout={handleLogout}
-                                            isLoggingOut={isLoggingOut}
-                                        />
-                                    ) : (
-                                        <Navigate to="/login" />
-                                    )
-                                }
-                            />
-                        </Routes>
-                    </div>
+                    <ScrollContextProvider>
+                        <div className="music-app">
+                            <Routes>
+                                <Route
+                                    path="/login"
+                                    element={auth ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
+                                />
+                                <Route
+                                    path="/*"
+                                    element={
+                                        auth ? (
+                                            <MainLayout
+                                                auth={auth}
+                                                handleLogout={handleLogout}
+                                                isLoggingOut={isLoggingOut}
+                                            />
+                                        ) : (
+                                            <Navigate to="/login" />
+                                        )
+                                    }
+                                />
+                            </Routes>
+                        </div>
+                    </ScrollContextProvider>
                 </PageTitleProvider>
             </HistoryProvider>
         </Router>

@@ -941,6 +941,14 @@ body {
     background-color: var(--btn-brand-color-hover);
 }
 
+body.lockscroll {
+    overflow: hidden !important;
+}
+
+.sidenav > .sidenav_wrapper.lockscroll {
+    overflow: hidden !important;
+}
+
 /* Responsive */
 @media only screen and (max-width: 800px) {
     body {
