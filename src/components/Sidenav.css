@@ -21,10 +21,45 @@
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Sidenav specific scroll */
+html.winOS .sidenav > .sidenav_wrapper {
+    overflow-y: scroll;
+}
+
+html.winOS .sidenav > .sidenav_wrapper::-webkit-scrollbar {
+    width: 10px;
+    border-radius: 20px;
+    background-color: var(--bg-color-secondary);
+}
+
+html.winOS .sidenav > .sidenav_wrapper::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    border: 2px solid var(--bg-color-secondary);
+    background-color: var(--bg-color-secondary);
+}
+
+html.winOS .sidenav > .sidenav_wrapper:hover::-webkit-scrollbar-thumb {
+    background-color: var(--bg-color-quaternary);
+}
+
+html.winOS .sidenav > .sidenav_wrapper::-webkit-scrollbar-thumb:hover {
+    background-color: var(--bg-color-quinary);
+}
+
+html.winOS .sidenav > .sidenav_wrapper > .sidenav_header {
+    width: calc(100% + 6px);
+}
+
+html.winOS .sidenav > .sidenav_wrapper > .sidenav_content {
+    width: calc(100% + 6px);
+}
+
+html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
+    width: calc(100% + 6px);
+}
+
 .sidenav > .sidenav_wrapper > .sidenav_header {
-    position: sticky;
-    top: -12px;
-    z-index: 3;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -58,10 +93,10 @@
     display: flex;
     font-size: 0.85rem;
     font-weight: 500;
-    padding: 7px 12px;
     margin: 0 12px;
+    padding: 7px 12px;
     border-radius: 8px;
-    transition: background-color 0.2s ease-out;
+    transition: background-color 0.2s ease-out, color 0.2s ease-out;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > ul > li > a:hover {
@@ -70,6 +105,82 @@
 
 .sidenav > .sidenav_wrapper > .sidenav_content > ul > li > a.active {
     background-color: var(--bg-color-tertiary);
+    color: var(--font-color-active);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search {
+    margin: 16px 14px;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    outline: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container > .search-icon {
+    position: absolute;
+    left: 10px;
+    pointer-events: none;
+    color: var(--font-color-tertiary);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container > input {
+    font-size: 0.75rem;
+    font-weight: 500;
+    width: 100%;
+    padding: 7px 6px 7px 30px;
+    background-color: rgba(0, 0, 0, 0);
+    text-overflow: ellipsis;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .empty {
+    font-size: 0.75rem;
+    margin: 10px 0;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .empty > .keyword {
+    font-weight: 500;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .playlists {
+    margin-top: 18px;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .indicator {
+    font-size: 0.725rem;
+    font-weight: 500;
+    margin: 20px 14px;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .indicator.error {
+    color: var(--font-color-error);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .container > .playlist {
+    font-size: 0.725rem;
+    font-weight: 500;
+    display: block;
+    cursor: pointer;
+    margin: 0 7px;
+    margin-bottom: 2px;
+    padding: 5px 7px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease-out, color 0.2s ease-out;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .container > .playlist:hover {
+    background-color: var(--bg-color-tertiary);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .container > .playlist.active {
+    background-color: var(--bg-color-tertiary);
+    color: var(--font-color-active);
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer {
@@ -77,6 +188,7 @@
     bottom: 0;
     z-index: 2;
     padding: 12px;
+    padding-top: 8px;
     margin-top: auto;
     background-color: var(--bg-color-secondary);
 }
@@ -175,7 +287,6 @@
 
     .sidenav > .sidenav_wrapper > .sidenav_header {
         padding: 20px 20px 6px;
-        top: -14px;
     }
 
     .sidenav > .sidenav_wrapper > .sidenav_header > .logo {

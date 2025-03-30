@@ -323,3 +323,11 @@ export const getPlaylistTracks = async (
 }
 
 export { api, axios }
+
+export const getAllPlaylists = async (serverUrl: string, userId: string, token: string): Promise<MediaItem[]> => {
+    const response = await api.get<{ Items: MediaItem[] }>(
+        `${serverUrl}/Users/${userId}/Items?IncludeItemTypes=Playlist&Recursive=true&Fields=Name`,
+        { headers: { 'X-Emby-Token': token } }
+    )
+    return response.data.Items
+}

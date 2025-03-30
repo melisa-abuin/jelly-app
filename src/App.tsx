@@ -141,6 +141,18 @@ const App = () => {
         }
     }, [auth])
 
+    // Detect OS and Browser for custom scrollbar in sidenav
+    useEffect(() => {
+        const isWindows = /Win/.test(navigator.userAgent)
+        const isChromium = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
+        const isEdge = /Edg/.test(navigator.userAgent) && /Microsoft Corporation/.test(navigator.vendor)
+        if (isWindows && (isChromium || isEdge)) {
+            document.getElementsByTagName('html')[0].classList.add('winOS')
+        } else {
+            document.getElementsByTagName('html')[0].classList.add('otherOS')
+        }
+    }, [])
+
     return (
         <Router>
             <HistoryProvider>
@@ -281,6 +293,9 @@ const MainLayout = ({
                             closeSidenav={closeSidenav}
                             volume={volume}
                             setVolume={setVolume}
+                            serverUrl={auth.serverUrl}
+                            userId={auth.userId}
+                            token={auth.token}
                         />
                         <div className={showSidenav ? 'dimmer active' : 'dimmer'} onClick={toggleSidenav}></div>
                         <main className="main">
@@ -446,6 +461,7 @@ const MainLayout = ({
                                         path="/playlist/:playlistId"
                                         element={
                                             <Playlist
+                                                key={window.location.pathname}
                                                 user={{ userId: auth.userId, username: auth.username }}
                                                 serverUrl={auth.serverUrl}
                                                 token={auth.token}

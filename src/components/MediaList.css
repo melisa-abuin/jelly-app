@@ -36,7 +36,7 @@
     background-color: var(--bg-color-secondary);
 }
 
-/* Hide thumbnail overlay by defualt */
+/* Hide thumbnail overlay by default */
 .media-list .media-item > .media-state > .overlay {
     position: absolute;
     opacity: 0;
@@ -173,30 +173,30 @@
 }
 
 .media-list .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar1 {
-    animation: bounce 0.5s infinite ease-in-out;
+    animation: MediaListbounce 0.5s infinite ease-in-out;
 }
 
 .media-list .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar2 {
-    animation: bounce 0.55s infinite ease-in-out;
+    animation: MediaListbounce 0.55s infinite ease-in-out;
 }
 
 .media-list .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar3 {
-    animation: bounce 0.45s infinite ease-in-out;
+    animation: MediaListbounce 0.45s infinite ease-in-out;
 }
 
 .media-list .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar4 {
-    animation: bounce 0.6s infinite ease-in-out;
+    animation: MediaListbounce 0.6s infinite ease-in-out;
 }
 
 .media-list .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar5 {
-    animation: bounce 0.5s infinite ease-in-out;
+    animation: MediaListbounce 0.5s infinite ease-in-out;
 }
 
 .media-list .media-item > .media-state > .overlay > .play-state-animation > .sound-bars > .bar6 {
-    animation: bounce 0.55s infinite ease-in-out;
+    animation: MediaListbounce 0.55s infinite ease-in-out;
 }
 
-@keyframes bounce {
+@keyframes MediaListbounce {
     0%,
     100% {
         transform: scaleY(1);
@@ -216,10 +216,15 @@
     line-height: 1;
 }
 
-.media-list .media-item > .media-details > .song-name,
-.media-list .media-item > .media-details > .container > .album-name {
+.media-list .media-item > .media-details > .song-name {
     font-size: 0.85rem;
     font-weight: 600;
+    transition: color 0.2s ease-out;
+}
+
+.media-list .media-item.playing > .media-details > .song-name,
+.media-list .media-item.paused > .media-details > .song-name {
+    color: var(--font-color-active);
 }
 
 .media-list .media-item > .media-details > .container > .artist {

@@ -5,13 +5,11 @@
 .playlist-page > .empty {
     font-size: 0.85rem;
     margin: 4px 0;
-    margin-left: 26px;
 }
 
 .playlist-page > .playlist-header {
     display: flex;
     align-items: center;
-    margin-left: 26px;
     margin-bottom: 14px;
 }
 

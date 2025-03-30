@@ -27,7 +27,7 @@ const Settings = ({ onLogout }: SettingsProps) => {
                 Connected with the logout btn below in some way
             </p>
             <br />
-            <button onClick={handleLogout} className="logout-button">
+            <button onClick={handleLogout} className="logout-button noSelect">
                 Logout
             </button>
         </div>

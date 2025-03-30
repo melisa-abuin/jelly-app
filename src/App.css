@@ -90,6 +90,10 @@ input:-webkit-autofill:active {
     box-shadow: inset 0 0 20px 20px var(--bg-color);
 }
 
+input::placeholder {
+    color: var(--font-color-tertiary);
+}
+
 /*
 button:disabled {
     opacity: 0.3;
@@ -138,6 +142,7 @@ svg {
 
 /* Site Theme */
 :root {
+    color-scheme: light;
     --system-fonts: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     --inter-font: 'Inter Variable', sans-serif;
     --bg-color: #ffffff;
@@ -149,6 +154,8 @@ svg {
     --font-color-secondary: #555555;
     --font-color-tertiary: #767676;
     --font-color-inverted: #ffffff;
+    --font-color-active: #000000;
+    --font-color-error: #e95151;
     --border-color: #ececec;
     --border-color-secondary: #d6d6d6;
     --link-color: #a386e7;
@@ -157,6 +164,9 @@ svg {
     --error-border: #ffd6d6;
     --error-background: #fff0f0;
     --brand-color: #947bee;
+    --btn-brand-color: #b282e9;
+    --btn-brand-color-hover: #9470e9;
+    --btn-brand-color-disabled: #caa5f0;
     --success-color: #34a52c; /* Not used */
     --overlay-bg: rgb(0 0 0 / 45%);
     --bg-color-dimmer: rgba(22, 11, 37, 0.4);
@@ -295,6 +305,7 @@ body {
     padding: 8px 12px;
     border-radius: 8px;
     outline: 1px solid var(--border-color);
+    text-overflow: ellipsis;
 }
 
 .login > .login_form > .submit_button {
@@ -306,16 +317,16 @@ body {
     padding: 9px 12px;
     border-radius: 8px;
     margin-top: 4px;
-    background-color: #b282e9;
+    background-color: var(--btn-brand-color);
     transition: background-color 0.2s ease-out;
 }
 
 .login > .login_form button:hover:not(:disabled) {
-    background-color: #9470e9;
+    background-color: var(--btn-brand-color-hover);
 }
 
 .login > .login_form button:disabled {
-    background-color: #caa5f0;
+    background-color: var(--btn-brand-color-disabled);
     cursor: not-allowed;
 }
 
@@ -916,18 +927,18 @@ body {
 
 /* Settings Page */
 .logout-button {
-    cursor: pointer;
-    font-size: 0.75rem;
+    font-size: 0.725rem;
     font-weight: 500;
     color: var(--font-color-inverted);
+    cursor: pointer;
     padding: 7px 13px;
     border-radius: 6px;
-    background-color: #dc3545;
+    background-color: var(--btn-brand-color);
     transition: background-color 0.2s ease-out;
 }
 
 .logout-button:hover {
-    background-color: #b02a37;
+    background-color: var(--btn-brand-color-hover);
 }
 
 /* Responsive */

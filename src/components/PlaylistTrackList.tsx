@@ -150,14 +150,25 @@ const PlaylistTrackList = ({
                     rowRefs.current[index] = el
                 }}
             >
-                <div className="track-indicator">
-                    <div className="track-number">{index + 1}</div>
-                    <div className="track-state">
-                        <div className="play">
-                            <div className="play-icon"></div>
-                        </div>
-                        <div className="pause">
-                            <div className="pause-icon"></div>
+                <div className="track-state">
+                    <img
+                        src={imageUrl}
+                        alt={track.Name}
+                        className="thumbnail"
+                        loading="lazy"
+                        onError={e => {
+                            ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
+                        }}
+                        onClick={e => handleThumbnailClick(track, index, e)}
+                    />
+                    <div className="overlay">
+                        <div className="container">
+                            <div className="play">
+                                <div className="play-icon"></div>
+                            </div>
+                            <div className="pause">
+                                <div className="pause-icon"></div>
+                            </div>
                         </div>
                         <div className="play-state-animation">
                             <svg width="18" height="18" viewBox="0 0 18 18" className="sound-bars">
@@ -169,18 +180,11 @@ const PlaylistTrackList = ({
                         </div>
                     </div>
                 </div>
-                <img
-                    src={imageUrl}
-                    alt={track.Name}
-                    className="thumbnail"
-                    loading="lazy"
-                    onError={e => {
-                        ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
-                    }}
-                    onClick={e => handleThumbnailClick(track, index, e)}
-                />
                 <div className="track-details">
-                    <span className="track-name">{track.Name}</span>
+                    <span className="track-name">
+                        <span className="track-number">{index + 1}.</span>
+                        {track.Name}
+                    </span>
                     <div className="container">
                         <div className="artist">
                             {track.Artists && track.Artists.length > 0 ? track.Artists.join(', ') : 'Unknown Artist'}
@@ -189,12 +193,14 @@ const PlaylistTrackList = ({
                         <div className="album">{track.Album || 'Unknown Album'}</div>
                     </div>
                 </div>
-                {isFavorite && (
-                    <div className="favorited" title="Favorited">
-                        <HeartFillIcon size={12} />
-                    </div>
-                )}
-                <div className="track-duration">{formatDuration(track.RunTimeTicks || 0)}</div>
+                <div className="track-indicators">
+                    {isFavorite && (
+                        <div className="favorited" title="Favorited">
+                            <HeartFillIcon size={12} />
+                        </div>
+                    )}
+                    <div className="track-duration">{formatDuration(track.RunTimeTicks || 0)}</div>
+                </div>
             </li>
         )
     }
