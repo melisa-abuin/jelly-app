@@ -61,5 +61,9 @@ export const useJellyfinArtistData = (
         ...data,
         loading: isLoading,
         error: error ? error.message : null,
+        appearsInAlbums: data?.appearsInAlbums || [],
+        albums: data?.albums || [],
+        tracks: data?.tracks || [],
+        totalPlays: data?.totalPlays || 0,
     }
 }

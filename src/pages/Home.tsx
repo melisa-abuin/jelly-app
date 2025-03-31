@@ -59,7 +59,7 @@ const Home = ({
                     loading={loading}
                     serverUrl={serverUrl}
                     playTrack={(track, index) => {
-                        setCurrentPlaylist(recentlyPlayed)
+                        setCurrentPlaylist(recentlyPlayed || [])
                         playTrack(track, index)
                     }}
                     currentTrack={currentTrack}
@@ -85,7 +85,7 @@ const Home = ({
                     loading={loading}
                     serverUrl={serverUrl}
                     playTrack={(track, index) => {
-                        setCurrentPlaylist(frequentlyPlayed)
+                        setCurrentPlaylist(frequentlyPlayed || [])
                         playTrack(track, index)
                     }}
                     currentTrack={currentTrack}
@@ -108,7 +108,7 @@ const Home = ({
                     loading={loading}
                     serverUrl={serverUrl}
                     playTrack={(track, index) => {
-                        setCurrentPlaylist(recentlyAdded)
+                        setCurrentPlaylist(recentlyAdded || [])
                         playTrack(track, index)
                     }}
                     currentTrack={currentTrack}

@@ -30,5 +30,6 @@ export const useJellyfinAlbumData = (serverUrl: string, userId: string, token: s
         ...data,
         loading: isLoading,
         error: error ? error.message : null,
+        tracks: data?.tracks || [],
     }
 }

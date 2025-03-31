@@ -12,7 +12,7 @@ interface ExtendedMediaItem extends MediaItem {
 
 interface MediaListProps {
     virtuosoRef?: Ref<VirtuosoHandle>
-    items: MediaItem[]
+    items: MediaItem[] | undefined
     type: 'song' | 'album'
     loading: boolean
     serverUrl: string
