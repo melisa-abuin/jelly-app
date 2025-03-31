@@ -1,6 +1,5 @@
-import axios from 'axios' // Add for better error typing
 import { FormEvent, useEffect, useState } from 'react'
-import { loginToJellyfin } from '../api/jellyfin'
+import { ApiError, loginToJellyfin } from '../api/jellyfin'
 
 interface AuthFormProps {
     onLogin: (authData: { serverUrl: string; token: string; userId: string; username: string }) => void
@@ -47,7 +46,7 @@ const AuthForm = ({ onLogin }: AuthFormProps) => {
             localStorage.setItem('lastServerUrl', serverUrl)
             onLogin({ serverUrl, token, userId, username: fetchedUsername })
         } catch (err) {
-            if (axios.isAxiosError(err)) {
+            if (err instanceof ApiError) {
                 if (err.response) {
                     // HTTP status errors
                     if (err.response.status === 401) {
@@ -59,9 +58,6 @@ const AuthForm = ({ onLogin }: AuthFormProps) => {
                     } else {
                         setError(`Login failed: Server returned status ${err.response.status}.`)
                     }
-                } else if (err.request) {
-                    // Network errors (no response received)
-                    setError('Cannot reach the server. Check your network or URL.')
                 } else {
                     // Setup errors (e.g., bad config)
                     setError('Login failed: Request setup error.')

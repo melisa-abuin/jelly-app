@@ -1,6 +1,5 @@
-import axios from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getAllTracks, MediaItem } from '../api/jellyfin'
+import { ApiError, getAllTracks, MediaItem } from '../api/jellyfin'
 
 interface JellyfinTracksData {
     allTracks: MediaItem[]
@@ -57,9 +56,9 @@ export const useJellyfinTracksData = (serverUrl: string, userId: string, token: 
                     error: null,
                     hasMore: tracks.length === itemsPerPage,
                 }))
-            } catch (error) {
-                console.error('Failed to fetch tracks data:', error)
-                if (axios.isAxiosError(error) && error.response?.status === 401) {
+            } catch (err) {
+                console.error('Failed to fetch tracks data:', err)
+                if (err instanceof ApiError && err.response?.status === 401) {
                     localStorage.removeItem('auth')
                     window.location.href = '/login'
                 } else {

@@ -1,6 +1,5 @@
-import axios from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { MediaItem } from '../api/jellyfin'
+import { ApiError, MediaItem } from '../api/jellyfin'
 
 interface JellyfinRecentlyPlayedData {
     items: MediaItem[]
@@ -64,9 +63,9 @@ export const useJellyfinRecentlyPlayedData = (serverUrl: string, userId: string,
                     error: null,
                     hasMore: fetchedItems.length === itemsPerPage, // Use fetchedItems to determine hasMore, like useJellyfinFavoritesData
                 }))
-            } catch (error) {
-                console.error('Failed to fetch recently played data:', error)
-                if (axios.isAxiosError(error) && error.response?.status === 401) {
+            } catch (err) {
+                console.error('Failed to fetch recently played data:', err)
+                if (err instanceof ApiError && err.response?.status === 401) {
                     localStorage.removeItem('auth')
                     window.location.href = '/login'
                 } else {

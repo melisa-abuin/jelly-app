@@ -1,6 +1,5 @@
-import axios from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getGenreTracks, MediaItem } from '../api/jellyfin'
+import { ApiError, getGenreTracks, MediaItem } from '../api/jellyfin'
 
 interface JellyfinGenreTracksData {
     tracks: MediaItem[]
@@ -65,9 +64,9 @@ export const useJellyfinGenreTracks = (
                     error: null,
                     hasMore: fetchedTracks.length === itemsPerPage,
                 }))
-            } catch (error) {
-                console.error('Failed to fetch genre tracks:', error)
-                if (axios.isAxiosError(error) && error.response?.status === 401) {
+            } catch (err) {
+                console.error('Failed to fetch genre tracks:', err)
+                if (err instanceof ApiError && err.response?.status === 401) {
                     localStorage.removeItem('auth')
                     window.location.href = '/login'
                 } else {

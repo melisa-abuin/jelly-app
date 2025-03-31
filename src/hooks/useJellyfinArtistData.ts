@@ -1,6 +1,5 @@
-import axios from 'axios'
 import { useEffect, useState } from 'react'
-import { api, getArtistDetails, MediaItem } from '../api/jellyfin'
+import { ApiError, fetchAllTracks, getArtistDetails, MediaItem } from '../api/jellyfin'
 
 interface JellyfinArtistData {
     artist: MediaItem | null
@@ -50,11 +49,7 @@ export const useJellyfinArtistData = (
                     trackLimit
                 )
 
-                const allTracksResponse = await api.get<{ Items: MediaItem[] }>(
-                    `${serverUrl}/Users/${userId}/Items?ArtistIds=${artistId}&IncludeItemTypes=Audio&Recursive=true&Fields=RunTimeTicks,UserData`,
-                    { headers: { 'X-Emby-Token': token } }
-                )
-                const allTracks = allTracksResponse.data.Items
+                const allTracks = await fetchAllTracks(serverUrl, userId, token, artistId)
                 const totalPlaytime = allTracks.reduce(
                     (sum: number, track: MediaItem) => sum + (track.RunTimeTicks || 0),
                     0
@@ -75,9 +70,9 @@ export const useJellyfinArtistData = (
                     loading: false,
                     error: null,
                 })
-            } catch (error) {
-                console.error('Failed to fetch artist data:', error)
-                if (axios.isAxiosError(error) && error.response?.status === 401) {
+            } catch (err) {
+                console.error('Failed to fetch artist data:', err)
+                if (err instanceof ApiError && err.response?.status === 401) {
                     localStorage.removeItem('auth')
                     window.location.href = '/login'
                 } else {

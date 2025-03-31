@@ -1,6 +1,5 @@
-import axios from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getFavoriteTracks, MediaItem } from '../api/jellyfin'
+import { ApiError, getFavoriteTracks, MediaItem } from '../api/jellyfin'
 
 interface JellyfinFavoritesData {
     allFavorites: MediaItem[]
@@ -57,9 +56,9 @@ export const useJellyfinFavoritesData = (serverUrl: string, userId: string, toke
                     error: null,
                     hasMore: favorites.length === itemsPerPage,
                 }))
-            } catch (error) {
-                console.error('Failed to fetch favorites data:', error)
-                if (axios.isAxiosError(error) && error.response?.status === 401) {
+            } catch (err) {
+                console.error('Failed to fetch favorites data:', err)
+                if (err instanceof ApiError && err.response?.status === 401) {
                     localStorage.removeItem('auth')
                     window.location.href = '/login'
                 } else {

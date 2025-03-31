@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { api, axios, getPlaylist, getPlaylistTracks, MediaItem } from '../api/jellyfin'
+import { ApiError, fetchPlaylistMetadata, getPlaylist, getPlaylistTracks, MediaItem } from '../api/jellyfin'
 
 interface JellyfinPlaylistData {
     playlist: MediaItem | null
@@ -85,16 +85,11 @@ export const useJellyfinPlaylistData = (
 
                 // Fetch totalResponse only on the first page
                 const totalResponse =
-                    page === 0
-                        ? await api.get<{ Items: MediaItem[]; TotalRecordCount: number }>(
-                              `${serverUrl}/Users/${userId}/Items?ParentId=${playlistId}&IncludeItemTypes=Audio&Fields=RunTimeTicks,UserData`,
-                              { headers: { 'X-Emby-Token': token } }
-                          )
-                        : null
+                    page === 0 ? await fetchPlaylistMetadata(serverUrl, userId, token, playlistId) : null
 
                 if (totalResponse) {
-                    const totalTracks = totalResponse.data.Items
-                    totalTrackCount = totalResponse.data.TotalRecordCount
+                    const totalTracks = totalResponse.Items
+                    totalTrackCount = totalResponse.TotalRecordCount
                     totalPlaytime = totalTracks.reduce(
                         (sum: number, track: MediaItem) => sum + (track.RunTimeTicks || 0),
                         0
@@ -134,9 +129,9 @@ export const useJellyfinPlaylistData = (
                     totalTrackCount: page === 0 ? totalTrackCount : prev.totalTrackCount,
                     totalPlays: page === 0 ? totalPlays : prev.totalPlays,
                 }))
-            } catch (error) {
-                console.error('Failed to fetch playlist tracks:', error)
-                if (axios.isAxiosError(error) && error.response?.status === 401) {
+            } catch (err) {
+                console.error('Failed to fetch playlist tracks:', err)
+                if (err instanceof ApiError && err.response?.status === 401) {
                     localStorage.removeItem('auth')
                     window.location.href = '/login'
                 } else {

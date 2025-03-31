@@ -1,6 +1,5 @@
-import axios from 'axios'
 import { useEffect, useState } from 'react'
-import { getAlbumDetails, MediaItem } from '../api/jellyfin'
+import { ApiError, getAlbumDetails, MediaItem } from '../api/jellyfin'
 
 interface JellyfinAlbumData {
     album: MediaItem | null
@@ -33,9 +32,9 @@ export const useJellyfinAlbumData = (serverUrl: string, userId: string, token: s
                     loading: false,
                     error: null,
                 })
-            } catch (error) {
-                console.error('Failed to fetch album data:', error)
-                if (axios.isAxiosError(error) && error.response?.status === 401) {
+            } catch (err) {
+                console.error('Failed to fetch album data:', err)
+                if (err instanceof ApiError && err.response?.status === 401) {
                     localStorage.removeItem('auth')
                     window.location.href = '/login'
                 } else {
