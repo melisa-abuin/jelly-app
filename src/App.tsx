@@ -1,6 +1,8 @@
 import '@fontsource-variable/inter'
 import { ArrowLeftIcon, BookmarkFillIcon, HeartFillIcon } from '@primer/octicons-react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
+import { QueryClient } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { MediaItem } from './api/jellyfin'
@@ -23,7 +25,17 @@ import RecentlyPlayed from './pages/RecentlyPlayed'
 import Settings from './pages/Settings'
 import Tracks from './pages/Tracks'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 1000 * 60 * 5, // 5 minutes
+        },
+    },
+})
+
+const persister = createSyncStoragePersister({
+    storage: window.localStorage,
+})
 
 // Create a context for the page title
 interface PageTitleContextType {
@@ -158,7 +170,7 @@ const App = () => {
     }, [])
 
     return (
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
             <Router>
                 <HistoryProvider>
                     <PageTitleProvider>
@@ -189,7 +201,7 @@ const App = () => {
                     </PageTitleProvider>
                 </HistoryProvider>
             </Router>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
     )
 }
 

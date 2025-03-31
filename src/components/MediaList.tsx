@@ -29,7 +29,7 @@ interface MediaListProps {
 
 const MediaList = ({
     virtuosoRef,
-    items,
+    items = [],
     type,
     loading,
     serverUrl,

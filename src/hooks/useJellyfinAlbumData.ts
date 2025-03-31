@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { ApiError, getAlbumDetails, MediaItem } from '../api/jellyfin'
+import { useQuery } from '@tanstack/react-query'
+import { getAlbumDetails, MediaItem } from '../api/jellyfin'
 
 interface JellyfinAlbumData {
     album: MediaItem | null
@@ -9,42 +9,26 @@ interface JellyfinAlbumData {
 }
 
 export const useJellyfinAlbumData = (serverUrl: string, userId: string, token: string, albumId: string) => {
-    const [data, setData] = useState<JellyfinAlbumData>({
-        album: null,
-        tracks: [],
-        loading: true,
-        error: null,
+    const { data, isLoading, error } = useQuery<JellyfinAlbumData, Error>({
+        queryKey: ['albumData', serverUrl, userId, token, albumId],
+        queryFn: async () => {
+            if (!serverUrl || !token || !albumId) {
+                throw new Error('No serverUrl, token, or albumId')
+            }
+            const { album, tracks } = await getAlbumDetails(serverUrl, userId, token, albumId)
+            return {
+                album,
+                tracks,
+                loading: false,
+                error: null,
+            }
+        },
+        enabled: Boolean(serverUrl && token && albumId),
     })
 
-    useEffect(() => {
-        if (!serverUrl || !token || !albumId) {
-            setData(prev => ({ ...prev, loading: true, error: 'No serverUrl, token, or albumId' }))
-            return
-        }
-
-        const fetchData = async () => {
-            setData(prev => ({ ...prev, loading: true, error: null }))
-            try {
-                const { album, tracks } = await getAlbumDetails(serverUrl, userId, token, albumId)
-                setData({
-                    album,
-                    tracks,
-                    loading: false,
-                    error: null,
-                })
-            } catch (err) {
-                console.error('Failed to fetch album data:', err)
-                if (err instanceof ApiError && err.response?.status === 401) {
-                    localStorage.removeItem('auth')
-                    window.location.href = '/login'
-                } else {
-                    setData(prev => ({ ...prev, loading: false, error: 'Failed to fetch album data' }))
-                }
-            }
-        }
-
-        fetchData()
-    }, [serverUrl, userId, token, albumId])
-
-    return data
+    return {
+        ...data,
+        loading: isLoading,
+        error: error ? error.message : null,
+    }
 }

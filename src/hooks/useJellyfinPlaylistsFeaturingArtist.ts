@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { MediaItem, getPlaylistsFeaturingArtist } from '../api/jellyfin'
 
 interface JellyfinPlaylistsFeaturingArtistData {
@@ -13,25 +13,20 @@ export const useJellyfinPlaylistsFeaturingArtist = (
     token: string,
     artistId: string
 ): JellyfinPlaylistsFeaturingArtistData => {
-    const [playlists, setPlaylists] = useState<MediaItem[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-
-    useEffect(() => {
-        const fetchPlaylists = async () => {
-            try {
-                setLoading(true)
-                const playlistsData = await getPlaylistsFeaturingArtist(serverUrl, userId, token, artistId)
-                setPlaylists(playlistsData)
-            } catch (err) {
-                setError((err as Error).message || 'Failed to fetch playlists')
-            } finally {
-                setLoading(false)
+    const { data, isLoading, error } = useQuery<MediaItem[], Error>({
+        queryKey: ['playlistsFeaturingArtist', serverUrl, userId, token, artistId],
+        queryFn: async () => {
+            if (!serverUrl || !userId || !token || !artistId) {
+                throw new Error('Missing required parameters')
             }
-        }
+            return await getPlaylistsFeaturingArtist(serverUrl, userId, token, artistId)
+        },
+        enabled: Boolean(serverUrl && userId && token && artistId),
+    })
 
-        fetchPlaylists()
-    }, [serverUrl, userId, token, artistId])
-
-    return { playlists, loading, error }
+    return {
+        playlists: data || [],
+        loading: isLoading,
+        error: error ? error.message : null,
+    }
 }

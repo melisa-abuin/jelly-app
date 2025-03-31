@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { getAllPlaylists, MediaItem } from '../api/jellyfin'
 
 interface useJellyfinPlaylistsList {
@@ -12,32 +12,20 @@ export const useJellyfinPlaylistsList = (
     userId: string,
     token: string
 ): useJellyfinPlaylistsList => {
-    const [playlists, setPlaylists] = useState<MediaItem[]>([])
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-
-    useEffect(() => {
-        if (!serverUrl || !userId || !token) {
-            setError('Missing authentication details')
-            return
-        }
-
-        const fetchPlaylists = async () => {
-            setLoading(true)
-            try {
-                const fetchedPlaylists = await getAllPlaylists(serverUrl, userId, token)
-                setPlaylists(fetchedPlaylists)
-                setError(null)
-            } catch (err) {
-                console.error('Failed to fetch playlists:', err)
-                setError('Failed to load playlists')
-            } finally {
-                setLoading(false)
+    const { data, isLoading, error } = useQuery<MediaItem[], Error>({
+        queryKey: ['playlists', serverUrl, userId, token],
+        queryFn: async () => {
+            if (!serverUrl || !userId || !token) {
+                throw new Error('Missing authentication details')
             }
-        }
+            return await getAllPlaylists(serverUrl, userId, token)
+        },
+        enabled: Boolean(serverUrl && userId && token),
+    })
 
-        fetchPlaylists()
-    }, [serverUrl, userId, token])
-
-    return { playlists, loading, error }
+    return {
+        playlists: data || [],
+        loading: isLoading,
+        error: error ? error.message : null,
+    }
 }
