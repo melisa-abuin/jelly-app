@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ApiError, MediaItem } from '../api/jellyfin'
+import { ApiError, MediaItem, fetchRecentlyPlayed } from '../api/jellyfin'
 
 interface JellyfinRecentlyPlayedData {
     items: MediaItem[]
@@ -40,14 +40,7 @@ export const useJellyfinRecentlyPlayedData = (serverUrl: string, userId: string,
             setData(prev => ({ ...prev, loading: true, error: null }))
             try {
                 const startIndex = page * itemsPerPage
-                const response = await fetch(
-                    `${serverUrl}/Users/${userId}/Items?SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Audio&Filters=IsPlayed&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,MediaSourceCount,MediaStreams&Limit=${itemsPerPage}&StartIndex=${startIndex}&api_key=${token}`
-                )
-                if (!response.ok) {
-                    throw new Error('Failed to fetch recently played items')
-                }
-                const data = await response.json()
-                const fetchedItems = data.Items || []
+                const fetchedItems = await fetchRecentlyPlayed(serverUrl, userId, token, startIndex, itemsPerPage)
 
                 const newItems = fetchedItems.filter((item: MediaItem) => {
                     if (!item.Artists || !item.Album || seenIds.current.has(item.Id)) {
@@ -61,7 +54,7 @@ export const useJellyfinRecentlyPlayedData = (serverUrl: string, userId: string,
                     items: [...prev.items, ...newItems],
                     loading: false,
                     error: null,
-                    hasMore: fetchedItems.length === itemsPerPage, // Use fetchedItems to determine hasMore, like useJellyfinFavoritesData
+                    hasMore: fetchedItems.length === itemsPerPage,
                 }))
             } catch (err) {
                 console.error('Failed to fetch recently played data:', err)

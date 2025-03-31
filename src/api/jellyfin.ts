@@ -438,3 +438,37 @@ export const fetchPlaylistMetadata = async (
     if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
     return response.json()
 }
+
+export const fetchRecentlyPlayed = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    startIndex: number,
+    limit: number
+): Promise<MediaItem[]> => {
+    const response = await fetch(
+        `${serverUrl}/Users/${userId}/Items?SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Audio&Filters=IsPlayed&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,MediaSourceCount,MediaStreams&Limit=${limit}&StartIndex=${startIndex}&api_key=${token}`
+    )
+    if (!response.ok) {
+        throw new ApiError('Failed to fetch recently played items', response)
+    }
+    const data = await response.json()
+    return data.Items || []
+}
+
+export const fetchFrequentlyPlayed = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    startIndex: number,
+    limit: number
+): Promise<MediaItem[]> => {
+    const response = await fetch(
+        `${serverUrl}/Users/${userId}/Items?SortBy=PlayCount&SortOrder=Descending&IncludeItemTypes=Audio&Filters=IsPlayed&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,MediaSourceCount,MediaStreams&Limit=${limit}&StartIndex=${startIndex}&api_key=${token}`
+    )
+    if (!response.ok) {
+        throw new ApiError('Failed to fetch frequently played items', response)
+    }
+    const data = await response.json()
+    return data.Items || []
+}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ApiError, MediaItem } from '../api/jellyfin'
+import { ApiError, MediaItem, fetchFrequentlyPlayed } from '../api/jellyfin'
 
 interface JellyfinFrequentlyPlayedData {
     items: MediaItem[]
@@ -40,14 +40,7 @@ export const useJellyfinFrequentlyPlayedData = (serverUrl: string, userId: strin
             setData(prev => ({ ...prev, loading: true, error: null }))
             try {
                 const startIndex = page * itemsPerPage
-                const response = await fetch(
-                    `${serverUrl}/Users/${userId}/Items?SortBy=PlayCount&SortOrder=Descending&IncludeItemTypes=Audio&Filters=IsPlayed&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,MediaSourceCount,MediaStreams&Limit=${itemsPerPage}&StartIndex=${startIndex}&api_key=${token}`
-                )
-                if (!response.ok) {
-                    throw new Error('Failed to fetch frequently played items')
-                }
-                const data = await response.json()
-                const fetchedItems = data.Items || []
+                const fetchedItems = await fetchFrequentlyPlayed(serverUrl, userId, token, startIndex, itemsPerPage)
 
                 const newItems = fetchedItems.filter((item: MediaItem) => {
                     if (!item.Artists || !item.Album || seenIds.current.has(item.Id)) {
