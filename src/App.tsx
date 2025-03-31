@@ -1,5 +1,6 @@
 import '@fontsource-variable/inter'
 import { ArrowLeftIcon, BookmarkFillIcon, HeartFillIcon } from '@primer/octicons-react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { MediaItem } from './api/jellyfin'
@@ -21,6 +22,8 @@ import Playlist from './pages/Playlist'
 import RecentlyPlayed from './pages/RecentlyPlayed'
 import Settings from './pages/Settings'
 import Tracks from './pages/Tracks'
+
+const queryClient = new QueryClient()
 
 // Create a context for the page title
 interface PageTitleContextType {
@@ -155,36 +158,38 @@ const App = () => {
     }, [])
 
     return (
-        <Router>
-            <HistoryProvider>
-                <PageTitleProvider>
-                    <ScrollContextProvider>
-                        <div className="music-app">
-                            <Routes>
-                                <Route
-                                    path="/login"
-                                    element={auth ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
-                                />
-                                <Route
-                                    path="/*"
-                                    element={
-                                        auth ? (
-                                            <MainLayout
-                                                auth={auth}
-                                                handleLogout={handleLogout}
-                                                isLoggingOut={isLoggingOut}
-                                            />
-                                        ) : (
-                                            <Navigate to="/login" />
-                                        )
-                                    }
-                                />
-                            </Routes>
-                        </div>
-                    </ScrollContextProvider>
-                </PageTitleProvider>
-            </HistoryProvider>
-        </Router>
+        <QueryClientProvider client={queryClient}>
+            <Router>
+                <HistoryProvider>
+                    <PageTitleProvider>
+                        <ScrollContextProvider>
+                            <div className="music-app">
+                                <Routes>
+                                    <Route
+                                        path="/login"
+                                        element={auth ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
+                                    />
+                                    <Route
+                                        path="/*"
+                                        element={
+                                            auth ? (
+                                                <MainLayout
+                                                    auth={auth}
+                                                    handleLogout={handleLogout}
+                                                    isLoggingOut={isLoggingOut}
+                                                />
+                                            ) : (
+                                                <Navigate to="/login" />
+                                            )
+                                        }
+                                    />
+                                </Routes>
+                            </div>
+                        </ScrollContextProvider>
+                    </PageTitleProvider>
+                </HistoryProvider>
+            </Router>
+        </QueryClientProvider>
     )
 }
 

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useInfiniteQuery } from '@tanstack/react-query'
+import { useCallback, useEffect } from 'react'
 import { ApiError, getAllAlbums, MediaItem } from '../api/jellyfin'
 
 interface JellyfinAlbumsData {
@@ -6,97 +7,55 @@ interface JellyfinAlbumsData {
     loading: boolean
     error: string | null
     hasMore: boolean
+    loadMore: () => void
 }
 
-export const useJellyfinAlbumsData = (serverUrl: string, userId: string, token: string) => {
-    const [data, setData] = useState<JellyfinAlbumsData>({
-        allAlbums: [],
-        loading: true,
-        error: null,
-        hasMore: true,
-    })
-    const [page, setPage] = useState(0)
+export const useJellyfinAlbumsData = (serverUrl: string, userId: string, token: string): JellyfinAlbumsData => {
     const itemsPerPage = 40
-    const seenIds = useRef(new Set<string>())
-    const isInitialMount = useRef(true)
-    const isLoadingMore = useRef(false)
+
+    const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
+        MediaItem[],
+        ApiError
+    >({
+        queryKey: ['albums', serverUrl, userId, token],
+        queryFn: async ({ pageParam = 0 }) => {
+            const startIndex = (pageParam as number) * itemsPerPage
+            return await getAllAlbums(serverUrl, userId, token, startIndex, itemsPerPage)
+        },
+        getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
+        enabled: Boolean(serverUrl && token),
+        initialPageParam: 0,
+    })
 
     useEffect(() => {
-        if (isInitialMount.current) {
-            setData({
-                allAlbums: [],
-                loading: true,
-                error: null,
-                hasMore: true,
-            })
-            setPage(0)
-            seenIds.current.clear()
-            isInitialMount.current = false
+        if (error instanceof ApiError && error.response?.status === 401) {
+            localStorage.removeItem('auth')
+            window.location.href = '/login'
         }
-    }, [serverUrl, userId, token])
+    }, [error])
 
-    useEffect(() => {
-        if (!serverUrl || !token) {
-            setData(prev => ({ ...prev, loading: true, error: 'No serverUrl or token' }))
-            return
-        }
-
-        const fetchData = async () => {
-            setData(prev => ({ ...prev, loading: true, error: null }))
-            try {
-                const startIndex = page * itemsPerPage
-                const albums = await getAllAlbums(serverUrl, userId, token, startIndex, itemsPerPage)
-
-                const newAlbums = albums.filter(album => {
-                    if (seenIds.current.has(album.Id)) {
-                        return false
-                    }
-                    seenIds.current.add(album.Id)
-                    return true
-                })
-
-                setData(prev => {
-                    const updatedAlbums = [...prev.allAlbums, ...newAlbums]
-                    return {
-                        allAlbums: updatedAlbums,
-                        loading: false,
-                        error: null,
-                        hasMore: albums.length === itemsPerPage,
-                    }
-                })
-            } catch (err) {
-                console.error('Failed to fetch albums data:', err)
-                if (err instanceof ApiError && err.response?.status === 401) {
-                    localStorage.removeItem('auth')
-                    window.location.href = '/login'
-                } else {
-                    setData(prev => ({ ...prev, loading: false, error: 'Failed to fetch albums data' }))
-                }
-            }
-        }
-
-        fetchData()
-    }, [serverUrl, userId, token, page])
+    const seenIds = new Set<string>()
+    const allAlbums: MediaItem[] = data
+        ? data.pages.flat().filter(album => {
+              if (seenIds.has(album.Id)) {
+                  return false
+              }
+              seenIds.add(album.Id)
+              return true
+          })
+        : []
 
     const loadMore = useCallback(() => {
-        if (isLoadingMore.current) {
-            return
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage()
         }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-        if (!data.loading && data.hasMore) {
-            isLoadingMore.current = true
-            setPage(prev => {
-                const nextPage = prev + 1
-                return nextPage
-            })
-        }
-    }, [data.loading, data.hasMore])
-
-    useEffect(() => {
-        if (!data.loading) {
-            isLoadingMore.current = false
-        }
-    }, [data.loading])
-
-    return { ...data, loadMore }
+    return {
+        allAlbums,
+        loading: isLoading || isFetchingNextPage,
+        error: error ? error.message : null,
+        hasMore: Boolean(hasNextPage),
+        loadMore,
+    }
 }

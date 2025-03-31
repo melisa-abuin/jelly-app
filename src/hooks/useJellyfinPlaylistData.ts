@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { ApiError, fetchPlaylistMetadata, getPlaylist, getPlaylistTracks, MediaItem } from '../api/jellyfin'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useCallback, useEffect } from 'react'
+import { ApiError, getPlaylist, getPlaylistTracks, MediaItem } from '../api/jellyfin'
 
 interface JellyfinPlaylistData {
     playlist: MediaItem | null
@@ -19,146 +20,65 @@ export const useJellyfinPlaylistData = (
     token: string,
     playlistId: string
 ): JellyfinPlaylistData => {
-    const [data, setData] = useState<JellyfinPlaylistData>({
-        playlist: null,
-        tracks: [],
-        loading: true,
-        error: null,
-        hasMore: true,
-        loadMore: () => {},
-        totalPlaytime: 0,
-        totalTrackCount: 0,
-        totalPlays: 0,
-    })
-    const [page, setPage] = useState(0)
     const itemsPerPage = 40
-    const seenIds = useRef(new Set<string>())
-    const isInitialMount = useRef(true)
-    const isLoadingMore = useRef(false)
+
+    const { data: playlist, error: playlistError } = useQuery<MediaItem, ApiError>({
+        queryKey: ['playlist', serverUrl, userId, token, playlistId],
+        queryFn: () => getPlaylist(serverUrl, userId, token, playlistId),
+        enabled: Boolean(serverUrl && token && playlistId),
+    })
+
+    const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
+        MediaItem[],
+        ApiError
+    >({
+        queryKey: ['playlistTracks', serverUrl, userId, token, playlistId],
+        queryFn: async ({ pageParam = 0 }) => {
+            const startIndex = (pageParam as number) * itemsPerPage
+            return await getPlaylistTracks(serverUrl, userId, token, playlistId, startIndex, itemsPerPage)
+        },
+        getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
+        enabled: Boolean(serverUrl && token && playlistId),
+        initialPageParam: 0,
+    })
 
     useEffect(() => {
-        if (isInitialMount.current) {
-            setPage(0)
-            seenIds.current.clear()
-            setData(prev => ({
-                ...prev,
-                tracks: [],
-                hasMore: true,
-                totalPlaytime: 0,
-                totalTrackCount: 0,
-                totalPlays: 0,
-            }))
-            isInitialMount.current = false
-
-            // Fetch playlist metadata only once
-            const fetchPlaylistMetadata = async () => {
-                try {
-                    const fetchedPlaylist = await getPlaylist(serverUrl, userId, token, playlistId)
-                    setData(prev => ({
-                        ...prev,
-                        playlist: fetchedPlaylist,
-                    }))
-                } catch (error) {
-                    console.error('Failed to fetch playlist metadata:', error)
-                    setData(prev => ({ ...prev, loading: false, error: 'Failed to fetch playlist metadata' }))
-                }
-            }
-
-            fetchPlaylistMetadata()
+        if ((error || playlistError) instanceof ApiError && (error || playlistError)?.response?.status === 401) {
+            localStorage.removeItem('auth')
+            window.location.href = '/login'
         }
-    }, [serverUrl, userId, token, playlistId])
+    }, [error, playlistError])
 
-    useEffect(() => {
-        if (!serverUrl || !token || !playlistId) {
-            setData(prev => ({ ...prev, loading: false, error: 'No serverUrl, token, or playlistId' }))
-            return
-        }
-
-        const fetchPlaylistTracks = async () => {
-            setData(prev => ({ ...prev, loading: true, error: null }))
-            try {
-                let totalPlaytime = 0
-                let totalTrackCount = 0
-                let totalPlays = 0
-
-                const startIndex = page * itemsPerPage
-
-                // Fetch totalResponse only on the first page
-                const totalResponse =
-                    page === 0 ? await fetchPlaylistMetadata(serverUrl, userId, token, playlistId) : null
-
-                if (totalResponse) {
-                    const totalTracks = totalResponse.Items
-                    totalTrackCount = totalResponse.TotalRecordCount
-                    totalPlaytime = totalTracks.reduce(
-                        (sum: number, track: MediaItem) => sum + (track.RunTimeTicks || 0),
-                        0
-                    )
-                    totalPlays = totalTracks.reduce(
-                        (sum: number, track: MediaItem) => sum + (track.UserData?.PlayCount || 0),
-                        0
-                    )
-                }
-
-                // Fetch tracks for the current page
-                const fetchedTracks = await getPlaylistTracks(
-                    serverUrl,
-                    userId,
-                    token,
-                    playlistId,
-                    startIndex,
-                    itemsPerPage
-                )
-
-                const newTracks = fetchedTracks.filter(track => {
-                    if (seenIds.current.has(track.Id)) {
-                        return false
-                    }
-                    seenIds.current.add(track.Id)
-                    return true
-                })
-
-                // Update state with the fetched data
-                setData(prev => ({
-                    ...prev,
-                    tracks: [...prev.tracks, ...newTracks],
-                    loading: false,
-                    error: null,
-                    hasMore: fetchedTracks.length === itemsPerPage,
-                    totalPlaytime: page === 0 ? totalPlaytime : prev.totalPlaytime,
-                    totalTrackCount: page === 0 ? totalTrackCount : prev.totalTrackCount,
-                    totalPlays: page === 0 ? totalPlays : prev.totalPlays,
-                }))
-            } catch (err) {
-                console.error('Failed to fetch playlist tracks:', err)
-                if (err instanceof ApiError && err.response?.status === 401) {
-                    localStorage.removeItem('auth')
-                    window.location.href = '/login'
-                } else {
-                    setData(prev => ({ ...prev, loading: false, error: 'Failed to fetch playlist tracks' }))
-                }
-            }
-        }
-
-        fetchPlaylistTracks()
-    }, [serverUrl, userId, token, playlistId, page])
+    const seenIds = new Set<string>()
+    const tracks: MediaItem[] = data
+        ? data.pages.flat().filter(track => {
+              if (seenIds.has(track.Id)) {
+                  return false
+              }
+              seenIds.add(track.Id)
+              return true
+          })
+        : []
 
     const loadMore = useCallback(() => {
-        if (isLoadingMore.current) {
-            return
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage()
         }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-        if (!data.loading && data.hasMore) {
-            isLoadingMore.current = true
-            setPage(prev => prev + 1)
-        }
-    }, [data.loading, data.hasMore])
+    const totalPlaytime = tracks.reduce((sum, track) => sum + (track.RunTimeTicks || 0), 0)
+    const totalTrackCount = tracks.length
+    const totalPlays = tracks.reduce((sum, track) => sum + (track.UserData?.PlayCount || 0), 0)
 
-    useEffect(() => {
-        if (!data.loading) {
-            isLoadingMore.current = false
-        }
-    }, [data.loading])
-
-    return { ...data, loadMore }
+    return {
+        playlist: playlist || null,
+        tracks,
+        loading: isLoading || isFetchingNextPage,
+        error: error ? error.message : null,
+        hasMore: Boolean(hasNextPage),
+        loadMore,
+        totalPlaytime,
+        totalTrackCount,
+        totalPlays,
+    }
 }

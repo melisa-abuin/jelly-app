@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useInfiniteQuery } from '@tanstack/react-query'
+import { useCallback, useEffect } from 'react'
 import { ApiError, getAllTracks, MediaItem } from '../api/jellyfin'
 
 interface JellyfinTracksData {
@@ -6,86 +7,58 @@ interface JellyfinTracksData {
     loading: boolean
     error: string | null
     hasMore: boolean
+    loadMore: () => void
 }
 
-export const useJellyfinTracksData = (serverUrl: string, userId: string, token: string) => {
-    const [data, setData] = useState<JellyfinTracksData>({
-        allTracks: [],
-        loading: true,
-        error: null,
-        hasMore: true,
-    })
-    const [page, setPage] = useState(0)
+export const useJellyfinTracksData = (serverUrl: string, userId: string, token: string): JellyfinTracksData => {
     const itemsPerPage = 40
-    const seenIds = useRef(new Set<string>())
-    const isInitialMount = useRef(true)
-    const isLoadingMore = useRef(false)
+
+    const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
+        MediaItem[],
+        ApiError
+    >({
+        queryKey: ['jellyfinTracks', serverUrl, userId, token],
+        queryFn: async ({ pageParam = 0 }) => {
+            const startIndex = (pageParam as number) * itemsPerPage
+            return await getAllTracks(serverUrl, userId, token, startIndex, itemsPerPage)
+        },
+        getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
+        enabled: Boolean(serverUrl && token),
+        initialPageParam: 0,
+    })
 
     useEffect(() => {
-        if (isInitialMount.current) {
-            setPage(0)
-            seenIds.current.clear()
-            setData(prev => ({ ...prev, allTracks: [], hasMore: true }))
-            isInitialMount.current = false
-        }
-    }, [serverUrl, userId, token])
-
-    useEffect(() => {
-        if (!serverUrl || !token) {
-            setData(prev => ({ ...prev, loading: true, error: 'No serverUrl or token' }))
-            return
-        }
-
-        const fetchData = async () => {
-            setData(prev => ({ ...prev, loading: true, error: null }))
-            try {
-                const startIndex = page * itemsPerPage
-                const tracks = await getAllTracks(serverUrl, userId, token, startIndex, itemsPerPage)
-
-                const newTracks = tracks.filter(track => {
-                    if (seenIds.current.has(track.Id)) {
-                        return false
-                    }
-                    seenIds.current.add(track.Id)
-                    return true
-                })
-
-                setData(prev => ({
-                    allTracks: [...prev.allTracks, ...newTracks],
-                    loading: false,
-                    error: null,
-                    hasMore: tracks.length === itemsPerPage,
-                }))
-            } catch (err) {
-                console.error('Failed to fetch tracks data:', err)
-                if (err instanceof ApiError && err.response?.status === 401) {
-                    localStorage.removeItem('auth')
-                    window.location.href = '/login'
-                } else {
-                    setData(prev => ({ ...prev, loading: false, error: 'Failed to fetch tracks data' }))
-                }
+        if (error instanceof ApiError) {
+            if (error.response?.status === 401) {
+                localStorage.removeItem('auth')
+                window.location.href = '/login'
             }
         }
+    }, [error])
 
-        fetchData()
-    }, [serverUrl, userId, token, page])
+    // Combine pages and filter out any duplicate tracks using a Set.
+    const seenIds = new Set<string>()
+    const allTracks: MediaItem[] = data
+        ? data.pages.flat().filter(track => {
+              if (seenIds.has(track.Id)) {
+                  return false
+              }
+              seenIds.add(track.Id)
+              return true
+          })
+        : []
 
     const loadMore = useCallback(() => {
-        if (isLoadingMore.current) {
-            return
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage()
         }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-        if (!data.loading && data.hasMore) {
-            isLoadingMore.current = true
-            setPage(prev => prev + 1)
-        }
-    }, [data.loading, data.hasMore])
-
-    useEffect(() => {
-        if (!data.loading) {
-            isLoadingMore.current = false
-        }
-    }, [data.loading])
-
-    return { ...data, loadMore }
+    return {
+        allTracks,
+        loading: isLoading || isFetchingNextPage,
+        error: error ? error.message : null,
+        hasMore: Boolean(hasNextPage),
+        loadMore,
+    }
 }

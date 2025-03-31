@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useInfiniteQuery } from '@tanstack/react-query'
+import { useCallback, useEffect } from 'react'
 import { ApiError, MediaItem, fetchFrequentlyPlayed } from '../api/jellyfin'
 
 interface JellyfinFrequentlyPlayedData {
@@ -6,86 +7,59 @@ interface JellyfinFrequentlyPlayedData {
     loading: boolean
     error: string | null
     hasMore: boolean
+    loadMore: () => void
 }
 
-export const useJellyfinFrequentlyPlayedData = (serverUrl: string, userId: string, token: string) => {
-    const [data, setData] = useState<JellyfinFrequentlyPlayedData>({
-        items: [],
-        loading: true,
-        error: null,
-        hasMore: true,
-    })
-    const [page, setPage] = useState(0)
+export const useJellyfinFrequentlyPlayedData = (
+    serverUrl: string,
+    userId: string,
+    token: string
+): JellyfinFrequentlyPlayedData => {
     const itemsPerPage = 40
-    const seenIds = useRef(new Set<string>())
-    const isInitialMount = useRef(true)
-    const isLoadingMore = useRef(false)
+
+    const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
+        MediaItem[],
+        ApiError
+    >({
+        queryKey: ['frequentlyPlayed', serverUrl, userId, token],
+        queryFn: async ({ pageParam = 0 }) => {
+            const startIndex = (pageParam as number) * itemsPerPage
+            return await fetchFrequentlyPlayed(serverUrl, userId, token, startIndex, itemsPerPage)
+        },
+        getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
+        enabled: Boolean(serverUrl && token),
+        initialPageParam: 0,
+    })
 
     useEffect(() => {
-        if (isInitialMount.current) {
-            setPage(0)
-            seenIds.current.clear()
-            setData(prev => ({ ...prev, items: [], hasMore: true }))
-            isInitialMount.current = false
+        if (error instanceof ApiError && error.response?.status === 401) {
+            localStorage.removeItem('auth')
+            window.location.href = '/login'
         }
-    }, [serverUrl, userId, token])
+    }, [error])
 
-    useEffect(() => {
-        if (!serverUrl || !token) {
-            setData(prev => ({ ...prev, loading: true, error: 'No serverUrl or token' }))
-            return
-        }
-
-        const fetchData = async () => {
-            setData(prev => ({ ...prev, loading: true, error: null }))
-            try {
-                const startIndex = page * itemsPerPage
-                const fetchedItems = await fetchFrequentlyPlayed(serverUrl, userId, token, startIndex, itemsPerPage)
-
-                const newItems = fetchedItems.filter((item: MediaItem) => {
-                    if (!item.Artists || !item.Album || seenIds.current.has(item.Id)) {
-                        return false
-                    }
-                    seenIds.current.add(item.Id)
-                    return true
-                })
-
-                setData(prev => ({
-                    items: [...prev.items, ...newItems],
-                    loading: false,
-                    error: null,
-                    hasMore: fetchedItems.length === itemsPerPage,
-                }))
-            } catch (err) {
-                console.error('Failed to fetch frequently played data:', err)
-                if (err instanceof ApiError && err.response?.status === 401) {
-                    localStorage.removeItem('auth')
-                    window.location.href = '/login'
-                } else {
-                    setData(prev => ({ ...prev, loading: false, error: 'Failed to fetch frequently played data' }))
-                }
-            }
-        }
-
-        fetchData()
-    }, [serverUrl, userId, token, page])
+    const seenIds = new Set<string>()
+    const items: MediaItem[] = data
+        ? data.pages.flat().filter(item => {
+              if (!item.Artists || !item.Album || seenIds.has(item.Id)) {
+                  return false
+              }
+              seenIds.add(item.Id)
+              return true
+          })
+        : []
 
     const loadMore = useCallback(() => {
-        if (isLoadingMore.current) {
-            return
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage()
         }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-        if (!data.loading && data.hasMore) {
-            isLoadingMore.current = true
-            setPage(prev => prev + 1)
-        }
-    }, [data.loading, data.hasMore])
-
-    useEffect(() => {
-        if (!data.loading) {
-            isLoadingMore.current = false
-        }
-    }, [data.loading])
-
-    return { ...data, loadMore }
+    return {
+        items,
+        loading: isLoading || isFetchingNextPage,
+        error: error ? error.message : null,
+        hasMore: Boolean(hasNextPage),
+        loadMore,
+    }
 }
