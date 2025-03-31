@@ -21,6 +21,16 @@
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Isolate volume scroll */
+.sidenav > .sidenav_wrapper.lockscroll {
+    overflow: hidden !important;
+}
+
+/* Prevent sidenav content from jumping on windows/chrome when scrolling volume */
+html.winOS .sidenav > .sidenav_wrapper.lockscroll {
+    scrollbar-gutter: stable;
+}
+
 /* Sidenav specific scroll */
 html.winOS .sidenav > .sidenav_wrapper {
     overflow-y: scroll;
