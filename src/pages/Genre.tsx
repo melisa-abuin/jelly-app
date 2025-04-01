@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
-import { usePageTitle } from '../App'
 import MediaList from '../components/MediaList'
+import { usePageTitle } from '../context/PageTitleContext'
 import { useJellyfinGenreTracks } from '../hooks/useJellyfinGenreTracks'
 
 interface GenreProps {

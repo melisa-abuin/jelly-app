@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { MediaItem, searchAlbumsDetailed, searchArtistsDetailed, searchPlaylistsDetailed } from '../api/jellyfin'
-import { usePageTitle } from '../App'
 import Loader from '../components/Loader'
 import TrackList from '../components/TrackList'
+import { usePageTitle } from '../context/PageTitleContext'
 
 interface SearchResult {
     type: 'Artist' | 'Album' | 'Playlist' | 'Song'

@@ -10,6 +10,7 @@ import './App.css'
 import './components/MediaList.css'
 import PlaybackManager from './components/PlaybackManager'
 import Sidenav from './components/Sidenav'
+import { PageTitleProvider, usePageTitle } from './context/PageTitleContext'
 import { ScrollContextProvider } from './context/ScrollContext'
 import { useSidenav } from './hooks/useSidenav'
 import Album from './pages/Album'
@@ -37,28 +38,6 @@ const queryClient = new QueryClient({
 const persister = createSyncStoragePersister({
     storage: window.localStorage,
 })
-
-// Create a context for the page title
-interface PageTitleContextType {
-    pageTitle: string
-    setPageTitle: (title: string) => void
-}
-
-const PageTitleContext = createContext<PageTitleContextType | undefined>(undefined)
-
-const PageTitleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [pageTitle, setPageTitle] = useState<string>('')
-
-    return <PageTitleContext.Provider value={{ pageTitle, setPageTitle }}>{children}</PageTitleContext.Provider>
-}
-
-export const usePageTitle = () => {
-    const context = useContext(PageTitleContext)
-    if (!context) {
-        throw new Error('usePageTitle must be used within a PageTitleProvider')
-    }
-    return context
-}
 
 interface HistoryContextType {
     historyStack: string[]
