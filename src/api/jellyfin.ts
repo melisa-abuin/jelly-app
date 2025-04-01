@@ -7,9 +7,7 @@ export class ApiError extends Error {
 
 const generateDeviceId = () => {
     const storedDeviceId = localStorage.getItem('deviceId')
-    if (storedDeviceId) {
-        return storedDeviceId
-    }
+    if (storedDeviceId) return storedDeviceId
     const newDeviceId = Math.random().toString(36).substring(2) + Date.now().toString(36)
     localStorage.setItem('deviceId', newDeviceId)
     return newDeviceId
@@ -72,6 +70,114 @@ export interface MediaItem {
     ChildCount?: number
 }
 
+// Sidenav
+export const searchItems = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    searchTerm: string,
+    limit = 40
+): Promise<MediaItem[]> => {
+    const response = await fetch(
+        `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
+            searchTerm
+        )}&IncludeItemTypes=MusicAlbum,Playlist,Audio&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ArtistItems`,
+        {
+            headers: { 'X-Emby-Token': token },
+            signal: AbortSignal.timeout(20000),
+        }
+    )
+    if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
+    const data: { Items: MediaItem[] } = await response.json()
+    return data.Items
+}
+
+export const searchArtists = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    searchTerm: string,
+    limit = 20
+): Promise<MediaItem[]> => {
+    const response = await fetch(
+        `${serverUrl}/Artists?searchTerm=${encodeURIComponent(
+            searchTerm
+        )}&UserId=${userId}&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio`,
+        {
+            headers: { 'X-Emby-Token': token },
+            signal: AbortSignal.timeout(20000),
+        }
+    )
+    if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
+    const data: { Items: MediaItem[] } = await response.json()
+    return data.Items
+}
+
+// SearchResults
+export const searchArtistsDetailed = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    searchTerm: string,
+    limit = 50
+): Promise<MediaItem[]> => {
+    const response = await fetch(
+        `${serverUrl}/Artists?searchTerm=${encodeURIComponent(
+            searchTerm
+        )}&UserId=${userId}&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags`,
+        {
+            headers: { 'X-Emby-Token': token },
+            signal: AbortSignal.timeout(20000),
+        }
+    )
+    if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
+    const data: { Items: MediaItem[] } = await response.json()
+    return data.Items
+}
+
+export const searchAlbumsDetailed = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    searchTerm: string,
+    limit = 50
+): Promise<MediaItem[]> => {
+    const response = await fetch(
+        `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
+            searchTerm
+        )}&IncludeItemTypes=MusicAlbum&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags,AlbumArtists`,
+        {
+            headers: { 'X-Emby-Token': token },
+            signal: AbortSignal.timeout(20000),
+        }
+    )
+    if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
+    const data: { Items: MediaItem[] } = await response.json()
+    return data.Items
+}
+
+export const searchPlaylistsDetailed = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    searchTerm: string,
+    limit = 50
+): Promise<MediaItem[]> => {
+    const response = await fetch(
+        `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
+            searchTerm
+        )}&IncludeItemTypes=Playlist&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags,ChildCount`,
+        {
+            headers: { 'X-Emby-Token': token },
+            signal: AbortSignal.timeout(20000),
+        }
+    )
+    if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
+    const data: { Items: MediaItem[] } = await response.json()
+    return data.Items
+}
+
+// Home
 export const getRecentlyPlayed = async (serverUrl: string, userId: string, token: string): Promise<MediaItem[]> => {
     const response = await fetch(
         `${serverUrl}/Users/${userId}/Items?SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=12&Fields=PrimaryImageAspectRatio,ParentId,ImageTags,ArtistItems`,
@@ -111,6 +217,7 @@ export const getRecentlyAdded = async (serverUrl: string, userId: string, token:
     return data.Items
 }
 
+// Albums
 export const getAllAlbums = async (
     serverUrl: string,
     userId: string,
@@ -130,6 +237,7 @@ export const getAllAlbums = async (
     return data.Items
 }
 
+// Tracks
 export const getAllTracks = async (
     serverUrl: string,
     userId: string,
@@ -149,6 +257,7 @@ export const getAllTracks = async (
     return data.Items
 }
 
+// Favorites
 export const getFavoriteTracks = async (
     serverUrl: string,
     userId: string,
@@ -168,6 +277,7 @@ export const getFavoriteTracks = async (
     return data.Items
 }
 
+// Album
 export const getAlbumDetails = async (
     serverUrl: string,
     userId: string,
@@ -198,6 +308,7 @@ export const getAlbumDetails = async (
     return { album, tracks }
 }
 
+// Artist
 export const getArtistDetails = async (
     serverUrl: string,
     userId: string,
@@ -307,7 +418,6 @@ export const getPlaylistsFeaturingArtist = async (
         const batchPromises = batch.map(async playlist => {
             let startIndex = 0
             const limit = 100
-
             while (true) {
                 const tracksResponse = await fetch(
                     `${serverUrl}/Users/${userId}/Items?ParentId=${playlist.Id}&IncludeItemTypes=Audio&Fields=ArtistItems&StartIndex=${startIndex}&Limit=${limit}`,
@@ -337,6 +447,7 @@ export const getPlaylistsFeaturingArtist = async (
     return playlistsWithArtist
 }
 
+// Genre
 export const getGenreTracks = async (
     serverUrl: string,
     userId: string,
@@ -359,6 +470,7 @@ export const getGenreTracks = async (
     return data.Items || []
 }
 
+// Playlist
 export const getPlaylist = async (
     serverUrl: string,
     userId: string,

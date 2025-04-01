@@ -22,6 +22,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Playlist from './pages/Playlist'
 import RecentlyPlayed from './pages/RecentlyPlayed'
+import SearchResults from './pages/SearchResults'
 import Settings from './pages/Settings'
 import Tracks from './pages/Tracks'
 
@@ -59,13 +60,6 @@ export const usePageTitle = () => {
     return context
 }
 
-interface AuthData {
-    serverUrl: string
-    token: string
-    userId: string
-    username: string
-}
-
 interface HistoryContextType {
     historyStack: string[]
     goBack: () => void
@@ -91,6 +85,7 @@ const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         '/artist',
         '/genre',
         '/playlist',
+        '/search',
     ]
 
     useEffect(() => {
@@ -157,7 +152,6 @@ const App = () => {
         }
     }, [auth])
 
-    // Detect OS and Browser for custom scrollbar in sidenav
     useEffect(() => {
         const isWindows = /Win/.test(navigator.userAgent)
         const isChromium = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
@@ -205,6 +199,13 @@ const App = () => {
     )
 }
 
+interface AuthData {
+    serverUrl: string
+    token: string
+    userId: string
+    username: string
+}
+
 const MainLayout = ({
     auth,
     handleLogout,
@@ -237,18 +238,18 @@ const MainLayout = ({
     }
 
     const getPageTitle = () => {
-        if (location.pathname.startsWith('/album/')) {
-            return pageTitle || 'Album'
+        // Return pageTitle if set (e.g., by SearchResults), otherwise fallback to defaults
+        if (pageTitle) return pageTitle
+
+        if (location.pathname.startsWith('/album/')) return 'Album'
+        if (location.pathname.startsWith('/artist/')) return 'Artist'
+        if (location.pathname.startsWith('/genre/')) return 'Genre'
+        if (location.pathname.startsWith('/playlist/')) return 'Playlist'
+        if (location.pathname.startsWith('/search/')) {
+            const query = decodeURIComponent(location.pathname.split('/search/')[1])
+            return `Search results for '${query}'`
         }
-        if (location.pathname.startsWith('/artist/')) {
-            return pageTitle || 'Artist'
-        }
-        if (location.pathname.startsWith('/genre/')) {
-            return pageTitle || 'Genre'
-        }
-        if (location.pathname.startsWith('/playlist/')) {
-            return pageTitle || 'Playlist'
-        }
+
         switch (location.pathname) {
             case '/':
                 return 'Home'
@@ -316,6 +317,8 @@ const MainLayout = ({
                             serverUrl={auth.serverUrl}
                             userId={auth.userId}
                             token={auth.token}
+                            setCurrentPlaylist={handleSetCurrentPlaylist}
+                            playTrack={playTrack}
                         />
                         <div className={showSidenav ? 'dimmer active' : 'dimmer'} onClick={toggleSidenav}></div>
                         <main className="main">
@@ -357,7 +360,6 @@ const MainLayout = ({
                                                     </svg>
                                                 </div>
                                             )}
-
                                             {location.pathname.startsWith('/genre/') && pageTitle && (
                                                 <div className="page-icon genre" title="Genre">
                                                     <BookmarkFillIcon size={16} />
@@ -549,6 +551,16 @@ const MainLayout = ({
                                         }
                                     />
                                     <Route path="/settings" element={<Settings onLogout={handleLogout} />} />
+                                    <Route
+                                        path="/search/:query"
+                                        element={
+                                            <SearchResults
+                                                serverUrl={auth.serverUrl}
+                                                token={auth.token}
+                                                userId={auth.userId}
+                                            />
+                                        }
+                                    />
                                     <Route path="*" element={<Navigate to="/" />} />
                                 </Routes>
                             </div>
@@ -619,13 +631,17 @@ const MainLayout = ({
                                                       'No Artist'}
                                             </div>
                                             <div className="album">
-                                                <Link
-                                                    to={`/album/${currentTrack?.AlbumId}`}
-                                                    className="text"
-                                                    title={currentTrack?.Album || 'No Album'}
-                                                >
-                                                    {currentTrack?.Album || 'No Album'}
-                                                </Link>
+                                                {currentTrack?.Album ? (
+                                                    <Link
+                                                        to={`/album/${currentTrack.AlbumId}`}
+                                                        className="text"
+                                                        title={currentTrack.Album}
+                                                    >
+                                                        {currentTrack.Album}
+                                                    </Link>
+                                                ) : (
+                                                    <div className="text">No Album</div>
+                                                )}
                                                 <div className="album-icon" title="Album">
                                                     <svg
                                                         width="14"

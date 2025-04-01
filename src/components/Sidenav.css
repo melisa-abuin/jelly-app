@@ -135,7 +135,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container > .search-icon {
     position: absolute;
-    left: 10px;
+    left: 8px;
     pointer-events: none;
     color: var(--font-color-tertiary);
 }
@@ -144,14 +144,107 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     font-size: 0.75rem;
     font-weight: 500;
     width: 100%;
-    padding: 7px 6px 7px 30px;
+    padding: 7px 0 7px 30px;
     background-color: rgba(0, 0, 0, 0);
     text-overflow: ellipsis;
 }
 
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container > .search-clear {
+    opacity: 0;
+    visibility: hidden;
+    cursor: pointer;
+    padding: 7px;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container.active > .search-clear {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results {
+    margin: 14px 0;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results {
+    font-size: 0.725rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result {
+    cursor: pointer;
+    margin: 0 -7px;
+    margin-bottom: 2px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease-out, color 0.2s ease-out, fill 0.2s ease-out;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result:hover {
+    background-color: var(--bg-color-tertiary);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result.active {
+    color: var(--font-color-active);
+    fill: var(--font-color-active);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result > .type {
+    display: flex;
+    align-items: flex-start;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result > .type > .icon {
+    width: 20px;
+    flex-shrink: 0;
+}
+
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result
+    > .type.album
+    > .icon
+    > svg {
+    fill-rule: evenodd;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result > .type > .text {
+    margin-top: 1px;
+}
+
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result
+    > .type
+    > .text
+    > .artist {
+    font-weight: 500;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .additional {
+    margin-top: 6px;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .indicator {
+    font-size: 0.725rem;
+    font-weight: 500;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .indicator.error {
+    color: var(--font-color-error);
+}
+
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .empty {
-    font-size: 0.75rem;
-    margin: 10px 0;
+    font-size: 0.725rem;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .empty > .keyword {
@@ -224,7 +317,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input {
     cursor: pointer;
-    width: 142px;
+    width: 144px;
     height: 7px;
     border-radius: 20px;
     background-color: var(--bg-color);
@@ -249,7 +342,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0 18px;
+    margin: 0 16px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .status {
