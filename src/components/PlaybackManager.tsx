@@ -1,4 +1,4 @@
-import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext'
 
@@ -71,84 +71,90 @@ const PlaybackManager = ({
     const hasRestored = useRef(false)
 
     // Update Media Session metadata
-    const updateMediaSessionMetadata = (track: MediaItem) => {
-        if ('mediaSession' in navigator) {
-            const songThumbnailUrl =
-                track.Id && track.ImageTags?.Primary
-                    ? `${api.auth.serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${api.auth.token}`
-                    : null
-            const albumThumbnailUrl =
-                track.AlbumPrimaryImageTag && track.AlbumId
-                    ? `${api.auth.serverUrl}/Items/${track.AlbumId}/Images/Primary?tag=${track.AlbumPrimaryImageTag}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${api.auth.token}`
-                    : null
+    const updateMediaSessionMetadata = useCallback(
+        (track: MediaItem) => {
+            if ('mediaSession' in navigator) {
+                const songThumbnailUrl =
+                    track.Id && track.ImageTags?.Primary
+                        ? `${api.auth.serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${api.auth.token}`
+                        : null
+                const albumThumbnailUrl =
+                    track.AlbumPrimaryImageTag && track.AlbumId
+                        ? `${api.auth.serverUrl}/Items/${track.AlbumId}/Images/Primary?tag=${track.AlbumPrimaryImageTag}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${api.auth.token}`
+                        : null
 
-            const artworkUrl = songThumbnailUrl || albumThumbnailUrl
+                const artworkUrl = songThumbnailUrl || albumThumbnailUrl
 
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: track.Name || 'Unknown Track',
-                artist: track.Artists?.join(', ') || track.AlbumArtist || 'Unknown Artist',
-                album: track.Album || 'Unknown Album',
-                artwork: artworkUrl
-                    ? [
-                          {
-                              src: artworkUrl,
-                              sizes: '512x512',
-                              type: 'image/webp',
-                          },
-                      ]
-                    : [],
-            })
-        }
-    }
-
-    const playTrack = async (track: MediaItem, index: number) => {
-        if (audioRef.current) {
-            const audio = audioRef.current
-            audio.pause()
-            audio.currentTime = 0
-
-            try {
-                const streamUrl = `${api.auth.serverUrl}/Audio/${track.Id}/universal?UserId=${api.auth.userId}&api_key=${api.auth.token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
-                audio.src = streamUrl
-                audio.load()
-
-                await new Promise<void>(resolve => {
-                    const onLoadedMetadata = () => {
-                        audio.removeEventListener('loadedmetadata', onLoadedMetadata)
-                        resolve()
-                    }
-                    audio.addEventListener('loadedmetadata', onLoadedMetadata)
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.Name || 'Unknown Track',
+                    artist: track.Artists?.join(', ') || track.AlbumArtist || 'Unknown Artist',
+                    album: track.Album || 'Unknown Album',
+                    artwork: artworkUrl
+                        ? [
+                              {
+                                  src: artworkUrl,
+                                  sizes: '512x512',
+                                  type: 'image/webp',
+                              },
+                          ]
+                        : [],
                 })
-
-                await audio.play()
-                setCurrentTrack(track)
-                setCurrentTrackIndex(index)
-                setIsPlaying(true)
-                updateLastPlayed(track)
-
-                localStorage.setItem('lastPlayedTrack', JSON.stringify(track))
-                localStorage.setItem('currentTrackIndex', index.toString())
-
-                if (shuffle) {
-                    currentShuffledIndex.current = shuffledPlaylist.current.indexOf(index)
-                }
-
-                playedIndices.current.add(index)
-
-                updateMediaSessionMetadata(track)
-            } catch (error) {
-                console.error('Error playing track:', error)
-                setIsPlaying(false)
-                setCurrentTrack(null)
-                setCurrentTrackIndex(-1)
-                setProgress(0)
-                setDuration(0)
-                setBuffered(0)
             }
-        }
-    }
+        },
+        [api.auth.serverUrl, api.auth.token]
+    )
 
-    const togglePlayPause = () => {
+    const playTrack = useCallback(
+        async (track: MediaItem, index: number) => {
+            if (audioRef.current) {
+                const audio = audioRef.current
+                audio.pause()
+                audio.currentTime = 0
+
+                try {
+                    const streamUrl = `${api.auth.serverUrl}/Audio/${track.Id}/universal?UserId=${api.auth.userId}&api_key=${api.auth.token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
+                    audio.src = streamUrl
+                    audio.load()
+
+                    await new Promise<void>(resolve => {
+                        const onLoadedMetadata = () => {
+                            audio.removeEventListener('loadedmetadata', onLoadedMetadata)
+                            resolve()
+                        }
+                        audio.addEventListener('loadedmetadata', onLoadedMetadata)
+                    })
+
+                    await audio.play()
+                    setCurrentTrack(track)
+                    setCurrentTrackIndex(index)
+                    setIsPlaying(true)
+                    updateLastPlayed(track)
+
+                    localStorage.setItem('lastPlayedTrack', JSON.stringify(track))
+                    localStorage.setItem('currentTrackIndex', index.toString())
+
+                    if (shuffle) {
+                        currentShuffledIndex.current = shuffledPlaylist.current.indexOf(index)
+                    }
+
+                    playedIndices.current.add(index)
+
+                    updateMediaSessionMetadata(track)
+                } catch (error) {
+                    console.error('Error playing track:', error)
+                    setIsPlaying(false)
+                    setCurrentTrack(null)
+                    setCurrentTrackIndex(-1)
+                    setProgress(0)
+                    setDuration(0)
+                    setBuffered(0)
+                }
+            }
+        },
+        [api.auth.serverUrl, api.auth.token, api.auth.userId, shuffle, updateLastPlayed, updateMediaSessionMetadata]
+    )
+
+    const togglePlayPause = useCallback(() => {
         if (audioRef.current && currentTrack) {
             const audio = audioRef.current
             if (isPlaying) {
@@ -176,9 +182,9 @@ const PlaybackManager = ({
                     })
             }
         }
-    }
+    }, [api.auth.serverUrl, api.auth.token, api.auth.userId, currentTrack, isPlaying])
 
-    const nextTrack = () => {
+    const nextTrack = useCallback(() => {
         if (!playlist || playlist.length === 0 || currentTrackIndex === -1 || !currentTrack) {
             if (audioRef.current) {
                 audioRef.current.pause()
@@ -244,9 +250,9 @@ const PlaybackManager = ({
             }
             setIsPlaying(false)
         }
-    }
+    }, [currentTrack, currentTrackIndex, hasMore, loadMore, playTrack, playlist, repeat, shuffle])
 
-    const previousTrack = () => {
+    const previousTrack = useCallback(() => {
         if (!playlist || playlist.length === 0 || currentTrackIndex === -1 || !currentTrack) {
             if (audioRef.current) {
                 audioRef.current.pause()
@@ -302,7 +308,7 @@ const PlaybackManager = ({
             }
             setIsPlaying(false)
         }
-    }
+    }, [currentTrack, currentTrackIndex, playTrack, playlist, repeat, shuffle])
 
     const toggleShuffle = () => {
         setShuffle(prev => {
@@ -359,7 +365,7 @@ const PlaybackManager = ({
     // Set initial volume
     useEffect(() => {
         audioRef.current.volume = volume
-    }, [])
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     // Attach play/pause event listeners
     useEffect(() => {
@@ -478,7 +484,7 @@ const PlaybackManager = ({
                 setCurrentTrackIndex(indexInPlaylist)
             }
         }
-    }, [playlist, currentTrack])
+    }, [playlist, currentTrack, currentTrackIndex])
 
     useEffect(() => {
         if (hasRestored.current) return
@@ -507,7 +513,7 @@ const PlaybackManager = ({
             setCurrentTrackIndex(-1)
         }
         hasRestored.current = true
-    }, [playlist, api.auth.token, api.auth.serverUrl, api.auth.userId])
+    }, [playlist, api.auth.token, api.auth.serverUrl, api.auth.userId, updateMediaSessionMetadata])
 
     useEffect(() => {
         if (shuffle && hasMore && loadMore) {
@@ -555,7 +561,7 @@ const PlaybackManager = ({
         return () => {
             audio.removeEventListener('ended', handleEnded)
         }
-    }, [currentTrack, currentTrackIndex, repeat, playlist])
+    }, [currentTrack, currentTrackIndex, repeat, playlist, playTrack, nextTrack])
 
     useEffect(() => {
         if (clearOnLogout) {

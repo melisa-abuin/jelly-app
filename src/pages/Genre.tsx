@@ -75,7 +75,7 @@ const Genre = ({
             hasPreloaded.current = true
             setIsPreloading(false)
         }
-    }, [tracks.length, hasMore, loading, loadMore])
+    }, [tracks.length, hasMore, loading, loadMore, isPreloading])
 
     if (error) {
         return <div className="error">{error}</div>

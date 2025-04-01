@@ -80,7 +80,7 @@ const Playlist = ({
             hasPreloaded.current = true
             setIsPreloading(false)
         }
-    }, [tracks.length, hasMore, loading, loadMore])
+    }, [tracks.length, hasMore, loading, loadMore, isPreloading])
 
     if (loading && tracks.length === 0) {
         return <Loader />

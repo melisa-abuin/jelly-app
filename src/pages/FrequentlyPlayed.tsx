@@ -69,7 +69,7 @@ const FrequentlyPlayed = ({
             hasPreloaded.current = true
             setIsPreloading(false)
         }
-    }, [items.length, hasMore, loading, loadMore])
+    }, [items.length, hasMore, loading, loadMore, isPreloading])
 
     return (
         <div className="frequently-page">

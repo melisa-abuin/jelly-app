@@ -69,7 +69,7 @@ const Tracks = ({
             hasPreloaded.current = true
             setIsPreloading(false)
         }
-    }, [allTracks.length, hasMore, loading, loadMore])
+    }, [allTracks.length, hasMore, loading, loadMore, isPreloading])
 
     return (
         <div className="tracks-page">

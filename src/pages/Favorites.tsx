@@ -69,7 +69,7 @@ const Favorites = ({
             hasPreloaded.current = true
             setIsPreloading(false)
         }
-    }, [allFavorites.length, hasMore, loading, loadMore])
+    }, [allFavorites.length, hasMore, loading, loadMore, isPreloading])
 
     return (
         <div className="favorites-page">

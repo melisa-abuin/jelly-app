@@ -42,6 +42,47 @@ const PlaylistTrackList = ({
     const sizeMap = useRef<{ [index: number]: number }>({})
 
     useEffect(() => {
+        const handleResize = () => {
+            measureInitialHeights()
+        }
+
+        const setupResizeObservers = () => {
+            resizeObservers.current = rowRefs.current.map((ref, index) => {
+                const observer = new ResizeObserver(() => {
+                    if (ref) {
+                        const originalHeight = ref.style.height
+                        ref.style.height = 'auto'
+                        const height = ref.getBoundingClientRect().height
+                        ref.style.height = originalHeight || `${height}px`
+                        if (height !== sizeMap.current[index]) {
+                            setSize(index, height)
+                        }
+                    }
+                })
+                if (ref) observer.observe(ref)
+                return observer
+            })
+        }
+
+        const cleanupResizeObservers = () => {
+            resizeObservers.current.forEach(observer => observer.disconnect())
+            resizeObservers.current = []
+        }
+
+        const measureInitialHeights = () => {
+            rowRefs.current.forEach((ref, index) => {
+                if (ref) {
+                    const originalHeight = ref.style.height
+                    ref.style.height = 'auto'
+                    const height = ref.getBoundingClientRect().height
+                    ref.style.height = originalHeight || `${height}px`
+                    if (height !== sizeMap.current[index]) {
+                        setSize(index, height)
+                    }
+                }
+            })
+        }
+
         rowRefs.current = tracks.map(() => null)
         cleanupResizeObservers()
         measureInitialHeights()
@@ -54,47 +95,6 @@ const PlaylistTrackList = ({
             window.removeEventListener('resize', handleResize)
         }
     }, [tracks])
-
-    const handleResize = () => {
-        measureInitialHeights()
-    }
-
-    const setupResizeObservers = () => {
-        resizeObservers.current = rowRefs.current.map((ref, index) => {
-            const observer = new ResizeObserver(() => {
-                if (ref) {
-                    const originalHeight = ref.style.height
-                    ref.style.height = 'auto'
-                    const height = ref.getBoundingClientRect().height
-                    ref.style.height = originalHeight || `${height}px`
-                    if (height !== sizeMap.current[index]) {
-                        setSize(index, height)
-                    }
-                }
-            })
-            if (ref) observer.observe(ref)
-            return observer
-        })
-    }
-
-    const cleanupResizeObservers = () => {
-        resizeObservers.current.forEach(observer => observer.disconnect())
-        resizeObservers.current = []
-    }
-
-    const measureInitialHeights = () => {
-        rowRefs.current.forEach((ref, index) => {
-            if (ref) {
-                const originalHeight = ref.style.height
-                ref.style.height = 'auto'
-                const height = ref.getBoundingClientRect().height
-                ref.style.height = originalHeight || `${height}px`
-                if (height !== sizeMap.current[index]) {
-                    setSize(index, height)
-                }
-            }
-        })
-    }
 
     const setSize = (index: number, height: number) => {
         sizeMap.current = { ...sizeMap.current, [index]: height }
