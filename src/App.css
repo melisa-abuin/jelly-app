@@ -411,11 +411,7 @@ body.lockscroll {
 }
 
 .main > .main_header > .primary > .container > .page_title > .page-icon {
-    margin-left: 4px;
-}
-
-.main > .main_header > .primary > .container > .page_title > .page-icon.album > svg {
-    fill-rule: evenodd;
+    margin-left: 6px;
 }
 
 .main > .main_header > .secondary {
@@ -585,7 +581,7 @@ body.lockscroll {
 
 .main > .main_footer > .playback > .container > .track-info > .album {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     font-size: 0.725rem;
     font-weight: 500;
     color: var(--font-color-tertiary);
@@ -598,11 +594,10 @@ body.lockscroll {
 }
 
 .main > .main_footer > .playback > .container > .track-info > .album > .album-icon {
-    margin-left: 2px;
+    margin-left: 4px;
 }
 
 .main > .main_footer > .playback > .container > .track-info > .album > .album-icon > svg {
-    fill-rule: evenodd;
     fill: var(--font-color-tertiary);
 }
 

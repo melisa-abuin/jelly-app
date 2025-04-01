@@ -176,8 +176,10 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     cursor: pointer;
     margin: 0 -7px;
     margin-bottom: 2px;
-    padding: 5px 6px;
+    padding: 6px 7px;
     border-radius: 6px;
+    color: var(--font-color);
+    fill: var(--font-color);
     transition: background-color 0.2s ease-out, color 0.2s ease-out, fill 0.2s ease-out;
 }
 
@@ -292,6 +294,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     width: 14px;
     height: 14px;
     background-color: var(--font-color);
+    mask-size: contain;
     mask-repeat: no-repeat;
     mask-image: url(/play.circle.fill.svg);
     transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
@@ -368,6 +371,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     width: 14px;
     height: 14px;
     background-color: var(--font-color);
+    mask-size: contain;
     mask-repeat: no-repeat;
     mask-image: url(/pause.circle.fill.svg);
     transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
@@ -582,7 +586,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .additional {
-    margin-top: 4px;
+    margin-top: 6px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .indicator {
