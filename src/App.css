@@ -21,16 +21,18 @@ a.textlink {
     color: var(--link-color);
     outline: none;
     text-decoration: none;
-    transition: opacity 0.2s ease-out;
+    /* transition: opacity 0.2s ease-out; */
 }
 
 a.textlink:hover {
     text-decoration: underline;
 }
 
+/*
 a.textlink:active {
     opacity: 0.3;
 }
+*/
 
 p {
     margin: 0;
@@ -74,6 +76,7 @@ input[type='search']::-webkit-search-results-decoration {
     -webkit-border-radius: 0;
     font-family: var(--system-fonts);
     font-family: var(--inter-font);
+    color: var(--font-color);
 }
 
 input:-webkit-autofill,
@@ -222,6 +225,7 @@ body.lockscroll {
     display: flex;
     width: 100%;
     min-height: 100%;
+    fill: var(--font-color);
     color: var(--font-color);
     background-color: var(--bg-color);
 }
@@ -414,14 +418,6 @@ body.lockscroll {
     fill-rule: evenodd;
 }
 
-.main > .main_header > .primary > .container > .page_title > .page-icon.album > svg > path {
-    fill: var(--font-color);
-}
-
-.main > .main_header > .primary > .container > .page_title > .page-icon.album > svg > .spindle-hole {
-    fill: var(--font-color);
-}
-
 .main > .main_header > .secondary {
     display: none;
 }
@@ -607,13 +603,6 @@ body.lockscroll {
 
 .main > .main_footer > .playback > .container > .track-info > .album > .album-icon > svg {
     fill-rule: evenodd;
-}
-
-.main > .main_footer > .playback > .container > .track-info > .album > .album-icon > svg > path {
-    fill: var(--font-color-tertiary);
-}
-
-.main > .main_footer > .playback > .container > .track-info > .album > .album-icon > svg > .spindle-hole {
     fill: var(--font-color-tertiary);
 }
 

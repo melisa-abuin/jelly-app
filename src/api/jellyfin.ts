@@ -3,9 +3,7 @@ import axiosRetry from 'axios-retry'
 
 const generateDeviceId = () => {
     const storedDeviceId = localStorage.getItem('deviceId')
-    if (storedDeviceId) {
-        return storedDeviceId
-    }
+    if (storedDeviceId) return storedDeviceId
     const newDeviceId = Math.random().toString(36).substring(2) + Date.now().toString(36)
     localStorage.setItem('deviceId', newDeviceId)
     return newDeviceId
@@ -13,16 +11,13 @@ const generateDeviceId = () => {
 
 const deviceId = generateDeviceId()
 
-const api = axios.create({
-    timeout: 20000,
-})
+const api = axios.create({ timeout: 20000 })
 
 axiosRetry(api, {
     retries: 3,
     retryDelay: retryCount => retryCount * 1000,
-    retryCondition: error => {
-        return axios.isAxiosError(error) && (error.code === 'ECONNABORTED' || error.response?.status === 503)
-    },
+    retryCondition: error =>
+        axios.isAxiosError(error) && (error.code === 'ECONNABORTED' || error.response?.status === 503),
 })
 
 interface AuthResponse {
@@ -45,11 +40,7 @@ export const loginToJellyfin = async (
                 },
             }
         )
-        return {
-            token: response.data.AccessToken,
-            userId: response.data.User.Id,
-            username: response.data.User.Name,
-        }
+        return { token: response.data.AccessToken, userId: response.data.User.Id, username: response.data.User.Name }
     } catch (error) {
         throw new Error('Login failed: ' + (error as Error).message)
     }
@@ -76,6 +67,117 @@ export interface MediaItem {
     ChildCount?: number
 }
 
+// Sidenav
+export const searchItems = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    searchTerm: string,
+    limit = 40
+): Promise<MediaItem[]> => {
+    const response = await api.get<{ Items: MediaItem[] }>(`${serverUrl}/Users/${userId}/Items`, {
+        params: {
+            searchTerm,
+            IncludeItemTypes: 'MusicAlbum,Playlist,Audio',
+            Recursive: true,
+            Limit: limit,
+            Fields: 'PrimaryImageAspectRatio,ArtistItems',
+        },
+        headers: { 'X-Emby-Token': token },
+    })
+    return response.data.Items
+}
+
+export const searchArtists = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    searchTerm: string,
+    limit = 20
+): Promise<MediaItem[]> => {
+    const response = await api.get<{ Items: MediaItem[] }>(`${serverUrl}/Artists`, {
+        params: {
+            searchTerm,
+            UserId: userId,
+            Recursive: true,
+            Limit: limit,
+            Fields: 'PrimaryImageAspectRatio',
+        },
+        headers: { 'X-Emby-Token': token },
+    })
+    return response.data.Items
+}
+
+export const getAllPlaylists = async (serverUrl: string, userId: string, token: string): Promise<MediaItem[]> => {
+    const response = await api.get<{ Items: MediaItem[] }>(
+        `${serverUrl}/Users/${userId}/Items?IncludeItemTypes=Playlist&Recursive=true&Fields=Name`,
+        { headers: { 'X-Emby-Token': token } }
+    )
+    return response.data.Items
+}
+
+// SearchResults
+export const searchArtistsDetailed = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    searchTerm: string,
+    limit = 50
+): Promise<MediaItem[]> => {
+    const response = await api.get<{ Items: MediaItem[] }>(`${serverUrl}/Artists`, {
+        params: {
+            searchTerm,
+            UserId: userId,
+            Recursive: true,
+            Limit: limit,
+            Fields: 'PrimaryImageAspectRatio,ImageTags', // Include thumbnails
+        },
+        headers: { 'X-Emby-Token': token },
+    })
+    return response.data.Items
+}
+
+export const searchAlbumsDetailed = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    searchTerm: string,
+    limit = 50
+): Promise<MediaItem[]> => {
+    const response = await api.get<{ Items: MediaItem[] }>(`${serverUrl}/Users/${userId}/Items`, {
+        params: {
+            searchTerm,
+            IncludeItemTypes: 'MusicAlbum',
+            Recursive: true,
+            Limit: limit,
+            Fields: 'PrimaryImageAspectRatio,ImageTags,AlbumArtists', // Thumbnails and artists
+        },
+        headers: { 'X-Emby-Token': token },
+    })
+    return response.data.Items
+}
+
+export const searchPlaylistsDetailed = async (
+    serverUrl: string,
+    userId: string,
+    token: string,
+    searchTerm: string,
+    limit = 50
+): Promise<MediaItem[]> => {
+    const response = await api.get<{ Items: MediaItem[] }>(`${serverUrl}/Users/${userId}/Items`, {
+        params: {
+            searchTerm,
+            IncludeItemTypes: 'Playlist',
+            Recursive: true,
+            Limit: limit,
+            Fields: 'PrimaryImageAspectRatio,ImageTags,ChildCount', // Thumbnails and track count
+        },
+        headers: { 'X-Emby-Token': token },
+    })
+    return response.data.Items
+}
+
+// Home
 export const getRecentlyPlayed = async (serverUrl: string, userId: string, token: string): Promise<MediaItem[]> => {
     const response = await api.get<{ Items: MediaItem[] }>(
         `${serverUrl}/Users/${userId}/Items?SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=12&Fields=PrimaryImageAspectRatio,ParentId,ImageTags,ArtistItems`,
@@ -100,6 +202,7 @@ export const getRecentlyAdded = async (serverUrl: string, userId: string, token:
     return response.data.Items
 }
 
+// Albums
 export const getAllAlbums = async (
     serverUrl: string,
     userId: string,
@@ -114,6 +217,7 @@ export const getAllAlbums = async (
     return response.data.Items
 }
 
+// Tracks
 export const getAllTracks = async (
     serverUrl: string,
     userId: string,
@@ -128,6 +232,7 @@ export const getAllTracks = async (
     return response.data.Items
 }
 
+// Favorites
 export const getFavoriteTracks = async (
     serverUrl: string,
     userId: string,
@@ -142,6 +247,7 @@ export const getFavoriteTracks = async (
     return response.data.Items
 }
 
+// Album
 export const getAlbumDetails = async (
     serverUrl: string,
     userId: string,
@@ -163,6 +269,7 @@ export const getAlbumDetails = async (
     return { album, tracks }
 }
 
+// Artist
 export const getArtistDetails = async (
     serverUrl: string,
     userId: string,
@@ -215,12 +322,8 @@ export const getArtistDetails = async (
 
     allAlbums.forEach(album => {
         const primaryAlbumArtist = album.AlbumArtists?.[0]?.Name || album.AlbumArtist || 'Unknown Artist'
-
-        if (primaryAlbumArtist === artist.Name) {
-            albums.push(album)
-        } else {
-            appearsInAlbums.push(album)
-        }
+        if (primaryAlbumArtist === artist.Name) albums.push(album)
+        else appearsInAlbums.push(album)
     })
 
     return { artist, tracks, albums, appearsInAlbums, totalTrackCount }
@@ -239,7 +342,6 @@ export const getPlaylistsFeaturingArtist = async (
     const playlists = playlistsResponse.data.Items
 
     const playlistsWithArtist: MediaItem[] = []
-
     const batchSize = 5
     for (let i = 0; i < playlists.length; i += batchSize) {
         const batch = playlists.slice(i, i + batchSize)
@@ -247,7 +349,6 @@ export const getPlaylistsFeaturingArtist = async (
             let allTracks: MediaItem[] = []
             let startIndex = 0
             const limit = 100
-
             while (true) {
                 const tracksResponse = await api.get<{ Items: MediaItem[]; TotalRecordCount: number }>(
                     `${serverUrl}/Users/${userId}/Items?ParentId=${playlist.Id}&IncludeItemTypes=Audio&Fields=ArtistItems&StartIndex=${startIndex}&Limit=${limit}`,
@@ -255,18 +356,11 @@ export const getPlaylistsFeaturingArtist = async (
                 )
                 const tracks = tracksResponse.data.Items
                 allTracks = allTracks.concat(tracks)
-
                 const hasArtist = tracks.some(track => track.ArtistItems?.some(artist => artist.Id === artistId))
-                if (hasArtist) {
-                    return playlist
-                }
-
-                if (startIndex + limit >= tracksResponse.data.TotalRecordCount) {
-                    break
-                }
+                if (hasArtist) return playlist
+                if (startIndex + limit >= tracksResponse.data.TotalRecordCount) break
                 startIndex += limit
             }
-
             return null
         })
 
@@ -277,6 +371,7 @@ export const getPlaylistsFeaturingArtist = async (
     return playlistsWithArtist
 }
 
+// Genre
 export const getGenreTracks = async (
     serverUrl: string,
     userId: string,
@@ -294,6 +389,7 @@ export const getGenreTracks = async (
     return response.data.Items || []
 }
 
+// Playlist
 export const getPlaylist = async (
     serverUrl: string,
     userId: string,
@@ -323,11 +419,3 @@ export const getPlaylistTracks = async (
 }
 
 export { api, axios }
-
-export const getAllPlaylists = async (serverUrl: string, userId: string, token: string): Promise<MediaItem[]> => {
-    const response = await api.get<{ Items: MediaItem[] }>(
-        `${serverUrl}/Users/${userId}/Items?IncludeItemTypes=Playlist&Recursive=true&Fields=Name`,
-        { headers: { 'X-Emby-Token': token } }
-    )
-    return response.data.Items
-}
