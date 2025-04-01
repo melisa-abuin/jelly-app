@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { MediaItem, searchAlbumsDetailed, searchArtistsDetailed, searchPlaylistsDetailed } from '../api/jellyfin'
+import { MediaItem } from '../api/jellyfin'
 import Loader from '../components/Loader'
 import TrackList from '../components/TrackList'
+import { useJellyfinContext } from '../context/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext'
 
 interface SearchResult {
@@ -15,9 +16,6 @@ interface SearchResult {
 }
 
 interface SearchResultsProps {
-    serverUrl: string
-    token: string
-    userId: string
     playTrack: (track: MediaItem, index: number) => void
     setCurrentPlaylist: (playlist: MediaItem[]) => void
     currentTrack: MediaItem | null
@@ -25,16 +23,15 @@ interface SearchResultsProps {
     togglePlayPause: () => void
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({
-    serverUrl,
-    token,
-    userId,
+const SearchResults = ({
     playTrack,
     setCurrentPlaylist,
     currentTrack,
     isPlaying,
     togglePlayPause,
-}) => {
+}: SearchResultsProps) => {
+    const api = useJellyfinContext()
+
     const { query } = useParams<{ query: string }>()
     const { setPageTitle } = usePageTitle()
     const [results, setResults] = useState<{
@@ -57,19 +54,19 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         }
 
         const fetchSearchResults = async () => {
-            if (!query || !serverUrl || !token || !userId) return
+            if (!query) return
 
             setLoading(true)
             setError(null)
 
             try {
-                const artistItems = await searchArtistsDetailed(serverUrl, userId, token, query, 50)
-                const albumItems = await searchAlbumsDetailed(serverUrl, userId, token, query, 50)
-                const playlistItems = await searchPlaylistsDetailed(serverUrl, userId, token, query, 50)
+                const artistItems = await api.searchArtistsDetailed(query, 50)
+                const albumItems = await api.searchAlbumsDetailed(query, 50)
+                const playlistItems = await api.searchPlaylistsDetailed(query, 50)
                 const songResponse = await fetch(
-                    `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
+                    `${api.auth.serverUrl}/Users/${api.auth.userId}/Items?searchTerm=${encodeURIComponent(
                         query
-                    )}&IncludeItemTypes=Audio&Recursive=true&Limit=10&Fields=ArtistItems&api_key=${token}`
+                    )}&IncludeItemTypes=Audio&Recursive=true&Limit=10&Fields=ArtistItems&api_key=${api.auth.token}`
                 )
                 const songData = await songResponse.json()
                 const songs = songData.Items || []
@@ -79,7 +76,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     id: artist.Id,
                     name: artist.Name,
                     thumbnailUrl: artist.ImageTags?.Primary
-                        ? `${serverUrl}/Items/${artist.Id}/Images/Primary?tag=${artist.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
+                        ? `${api.auth.serverUrl}/Items/${artist.Id}/Images/Primary?tag=${artist.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
                         : '/default-thumbnail.png',
                 }))
 
@@ -88,9 +85,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     id: item.Id,
                     name: item.Name,
                     thumbnailUrl: item.ImageTags?.Primary
-                        ? `${serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
+                        ? `${api.auth.serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
                         : item.AlbumPrimaryImageTag && item.AlbumId
-                        ? `${serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
+                        ? `${api.auth.serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
                         : '/default-thumbnail.png',
                     artists: item.AlbumArtists?.map(artist => artist.Name) || [item.AlbumArtist || 'Unknown Artist'],
                 }))
@@ -100,7 +97,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     id: playlist.Id,
                     name: playlist.Name,
                     thumbnailUrl: playlist.ImageTags?.Primary
-                        ? `${serverUrl}/Items/${playlist.Id}/Images/Primary?tag=${playlist.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
+                        ? `${api.auth.serverUrl}/Items/${playlist.Id}/Images/Primary?tag=${playlist.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
                         : '/default-thumbnail.png',
                     totalTracks: playlist.ChildCount || 0,
                 }))
@@ -117,7 +114,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         fetchSearchResults()
 
         return () => setPageTitle('')
-    }, [query, serverUrl, token, userId, setPageTitle])
+    }, [query, setPageTitle, api])
 
     if (loading) return <Loader />
     if (error) return <div>{error}</div>

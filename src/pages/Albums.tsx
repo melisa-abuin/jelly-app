@@ -3,9 +3,6 @@ import MediaList from '../components/MediaList'
 import { useJellyfinAlbumsData } from '../hooks/useJellyfinAlbumsData'
 
 interface AlbumsProps {
-    user: { userId: string; username: string }
-    serverUrl: string
-    token: string
     playTrack?: (track: MediaItem, index: number) => void
     currentTrack?: MediaItem | null
     currentTrackIndex?: number
@@ -13,17 +10,8 @@ interface AlbumsProps {
     togglePlayPause?: () => void
 }
 
-const Albums = ({
-    user,
-    serverUrl,
-    token,
-    playTrack,
-    currentTrack,
-    currentTrackIndex,
-    isPlaying,
-    togglePlayPause,
-}: AlbumsProps) => {
-    const { allAlbums, loading, error, loadMore, hasMore } = useJellyfinAlbumsData(serverUrl, user.userId, token)
+const Albums = ({ playTrack, currentTrack, currentTrackIndex, isPlaying, togglePlayPause }: AlbumsProps) => {
+    const { allAlbums, loading, error, loadMore, hasMore } = useJellyfinAlbumsData()
 
     return (
         <div className="albums-page">
@@ -31,7 +19,6 @@ const Albums = ({
                 items={allAlbums}
                 type="album"
                 loading={loading}
-                serverUrl={serverUrl}
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={playTrack || (() => {})}

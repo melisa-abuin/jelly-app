@@ -5,9 +5,6 @@ import MediaList from '../components/MediaList'
 import { useJellyfinHomeData } from '../hooks/useJellyfinHomeData'
 
 interface HomePageProps {
-    user: { userId: string; username: string }
-    serverUrl: string
-    token: string
     playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
     currentTrackIndex: number
@@ -17,9 +14,6 @@ interface HomePageProps {
 }
 
 const Home = ({
-    user,
-    serverUrl,
-    token,
     playTrack,
     currentTrack,
     currentTrackIndex,
@@ -27,11 +21,7 @@ const Home = ({
     togglePlayPause,
     setCurrentPlaylist,
 }: HomePageProps) => {
-    const { recentlyPlayed, frequentlyPlayed, recentlyAdded, loading, error } = useJellyfinHomeData(
-        serverUrl,
-        user.userId,
-        token
-    )
+    const { recentlyPlayed, frequentlyPlayed, recentlyAdded, loading, error } = useJellyfinHomeData()
 
     if (loading) {
         return <Loader />
@@ -57,7 +47,6 @@ const Home = ({
                     items={recentlyPlayed}
                     type="song"
                     loading={loading}
-                    serverUrl={serverUrl}
                     playTrack={(track, index) => {
                         setCurrentPlaylist(recentlyPlayed || [])
                         playTrack(track, index)
@@ -83,7 +72,6 @@ const Home = ({
                     items={frequentlyPlayed}
                     type="song"
                     loading={loading}
-                    serverUrl={serverUrl}
                     playTrack={(track, index) => {
                         setCurrentPlaylist(frequentlyPlayed || [])
                         playTrack(track, index)
@@ -106,7 +94,6 @@ const Home = ({
                     items={recentlyAdded}
                     type="album"
                     loading={loading}
-                    serverUrl={serverUrl}
                     playTrack={(track, index) => {
                         setCurrentPlaylist(recentlyAdded || [])
                         playTrack(track, index)

@@ -13,7 +13,7 @@ interface TrackListProps {
     showAlbumLink?: boolean
 }
 
-const TrackList: React.FC<TrackListProps> = ({
+const TrackList = ({
     tracks,
     currentTrack,
     isPlaying,
@@ -21,7 +21,7 @@ const TrackList: React.FC<TrackListProps> = ({
     setCurrentPlaylist,
     playTrack,
     showAlbumLink = false,
-}) => {
+}: TrackListProps) => {
     const MIN_PLAY_COUNT = 5
     const mostPlayedTracks = tracks
         .map(track => ({

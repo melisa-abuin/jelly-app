@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
-import { ApiError, getGenreTracks, MediaItem } from '../api/jellyfin'
+import { ApiError, MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface JellyfinGenreTracksData {
     tracks: MediaItem[]
@@ -10,25 +11,21 @@ interface JellyfinGenreTracksData {
     loadMore: () => void
 }
 
-export const useJellyfinGenreTracks = (
-    serverUrl: string,
-    userId: string,
-    token: string,
-    genre: string
-): JellyfinGenreTracksData => {
+export const useJellyfinGenreTracks = (genre: string): JellyfinGenreTracksData => {
+    const api = useJellyfinContext()
+
     const itemsPerPage = 40
 
     const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
-        queryKey: ['genreTracks', serverUrl, userId, token, genre],
+        queryKey: ['genreTracks', genre],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await getGenreTracks(serverUrl, userId, token, genre, startIndex, itemsPerPage)
+            return await api.getGenreTracks(genre, startIndex, itemsPerPage)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
-        enabled: Boolean(serverUrl && token && genre),
         initialPageParam: 0,
     })
 

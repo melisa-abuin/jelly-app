@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { getFrequentlyPlayed, getRecentlyAdded, getRecentlyPlayed, MediaItem } from '../api/jellyfin'
+import { MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface JellyfinHomeData {
     recentlyPlayed: MediaItem[]
@@ -9,17 +10,16 @@ interface JellyfinHomeData {
     error: string | null
 }
 
-export const useJellyfinHomeData = (serverUrl: string, userId: string, token: string) => {
+export const useJellyfinHomeData = () => {
+    const api = useJellyfinContext()
+
     const { data, isLoading, error } = useQuery<JellyfinHomeData, Error>({
-        queryKey: ['homeData', serverUrl, userId, token],
+        queryKey: ['homeData'],
         queryFn: async () => {
-            if (!serverUrl || !token) {
-                throw new Error('No serverUrl or token')
-            }
             const [recentlyPlayed, frequentlyPlayed, recentlyAdded] = await Promise.all([
-                getRecentlyPlayed(serverUrl, userId, token),
-                getFrequentlyPlayed(serverUrl, userId, token),
-                getRecentlyAdded(serverUrl, userId, token),
+                api.getRecentlyPlayed(),
+                api.getFrequentlyPlayed(),
+                api.getRecentlyAdded(),
             ])
             return {
                 recentlyPlayed: recentlyPlayed.filter(item => item.Type === 'Audio'),
@@ -29,7 +29,6 @@ export const useJellyfinHomeData = (serverUrl: string, userId: string, token: st
                 error: null,
             }
         },
-        enabled: Boolean(serverUrl && token),
     })
 
     return {

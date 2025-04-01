@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
-import { ApiError, getFavoriteTracks, MediaItem } from '../api/jellyfin'
+import { ApiError, MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface JellyfinFavoritesData {
     allFavorites: MediaItem[]
@@ -10,20 +11,20 @@ interface JellyfinFavoritesData {
     loadMore: () => void
 }
 
-export const useJellyfinFavoritesData = (serverUrl: string, userId: string, token: string): JellyfinFavoritesData => {
+export const useJellyfinFavoritesData = (): JellyfinFavoritesData => {
+    const api = useJellyfinContext()
     const itemsPerPage = 40
 
     const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
-        queryKey: ['favorites', serverUrl, userId, token],
+        queryKey: ['favorites'],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await getFavoriteTracks(serverUrl, userId, token, startIndex, itemsPerPage)
+            return await api.getFavoriteTracks(startIndex, itemsPerPage)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
-        enabled: Boolean(serverUrl && token),
         initialPageParam: 0,
     })
 

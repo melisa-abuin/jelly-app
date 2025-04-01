@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
-import { ApiError, getAllAlbums, MediaItem } from '../api/jellyfin'
+import { ApiError, MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface JellyfinAlbumsData {
     allAlbums: MediaItem[]
@@ -10,20 +11,20 @@ interface JellyfinAlbumsData {
     loadMore: () => void
 }
 
-export const useJellyfinAlbumsData = (serverUrl: string, userId: string, token: string): JellyfinAlbumsData => {
+export const useJellyfinAlbumsData = (): JellyfinAlbumsData => {
+    const api = useJellyfinContext()
     const itemsPerPage = 40
 
     const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
-        queryKey: ['albums', serverUrl, userId, token],
+        queryKey: ['albums'],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await getAllAlbums(serverUrl, userId, token, startIndex, itemsPerPage)
+            return await api.getAllAlbums(startIndex, itemsPerPage)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
-        enabled: Boolean(serverUrl && token),
         initialPageParam: 0,
     })
 

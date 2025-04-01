@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import Loader from '../components/Loader'
 import TrackList from '../components/TrackList'
+import { useJellyfinContext } from '../context/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext'
 import { useJellyfinArtistData } from '../hooks/useJellyfinArtistData'
 import { useJellyfinPlaylistsFeaturingArtist } from '../hooks/useJellyfinPlaylistsFeaturingArtist'
@@ -11,9 +12,6 @@ import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Artist.css'
 
 interface ArtistProps {
-    user: { userId: string; username: string }
-    serverUrl: string
-    token: string
     playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
     isPlaying: boolean
@@ -21,24 +19,16 @@ interface ArtistProps {
     setCurrentPlaylist: (playlist: MediaItem[]) => void
 }
 
-const Artist = ({
-    user,
-    serverUrl,
-    token,
-    playTrack,
-    currentTrack,
-    isPlaying,
-    togglePlayPause,
-    setCurrentPlaylist,
-}: ArtistProps) => {
+const Artist = ({ playTrack, currentTrack, isPlaying, togglePlayPause, setCurrentPlaylist }: ArtistProps) => {
+    const api = useJellyfinContext()
     const { artistId } = useParams<{ artistId: string }>()
     const { artist, tracks, albums, appearsInAlbums, totalTrackCount, totalPlaytime, totalPlays, loading, error } =
-        useJellyfinArtistData(serverUrl, user.userId, token, artistId!)
+        useJellyfinArtistData(artistId!)
     const {
         playlists,
         loading: playlistsLoading,
         error: playlistsError,
-    } = useJellyfinPlaylistsFeaturingArtist(serverUrl, user.userId, token, artistId!)
+    } = useJellyfinPlaylistsFeaturingArtist(artistId!)
     const { setPageTitle } = usePageTitle()
 
     useEffect(() => {
@@ -80,7 +70,7 @@ const Artist = ({
                 <img
                     src={
                         artist.ImageTags?.Primary
-                            ? `${serverUrl}/Items/${artist.Id}/Images/Primary?tag=${artist.ImageTags.Primary}&quality=100&fillWidth=100&fillHeight=100&format=webp&api_key=${token}`
+                            ? `${api.auth.serverUrl}/Items/${artist.Id}/Images/Primary?tag=${artist.ImageTags.Primary}&quality=100&fillWidth=100&fillHeight=100&format=webp&api_key=${api.auth.token}`
                             : '/default-thumbnail.png'
                     }
                     alt={artist.Name}
@@ -172,7 +162,7 @@ const Artist = ({
                                     <img
                                         src={
                                             album.ImageTags?.Primary
-                                                ? `${serverUrl}/Items/${album.Id}/Images/Primary?tag=${album.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
+                                                ? `${api.auth.serverUrl}/Items/${album.Id}/Images/Primary?tag=${album.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
                                                 : '/default-thumbnail.png'
                                         }
                                         alt={album.Name}
@@ -207,7 +197,7 @@ const Artist = ({
                                     <img
                                         src={
                                             album.ImageTags?.Primary
-                                                ? `${serverUrl}/Items/${album.Id}/Images/Primary?tag=${album.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
+                                                ? `${api.auth.serverUrl}/Items/${album.Id}/Images/Primary?tag=${album.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
                                                 : '/default-thumbnail.png'
                                         }
                                         alt={album.Name}
@@ -254,7 +244,7 @@ const Artist = ({
                                             <img
                                                 src={
                                                     playlist.ImageTags?.Primary
-                                                        ? `${serverUrl}/Items/${playlist.Id}/Images/Primary?tag=${playlist.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
+                                                        ? `${api.auth.serverUrl}/Items/${playlist.Id}/Images/Primary?tag=${playlist.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
                                                         : '/default-thumbnail.png'
                                                 }
                                                 alt={playlist.Name}

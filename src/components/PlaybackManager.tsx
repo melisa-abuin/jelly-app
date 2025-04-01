@@ -1,10 +1,8 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface PlaybackManagerProps {
-    serverUrl: string
-    token: string
-    userId: string
     initialVolume: number
     updateLastPlayed: (track: MediaItem) => void
     playlist?: MediaItem[]
@@ -20,7 +18,7 @@ interface PlaybackManagerProps {
         progress: number
         duration: number
         buffered: number
-        handleSeek: (e: React.ChangeEvent<HTMLInputElement>) => void
+        handleSeek: (e: ChangeEvent<HTMLInputElement>) => void
         formatTime: (seconds: number) => string
         volume: number
         setVolume: (volume: number) => void
@@ -34,10 +32,7 @@ interface PlaybackManagerProps {
     }) => ReactNode
 }
 
-const PlaybackManager: React.FC<PlaybackManagerProps> = ({
-    serverUrl,
-    token,
-    userId,
+const PlaybackManager = ({
     initialVolume,
     updateLastPlayed,
     playlist = [],
@@ -46,7 +41,8 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
     hasMore,
     clearOnLogout,
     children,
-}) => {
+}: PlaybackManagerProps) => {
+    const api = useJellyfinContext()
     const [currentTrack, setCurrentTrack] = useState<MediaItem | null>(() => {
         const savedTrack = localStorage.getItem('lastPlayedTrack')
         return savedTrack ? JSON.parse(savedTrack) : null
@@ -79,11 +75,11 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
         if ('mediaSession' in navigator) {
             const songThumbnailUrl =
                 track.Id && track.ImageTags?.Primary
-                    ? `${serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${token}`
+                    ? `${api.auth.serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${api.auth.token}`
                     : null
             const albumThumbnailUrl =
                 track.AlbumPrimaryImageTag && track.AlbumId
-                    ? `${serverUrl}/Items/${track.AlbumId}/Images/Primary?tag=${track.AlbumPrimaryImageTag}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${token}`
+                    ? `${api.auth.serverUrl}/Items/${track.AlbumId}/Images/Primary?tag=${track.AlbumPrimaryImageTag}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${api.auth.token}`
                     : null
 
             const artworkUrl = songThumbnailUrl || albumThumbnailUrl
@@ -112,7 +108,7 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
             audio.currentTime = 0
 
             try {
-                const streamUrl = `${serverUrl}/Audio/${track.Id}/universal?UserId=${userId}&api_key=${token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
+                const streamUrl = `${api.auth.serverUrl}/Audio/${track.Id}/universal?UserId=${api.auth.userId}&api_key=${api.auth.token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
                 audio.src = streamUrl
                 audio.load()
 
@@ -160,7 +156,7 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                 setIsPlaying(false)
             } else {
                 if (!audio.src) {
-                    const streamUrl = `${serverUrl}/Audio/${currentTrack.Id}/universal?UserId=${userId}&api_key=${token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
+                    const streamUrl = `${api.auth.serverUrl}/Audio/${currentTrack.Id}/universal?UserId=${api.auth.userId}&api_key=${api.auth.token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
                     audio.src = streamUrl
                     audio.load()
                 }
@@ -340,7 +336,7 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
         })
     }
 
-    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSeek = (e: ChangeEvent<HTMLInputElement>) => {
         if (audioRef.current) {
             const newTime = parseFloat(e.target.value)
             audioRef.current.currentTime = newTime
@@ -489,7 +485,7 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
 
         const savedLastPlayedTrack = localStorage.getItem('lastPlayedTrack')
         const savedIndex = localStorage.getItem('currentTrackIndex')
-        if (savedLastPlayedTrack && token) {
+        if (savedLastPlayedTrack && api.auth.token) {
             const lastPlayedTrack = JSON.parse(savedLastPlayedTrack)
             setCurrentTrack(lastPlayedTrack)
             const indexInPlaylist = playlist.findIndex(track => track.Id === lastPlayedTrack.Id)
@@ -501,17 +497,17 @@ const PlaybackManager: React.FC<PlaybackManagerProps> = ({
                 setCurrentTrackIndex(-1)
             }
             if (audioRef.current) {
-                const streamUrl = `${serverUrl}/Audio/${lastPlayedTrack.Id}/universal?UserId=${userId}&api_key=${token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
+                const streamUrl = `${api.auth.serverUrl}/Audio/${lastPlayedTrack.Id}/universal?UserId=${api.auth.userId}&api_key=${api.auth.token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
                 audioRef.current.src = streamUrl
                 audioRef.current.load()
             }
             updateMediaSessionMetadata(lastPlayedTrack)
-        } else if (!token) {
+        } else if (!api.auth.token) {
             setCurrentTrack(null)
             setCurrentTrackIndex(-1)
         }
         hasRestored.current = true
-    }, [serverUrl, userId, token, playlist])
+    }, [playlist, api.auth.token, api.auth.serverUrl, api.auth.userId])
 
     useEffect(() => {
         if (shuffle && hasMore && loadMore) {

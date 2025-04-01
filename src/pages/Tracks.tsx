@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import MediaList from '../components/MediaList'
 import { useJellyfinTracksData } from '../hooks/useJellyfinTracksData'
 
 interface TracksProps {
-    user: { userId: string; username: string }
-    serverUrl: string
-    token: string
     playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
     currentTrackIndex: number
@@ -18,9 +16,6 @@ interface TracksProps {
 }
 
 const Tracks = ({
-    user,
-    serverUrl,
-    token,
     playTrack,
     currentTrack,
     currentTrackIndex,
@@ -30,8 +25,8 @@ const Tracks = ({
     setLoadMoreCallback,
     setHasMoreState,
 }: TracksProps) => {
-    const { allTracks, loading, error, loadMore, hasMore } = useJellyfinTracksData(serverUrl, user.userId, token)
-    const virtuosoRef = useRef<any>(null)
+    const { allTracks, loading, error, loadMore, hasMore } = useJellyfinTracksData()
+    const virtuosoRef = useRef<VirtuosoHandle>(null)
     const hasPreloaded = useRef(false)
     const [isPreloading, setIsPreloading] = useState(false)
 
@@ -84,7 +79,6 @@ const Tracks = ({
                 items={allTracks}
                 type="song"
                 loading={loading}
-                serverUrl={serverUrl}
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={(track, index) => {

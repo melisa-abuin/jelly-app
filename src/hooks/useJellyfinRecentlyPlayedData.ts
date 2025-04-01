@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
-import { ApiError, MediaItem, fetchRecentlyPlayed } from '../api/jellyfin'
+import { ApiError, MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface JellyfinRecentlyPlayedData {
     items: MediaItem[]
@@ -10,24 +11,21 @@ interface JellyfinRecentlyPlayedData {
     loadMore: () => void
 }
 
-export const useJellyfinRecentlyPlayedData = (
-    serverUrl: string,
-    userId: string,
-    token: string
-): JellyfinRecentlyPlayedData => {
+export const useJellyfinRecentlyPlayedData = (): JellyfinRecentlyPlayedData => {
+    const api = useJellyfinContext()
+
     const itemsPerPage = 40
 
     const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
-        queryKey: ['recentlyPlayed', serverUrl, userId, token],
+        queryKey: ['recentlyPlayed'],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await fetchRecentlyPlayed(serverUrl, userId, token, startIndex, itemsPerPage)
+            return await api.fetchRecentlyPlayed(startIndex, itemsPerPage)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
-        enabled: Boolean(serverUrl && token),
         initialPageParam: 0,
     })
 

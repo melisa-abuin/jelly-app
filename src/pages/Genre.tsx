@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import MediaList from '../components/MediaList'
 import { usePageTitle } from '../context/PageTitleContext'
 import { useJellyfinGenreTracks } from '../hooks/useJellyfinGenreTracks'
 
 interface GenreProps {
-    user: { userId: string; username: string }
-    serverUrl: string
-    token: string
     playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
     currentTrackIndex: number
@@ -20,9 +18,6 @@ interface GenreProps {
 }
 
 const Genre = ({
-    user,
-    serverUrl,
-    token,
     playTrack,
     currentTrack,
     currentTrackIndex,
@@ -31,9 +26,9 @@ const Genre = ({
     setCurrentPlaylist,
 }: GenreProps) => {
     const { genre } = useParams<{ genre: string }>()
-    const { tracks, loading, error, loadMore, hasMore } = useJellyfinGenreTracks(serverUrl, user.userId, token, genre!)
+    const { tracks, loading, error, loadMore, hasMore } = useJellyfinGenreTracks(genre!)
     const { setPageTitle } = usePageTitle()
-    const virtuosoRef = useRef<any>(null)
+    const virtuosoRef = useRef<VirtuosoHandle>(null)
     const hasPreloaded = useRef(false)
     const [isPreloading, setIsPreloading] = useState(false)
 
@@ -93,7 +88,6 @@ const Genre = ({
                 items={tracks}
                 type="song"
                 loading={loading}
-                serverUrl={serverUrl}
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={(track, index) => {

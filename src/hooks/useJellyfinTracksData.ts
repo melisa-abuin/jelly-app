@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
-import { ApiError, getAllTracks, MediaItem } from '../api/jellyfin'
+import { ApiError, MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface JellyfinTracksData {
     allTracks: MediaItem[]
@@ -10,20 +11,20 @@ interface JellyfinTracksData {
     loadMore: () => void
 }
 
-export const useJellyfinTracksData = (serverUrl: string, userId: string, token: string): JellyfinTracksData => {
+export const useJellyfinTracksData = (): JellyfinTracksData => {
+    const api = useJellyfinContext()
     const itemsPerPage = 40
 
     const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
-        queryKey: ['jellyfinTracks', serverUrl, userId, token],
+        queryKey: ['jellyfinTracks'],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await getAllTracks(serverUrl, userId, token, startIndex, itemsPerPage)
+            return await api.getAllTracks(startIndex, itemsPerPage)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
-        enabled: Boolean(serverUrl && token),
         initialPageParam: 0,
     })
 

@@ -4,15 +4,13 @@ import { Link, useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import Loader from '../components/Loader'
 import TrackList from '../components/TrackList'
+import { useJellyfinContext } from '../context/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext'
 import { useJellyfinAlbumData } from '../hooks/useJellyfinAlbumData'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Album.css'
 
 interface AlbumProps {
-    user: { userId: string; username: string }
-    serverUrl: string
-    token: string
     playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
     isPlaying: boolean
@@ -20,18 +18,10 @@ interface AlbumProps {
     setCurrentPlaylist: (playlist: MediaItem[]) => void
 }
 
-const Album = ({
-    user,
-    serverUrl,
-    token,
-    playTrack,
-    currentTrack,
-    isPlaying,
-    togglePlayPause,
-    setCurrentPlaylist,
-}: AlbumProps) => {
+const Album = ({ playTrack, currentTrack, isPlaying, togglePlayPause, setCurrentPlaylist }: AlbumProps) => {
+    const api = useJellyfinContext()
     const { albumId } = useParams<{ albumId: string }>()
-    const { album, tracks, loading, error } = useJellyfinAlbumData(serverUrl, user.userId, token, albumId!)
+    const { album, tracks, loading, error } = useJellyfinAlbumData(albumId!)
     const { setPageTitle } = usePageTitle()
 
     useEffect(() => {
@@ -67,7 +57,7 @@ const Album = ({
                 <img
                     src={
                         album.ImageTags?.Primary
-                            ? `${serverUrl}/Items/${album.Id}/Images/Primary?tag=${album.ImageTags.Primary}&quality=100&fillWidth=100&fillHeight=100&format=webp&api_key=${token}`
+                            ? `${api.auth.serverUrl}/Items/${album.Id}/Images/Primary?tag=${album.ImageTags.Primary}&quality=100&fillWidth=100&fillHeight=100&format=webp&api_key=${api.auth.token}`
                             : '/default-thumbnail.png'
                     }
                     alt={album.Name}
