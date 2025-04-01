@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { searchAlbumsDetailed, searchArtistsDetailed, searchPlaylistsDetailed } from '../api/jellyfin'
+import { MediaItem, searchAlbumsDetailed, searchArtistsDetailed, searchPlaylistsDetailed } from '../api/jellyfin'
 import { usePageTitle } from '../App'
 import Loader from '../components/Loader'
+import TrackList from '../components/TrackList'
 
 interface SearchResult {
-    type: 'Artist' | 'Album' | 'Playlist'
+    type: 'Artist' | 'Album' | 'Playlist' | 'Song'
     id: string
     name: string
     thumbnailUrl?: string
@@ -17,19 +18,35 @@ interface SearchResultsProps {
     serverUrl: string
     token: string
     userId: string
+    playTrack: (track: MediaItem, index: number) => void
+    setCurrentPlaylist: (playlist: MediaItem[]) => void
+    currentTrack: MediaItem | null
+    isPlaying: boolean
+    togglePlayPause: () => void
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ serverUrl, token, userId }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({
+    serverUrl,
+    token,
+    userId,
+    playTrack,
+    setCurrentPlaylist,
+    currentTrack,
+    isPlaying,
+    togglePlayPause,
+}) => {
     const { query } = useParams<{ query: string }>()
     const { setPageTitle } = usePageTitle()
     const [results, setResults] = useState<{
         artists: SearchResult[]
         albums: SearchResult[]
         playlists: SearchResult[]
+        songs: MediaItem[]
     }>({
         artists: [],
         albums: [],
         playlists: [],
+        songs: [],
     })
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -47,10 +64,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ serverUrl, token, userId 
 
             try {
                 const artistItems = await searchArtistsDetailed(serverUrl, userId, token, query, 50)
-
                 const albumItems = await searchAlbumsDetailed(serverUrl, userId, token, query, 50)
-
                 const playlistItems = await searchPlaylistsDetailed(serverUrl, userId, token, query, 50)
+                const songResponse = await fetch(
+                    `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
+                        query
+                    )}&IncludeItemTypes=Audio&Recursive=true&Limit=10&Fields=ArtistItems&api_key=${token}`
+                )
+                const songData = await songResponse.json()
+                const songs = songData.Items || []
 
                 const artists = artistItems.map(artist => ({
                     type: 'Artist' as const,
@@ -83,7 +105,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ serverUrl, token, userId 
                     totalTracks: playlist.ChildCount || 0,
                 }))
 
-                setResults({ artists, albums, playlists })
+                setResults({ artists, albums, playlists, songs })
             } catch (err) {
                 console.error('Search Error:', err)
                 setError('Failed to load search results')
@@ -93,6 +115,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ serverUrl, token, userId 
         }
 
         fetchSearchResults()
+
+        return () => setPageTitle('')
     }, [query, serverUrl, token, userId, setPageTitle])
 
     if (loading) return <Loader />
@@ -101,6 +125,21 @@ const SearchResults: React.FC<SearchResultsProps> = ({ serverUrl, token, userId 
 
     return (
         <div className="search-results">
+            {results.songs.length > 0 && (
+                <div className="section songs">
+                    <h2>Songs</h2>
+                    <TrackList
+                        tracks={results.songs}
+                        currentTrack={currentTrack}
+                        isPlaying={isPlaying}
+                        togglePlayPause={togglePlayPause}
+                        setCurrentPlaylist={setCurrentPlaylist}
+                        playTrack={playTrack}
+                        showAlbumLink={true}
+                    />
+                </div>
+            )}
+
             {results.artists.length > 0 && (
                 <div className="section artists">
                     <h2>Artists</h2>
@@ -157,9 +196,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ serverUrl, token, userId 
                 </div>
             )}
 
-            {results.artists.length === 0 && results.albums.length === 0 && results.playlists.length === 0 && (
-                <div>No results found for "{query}".</div>
-            )}
+            {results.artists.length === 0 &&
+                results.albums.length === 0 &&
+                results.playlists.length === 0 &&
+                results.songs.length === 0 && <div>No results found for '{query}'.</div>}
         </div>
     )
 }
