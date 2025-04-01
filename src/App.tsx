@@ -301,6 +301,9 @@ const MainLayout = ({
                             token={auth.token}
                             setCurrentPlaylist={handleSetCurrentPlaylist}
                             playTrack={playTrack}
+                            currentTrack={currentTrack}
+                            isPlaying={isPlaying}
+                            togglePlayPause={togglePlayPause}
                         />
                         <div className={showSidenav ? 'dimmer active' : 'dimmer'} onClick={toggleSidenav}></div>
                         <main className="main">
@@ -540,6 +543,11 @@ const MainLayout = ({
                                                 serverUrl={auth.serverUrl}
                                                 token={auth.token}
                                                 userId={auth.userId}
+                                                playTrack={playTrack}
+                                                setCurrentPlaylist={handleSetCurrentPlaylist}
+                                                currentTrack={currentTrack}
+                                                isPlaying={isPlaying}
+                                                togglePlayPause={togglePlayPause}
                                             />
                                         }
                                     />

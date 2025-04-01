@@ -18,6 +18,9 @@ interface SidenavProps {
     token: string
     playTrack: (track: MediaItem, index: number) => void
     setCurrentPlaylist: (playlist: MediaItem[]) => void
+    currentTrack: MediaItem | null
+    isPlaying: boolean
+    togglePlayPause: () => void
 }
 
 interface SearchResult {
@@ -97,7 +100,7 @@ const Sidenav = (props: SidenavProps) => {
                             artistName: item.ArtistItems?.[0]?.Name || item.Artists?.[0] || 'Unknown Artist',
                             mediaItem: item,
                         }))
-                        .slice(0, 8)
+                        .slice(0, 6)
                     const albums = items
                         .filter(item => item.Type === 'MusicAlbum')
                         .map(item => ({ type: 'Album' as const, id: item.Id, name: item.Name }))
@@ -132,13 +135,14 @@ const Sidenav = (props: SidenavProps) => {
         setSearchResults([])
     }
 
-    const [activeSongId, setActiveSongId] = useState<string | null>(null)
-
     const handleSongClick = (song: SearchResult) => {
         if (song.mediaItem) {
-            props.setCurrentPlaylist([song.mediaItem])
-            props.playTrack(song.mediaItem, 0)
-            setActiveSongId(song.id)
+            if (song.id === props.currentTrack?.Id) {
+                props.togglePlayPause()
+            } else {
+                props.setCurrentPlaylist([song.mediaItem])
+                props.playTrack(song.mediaItem, 0)
+            }
             props.closeSidenav()
         }
     }
@@ -207,21 +211,61 @@ const Sidenav = (props: SidenavProps) => {
                                                         key={`${result.type}-${result.id}`}
                                                         onClick={() => handleSongClick(result)}
                                                         className={`result ${
-                                                            result.type === 'Song' && result.id === activeSongId
-                                                                ? 'active'
+                                                            result.type === 'Song' &&
+                                                            result.id === props.currentTrack?.Id
+                                                                ? props.isPlaying
+                                                                    ? 'playing'
+                                                                    : 'paused'
                                                                 : ''
                                                         }`}
                                                     >
                                                         <div className="type song">
                                                             <div className="icon" title="Song">
-                                                                <svg
-                                                                    width="16"
-                                                                    height="16"
-                                                                    viewBox="0 0 24 24"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                >
-                                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" />
-                                                                </svg>
+                                                                <div className="song-icon">
+                                                                    <svg
+                                                                        width="16"
+                                                                        height="16"
+                                                                        viewBox="0 0 52 54"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                    >
+                                                                        <path d="M 41.83984375,16.7578125 L 41.83984375,9.302734375 C 41.83984375,8.099609375 40.89453125,7.3046875 39.712890625,7.5625 L 28.390625,9.990234375 C 27.015625,10.291015625 26.328125,10.978515625 26.328125,12.1171875 L 26.478515625,34.9765625 C 26.478515625,36.05078125 25.94140625,36.759765625 24.99609375,36.953125 L 21.623046875,37.662109375 C 17.43359375,38.54296875 15.478515625,40.6484375 15.478515625,43.806640625 C 15.478515625,46.986328125 17.90625,49.19921875 21.365234375,49.19921875 C 24.458984375,49.19921875 29.03515625,46.96484375 29.03515625,40.86328125 L 29.03515625,22.193359375 C 29.03515625,21.033203125 29.271484375,20.796875 30.32421875,20.5390625 L 40.59375,18.283203125 C 41.3671875,18.1328125 41.83984375,17.53125 41.83984375,16.7578125 Z" />
+                                                                    </svg>
+                                                                </div>
+                                                                <div className="play-icon" />
+                                                                <div className="pause-icon" />
+                                                                <div className="play-state-animation">
+                                                                    <svg
+                                                                        width="14"
+                                                                        height="14"
+                                                                        viewBox="0 0 14 14"
+                                                                        className="sound-bars"
+                                                                    >
+                                                                        <rect
+                                                                            x="1"
+                                                                            y="8"
+                                                                            width="3"
+                                                                            height="6"
+                                                                            rx="1.5"
+                                                                            className="bar bar1"
+                                                                        ></rect>
+                                                                        <rect
+                                                                            x="5.5"
+                                                                            y="7"
+                                                                            width="3"
+                                                                            height="7"
+                                                                            rx="1.5"
+                                                                            className="bar bar2"
+                                                                        ></rect>
+                                                                        <rect
+                                                                            x="10"
+                                                                            y="9"
+                                                                            width="3"
+                                                                            height="5"
+                                                                            rx="1.5"
+                                                                            className="bar bar3"
+                                                                        ></rect>
+                                                                    </svg>
+                                                                </div>
                                                             </div>
                                                             <div className="text">
                                                                 {result.name}{' '}

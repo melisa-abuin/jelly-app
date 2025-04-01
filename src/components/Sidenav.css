@@ -185,9 +185,22 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     background-color: var(--bg-color-tertiary);
 }
 
-.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result.active {
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result.active,
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result.playing,
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result.paused {
     color: var(--font-color-active);
     fill: var(--font-color-active);
+    background-color: var(--bg-color-tertiary);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result.playing,
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result.paused {
+    background-color: unset;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result.playing:hover,
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result.paused:hover {
+    background-color: var(--bg-color-tertiary);
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result > .type {
@@ -213,6 +226,344 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     fill-rule: evenodd;
 }
 
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result
+    > .type
+    > .icon
+    > .song-icon {
+    position: absolute;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+/* Hide song icon on hover/playing/paused */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result.playing
+    > .type
+    > .icon
+    > .song-icon,
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result:hover
+    > .type
+    > .icon
+    > .song-icon,
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result.paused
+    > .type
+    > .icon
+    > .song-icon {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result
+    > .type
+    > .icon
+    > .play-icon {
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+    display: block;
+    width: 14px;
+    height: 14px;
+    background-color: var(--font-color);
+    mask-repeat: no-repeat;
+    mask-image: url(/play.circle.fill.svg);
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result:hover
+    > .type
+    > .icon
+    > .play-icon {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Hide play button when a track is playing or paused */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result.playing
+    > .type
+    > .icon
+    > .play-icon,
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result.paused
+    > .type
+    > .icon
+    > .play-icon {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Show play button when a track is paused and you hover the track/playlist/item */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result.paused:hover
+    > .type
+    > .icon
+    > .play-icon {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result
+    > .type
+    > .icon
+    > .pause-icon {
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+    display: block;
+    width: 14px;
+    height: 14px;
+    background-color: var(--font-color);
+    mask-repeat: no-repeat;
+    mask-image: url(/pause.circle.fill.svg);
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+/* Hide pause button when a track is paused */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result.paused
+    > .type
+    > .icon
+    > .pause-icon {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Show pause button when a track is playing and you hover the track */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result.playing:hover
+    > .type
+    > .icon
+    > .pause-icon {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Hide play-state animation by default */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result
+    > .type
+    > .icon
+    > .play-state-animation {
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+/* Show play-state animation when a track is playing or paused */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result.playing
+    > .type
+    > .icon
+    > .play-state-animation,
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result.paused
+    > .type
+    > .icon
+    > .play-state-animation {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Hide play-state animation when you hover the track */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result:hover
+    > .type
+    > .icon
+    > .play-state-animation {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Play-state animation */
+/* Animation is active when a track is playing */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result.playing
+    > .type
+    > .icon
+    > .play-state-animation
+    > .sound-bars {
+    animation-play-state: running;
+}
+
+/* Animation is paused when a track is stopped */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result.paused
+    > .type
+    > .icon
+    > .play-state-animation
+    > .sound-bars {
+    animation-play-state: paused;
+}
+
+/* The individual sound-bars will inherit the play state from parent */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result
+    > .type
+    > .icon
+    > .play-state-animation
+    > .sound-bars
+    > .bar {
+    animation-play-state: inherit !important;
+    transform-origin: bottom;
+    fill: var(--brand-color);
+}
+
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result
+    > .type
+    > .icon
+    > .play-state-animation
+    > .sound-bars
+    > .bar1 {
+    animation: ResultTrackbounce 0.5s infinite ease-in-out;
+}
+
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result
+    > .type
+    > .icon
+    > .play-state-animation
+    > .sound-bars
+    > .bar2 {
+    animation: ResultTrackbounce 0.55s infinite ease-in-out;
+}
+
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result
+    > .type
+    > .icon
+    > .play-state-animation
+    > .sound-bars
+    > .bar3 {
+    animation: ResultTrackbounce 0.45s infinite ease-in-out;
+}
+
+@keyframes ResultTrackbounce {
+    0%,
+    100% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(1.8);
+    }
+}
+
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result > .type > .text {
     margin-top: 1px;
 }
@@ -231,7 +582,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .additional {
-    margin-top: 6px;
+    margin-top: 4px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .indicator {
