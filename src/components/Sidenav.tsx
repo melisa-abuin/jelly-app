@@ -1,7 +1,7 @@
 import { GearIcon, SearchIcon, XCircleIcon } from '@primer/octicons-react'
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { MediaItem, searchArtists } from '../api/jellyfin'
+import { MediaItem, searchArtists, searchItems } from '../api/jellyfin'
 import '../App.css'
 import { useScrollContext } from '../context/ScrollContext'
 import { useJellyfinPlaylistsList } from '../hooks/useJellyfinPlaylistsList'
@@ -73,24 +73,13 @@ const Sidenav = (props: SidenavProps) => {
                     )
 
                     // Fetch songs, albums, and playlists from /Items endpoint
-                    const itemsResponse = await api.get<{ Items: MediaItem[] }>(
-                        `${props.serverUrl}/Users/${props.userId}/Items`,
-                        {
-                            params: {
-                                searchTerm: searchQuery,
-                                IncludeItemTypes: 'MusicAlbum,Playlist,Audio',
-                                Recursive: true,
-                                Limit: 40,
-                                Fields: 'ArtistItems',
-                            },
-                            headers: { 'X-Emby-Token': props.token },
-                        }
-                    )
-                    const items = itemsResponse.data.Items || []
+                    const itemsResponse = await searchItems(props.serverUrl, props.userId, props.token, searchQuery, 20)
+                    const items = itemsResponse || []
 
                     const artists = artistResponse
                         .map(item => ({ type: 'Artist' as const, id: item.Id, name: item.Name }))
                         .slice(0, 4)
+
                     const songs = items
                         .filter(item => item.Type === 'Audio')
                         .map(item => ({
@@ -101,10 +90,12 @@ const Sidenav = (props: SidenavProps) => {
                             mediaItem: item,
                         }))
                         .slice(0, 6)
+
                     const albums = items
                         .filter(item => item.Type === 'MusicAlbum')
                         .map(item => ({ type: 'Album' as const, id: item.Id, name: item.Name }))
                         .slice(0, 4)
+
                     const playlists = items
                         .filter(item => item.Type === 'Playlist')
                         .map(item => ({ type: 'Playlist' as const, id: item.Id, name: item.Name }))

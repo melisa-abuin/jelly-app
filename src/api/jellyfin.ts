@@ -81,7 +81,7 @@ export const searchItems = async (
     const response = await fetch(
         `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
             searchTerm
-        )}&IncludeItemTypes=MusicAlbum,Playlist,Audio&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ArtistItems`,
+        )}&IncludeItemTypes=MusicAlbum,Playlist,Audio&Recursive=true&Limit=${limit}&Fields=ArtistItems`,
         {
             headers: { 'X-Emby-Token': token },
             signal: AbortSignal.timeout(20000),
