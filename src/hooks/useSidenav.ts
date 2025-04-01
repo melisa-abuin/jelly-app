@@ -6,7 +6,7 @@ export const useSidenav = (location?: Location) => {
 
     // Close sidenav on route change if location is provided
     useEffect(() => {
-        if (location) {
+        if (location?.pathname) {
             setShowSidenav(false)
         }
     }, [location?.pathname])

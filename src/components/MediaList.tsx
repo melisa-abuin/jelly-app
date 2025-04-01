@@ -3,6 +3,7 @@ import { Ref, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 import Loader from './Loader'
 
 interface ExtendedMediaItem extends MediaItem {
@@ -15,7 +16,6 @@ interface MediaListProps {
     items: MediaItem[] | undefined
     type: 'song' | 'album'
     loading: boolean
-    serverUrl: string
     loadMore?: () => void
     hasMore?: boolean
     playTrack: (track: MediaItem, index: number) => void
@@ -32,7 +32,6 @@ const MediaList = ({
     items = [],
     type,
     loading,
-    serverUrl,
     loadMore,
     hasMore,
     playTrack,
@@ -43,6 +42,8 @@ const MediaList = ({
     playlist = [],
     setCurrentPlaylist,
 }: MediaListProps) => {
+    const api = useJellyfinContext()
+
     const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
     const navigate = useNavigate()
@@ -50,6 +51,51 @@ const MediaList = ({
     const sizeMap = useRef<{ [index: number]: number }>({})
 
     useEffect(() => {
+        const handleResize = () => {
+            measureInitialHeights()
+        }
+
+        const setupResizeObservers = () => {
+            resizeObservers.current = rowRefs.current.map((ref, index) => {
+                const observer = new ResizeObserver(() => {
+                    if (ref) {
+                        const originalHeight = ref.style.height
+                        ref.style.height = 'auto'
+                        const height = ref.getBoundingClientRect().height
+                        ref.style.height = originalHeight || `${height}px`
+                        if (height !== sizeMap.current[index]) {
+                            setSize(index, height)
+                        }
+                    }
+                })
+                if (ref) observer.observe(ref)
+                return observer
+            })
+        }
+
+        const cleanupResizeObservers = () => {
+            resizeObservers.current.forEach(observer => observer.disconnect())
+            resizeObservers.current = []
+        }
+
+        const measureInitialHeights = () => {
+            rowRefs.current.forEach((ref, index) => {
+                if (ref) {
+                    const originalHeight = ref.style.height
+                    ref.style.height = 'auto'
+                    const height = ref.getBoundingClientRect().height
+                    ref.style.height = originalHeight || `${height}px`
+                    if (height !== sizeMap.current[index]) {
+                        setSize(index, height)
+                    }
+                }
+            })
+        }
+
+        const setSize = (index: number, height: number) => {
+            sizeMap.current = { ...sizeMap.current, [index]: height }
+        }
+
         rowRefs.current = items.map(() => null)
         cleanupResizeObservers()
         measureInitialHeights()
@@ -62,51 +108,6 @@ const MediaList = ({
             window.removeEventListener('resize', handleResize)
         }
     }, [items])
-
-    const handleResize = () => {
-        measureInitialHeights()
-    }
-
-    const setupResizeObservers = () => {
-        resizeObservers.current = rowRefs.current.map((ref, index) => {
-            const observer = new ResizeObserver(() => {
-                if (ref) {
-                    const originalHeight = ref.style.height
-                    ref.style.height = 'auto'
-                    const height = ref.getBoundingClientRect().height
-                    ref.style.height = originalHeight || `${height}px`
-                    if (height !== sizeMap.current[index]) {
-                        setSize(index, height)
-                    }
-                }
-            })
-            if (ref) observer.observe(ref)
-            return observer
-        })
-    }
-
-    const cleanupResizeObservers = () => {
-        resizeObservers.current.forEach(observer => observer.disconnect())
-        resizeObservers.current = []
-    }
-
-    const measureInitialHeights = () => {
-        rowRefs.current.forEach((ref, index) => {
-            if (ref) {
-                const originalHeight = ref.style.height
-                ref.style.height = 'auto'
-                const height = ref.getBoundingClientRect().height
-                ref.style.height = originalHeight || `${height}px`
-                if (height !== sizeMap.current[index]) {
-                    setSize(index, height)
-                }
-            }
-        })
-    }
-
-    const setSize = (index: number, height: number) => {
-        sizeMap.current = { ...sizeMap.current, [index]: height }
-    }
 
     const handleSongClick = (item: MediaItem, index: number) => {
         if (type === 'song') {
@@ -133,9 +134,9 @@ const MediaList = ({
         const item = items[index] as ExtendedMediaItem
         const token = localStorage.getItem('auth') ? JSON.parse(localStorage.getItem('auth')!).token : ''
         const imageUrl = item.ImageTags?.Primary
-            ? `${serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
+            ? `${api.auth.serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
             : item.AlbumPrimaryImageTag && item.AlbumId
-            ? `${serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
+            ? `${api.auth.serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
             : '/default-thumbnail.png'
 
         const itemClass = type === 'song' && currentTrack?.Id === item.Id ? (isPlaying ? 'playing' : 'paused') : ''

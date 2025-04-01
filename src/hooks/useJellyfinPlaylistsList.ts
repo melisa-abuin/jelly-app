@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { getAllPlaylists, MediaItem } from '../api/jellyfin'
+import { MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface useJellyfinPlaylistsList {
     playlists: MediaItem[]
@@ -7,20 +8,14 @@ interface useJellyfinPlaylistsList {
     error: string | null
 }
 
-export const useJellyfinPlaylistsList = (
-    serverUrl: string,
-    userId: string,
-    token: string
-): useJellyfinPlaylistsList => {
+export const useJellyfinPlaylistsList = (): useJellyfinPlaylistsList => {
+    const api = useJellyfinContext()
+
     const { data, isLoading, error } = useQuery<MediaItem[], Error>({
-        queryKey: ['playlists', serverUrl, userId, token],
+        queryKey: ['playlists'],
         queryFn: async () => {
-            if (!serverUrl || !userId || !token) {
-                throw new Error('Missing authentication details')
-            }
-            return await getAllPlaylists(serverUrl, userId, token)
+            return await api.getAllPlaylists()
         },
-        enabled: Boolean(serverUrl && userId && token),
     })
 
     return {

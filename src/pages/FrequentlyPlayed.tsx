@@ -1,12 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import MediaList from '../components/MediaList'
 import { useJellyfinFrequentlyPlayedData } from '../hooks/useJellyfinFrequentlyPlayedData'
 
 interface FrequentlyPlayedProps {
-    serverUrl: string
-    userId: string
-    token: string
     playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
     currentTrackIndex: number
@@ -17,10 +15,7 @@ interface FrequentlyPlayedProps {
     setHasMoreState: (hasMore: boolean) => void
 }
 
-const FrequentlyPlayed: React.FC<FrequentlyPlayedProps> = ({
-    serverUrl,
-    userId,
-    token,
+const FrequentlyPlayed = ({
     playTrack,
     currentTrack,
     currentTrackIndex,
@@ -29,9 +24,9 @@ const FrequentlyPlayed: React.FC<FrequentlyPlayedProps> = ({
     setCurrentPlaylist,
     setLoadMoreCallback,
     setHasMoreState,
-}) => {
-    const { items, loading, error, loadMore, hasMore } = useJellyfinFrequentlyPlayedData(serverUrl, userId, token)
-    const virtuosoRef = useRef<any>(null)
+}: FrequentlyPlayedProps) => {
+    const { items, loading, error, loadMore, hasMore } = useJellyfinFrequentlyPlayedData()
+    const virtuosoRef = useRef<VirtuosoHandle>(null)
     const hasPreloaded = useRef(false)
     const [isPreloading, setIsPreloading] = useState(false)
 
@@ -74,7 +69,7 @@ const FrequentlyPlayed: React.FC<FrequentlyPlayedProps> = ({
             hasPreloaded.current = true
             setIsPreloading(false)
         }
-    }, [items.length, hasMore, loading, loadMore])
+    }, [items.length, hasMore, loading, loadMore, isPreloading])
 
     return (
         <div className="frequently-page">
@@ -84,7 +79,6 @@ const FrequentlyPlayed: React.FC<FrequentlyPlayedProps> = ({
                 items={items}
                 type="song"
                 loading={loading}
-                serverUrl={serverUrl}
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={(track, index) => {

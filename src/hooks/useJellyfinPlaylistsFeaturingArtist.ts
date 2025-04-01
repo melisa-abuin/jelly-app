@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { MediaItem, getPlaylistsFeaturingArtist } from '../api/jellyfin'
+import { MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface JellyfinPlaylistsFeaturingArtistData {
     playlists: MediaItem[]
@@ -7,21 +8,14 @@ interface JellyfinPlaylistsFeaturingArtistData {
     error: string | null
 }
 
-export const useJellyfinPlaylistsFeaturingArtist = (
-    serverUrl: string,
-    userId: string,
-    token: string,
-    artistId: string
-): JellyfinPlaylistsFeaturingArtistData => {
+export const useJellyfinPlaylistsFeaturingArtist = (artistId: string): JellyfinPlaylistsFeaturingArtistData => {
+    const api = useJellyfinContext()
+
     const { data, isLoading, error } = useQuery<MediaItem[], Error>({
-        queryKey: ['playlistsFeaturingArtist', serverUrl, userId, token, artistId],
+        queryKey: ['playlistsFeaturingArtist', artistId],
         queryFn: async () => {
-            if (!serverUrl || !userId || !token || !artistId) {
-                throw new Error('Missing required parameters')
-            }
-            return await getPlaylistsFeaturingArtist(serverUrl, userId, token, artistId)
+            return await api.getPlaylistsFeaturingArtist(artistId)
         },
-        enabled: Boolean(serverUrl && userId && token && artistId),
     })
 
     return {

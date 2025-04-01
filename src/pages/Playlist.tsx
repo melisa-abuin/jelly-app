@@ -5,15 +5,13 @@ import { VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import Loader from '../components/Loader'
 import PlaylistTrackList from '../components/PlaylistTrackList'
+import { useJellyfinContext } from '../context/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext'
 import { useJellyfinPlaylistData } from '../hooks/useJellyfinPlaylistData'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Playlist.css'
 
 interface PlaylistProps {
-    user: { userId: string; username: string }
-    serverUrl: string
-    token: string
     playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
     currentTrackIndex: number
@@ -23,9 +21,6 @@ interface PlaylistProps {
 }
 
 const Playlist = ({
-    user,
-    serverUrl,
-    token,
     playTrack,
     currentTrack,
     currentTrackIndex,
@@ -33,9 +28,10 @@ const Playlist = ({
     togglePlayPause,
     setCurrentPlaylist,
 }: PlaylistProps) => {
+    const api = useJellyfinContext()
     const { playlistId } = useParams<{ playlistId: string }>()
     const { playlist, tracks, loading, error, loadMore, hasMore, totalPlaytime, totalTrackCount, totalPlays } =
-        useJellyfinPlaylistData(serverUrl, user.userId, token, playlistId!)
+        useJellyfinPlaylistData(playlistId!)
     const { setPageTitle } = usePageTitle()
     const virtuosoRef = useRef<VirtuosoHandle | null>(null)
     const hasPreloaded = useRef(false)
@@ -84,7 +80,7 @@ const Playlist = ({
             hasPreloaded.current = true
             setIsPreloading(false)
         }
-    }, [tracks.length, hasMore, loading, loadMore])
+    }, [tracks.length, hasMore, loading, loadMore, isPreloading])
 
     if (loading && tracks.length === 0) {
         return <Loader />
@@ -105,7 +101,7 @@ const Playlist = ({
                 <img
                     src={
                         playlist.ImageTags?.Primary
-                            ? `${serverUrl}/Items/${playlist.Id}/Images/Primary?tag=${playlist.ImageTags.Primary}&quality=100&fillWidth=100&fillHeight=100&format=webp&api_key=${token}`
+                            ? `${api.auth.serverUrl}/Items/${playlist.Id}/Images/Primary?tag=${playlist.ImageTags.Primary}&quality=100&fillWidth=100&fillHeight=100&format=webp&api_key=${api.auth.token}`
                             : '/default-thumbnail.png'
                     }
                     alt={playlist.Name}
@@ -160,7 +156,6 @@ const Playlist = ({
                 virtuosoRef={virtuosoRef}
                 tracks={tracks}
                 loading={loading}
-                serverUrl={serverUrl}
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={(track, index) => {

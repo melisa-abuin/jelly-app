@@ -3,13 +3,14 @@ import { ArrowLeftIcon, BookmarkFillIcon, HeartFillIcon } from '@primer/octicons
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { QueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, CSSProperties, ReactNode, useContext, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { MediaItem } from './api/jellyfin'
 import './App.css'
 import './components/MediaList.css'
 import PlaybackManager from './components/PlaybackManager'
 import Sidenav from './components/Sidenav'
+import { JellyfinContextProvider } from './context/JellyfinContext'
 import { PageTitleProvider, usePageTitle } from './context/PageTitleContext'
 import { ScrollContextProvider } from './context/ScrollContext'
 import { useSidenav } from './hooks/useSidenav'
@@ -46,28 +47,28 @@ interface HistoryContextType {
 
 const HistoryContext = createContext<HistoryContextType | undefined>(undefined)
 
-const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const HistoryProvider = ({ children }: { children: ReactNode }) => {
     const [historyStack, setHistoryStack] = useState<string[]>([])
     const navigate = useNavigate()
     const location = useLocation()
     const prevLocationRef = useRef<string | null>(null)
 
-    const validRoutes = [
-        '/',
-        '/tracks',
-        '/albums',
-        '/favorites',
-        '/settings',
-        '/album',
-        '/recently',
-        '/frequently',
-        '/artist',
-        '/genre',
-        '/playlist',
-        '/search',
-    ]
-
     useEffect(() => {
+        const validRoutes = [
+            '/',
+            '/tracks',
+            '/albums',
+            '/favorites',
+            '/settings',
+            '/album',
+            '/recently',
+            '/frequently',
+            '/artist',
+            '/genre',
+            '/playlist',
+            '/search',
+        ]
+
         const currentPath = location.pathname
 
         if (
@@ -142,35 +143,32 @@ const App = () => {
         }
     }, [])
 
+    const actualApp = (
+        <div className="music-app">
+            <Routes>
+                <Route path="/login" element={auth ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
+                <Route
+                    path="/*"
+                    element={
+                        auth ? (
+                            <JellyfinContextProvider auth={auth}>
+                                <MainLayout auth={auth} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
+                            </JellyfinContextProvider>
+                        ) : (
+                            <Navigate to="/login" />
+                        )
+                    }
+                />
+            </Routes>
+        </div>
+    )
+
     return (
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
             <Router>
                 <HistoryProvider>
                     <PageTitleProvider>
-                        <ScrollContextProvider>
-                            <div className="music-app">
-                                <Routes>
-                                    <Route
-                                        path="/login"
-                                        element={auth ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
-                                    />
-                                    <Route
-                                        path="/*"
-                                        element={
-                                            auth ? (
-                                                <MainLayout
-                                                    auth={auth}
-                                                    handleLogout={handleLogout}
-                                                    isLoggingOut={isLoggingOut}
-                                                />
-                                            ) : (
-                                                <Navigate to="/login" />
-                                            )
-                                        }
-                                    />
-                                </Routes>
-                            </div>
-                        </ScrollContextProvider>
+                        <ScrollContextProvider>{actualApp}</ScrollContextProvider>
                     </PageTitleProvider>
                 </HistoryProvider>
             </Router>
@@ -254,9 +252,6 @@ const MainLayout = ({
     return (
         <div className="interface">
             <PlaybackManager
-                serverUrl={auth.serverUrl}
-                token={auth.token}
-                userId={auth.userId}
                 initialVolume={0.5}
                 updateLastPlayed={(track: MediaItem) => {
                     localStorage.setItem('lastPlayedTrack', JSON.stringify(track))
@@ -293,9 +288,6 @@ const MainLayout = ({
                             closeSidenav={closeSidenav}
                             volume={volume}
                             setVolume={setVolume}
-                            serverUrl={auth.serverUrl}
-                            userId={auth.userId}
-                            token={auth.token}
                             setCurrentPlaylist={handleSetCurrentPlaylist}
                             playTrack={playTrack}
                             currentTrack={currentTrack}
@@ -407,9 +399,6 @@ const MainLayout = ({
                                         path="/"
                                         element={
                                             <Home
-                                                user={{ userId: auth.userId, username: auth.username }}
-                                                serverUrl={auth.serverUrl}
-                                                token={auth.token}
                                                 playTrack={playTrack}
                                                 currentTrack={currentTrack}
                                                 currentTrackIndex={currentTrackIndex}
@@ -423,9 +412,6 @@ const MainLayout = ({
                                         path="/tracks"
                                         element={
                                             <Tracks
-                                                user={{ userId: auth.userId, username: auth.username }}
-                                                serverUrl={auth.serverUrl}
-                                                token={auth.token}
                                                 playTrack={playTrack}
                                                 currentTrack={currentTrack}
                                                 currentTrackIndex={currentTrackIndex}
@@ -437,23 +423,11 @@ const MainLayout = ({
                                             />
                                         }
                                     />
-                                    <Route
-                                        path="/albums"
-                                        element={
-                                            <Albums
-                                                user={{ userId: auth.userId, username: auth.username }}
-                                                serverUrl={auth.serverUrl}
-                                                token={auth.token}
-                                            />
-                                        }
-                                    />
+                                    <Route path="/albums" element={<Albums />} />
                                     <Route
                                         path="/album/:albumId"
                                         element={
                                             <Album
-                                                user={{ userId: auth.userId, username: auth.username }}
-                                                serverUrl={auth.serverUrl}
-                                                token={auth.token}
                                                 playTrack={playTrack}
                                                 currentTrack={currentTrack}
                                                 isPlaying={isPlaying}
@@ -466,9 +440,6 @@ const MainLayout = ({
                                         path="/artist/:artistId"
                                         element={
                                             <Artist
-                                                user={{ userId: auth.userId, username: auth.username }}
-                                                serverUrl={auth.serverUrl}
-                                                token={auth.token}
                                                 playTrack={playTrack}
                                                 currentTrack={currentTrack}
                                                 isPlaying={isPlaying}
@@ -481,9 +452,6 @@ const MainLayout = ({
                                         path="/genre/:genre"
                                         element={
                                             <Genre
-                                                user={{ userId: auth.userId, username: auth.username }}
-                                                serverUrl={auth.serverUrl}
-                                                token={auth.token}
                                                 playTrack={playTrack}
                                                 currentTrack={currentTrack}
                                                 currentTrackIndex={currentTrackIndex}
@@ -498,9 +466,6 @@ const MainLayout = ({
                                         element={
                                             <Playlist
                                                 key={window.location.pathname}
-                                                user={{ userId: auth.userId, username: auth.username }}
-                                                serverUrl={auth.serverUrl}
-                                                token={auth.token}
                                                 playTrack={playTrack}
                                                 currentTrack={currentTrack}
                                                 currentTrackIndex={currentTrackIndex}
@@ -514,9 +479,6 @@ const MainLayout = ({
                                         path="/favorites"
                                         element={
                                             <Favorites
-                                                user={{ userId: auth.userId, username: auth.username }}
-                                                serverUrl={auth.serverUrl}
-                                                token={auth.token}
                                                 playTrack={playTrack}
                                                 currentTrack={currentTrack}
                                                 currentTrackIndex={currentTrackIndex}
@@ -532,9 +494,6 @@ const MainLayout = ({
                                         path="/recently"
                                         element={
                                             <RecentlyPlayed
-                                                serverUrl={auth.serverUrl}
-                                                userId={auth.userId}
-                                                token={auth.token}
                                                 playTrack={playTrack}
                                                 currentTrack={currentTrack}
                                                 currentTrackIndex={currentTrackIndex}
@@ -550,9 +509,6 @@ const MainLayout = ({
                                         path="/frequently"
                                         element={
                                             <FrequentlyPlayed
-                                                serverUrl={auth.serverUrl}
-                                                userId={auth.userId}
-                                                token={auth.token}
                                                 playTrack={playTrack}
                                                 currentTrack={currentTrack}
                                                 currentTrackIndex={currentTrackIndex}
@@ -569,9 +525,6 @@ const MainLayout = ({
                                         path="/search/:query"
                                         element={
                                             <SearchResults
-                                                serverUrl={auth.serverUrl}
-                                                token={auth.token}
-                                                userId={auth.userId}
                                                 playTrack={playTrack}
                                                 setCurrentPlaylist={handleSetCurrentPlaylist}
                                                 currentTrack={currentTrack}
@@ -606,7 +559,7 @@ const MainLayout = ({
                                                     '--buffered-width': `${
                                                         duration ? (buffered / duration) * 100 : 0
                                                     }%`,
-                                                } as React.CSSProperties
+                                                } as CSSProperties
                                             }
                                             onChange={handleSeek}
                                         />

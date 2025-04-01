@@ -1,22 +1,22 @@
-import React, { createContext, useContext, useState } from 'react'
+import { createContext, ReactNode, useContext, useState } from 'react'
 
-interface PageTitleContextType {
-    pageTitle: string
-    setPageTitle: (title: string) => void
-}
+type InitialState = ReturnType<typeof useInitialState>
 
-const PageTitleContext = createContext<PageTitleContextType | undefined>(undefined)
+const useInitialState = () => {
+    const [pageTitle, setPageTitle] = useState('')
 
-export const PageTitleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [pageTitle, setPageTitle] = useState<string>('')
-
-    return <PageTitleContext.Provider value={{ pageTitle, setPageTitle }}>{children}</PageTitleContext.Provider>
-}
-
-export const usePageTitle = () => {
-    const context = useContext(PageTitleContext)
-    if (!context) {
-        throw new Error('usePageTitle must be used within a PageTitleProvider')
+    return {
+        pageTitle,
+        setPageTitle,
     }
-    return context
+}
+
+export const PageTitleContext = createContext<InitialState>({} as InitialState)
+
+export const usePageTitle = () => useContext(PageTitleContext)
+
+export const PageTitleProvider = ({ children }: { children: ReactNode }) => {
+    const initialState = useInitialState()
+
+    return <PageTitleContext.Provider value={initialState}>{children}</PageTitleContext.Provider>
 }

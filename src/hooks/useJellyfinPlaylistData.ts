@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
-import { ApiError, getPlaylist, getPlaylistTracks, MediaItem } from '../api/jellyfin'
+import { ApiError, MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface JellyfinPlaylistData {
     playlist: MediaItem | null
@@ -14,31 +15,26 @@ interface JellyfinPlaylistData {
     totalPlays: number
 }
 
-export const useJellyfinPlaylistData = (
-    serverUrl: string,
-    userId: string,
-    token: string,
-    playlistId: string
-): JellyfinPlaylistData => {
+export const useJellyfinPlaylistData = (playlistId: string): JellyfinPlaylistData => {
+    const api = useJellyfinContext()
+
     const itemsPerPage = 40
 
     const { data: playlist, error: playlistError } = useQuery<MediaItem, ApiError>({
-        queryKey: ['playlist', serverUrl, userId, token, playlistId],
-        queryFn: () => getPlaylist(serverUrl, userId, token, playlistId),
-        enabled: Boolean(serverUrl && token && playlistId),
+        queryKey: ['playlist', playlistId],
+        queryFn: () => api.getPlaylist(playlistId),
     })
 
     const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
-        queryKey: ['playlistTracks', serverUrl, userId, token, playlistId],
+        queryKey: ['playlistTracks', playlistId],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await getPlaylistTracks(serverUrl, userId, token, playlistId, startIndex, itemsPerPage)
+            return await api.getPlaylistTracks(playlistId, startIndex, itemsPerPage)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
-        enabled: Boolean(serverUrl && token && playlistId),
         initialPageParam: 0,
     })
 

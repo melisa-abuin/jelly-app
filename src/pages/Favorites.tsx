@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import MediaList from '../components/MediaList'
 import { useJellyfinFavoritesData } from '../hooks/useJellyfinFavoritesData'
 
 interface FavoritesProps {
-    user: { userId: string; username: string }
-    serverUrl: string
-    token: string
     playTrack: (track: MediaItem, index: number) => void
     currentTrack: MediaItem | null
     currentTrackIndex: number
@@ -18,9 +16,6 @@ interface FavoritesProps {
 }
 
 const Favorites = ({
-    user,
-    serverUrl,
-    token,
     playTrack,
     currentTrack,
     currentTrackIndex,
@@ -30,8 +25,8 @@ const Favorites = ({
     setLoadMoreCallback,
     setHasMoreState,
 }: FavoritesProps) => {
-    const { allFavorites, loading, error, loadMore, hasMore } = useJellyfinFavoritesData(serverUrl, user.userId, token)
-    const virtuosoRef = useRef<any>(null)
+    const { allFavorites, loading, error, loadMore, hasMore } = useJellyfinFavoritesData()
+    const virtuosoRef = useRef<VirtuosoHandle>(null)
     const hasPreloaded = useRef(false)
     const [isPreloading, setIsPreloading] = useState(false)
 
@@ -74,7 +69,7 @@ const Favorites = ({
             hasPreloaded.current = true
             setIsPreloading(false)
         }
-    }, [allFavorites.length, hasMore, loading, loadMore])
+    }, [allFavorites.length, hasMore, loading, loadMore, isPreloading])
 
     return (
         <div className="favorites-page">
@@ -84,7 +79,6 @@ const Favorites = ({
                 items={allFavorites}
                 type="song"
                 loading={loading}
-                serverUrl={serverUrl}
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={(track, index) => {

@@ -1,8 +1,9 @@
 import { GearIcon, SearchIcon, XCircleIcon } from '@primer/octicons-react'
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState, WheelEvent } from 'react'
 import { NavLink } from 'react-router-dom'
-import { MediaItem, searchArtists, searchItems } from '../api/jellyfin'
+import { MediaItem } from '../api/jellyfin'
 import '../App.css'
+import { useJellyfinContext } from '../context/JellyfinContext'
 import { useScrollContext } from '../context/ScrollContext'
 import { useJellyfinPlaylistsList } from '../hooks/useJellyfinPlaylistsList'
 import './Sidenav.css'
@@ -13,9 +14,6 @@ interface SidenavProps {
     closeSidenav: () => void
     volume: number
     setVolume: (volume: number) => void
-    serverUrl: string
-    userId: string
-    token: string
     playTrack: (track: MediaItem, index: number) => void
     setCurrentPlaylist: (playlist: MediaItem[]) => void
     currentTrack: MediaItem | null
@@ -32,19 +30,20 @@ interface SearchResult {
 }
 
 const Sidenav = (props: SidenavProps) => {
-    const { playlists, loading, error } = useJellyfinPlaylistsList(props.serverUrl, props.userId, props.token)
+    const api = useJellyfinContext()
+    const { playlists, loading, error } = useJellyfinPlaylistsList()
     const { disabled, setDisabled } = useScrollContext()
     const [searchQuery, setSearchQuery] = useState('')
     const [searchResults, setSearchResults] = useState<SearchResult[]>([])
     const [searchLoading, setSearchLoading] = useState(false)
     const [searchError, setSearchError] = useState<string | null>(null)
 
-    const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(e.target.value)
         props.setVolume(newVolume)
     }
 
-    const handleVolumeScroll = (e: React.WheelEvent<HTMLInputElement>) => {
+    const handleVolumeScroll = (e: WheelEvent<HTMLInputElement>) => {
         e.stopPropagation()
         const delta = e.deltaY > 0 ? -0.05 : 0.05
         const newVolume = Math.max(0, Math.min(1, props.volume + delta))
@@ -54,7 +53,7 @@ const Sidenav = (props: SidenavProps) => {
     useEffect(() => {
         const debounceTimer = setTimeout(() => {
             const fetchSearchResults = async () => {
-                if (!searchQuery.trim() || !props.serverUrl || !props.token || !props.userId) {
+                if (!searchQuery.trim() || !api.auth.serverUrl || !api.auth.token || !api.auth.userId) {
                     setSearchResults([])
                     return
                 }
@@ -64,16 +63,10 @@ const Sidenav = (props: SidenavProps) => {
 
                 try {
                     // Fetch artists from /Artists endpoint
-                    const artistResponse = await searchArtists(
-                        props.serverUrl,
-                        props.userId,
-                        props.token,
-                        searchQuery,
-                        20
-                    )
+                    const artistResponse = await api.searchArtists(searchQuery, 20)
 
                     // Fetch songs, albums, and playlists from /Items endpoint
-                    const itemsResponse = await searchItems(props.serverUrl, props.userId, props.token, searchQuery, 20)
+                    const itemsResponse = await api.searchItems(searchQuery, 20)
                     const items = itemsResponse || []
 
                     const artists = artistResponse
@@ -115,9 +108,9 @@ const Sidenav = (props: SidenavProps) => {
         }, 400)
 
         return () => clearTimeout(debounceTimer)
-    }, [searchQuery, props.serverUrl, props.token, props.userId])
+    }, [searchQuery, api.auth.serverUrl, api.auth.token, api.auth.userId, api])
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value)
     }
 

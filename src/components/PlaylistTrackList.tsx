@@ -1,8 +1,9 @@
 import { HeartFillIcon } from '@primer/octicons-react'
-import React, { Ref, useCallback, useEffect, useRef } from 'react'
+import { MouseEvent, Ref, useCallback, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 import { formatDuration } from '../utils/formatDuration'
 import Loader from './Loader'
 import './PlaylistTrackList.css'
@@ -11,7 +12,6 @@ interface PlaylistTrackListProps {
     virtuosoRef?: Ref<VirtuosoHandle>
     tracks: MediaItem[]
     loading: boolean
-    serverUrl: string
     loadMore?: () => void
     hasMore?: boolean
     playTrack: (track: MediaItem, index: number) => void
@@ -27,7 +27,6 @@ const PlaylistTrackList = ({
     virtuosoRef,
     tracks,
     loading,
-    serverUrl,
     loadMore,
     hasMore,
     playTrack,
@@ -36,12 +35,54 @@ const PlaylistTrackList = ({
     togglePlayPause,
     playlistId,
 }: PlaylistTrackListProps) => {
+    const api = useJellyfinContext()
     const rowRefs = useRef<(HTMLLIElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
     const location = useLocation()
     const sizeMap = useRef<{ [index: number]: number }>({})
 
     useEffect(() => {
+        const handleResize = () => {
+            measureInitialHeights()
+        }
+
+        const setupResizeObservers = () => {
+            resizeObservers.current = rowRefs.current.map((ref, index) => {
+                const observer = new ResizeObserver(() => {
+                    if (ref) {
+                        const originalHeight = ref.style.height
+                        ref.style.height = 'auto'
+                        const height = ref.getBoundingClientRect().height
+                        ref.style.height = originalHeight || `${height}px`
+                        if (height !== sizeMap.current[index]) {
+                            setSize(index, height)
+                        }
+                    }
+                })
+                if (ref) observer.observe(ref)
+                return observer
+            })
+        }
+
+        const cleanupResizeObservers = () => {
+            resizeObservers.current.forEach(observer => observer.disconnect())
+            resizeObservers.current = []
+        }
+
+        const measureInitialHeights = () => {
+            rowRefs.current.forEach((ref, index) => {
+                if (ref) {
+                    const originalHeight = ref.style.height
+                    ref.style.height = 'auto'
+                    const height = ref.getBoundingClientRect().height
+                    ref.style.height = originalHeight || `${height}px`
+                    if (height !== sizeMap.current[index]) {
+                        setSize(index, height)
+                    }
+                }
+            })
+        }
+
         rowRefs.current = tracks.map(() => null)
         cleanupResizeObservers()
         measureInitialHeights()
@@ -54,47 +95,6 @@ const PlaylistTrackList = ({
             window.removeEventListener('resize', handleResize)
         }
     }, [tracks])
-
-    const handleResize = () => {
-        measureInitialHeights()
-    }
-
-    const setupResizeObservers = () => {
-        resizeObservers.current = rowRefs.current.map((ref, index) => {
-            const observer = new ResizeObserver(() => {
-                if (ref) {
-                    const originalHeight = ref.style.height
-                    ref.style.height = 'auto'
-                    const height = ref.getBoundingClientRect().height
-                    ref.style.height = originalHeight || `${height}px`
-                    if (height !== sizeMap.current[index]) {
-                        setSize(index, height)
-                    }
-                }
-            })
-            if (ref) observer.observe(ref)
-            return observer
-        })
-    }
-
-    const cleanupResizeObservers = () => {
-        resizeObservers.current.forEach(observer => observer.disconnect())
-        resizeObservers.current = []
-    }
-
-    const measureInitialHeights = () => {
-        rowRefs.current.forEach((ref, index) => {
-            if (ref) {
-                const originalHeight = ref.style.height
-                ref.style.height = 'auto'
-                const height = ref.getBoundingClientRect().height
-                ref.style.height = originalHeight || `${height}px`
-                if (height !== sizeMap.current[index]) {
-                    setSize(index, height)
-                }
-            }
-        })
-    }
 
     const setSize = (index: number, height: number) => {
         sizeMap.current = { ...sizeMap.current, [index]: height }
@@ -112,7 +112,7 @@ const PlaylistTrackList = ({
     )
 
     const handleThumbnailClick = useCallback(
-        (track: MediaItem, index: number, e: React.MouseEvent) => {
+        (track: MediaItem, index: number, e: MouseEvent) => {
             e.stopPropagation()
             if (currentTrack?.Id === track.Id && isPlaying) {
                 togglePlayPause()
@@ -133,9 +133,9 @@ const PlaylistTrackList = ({
         const track = tracks[index]
         const token = localStorage.getItem('auth') ? JSON.parse(localStorage.getItem('auth')!).token : ''
         const imageUrl = track.ImageTags?.Primary
-            ? `${serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=40&fillHeight=40&format=webp&api_key=${token}`
+            ? `${api.auth.serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=40&fillHeight=40&format=webp&api_key=${token}`
             : track.AlbumId
-            ? `${serverUrl}/Items/${track.AlbumId}/Images/Primary?quality=100&fillWidth=40&fillHeight=40&format=webp&api_key=${token}`
+            ? `${api.auth.serverUrl}/Items/${track.AlbumId}/Images/Primary?quality=100&fillWidth=40&fillHeight=40&format=webp&api_key=${token}`
             : '/default-thumbnail.png'
 
         const trackClass = currentTrack?.Id === track.Id ? (isPlaying ? 'playing' : 'paused') : ''

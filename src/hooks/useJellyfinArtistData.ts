@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchAllTracks, getArtistDetails, MediaItem } from '../api/jellyfin'
+import { MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface JellyfinArtistData {
     artist: MediaItem | null
@@ -13,27 +14,17 @@ interface JellyfinArtistData {
     error: string | null
 }
 
-export const useJellyfinArtistData = (
-    serverUrl: string,
-    userId: string,
-    token: string,
-    artistId: string,
-    trackLimit = 5
-) => {
+export const useJellyfinArtistData = (artistId: string, trackLimit = 5) => {
+    const api = useJellyfinContext()
+
     const { data, isLoading, error } = useQuery<JellyfinArtistData, Error>({
-        queryKey: ['artistData', serverUrl, userId, token, artistId, trackLimit],
+        queryKey: ['artistData', artistId, trackLimit],
         queryFn: async () => {
-            if (!serverUrl || !token || !artistId) {
-                throw new Error('No serverUrl, token, or artistId')
-            }
-            const { artist, tracks, albums, appearsInAlbums, totalTrackCount } = await getArtistDetails(
-                serverUrl,
-                userId,
-                token,
+            const { artist, tracks, albums, appearsInAlbums, totalTrackCount } = await api.getArtistDetails(
                 artistId,
                 trackLimit
             )
-            const allTracks = await fetchAllTracks(serverUrl, userId, token, artistId)
+            const allTracks = await api.fetchAllTracks(artistId)
             const totalPlaytime = allTracks.reduce(
                 (sum: number, track: MediaItem) => sum + (track.RunTimeTicks || 0),
                 0
@@ -54,7 +45,6 @@ export const useJellyfinArtistData = (
                 error: null,
             }
         },
-        enabled: Boolean(serverUrl && token && artistId),
     })
 
     return {

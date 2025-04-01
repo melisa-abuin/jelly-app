@@ -26,6 +26,7 @@ const useInitialState = () => {
 }
 
 export const ScrollContext = createContext<InitialState>({} as InitialState)
+
 export const useScrollContext = () => useContext(ScrollContext)
 
 export const ScrollContextProvider = ({ children }: { children: ReactNode }) => {

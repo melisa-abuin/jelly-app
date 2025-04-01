@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { getAlbumDetails, MediaItem } from '../api/jellyfin'
+import { MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext'
 
 interface JellyfinAlbumData {
     album: MediaItem | null
@@ -8,14 +9,14 @@ interface JellyfinAlbumData {
     error: string | null
 }
 
-export const useJellyfinAlbumData = (serverUrl: string, userId: string, token: string, albumId: string) => {
+export const useJellyfinAlbumData = (albumId: string) => {
+    const api = useJellyfinContext()
+
     const { data, isLoading, error } = useQuery<JellyfinAlbumData, Error>({
-        queryKey: ['albumData', serverUrl, userId, token, albumId],
+        queryKey: ['albumData', albumId],
         queryFn: async () => {
-            if (!serverUrl || !token || !albumId) {
-                throw new Error('No serverUrl, token, or albumId')
-            }
-            const { album, tracks } = await getAlbumDetails(serverUrl, userId, token, albumId)
+            const { album, tracks } = await api.getAlbumDetails(albumId)
+
             return {
                 album,
                 tracks,
@@ -23,7 +24,6 @@ export const useJellyfinAlbumData = (serverUrl: string, userId: string, token: s
                 error: null,
             }
         },
-        enabled: Boolean(serverUrl && token && albumId),
     })
 
     return {
