@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import { formatDuration } from '../utils/formatDuration'
 import Loader from './Loader'
 import './PlaylistTrackList.css'
@@ -15,10 +16,6 @@ interface PlaylistTrackListProps {
     loadMore?: () => void
     hasMore?: boolean
     playTrack: (track: MediaItem, index: number) => void
-    currentTrack: MediaItem | null
-    currentTrackIndex: number
-    isPlaying: boolean
-    togglePlayPause: () => void
     playlist: MediaItem[]
     playlistId?: string
 }
@@ -30,12 +27,11 @@ const PlaylistTrackList = ({
     loadMore,
     hasMore,
     playTrack,
-    currentTrack,
-    isPlaying,
-    togglePlayPause,
     playlistId,
 }: PlaylistTrackListProps) => {
     const api = useJellyfinContext()
+    const playback = usePlaybackContext()
+
     const rowRefs = useRef<(HTMLLIElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
     const location = useLocation()
@@ -102,25 +98,25 @@ const PlaylistTrackList = ({
 
     const handleTrackClick = useCallback(
         (track: MediaItem, index: number) => {
-            if (currentTrack?.Id === track.Id) {
-                togglePlayPause()
+            if (playback.currentTrack?.Id === track.Id) {
+                playback.togglePlayPause()
             } else {
                 playTrack(track, index)
             }
         },
-        [currentTrack, togglePlayPause, playTrack]
+        [playTrack, playback]
     )
 
     const handleThumbnailClick = useCallback(
         (track: MediaItem, index: number, e: MouseEvent) => {
             e.stopPropagation()
-            if (currentTrack?.Id === track.Id && isPlaying) {
-                togglePlayPause()
+            if (playback.currentTrack?.Id === track.Id && playback.isPlaying) {
+                playback.togglePlayPause()
             } else {
                 playTrack(track, index)
             }
         },
-        [currentTrack, isPlaying, togglePlayPause, playTrack]
+        [playTrack, playback]
     )
 
     const handleEndReached = () => {
@@ -138,7 +134,7 @@ const PlaylistTrackList = ({
             ? `${api.auth.serverUrl}/Items/${track.AlbumId}/Images/Primary?quality=100&fillWidth=40&fillHeight=40&format=webp&api_key=${token}`
             : '/default-thumbnail.png'
 
-        const trackClass = currentTrack?.Id === track.Id ? (isPlaying ? 'playing' : 'paused') : ''
+        const trackClass = playback.currentTrack?.Id === track.Id ? (playback.isPlaying ? 'playing' : 'paused') : ''
         const isFavorite = track.UserData?.IsFavorite && location.pathname !== '/favorites'
 
         return (

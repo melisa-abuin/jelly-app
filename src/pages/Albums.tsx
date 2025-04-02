@@ -1,16 +1,9 @@
-import { MediaItem } from '../api/jellyfin'
 import MediaList from '../components/MediaList'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import { useJellyfinAlbumsData } from '../hooks/useJellyfinAlbumsData'
 
-interface AlbumsProps {
-    playTrack?: (track: MediaItem, index: number) => void
-    currentTrack?: MediaItem | null
-    currentTrackIndex?: number
-    isPlaying?: boolean
-    togglePlayPause?: () => void
-}
-
-const Albums = ({ playTrack, currentTrack, currentTrackIndex, isPlaying, togglePlayPause }: AlbumsProps) => {
+const Albums = () => {
+    const playback = usePlaybackContext()
     const { allAlbums, loading, error, loadMore, hasMore } = useJellyfinAlbumsData()
 
     return (
@@ -21,11 +14,7 @@ const Albums = ({ playTrack, currentTrack, currentTrackIndex, isPlaying, toggleP
                 loading={loading}
                 loadMore={loadMore}
                 hasMore={hasMore}
-                playTrack={playTrack || (() => {})}
-                currentTrack={currentTrack || null}
-                currentTrackIndex={currentTrackIndex || -1}
-                isPlaying={isPlaying || false}
-                togglePlayPause={togglePlayPause || (() => {})}
+                playTrack={playback.playTrack}
             />
             {error && <div className="error">{error}</div>}
         </div>

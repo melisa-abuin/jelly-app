@@ -1,46 +1,20 @@
-import { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext'
 
-interface PlaybackManagerProps {
+export interface PlaybackManagerProps {
     initialVolume: number
     updateLastPlayed: (track: MediaItem) => void
-    playlist?: MediaItem[]
     currentTrackIndex?: number
-    loadMore?: () => void
-    hasMore?: boolean
     clearOnLogout?: boolean
-    children: (props: {
-        currentTrack: MediaItem | null
-        currentTrackIndex: number
-        isPlaying: boolean
-        togglePlayPause: () => void
-        progress: number
-        duration: number
-        buffered: number
-        handleSeek: (e: ChangeEvent<HTMLInputElement>) => void
-        formatTime: (seconds: number) => string
-        volume: number
-        setVolume: (volume: number) => void
-        playTrack: (track: MediaItem, index: number) => void
-        nextTrack: () => void
-        previousTrack: () => void
-        shuffle: boolean
-        toggleShuffle: () => void
-        repeat: 'off' | 'all' | 'one'
-        toggleRepeat: () => void
-    }) => ReactNode
 }
 
-const PlaybackManager = ({
+// Broken name to prevent confusion with the context
+export const useP__laybackManager = ({
     initialVolume,
     updateLastPlayed,
-    playlist = [],
     currentTrackIndex: initialTrackIndex = -1,
-    loadMore,
-    hasMore,
     clearOnLogout,
-    children,
 }: PlaybackManagerProps) => {
     const api = useJellyfinContext()
     const [currentTrack, setCurrentTrack] = useState<MediaItem | null>(() => {
@@ -69,6 +43,16 @@ const PlaybackManager = ({
     const currentShuffledIndex = useRef<number>(-1)
     const playedIndices = useRef<Set<number>>(new Set())
     const hasRestored = useRef(false)
+    const [hasMoreState, setHasMoreState] = useState<boolean>(false)
+    const [currentPlaylist, setCurrentPlaylist] = useState<MediaItem[]>(() => {
+        const savedPlaylist = localStorage.getItem('currentPlaylist')
+        return savedPlaylist ? JSON.parse(savedPlaylist) : []
+    })
+    const [loadMoreCallback, setLoadMoreCallback] = useState<(() => void) | undefined>(undefined)
+
+    useEffect(() => {
+        localStorage.setItem('currentPlaylist', JSON.stringify(currentPlaylist))
+    }, [currentPlaylist])
 
     // Update Media Session metadata
     const updateMediaSessionMetadata = useCallback(
@@ -294,21 +278,10 @@ const PlaybackManager = ({
                     })
             }
         }
-    }, [
-        api.auth.serverUrl,
-        api.auth.token,
-        api.auth.userId,
-        shuffle,
-        updateLastPlayed,
-        updateMediaSessionMetadata,
-        reportPlaybackStart,
-        reportPlaybackStopped,
-        currentTrack,
-        isPlaying,
-    ])
+    }, [currentTrack, isPlaying, reportPlaybackProgress, api.auth.serverUrl, api.auth.userId, api.auth.token])
 
     const nextTrack = useCallback(() => {
-        if (!playlist || playlist.length === 0 || currentTrackIndex === -1 || !currentTrack) {
+        if (!currentPlaylist || currentPlaylist.length === 0 || currentTrackIndex === -1 || !currentTrack) {
             if (audioRef.current) {
                 audioRef.current.pause()
             }
@@ -322,14 +295,14 @@ const PlaybackManager = ({
         } else if (shuffle) {
             currentShuffledIndex.current = currentShuffledIndex.current + 1
             if (currentShuffledIndex.current >= shuffledPlaylist.current.length) {
-                if (hasMore && loadMore) {
+                if (hasMoreState && loadMoreCallback) {
                     const currentScrollPosition = window.scrollY
-                    loadMore()
+                    loadMoreCallback()
                     window.scrollTo({ top: currentScrollPosition, behavior: 'smooth' })
                     return
                 } else if (repeat === 'all') {
                     playedIndices.current.clear()
-                    shuffledPlaylist.current = [...Array(playlist.length).keys()]
+                    shuffledPlaylist.current = [...Array(currentPlaylist.length).keys()]
                         .filter(i => i !== currentTrackIndex)
                         .sort(() => Math.random() - 0.5)
                     if (currentTrackIndex !== -1) {
@@ -347,10 +320,10 @@ const PlaybackManager = ({
             nextIndex = shuffledPlaylist.current[currentShuffledIndex.current]
         } else {
             nextIndex = currentTrackIndex + 1
-            if (nextIndex >= playlist.length) {
-                if (hasMore && loadMore) {
+            if (nextIndex >= currentPlaylist.length) {
+                if (hasMoreState && loadMoreCallback) {
                     const currentScrollPosition = window.scrollY
-                    loadMore()
+                    loadMoreCallback()
                     window.scrollTo({ top: currentScrollPosition, behavior: 'smooth' })
                     return
                 } else if (repeat === 'all') {
@@ -365,18 +338,18 @@ const PlaybackManager = ({
             }
         }
 
-        if (nextIndex >= 0 && nextIndex < playlist.length && playlist[nextIndex]) {
-            playTrack(playlist[nextIndex], nextIndex)
+        if (nextIndex >= 0 && nextIndex < currentPlaylist.length && currentPlaylist[nextIndex]) {
+            playTrack(currentPlaylist[nextIndex], nextIndex)
         } else {
             if (audioRef.current) {
                 audioRef.current.pause()
             }
             setIsPlaying(false)
         }
-    }, [currentTrack, currentTrackIndex, hasMore, loadMore, playTrack, playlist, repeat, shuffle])
+    }, [currentTrack, currentTrackIndex, hasMoreState, loadMoreCallback, playTrack, currentPlaylist, repeat, shuffle])
 
     const previousTrack = useCallback(() => {
-        if (!playlist || playlist.length === 0 || currentTrackIndex === -1 || !currentTrack) {
+        if (!currentPlaylist || currentPlaylist.length === 0 || currentTrackIndex === -1 || !currentTrack) {
             if (audioRef.current) {
                 audioRef.current.pause()
             }
@@ -392,7 +365,7 @@ const PlaybackManager = ({
             if (currentShuffledIndex.current < 0) {
                 if (repeat === 'all') {
                     playedIndices.current.clear()
-                    shuffledPlaylist.current = [...Array(playlist.length).keys()]
+                    shuffledPlaylist.current = [...Array(currentPlaylist.length).keys()]
                         .filter(i => i !== currentTrackIndex)
                         .sort(() => Math.random() - 0.5)
                     if (currentTrackIndex !== -1) {
@@ -412,7 +385,7 @@ const PlaybackManager = ({
             prevIndex = currentTrackIndex - 1
             if (prevIndex < 0) {
                 if (repeat === 'all') {
-                    prevIndex = playlist.length - 1
+                    prevIndex = currentPlaylist.length - 1
                 } else {
                     if (audioRef.current) {
                         audioRef.current.pause()
@@ -423,22 +396,22 @@ const PlaybackManager = ({
             }
         }
 
-        if (prevIndex >= 0 && prevIndex < playlist.length && playlist[prevIndex]) {
-            playTrack(playlist[prevIndex], prevIndex)
+        if (prevIndex >= 0 && prevIndex < currentPlaylist.length && currentPlaylist[prevIndex]) {
+            playTrack(currentPlaylist[prevIndex], prevIndex)
         } else {
             if (audioRef.current) {
                 audioRef.current.pause()
             }
             setIsPlaying(false)
         }
-    }, [currentTrack, currentTrackIndex, playTrack, playlist, repeat, shuffle])
+    }, [currentTrack, currentTrackIndex, playTrack, currentPlaylist, repeat, shuffle])
 
     const toggleShuffle = () => {
         setShuffle(prev => {
             const newShuffle = !prev
             if (newShuffle) {
                 playedIndices.current.clear()
-                shuffledPlaylist.current = [...Array(playlist.length).keys()]
+                shuffledPlaylist.current = [...Array(currentPlaylist.length).keys()]
                     .filter(i => i !== currentTrackIndex)
                     .sort(() => Math.random() - 0.5)
                 if (currentTrackIndex !== -1) {
@@ -601,13 +574,13 @@ const PlaybackManager = ({
     }, [currentTrackIndex])
 
     useEffect(() => {
-        if (playlist.length > 0 && currentTrack) {
-            const indexInPlaylist = playlist.findIndex(track => track.Id === currentTrack.Id)
+        if (currentPlaylist.length > 0 && currentTrack) {
+            const indexInPlaylist = currentPlaylist.findIndex(track => track.Id === currentTrack.Id)
             if (indexInPlaylist !== -1 && indexInPlaylist !== currentTrackIndex) {
                 setCurrentTrackIndex(indexInPlaylist)
             }
         }
-    }, [playlist, currentTrack, currentTrackIndex])
+    }, [currentPlaylist, currentTrack, currentTrackIndex])
 
     useEffect(() => {
         if (hasRestored.current) return
@@ -617,7 +590,7 @@ const PlaybackManager = ({
         if (savedLastPlayedTrack && api.auth.token) {
             const lastPlayedTrack = JSON.parse(savedLastPlayedTrack)
             setCurrentTrack(lastPlayedTrack)
-            const indexInPlaylist = playlist.findIndex(track => track.Id === lastPlayedTrack.Id)
+            const indexInPlaylist = currentPlaylist.findIndex(track => track.Id === lastPlayedTrack.Id)
             if (indexInPlaylist !== -1) {
                 setCurrentTrackIndex(indexInPlaylist)
             } else if (savedIndex) {
@@ -636,23 +609,23 @@ const PlaybackManager = ({
             setCurrentTrackIndex(-1)
         }
         hasRestored.current = true
-    }, [playlist, api.auth.token, api.auth.serverUrl, api.auth.userId, updateMediaSessionMetadata])
+    }, [currentPlaylist, api.auth.token, api.auth.serverUrl, api.auth.userId, updateMediaSessionMetadata])
 
     useEffect(() => {
-        if (shuffle && hasMore && loadMore) {
+        if (shuffle && hasMoreState && loadMoreCallback) {
             const threshold = 5
             if (currentShuffledIndex.current >= shuffledPlaylist.current.length - threshold) {
                 const currentScrollPosition = window.scrollY
-                loadMore()
+                loadMoreCallback()
                 window.scrollTo({ top: currentScrollPosition, behavior: 'smooth' })
             }
         }
-    }, [currentShuffledIndex, shuffle, hasMore, loadMore])
+    }, [currentShuffledIndex, shuffle, hasMoreState, loadMoreCallback])
 
     useEffect(() => {
         if (shuffle) {
             const currentTrackIndexInShuffled = shuffledPlaylist.current[currentShuffledIndex.current]
-            shuffledPlaylist.current = [...Array(playlist.length).keys()]
+            shuffledPlaylist.current = [...Array(currentPlaylist.length).keys()]
                 .filter(i => i !== currentTrackIndexInShuffled)
                 .sort(() => Math.random() - 0.5)
             if (currentTrackIndexInShuffled !== undefined) {
@@ -660,14 +633,14 @@ const PlaybackManager = ({
                 currentShuffledIndex.current = 0
             }
         }
-    }, [playlist, shuffle])
+    }, [currentPlaylist, shuffle])
 
     useEffect(() => {
         if (!audioRef.current) return
 
         const audio = audioRef.current
         const handleEnded = () => {
-            if (!currentTrack || currentTrackIndex === -1 || !playlist || playlist.length === 0) {
+            if (!currentTrack || currentTrackIndex === -1 || !currentPlaylist || currentPlaylist.length === 0) {
                 setIsPlaying(false)
                 if (currentTrack) {
                     reportPlaybackStopped(currentTrack, audio.currentTime)
@@ -688,7 +661,7 @@ const PlaybackManager = ({
         return () => {
             audio.removeEventListener('ended', handleEnded)
         }
-    }, [currentTrack, currentTrackIndex, repeat, playlist, playTrack, nextTrack, reportPlaybackStopped])
+    }, [currentTrack, currentTrackIndex, repeat, currentPlaylist, playTrack, nextTrack, reportPlaybackStopped])
 
     useEffect(() => {
         if (clearOnLogout && currentTrack) {
@@ -706,7 +679,7 @@ const PlaybackManager = ({
         }
     }, [clearOnLogout, currentTrack, reportPlaybackStopped])
 
-    return children({
+    return {
         currentTrack,
         currentTrackIndex,
         isPlaying,
@@ -725,7 +698,11 @@ const PlaybackManager = ({
         toggleShuffle,
         repeat,
         toggleRepeat,
-    })
+        hasMoreState,
+        setHasMoreState,
+        currentPlaylist,
+        setCurrentPlaylist,
+        loadMoreCallback,
+        setLoadMoreCallback,
+    }
 }
-
-export default PlaybackManager

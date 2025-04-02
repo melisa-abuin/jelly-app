@@ -1,27 +1,12 @@
 import { Link } from 'react-router-dom' // Add this import
-import { MediaItem } from '../api/jellyfin'
 import Loader from '../components/Loader'
 import MediaList from '../components/MediaList'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import { useJellyfinHomeData } from '../hooks/useJellyfinHomeData'
 
-interface HomePageProps {
-    playTrack: (track: MediaItem, index: number) => void
-    currentTrack: MediaItem | null
-    currentTrackIndex: number
-    isPlaying: boolean
-    togglePlayPause: () => void
-    setCurrentPlaylist: (playlist: MediaItem[]) => void
-}
-
-const Home = ({
-    playTrack,
-    currentTrack,
-    currentTrackIndex,
-    isPlaying,
-    togglePlayPause,
-    setCurrentPlaylist,
-}: HomePageProps) => {
+const Home = () => {
     const { recentlyPlayed, frequentlyPlayed, recentlyAdded, loading, error } = useJellyfinHomeData()
+    const playback = usePlaybackContext()
 
     if (loading) {
         return <Loader />
@@ -48,13 +33,9 @@ const Home = ({
                     type="song"
                     loading={loading}
                     playTrack={(track, index) => {
-                        setCurrentPlaylist(recentlyPlayed || [])
-                        playTrack(track, index)
+                        playback.setCurrentPlaylist(recentlyPlayed || [])
+                        playback.playTrack(track, index)
                     }}
-                    currentTrack={currentTrack}
-                    currentTrackIndex={currentTrackIndex}
-                    isPlaying={isPlaying}
-                    togglePlayPause={togglePlayPause}
                     playlist={recentlyPlayed}
                 />
             </div>
@@ -73,13 +54,9 @@ const Home = ({
                     type="song"
                     loading={loading}
                     playTrack={(track, index) => {
-                        setCurrentPlaylist(frequentlyPlayed || [])
-                        playTrack(track, index)
+                        playback.setCurrentPlaylist(frequentlyPlayed || [])
+                        playback.playTrack(track, index)
                     }}
-                    currentTrack={currentTrack}
-                    currentTrackIndex={currentTrackIndex}
-                    isPlaying={isPlaying}
-                    togglePlayPause={togglePlayPause}
                     playlist={frequentlyPlayed}
                 />
             </div>
@@ -95,13 +72,9 @@ const Home = ({
                     type="album"
                     loading={loading}
                     playTrack={(track, index) => {
-                        setCurrentPlaylist(recentlyAdded || [])
-                        playTrack(track, index)
+                        playback.setCurrentPlaylist(recentlyAdded || [])
+                        playback.playTrack(track, index)
                     }}
-                    currentTrack={currentTrack}
-                    currentTrackIndex={currentTrackIndex}
-                    isPlaying={isPlaying}
-                    togglePlayPause={togglePlayPause}
                     playlist={recentlyAdded}
                 />
             </div>

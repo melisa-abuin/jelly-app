@@ -1,30 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { VirtuosoHandle } from 'react-virtuoso'
-import { MediaItem } from '../api/jellyfin'
 import MediaList from '../components/MediaList'
 import { usePageTitle } from '../context/PageTitleContext'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import { useJellyfinGenreTracks } from '../hooks/useJellyfinGenreTracks'
 
-interface GenreProps {
-    playTrack: (track: MediaItem, index: number) => void
-    currentTrack: MediaItem | null
-    currentTrackIndex: number
-    isPlaying: boolean
-    togglePlayPause: () => void
-    setCurrentPlaylist: (playlist: MediaItem[]) => void
-    setLoadMoreCallback?: (callback: () => void) => void
-    setHasMoreState?: (hasMore: boolean) => void
-}
+const Genre = () => {
+    const playback = usePlaybackContext()
 
-const Genre = ({
-    playTrack,
-    currentTrack,
-    currentTrackIndex,
-    isPlaying,
-    togglePlayPause,
-    setCurrentPlaylist,
-}: GenreProps) => {
     const { genre } = useParams<{ genre: string }>()
     const { tracks, loading, error, loadMore, hasMore } = useJellyfinGenreTracks(genre!)
     const { setPageTitle } = usePageTitle()
@@ -91,13 +75,9 @@ const Genre = ({
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={(track, index) => {
-                    setCurrentPlaylist(tracks)
-                    playTrack(track, index)
+                    playback.setCurrentPlaylist(tracks)
+                    playback.playTrack(track, index)
                 }}
-                currentTrack={currentTrack}
-                currentTrackIndex={currentTrackIndex}
-                isPlaying={isPlaying}
-                togglePlayPause={togglePlayPause}
                 playlist={tracks}
             />
         </div>

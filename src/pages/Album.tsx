@@ -1,25 +1,19 @@
 import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { MediaItem } from '../api/jellyfin'
 import Loader from '../components/Loader'
 import TrackList from '../components/TrackList'
 import { useJellyfinContext } from '../context/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import { useJellyfinAlbumData } from '../hooks/useJellyfinAlbumData'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Album.css'
 
-interface AlbumProps {
-    playTrack: (track: MediaItem, index: number) => void
-    currentTrack: MediaItem | null
-    isPlaying: boolean
-    togglePlayPause: () => void
-    setCurrentPlaylist: (playlist: MediaItem[]) => void
-}
-
-const Album = ({ playTrack, currentTrack, isPlaying, togglePlayPause, setCurrentPlaylist }: AlbumProps) => {
+const Album = () => {
     const api = useJellyfinContext()
+    const playback = usePlaybackContext()
+
     const { albumId } = useParams<{ albumId: string }>()
     const { album, tracks, loading, error } = useJellyfinAlbumData(albumId!)
     const { setPageTitle } = usePageTitle()
@@ -99,8 +93,8 @@ const Album = ({ playTrack, currentTrack, isPlaying, togglePlayPause, setCurrent
                         <div
                             className="play-album"
                             onClick={() => {
-                                setCurrentPlaylist(tracks)
-                                playTrack(tracks[0], 0)
+                                playback.setCurrentPlaylist(tracks)
+                                playback.playTrack(tracks[0], 0)
                             }}
                         >
                             <div className="play-icon" />
@@ -116,14 +110,7 @@ const Album = ({ playTrack, currentTrack, isPlaying, togglePlayPause, setCurrent
                 </div>
             </div>
 
-            <TrackList
-                tracks={tracks}
-                currentTrack={currentTrack}
-                isPlaying={isPlaying}
-                togglePlayPause={togglePlayPause}
-                setCurrentPlaylist={setCurrentPlaylist}
-                playTrack={playTrack}
-            />
+            <TrackList tracks={tracks} />
         </div>
     )
 }

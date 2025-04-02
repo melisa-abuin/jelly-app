@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import Loader from './Loader'
 
 interface ExtendedMediaItem extends MediaItem {
@@ -19,10 +20,6 @@ interface MediaListProps {
     loadMore?: () => void
     hasMore?: boolean
     playTrack: (track: MediaItem, index: number) => void
-    currentTrack: MediaItem | null
-    currentTrackIndex: number
-    isPlaying: boolean
-    togglePlayPause: () => void
     playlist?: MediaItem[]
     setCurrentPlaylist?: (playlist: MediaItem[]) => void
 }
@@ -35,14 +32,11 @@ const MediaList = ({
     loadMore,
     hasMore,
     playTrack,
-    currentTrack,
-    currentTrackIndex,
-    isPlaying,
-    togglePlayPause,
     playlist = [],
     setCurrentPlaylist,
 }: MediaListProps) => {
     const api = useJellyfinContext()
+    const playback = usePlaybackContext()
 
     const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
@@ -111,14 +105,14 @@ const MediaList = ({
 
     const handleSongClick = (item: MediaItem, index: number) => {
         if (type === 'song') {
-            if (currentTrack?.Id === item.Id) {
-                togglePlayPause()
+            if (playback.currentTrack?.Id === item.Id) {
+                playback.togglePlayPause()
             } else {
                 const playlistIndex = playlist.findIndex(track => track.Id === item.Id)
                 if (setCurrentPlaylist) {
                     setCurrentPlaylist(items)
                 }
-                const effectiveIndex = playlistIndex !== -1 && currentTrackIndex !== -1 ? playlistIndex : index
+                const effectiveIndex = playlistIndex !== -1 && playback.currentTrackIndex !== -1 ? playlistIndex : index
                 playTrack(item, effectiveIndex)
             }
         }
@@ -139,7 +133,8 @@ const MediaList = ({
             ? `${api.auth.serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
             : '/default-thumbnail.png'
 
-        const itemClass = type === 'song' && currentTrack?.Id === item.Id ? (isPlaying ? 'playing' : 'paused') : ''
+        const itemClass =
+            type === 'song' && playback.currentTrack?.Id === item.Id ? (playback.isPlaying ? 'playing' : 'paused') : ''
 
         return type === 'album' ? (
             <div

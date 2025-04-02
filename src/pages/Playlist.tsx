@@ -2,33 +2,19 @@ import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { VirtuosoHandle } from 'react-virtuoso'
-import { MediaItem } from '../api/jellyfin'
 import Loader from '../components/Loader'
 import PlaylistTrackList from '../components/PlaylistTrackList'
 import { useJellyfinContext } from '../context/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import { useJellyfinPlaylistData } from '../hooks/useJellyfinPlaylistData'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Playlist.css'
 
-interface PlaylistProps {
-    playTrack: (track: MediaItem, index: number) => void
-    currentTrack: MediaItem | null
-    currentTrackIndex: number
-    isPlaying: boolean
-    togglePlayPause: () => void
-    setCurrentPlaylist: (playlist: MediaItem[]) => void
-}
-
-const Playlist = ({
-    playTrack,
-    currentTrack,
-    currentTrackIndex,
-    isPlaying,
-    togglePlayPause,
-    setCurrentPlaylist,
-}: PlaylistProps) => {
+const Playlist = () => {
     const api = useJellyfinContext()
+    const playback = usePlaybackContext()
+
     const { playlistId } = useParams<{ playlistId: string }>()
     const { playlist, tracks, loading, error, loadMore, hasMore, totalPlaytime, totalTrackCount, totalPlays } =
         useJellyfinPlaylistData(playlistId!)
@@ -135,8 +121,8 @@ const Playlist = ({
                         <div
                             className="play-playlist"
                             onClick={() => {
-                                setCurrentPlaylist(tracks)
-                                playTrack(tracks[0], 0)
+                                playback.setCurrentPlaylist(tracks)
+                                playback.playTrack(tracks[0], 0)
                             }}
                         >
                             <div className="play-icon" />
@@ -159,13 +145,9 @@ const Playlist = ({
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={(track, index) => {
-                    setCurrentPlaylist(tracks)
-                    playTrack(track, index)
+                    playback.setCurrentPlaylist(tracks)
+                    playback.playTrack(track, index)
                 }}
-                currentTrack={currentTrack}
-                currentTrackIndex={currentTrackIndex}
-                isPlaying={isPlaying}
-                togglePlayPause={togglePlayPause}
                 playlist={tracks}
             />
         </div>

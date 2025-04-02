@@ -1,39 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 import { VirtuosoHandle } from 'react-virtuoso'
-import { MediaItem } from '../api/jellyfin'
 import MediaList from '../components/MediaList'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import { useJellyfinFrequentlyPlayedData } from '../hooks/useJellyfinFrequentlyPlayedData'
 
-interface FrequentlyPlayedProps {
-    playTrack: (track: MediaItem, index: number) => void
-    currentTrack: MediaItem | null
-    currentTrackIndex: number
-    isPlaying: boolean
-    togglePlayPause: () => void
-    setCurrentPlaylist: (playlist: MediaItem[]) => void
-    setLoadMoreCallback: (callback: () => void) => void
-    setHasMoreState: (hasMore: boolean) => void
-}
+const FrequentlyPlayed = () => {
+    const playback = usePlaybackContext()
 
-const FrequentlyPlayed = ({
-    playTrack,
-    currentTrack,
-    currentTrackIndex,
-    isPlaying,
-    togglePlayPause,
-    setCurrentPlaylist,
-    setLoadMoreCallback,
-    setHasMoreState,
-}: FrequentlyPlayedProps) => {
     const { items, loading, error, loadMore, hasMore } = useJellyfinFrequentlyPlayedData()
     const virtuosoRef = useRef<VirtuosoHandle>(null)
     const hasPreloaded = useRef(false)
     const [isPreloading, setIsPreloading] = useState(false)
 
     useEffect(() => {
-        setLoadMoreCallback(() => loadMore)
-        setHasMoreState(hasMore)
-    }, [loadMore, hasMore, setLoadMoreCallback, setHasMoreState])
+        playback.setLoadMoreCallback(() => loadMore)
+        playback.setHasMoreState(hasMore)
+    }, [loadMore, hasMore, playback])
 
     useEffect(() => {
         if (hasPreloaded.current || isPreloading) return
@@ -82,13 +64,9 @@ const FrequentlyPlayed = ({
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={(track, index) => {
-                    setCurrentPlaylist(items)
-                    playTrack(track, index)
+                    playback.setCurrentPlaylist(items)
+                    playback.playTrack(track, index)
                 }}
-                currentTrack={currentTrack}
-                currentTrackIndex={currentTrackIndex}
-                isPlaying={isPlaying}
-                togglePlayPause={togglePlayPause}
                 playlist={items}
             />
         </div>

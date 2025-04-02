@@ -18,21 +18,7 @@ interface SearchResult {
     isFavorite?: boolean
 }
 
-interface SearchResultsProps {
-    playTrack: (track: MediaItem, index: number) => void
-    setCurrentPlaylist: (playlist: MediaItem[]) => void
-    currentTrack: MediaItem | null
-    isPlaying: boolean
-    togglePlayPause: () => void
-}
-
-const SearchResults = ({
-    playTrack,
-    setCurrentPlaylist,
-    currentTrack,
-    isPlaying,
-    togglePlayPause,
-}: SearchResultsProps) => {
+const SearchResults = () => {
     const api = useJellyfinContext()
 
     const { query } = useParams<{ query: string }>()
@@ -132,15 +118,7 @@ const SearchResults = ({
             <div className="search-content">
                 {results.songs.length > 0 && (
                     <div className="section songs">
-                        <TrackList
-                            tracks={results.songs}
-                            currentTrack={currentTrack}
-                            isPlaying={isPlaying}
-                            togglePlayPause={togglePlayPause}
-                            setCurrentPlaylist={setCurrentPlaylist}
-                            playTrack={playTrack}
-                            showAlbumLink={false}
-                        />
+                        <TrackList tracks={results.songs} showAlbumLink={false} />
                     </div>
                 )}
 

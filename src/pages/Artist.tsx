@@ -1,26 +1,20 @@
 import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { MediaItem } from '../api/jellyfin'
 import Loader from '../components/Loader'
 import TrackList from '../components/TrackList'
 import { useJellyfinContext } from '../context/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import { useJellyfinArtistData } from '../hooks/useJellyfinArtistData'
 import { useJellyfinPlaylistsFeaturingArtist } from '../hooks/useJellyfinPlaylistsFeaturingArtist'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Artist.css'
 
-interface ArtistProps {
-    playTrack: (track: MediaItem, index: number) => void
-    currentTrack: MediaItem | null
-    isPlaying: boolean
-    togglePlayPause: () => void
-    setCurrentPlaylist: (playlist: MediaItem[]) => void
-}
-
-const Artist = ({ playTrack, currentTrack, isPlaying, togglePlayPause, setCurrentPlaylist }: ArtistProps) => {
+const Artist = () => {
     const api = useJellyfinContext()
+    const playback = usePlaybackContext()
+
     const { artistId } = useParams<{ artistId: string }>()
     const { artist, tracks, albums, appearsInAlbums, totalTrackCount, totalPlaytime, totalPlays, loading, error } =
         useJellyfinArtistData(artistId!)
@@ -120,8 +114,8 @@ const Artist = ({ playTrack, currentTrack, isPlaying, togglePlayPause, setCurren
                         <div
                             className="play-artist"
                             onClick={() => {
-                                setCurrentPlaylist(tracks)
-                                playTrack(tracks[0], 0)
+                                playback.setCurrentPlaylist(tracks)
+                                playback.playTrack(tracks[0], 0)
                             }}
                         >
                             <div className="play-icon" />
@@ -140,15 +134,7 @@ const Artist = ({ playTrack, currentTrack, isPlaying, togglePlayPause, setCurren
             <div className="artist-content">
                 {topSongs.length > 0 && (
                     <div className="section top-songs">
-                        <TrackList
-                            tracks={topSongs}
-                            currentTrack={currentTrack}
-                            isPlaying={isPlaying}
-                            togglePlayPause={togglePlayPause}
-                            setCurrentPlaylist={setCurrentPlaylist}
-                            playTrack={playTrack}
-                            showAlbumLink={true}
-                        />
+                        <TrackList tracks={topSongs} showAlbumLink={true} />
                     </div>
                 )}
 

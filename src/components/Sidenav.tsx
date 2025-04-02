@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import '../App.css'
 import { useJellyfinContext } from '../context/JellyfinContext'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import { useScrollContext } from '../context/ScrollContext'
 import { useJellyfinPlaylistsList } from '../hooks/useJellyfinPlaylistsList'
 import './Sidenav.css'
@@ -12,13 +13,6 @@ interface SidenavProps {
     username: string
     showSidenav: boolean
     closeSidenav: () => void
-    volume: number
-    setVolume: (volume: number) => void
-    playTrack: (track: MediaItem, index: number) => void
-    setCurrentPlaylist: (playlist: MediaItem[]) => void
-    currentTrack: MediaItem | null
-    isPlaying: boolean
-    togglePlayPause: () => void
 }
 
 interface SearchResult {
@@ -31,6 +25,8 @@ interface SearchResult {
 
 const Sidenav = (props: SidenavProps) => {
     const api = useJellyfinContext()
+    const playback = usePlaybackContext()
+
     const { playlists, loading, error } = useJellyfinPlaylistsList()
     const { disabled, setDisabled } = useScrollContext()
     const [searchQuery, setSearchQuery] = useState('')
@@ -40,14 +36,14 @@ const Sidenav = (props: SidenavProps) => {
 
     const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(e.target.value)
-        props.setVolume(newVolume)
+        playback.setVolume(newVolume)
     }
 
     const handleVolumeScroll = (e: WheelEvent<HTMLInputElement>) => {
         e.stopPropagation()
         const delta = e.deltaY > 0 ? -0.05 : 0.05
-        const newVolume = Math.max(0, Math.min(1, props.volume + delta))
-        props.setVolume(newVolume)
+        const newVolume = Math.max(0, Math.min(1, playback.volume + delta))
+        playback.setVolume(newVolume)
     }
 
     useEffect(() => {
@@ -121,11 +117,11 @@ const Sidenav = (props: SidenavProps) => {
 
     const handleSongClick = (song: SearchResult) => {
         if (song.mediaItem) {
-            if (song.id === props.currentTrack?.Id) {
-                props.togglePlayPause()
+            if (song.id === playback.currentTrack?.Id) {
+                playback.togglePlayPause()
             } else {
-                props.setCurrentPlaylist([song.mediaItem])
-                props.playTrack(song.mediaItem, 0)
+                playback.setCurrentPlaylist([song.mediaItem])
+                playback.playTrack(song.mediaItem, 0)
             }
             props.closeSidenav()
         }
@@ -216,8 +212,8 @@ const Sidenav = (props: SidenavProps) => {
                                                         onClick={() => handleSongClick(result)}
                                                         className={`result ${
                                                             result.type === 'Song' &&
-                                                            result.id === props.currentTrack?.Id
-                                                                ? props.isPlaying
+                                                            result.id === playback.currentTrack?.Id
+                                                                ? playback.isPlaying
                                                                     ? 'playing'
                                                                     : 'paused'
                                                                 : ''
@@ -417,7 +413,7 @@ const Sidenav = (props: SidenavProps) => {
                 </nav>
                 <div className="sidenav_footer">
                     <div className="volume">
-                        <div className="indicator">Volume: {(props.volume * 100).toFixed(0)}%</div>
+                        <div className="indicator">Volume: {(playback.volume * 100).toFixed(0)}%</div>
                         <div className="control">
                             <input
                                 type="range"
@@ -426,7 +422,7 @@ const Sidenav = (props: SidenavProps) => {
                                 min="0"
                                 max="1"
                                 step="0.01"
-                                value={props.volume}
+                                value={playback.volume}
                                 onChange={handleVolumeChange}
                                 onWheel={handleVolumeScroll}
                                 onMouseEnter={() => setDisabled(true)}

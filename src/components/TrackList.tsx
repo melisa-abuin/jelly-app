@@ -1,27 +1,17 @@
 import { HeartFillIcon } from '@primer/octicons-react'
 import { MediaItem } from '../api/jellyfin'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import { formatDuration } from '../utils/formatDuration'
 import './TrackList.css'
 
 interface TrackListProps {
     tracks: MediaItem[]
-    currentTrack: MediaItem | null
-    isPlaying: boolean
-    togglePlayPause: () => void
-    setCurrentPlaylist: (playlist: MediaItem[]) => void
-    playTrack: (track: MediaItem, index: number) => void
     showAlbumLink?: boolean
 }
 
-const TrackList = ({
-    tracks,
-    currentTrack,
-    isPlaying,
-    togglePlayPause,
-    setCurrentPlaylist,
-    playTrack,
-    showAlbumLink = false,
-}: TrackListProps) => {
+const TrackList = ({ tracks, showAlbumLink = false }: TrackListProps) => {
+    const playback = usePlaybackContext()
+
     const MIN_PLAY_COUNT = 5
     const mostPlayedTracks = tracks
         .map(track => ({
@@ -36,10 +26,10 @@ const TrackList = ({
     return (
         <ul className="tracklist noSelect">
             {tracks.map((track, index) => {
-                const isCurrentTrack = currentTrack?.Id === track.Id
+                const isCurrentTrack = playback.currentTrack?.Id === track.Id
                 const isMostPlayed = mostPlayedTracks.includes(track.Id)
                 const itemClass = [
-                    isCurrentTrack ? (isPlaying ? 'playing' : 'paused') : '',
+                    isCurrentTrack ? (playback.isPlaying ? 'playing' : 'paused') : '',
                     isMostPlayed ? 'most-played' : '',
                 ]
                     .filter(Boolean)
@@ -51,10 +41,10 @@ const TrackList = ({
                         className={`track-item ${itemClass}`}
                         onClick={() => {
                             if (isCurrentTrack) {
-                                togglePlayPause()
+                                playback.togglePlayPause()
                             } else {
-                                setCurrentPlaylist(tracks)
-                                playTrack(track, index)
+                                playback.setCurrentPlaylist(tracks)
+                                playback.playTrack(track, index)
                             }
                         }}
                     >
