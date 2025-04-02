@@ -109,7 +109,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         const response = await fetch(
             `${serverUrl}/Artists?searchTerm=${encodeURIComponent(
                 searchTerm
-            )}&UserId=${userId}&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags`,
+            )}&UserId=${userId}&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags,UserData`,
             {
                 headers: { 'X-Emby-Token': token },
                 signal: AbortSignal.timeout(20000),
@@ -124,7 +124,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         const response = await fetch(
             `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
                 searchTerm
-            )}&IncludeItemTypes=MusicAlbum&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags,AlbumArtists`,
+            )}&IncludeItemTypes=MusicAlbum&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags,AlbumArtists,UserData`,
             {
                 headers: { 'X-Emby-Token': token },
                 signal: AbortSignal.timeout(20000),
@@ -139,7 +139,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         const response = await fetch(
             `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
                 searchTerm
-            )}&IncludeItemTypes=Playlist&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags,ChildCount`,
+            )}&IncludeItemTypes=Playlist&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags,ChildCount,UserData`,
             {
                 headers: { 'X-Emby-Token': token },
                 signal: AbortSignal.timeout(20000),

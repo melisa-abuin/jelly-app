@@ -57,15 +57,15 @@ html.winOS .sidenav > .sidenav_wrapper::-webkit-scrollbar-thumb:hover {
 }
 
 html.winOS .sidenav > .sidenav_wrapper > .sidenav_header {
-    width: calc(100% + 6px);
+    width: calc(100% + 4px);
 }
 
 html.winOS .sidenav > .sidenav_wrapper > .sidenav_content {
-    width: calc(100% + 6px);
+    width: calc(100% + 4px);
 }
 
 html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
-    width: calc(100% + 6px);
+    width: calc(100% + 4px);
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_header {

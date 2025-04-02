@@ -1,3 +1,4 @@
+import { HeartFillIcon } from '@primer/octicons-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
@@ -14,6 +15,7 @@ interface SearchResult {
     thumbnailUrl?: string
     artists?: string[]
     totalTracks?: number
+    isFavorite?: boolean
 }
 
 interface SearchResultsProps {
@@ -64,6 +66,7 @@ const SearchResults = ({
                 const artistItems = await api.searchArtistsDetailed(query, 10)
                 const albumItems = await api.searchAlbumsDetailed(query, 10)
                 const playlistItems = await api.searchPlaylistsDetailed(query, 10)
+
                 const songResponse = await fetch(
                     `${api.auth.serverUrl}/Users/${api.auth.userId}/Items?searchTerm=${encodeURIComponent(
                         query
@@ -79,6 +82,7 @@ const SearchResults = ({
                     thumbnailUrl: artist.ImageTags?.Primary
                         ? `${api.auth.serverUrl}/Items/${artist.Id}/Images/Primary?tag=${artist.ImageTags.Primary}&quality=100&fillWidth=36&fillHeight=36&format=webp&api_key=${api.auth.token}`
                         : '/default-thumbnail.png',
+                    isFavorite: artist.UserData?.IsFavorite || false,
                 }))
 
                 const albums = albumItems.map(item => ({
@@ -90,7 +94,8 @@ const SearchResults = ({
                         : item.AlbumPrimaryImageTag && item.AlbumId
                         ? `${api.auth.serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
                         : '/default-thumbnail.png',
-                    artists: item.AlbumArtists?.map(artist => artist.Name) || [item.AlbumArtist || 'Unknown Artist'],
+                    artists: [item.AlbumArtists?.[0]?.Name || item.AlbumArtist || 'Unknown Artist'],
+                    isFavorite: item.UserData?.IsFavorite || false,
                 }))
 
                 const playlists = playlistItems.map(playlist => ({
@@ -101,6 +106,7 @@ const SearchResults = ({
                         ? `${api.auth.serverUrl}/Items/${playlist.Id}/Images/Primary?tag=${playlist.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
                         : '/default-thumbnail.png',
                     totalTracks: playlist.ChildCount || 0,
+                    isFavorite: playlist.UserData?.IsFavorite || false,
                 }))
 
                 setResults({ artists, albums, playlists, songs })
@@ -150,6 +156,11 @@ const SearchResults = ({
                                     <div className="section-info">
                                         <div className="name">{artist.name}</div>
                                     </div>
+                                    {artist.isFavorite && (
+                                        <div className="favorited" title="Favorited">
+                                            <HeartFillIcon size={16} />
+                                        </div>
+                                    )}
                                 </Link>
                             ))}
                         </div>
@@ -168,9 +179,14 @@ const SearchResults = ({
                                     <div className="section-info">
                                         <div className="name">{album.name}</div>
                                         <div className="desc album-artists">
-                                            {album.artists?.join(', ') || 'Unknown Artist'}
+                                            {album.artists?.[0] || 'Unknown Artist'}
                                         </div>
                                     </div>
+                                    {album.isFavorite && (
+                                        <div className="favorited" title="Favorited">
+                                            <HeartFillIcon size={16} />
+                                        </div>
+                                    )}
                                 </Link>
                             ))}
                         </div>
@@ -190,6 +206,11 @@ const SearchResults = ({
                                         <div className="name">{playlist.name}</div>
                                         <div className="desc track-amount">{playlist.totalTracks} tracks</div>
                                     </div>
+                                    {playlist.isFavorite && (
+                                        <div className="favorited" title="Favorited">
+                                            <HeartFillIcon size={16} />
+                                        </div>
+                                    )}
                                 </Link>
                             ))}
                         </div>
