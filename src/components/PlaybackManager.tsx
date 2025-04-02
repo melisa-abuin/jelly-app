@@ -104,10 +104,107 @@ const PlaybackManager = ({
         [api.auth.serverUrl, api.auth.token]
     )
 
+    // Playback Reporting
+    const reportPlaybackStart = useCallback(
+        async (track: MediaItem) => {
+            const url = `${api.auth.serverUrl}/Sessions/Playing`
+            const payload = {
+                ItemId: track.Id,
+                PlayMethod: 'DirectStream',
+                PositionTicks: 0,
+                IsPaused: false,
+                CanSeek: true,
+                MediaSourceId: track.Id,
+                AudioStreamIndex: 1,
+            }
+
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Emby-Token': api.auth.token,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                })
+            } catch (error) {
+                console.error('Error reporting playback start:', error)
+            }
+        },
+        [api.auth.serverUrl, api.auth.token]
+    )
+
+    const reportPlaybackProgress = useCallback(
+        async (track: MediaItem, position: number, isPaused: boolean) => {
+            const url = `${api.auth.serverUrl}/Sessions/Playing/Progress`
+            const payload = {
+                ItemId: track.Id,
+                PositionTicks: Math.floor(position * 10000000),
+                IsPaused: isPaused,
+                PlayMethod: 'DirectStream',
+                MediaSourceId: track.Id,
+                AudioStreamIndex: 1,
+            }
+
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Emby-Token': api.auth.token,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                })
+            } catch (error) {
+                console.error('Error reporting playback progress:', error)
+            }
+        },
+        [api.auth.serverUrl, api.auth.token]
+    )
+
+    const reportPlaybackStopped = useCallback(
+        async (track: MediaItem, position: number) => {
+            const url = `${api.auth.serverUrl}/Sessions/Playing/Stopped`
+            const payload = {
+                ItemId: track.Id,
+                PositionTicks: Math.floor(position * 10000000),
+                PlayMethod: 'DirectStream',
+                MediaSourceId: track.Id,
+            }
+
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Emby-Token': api.auth.token,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                })
+            } catch (error) {
+                console.error('Error reporting playback stopped:', error)
+            }
+        },
+        [api.auth.serverUrl, api.auth.token]
+    )
+
+    useEffect(() => {
+        if (!isPlaying || !currentTrack) return
+
+        const interval = setInterval(() => {
+            reportPlaybackProgress(currentTrack, audioRef.current.currentTime, false)
+        }, 10000)
+
+        return () => clearInterval(interval)
+    }, [isPlaying, currentTrack, reportPlaybackProgress])
+
     const playTrack = useCallback(
         async (track: MediaItem, index: number) => {
             if (audioRef.current) {
                 const audio = audioRef.current
+                if (currentTrack && isPlaying) {
+                    await reportPlaybackStopped(currentTrack, audio.currentTime)
+                }
                 audio.pause()
                 audio.currentTime = 0
 
@@ -138,8 +235,10 @@ const PlaybackManager = ({
                     }
 
                     playedIndices.current.add(index)
-
                     updateMediaSessionMetadata(track)
+
+                    // Report playback start to Jellyfin
+                    await reportPlaybackStart(track)
                 } catch (error) {
                     console.error('Error playing track:', error)
                     setIsPlaying(false)
@@ -151,7 +250,18 @@ const PlaybackManager = ({
                 }
             }
         },
-        [api.auth.serverUrl, api.auth.token, api.auth.userId, shuffle, updateLastPlayed, updateMediaSessionMetadata]
+        [
+            api.auth.serverUrl,
+            api.auth.token,
+            api.auth.userId,
+            shuffle,
+            updateLastPlayed,
+            updateMediaSessionMetadata,
+            reportPlaybackStart,
+            reportPlaybackStopped,
+            currentTrack,
+            isPlaying,
+        ]
     )
 
     const togglePlayPause = useCallback(() => {
@@ -160,6 +270,7 @@ const PlaybackManager = ({
             if (isPlaying) {
                 audio.pause()
                 setIsPlaying(false)
+                reportPlaybackProgress(currentTrack, audio.currentTime, true)
             } else {
                 if (!audio.src) {
                     const streamUrl = `${api.auth.serverUrl}/Audio/${currentTrack.Id}/universal?UserId=${api.auth.userId}&api_key=${api.auth.token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
@@ -170,6 +281,7 @@ const PlaybackManager = ({
                     .play()
                     .then(() => {
                         setIsPlaying(true)
+                        reportPlaybackProgress(currentTrack, audio.currentTime, false)
                     })
                     .catch(error => {
                         console.error('Error resuming playback:', error)
@@ -182,7 +294,18 @@ const PlaybackManager = ({
                     })
             }
         }
-    }, [api.auth.serverUrl, api.auth.token, api.auth.userId, currentTrack, isPlaying])
+    }, [
+        api.auth.serverUrl,
+        api.auth.token,
+        api.auth.userId,
+        shuffle,
+        updateLastPlayed,
+        updateMediaSessionMetadata,
+        reportPlaybackStart,
+        reportPlaybackStopped,
+        currentTrack,
+        isPlaying,
+    ])
 
     const nextTrack = useCallback(() => {
         if (!playlist || playlist.length === 0 || currentTrackIndex === -1 || !currentTrack) {
@@ -546,9 +669,13 @@ const PlaybackManager = ({
         const handleEnded = () => {
             if (!currentTrack || currentTrackIndex === -1 || !playlist || playlist.length === 0) {
                 setIsPlaying(false)
+                if (currentTrack) {
+                    reportPlaybackStopped(currentTrack, audio.currentTime)
+                }
                 return
             }
 
+            reportPlaybackStopped(currentTrack, audio.currentTime)
             if (repeat === 'one') {
                 playTrack(currentTrack, currentTrackIndex)
             } else {
@@ -561,10 +688,11 @@ const PlaybackManager = ({
         return () => {
             audio.removeEventListener('ended', handleEnded)
         }
-    }, [currentTrack, currentTrackIndex, repeat, playlist, playTrack, nextTrack])
+    }, [currentTrack, currentTrackIndex, repeat, playlist, playTrack, nextTrack, reportPlaybackStopped])
 
     useEffect(() => {
-        if (clearOnLogout) {
+        if (clearOnLogout && currentTrack) {
+            reportPlaybackStopped(currentTrack, audioRef.current.currentTime)
             setCurrentTrack(null)
             setCurrentTrackIndex(-1)
             setIsPlaying(false)
@@ -576,7 +704,7 @@ const PlaybackManager = ({
                 audioRef.current.src = ''
             }
         }
-    }, [clearOnLogout])
+    }, [clearOnLogout, currentTrack, reportPlaybackStopped])
 
     return children({
         currentTrack,
