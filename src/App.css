@@ -377,7 +377,7 @@ body.lockscroll {
     display: flex;
     align-items: center;
     width: 100%;
-    max-width: calc(100% - 28px);
+    max-width: calc(100% - 30px);
 }
 
 .main > .main_header > .primary > .container {
@@ -848,6 +848,7 @@ body.lockscroll {
 }
 
 /* Other page specific */
+.search-results-page,
 .albums-page,
 .favorites-page,
 .tracks-page,

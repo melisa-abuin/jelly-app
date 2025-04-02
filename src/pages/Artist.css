@@ -5,7 +5,7 @@
 .artist-page > .artist-header {
     display: flex;
     align-items: center;
-    margin-left: 26px;
+    margin-left: 28px;
     margin-bottom: 14px;
 }
 
@@ -177,7 +177,7 @@
 .artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .date,
 .artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .track-amount {
     font-size: 0.725rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--font-color-tertiary);
 }
 
@@ -192,7 +192,7 @@
 .artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .container > .year {
     display: inline;
     font-size: 0.725rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--font-color-tertiary);
 }
 
