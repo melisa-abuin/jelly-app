@@ -49,6 +49,7 @@ export const useP__laybackManager = ({
         return savedPlaylist ? JSON.parse(savedPlaylist) : []
     })
     const [loadMoreCallback, setLoadMoreCallback] = useState<(() => void) | undefined>(undefined)
+    const abortControllerRef = useRef<AbortController | null>(null)
 
     useEffect(() => {
         localStorage.setItem('currentPlaylist', JSON.stringify(currentPlaylist))
@@ -90,7 +91,7 @@ export const useP__laybackManager = ({
 
     // Playback Reporting
     const reportPlaybackStart = useCallback(
-        async (track: MediaItem) => {
+        async (track: MediaItem, signal: AbortSignal) => {
             const url = `${api.auth.serverUrl}/Sessions/Playing`
             const payload = {
                 ItemId: track.Id,
@@ -110,6 +111,7 @@ export const useP__laybackManager = ({
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(payload),
+                    signal,
                 })
             } catch (error) {
                 console.error('Error reporting playback start:', error)
@@ -147,7 +149,7 @@ export const useP__laybackManager = ({
     )
 
     const reportPlaybackStopped = useCallback(
-        async (track: MediaItem, position: number) => {
+        async (track: MediaItem, position: number, signal?: AbortSignal) => {
             const url = `${api.auth.serverUrl}/Sessions/Playing/Stopped`
             const payload = {
                 ItemId: track.Id,
@@ -164,6 +166,7 @@ export const useP__laybackManager = ({
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(payload),
+                    signal,
                 })
             } catch (error) {
                 console.error('Error reporting playback stopped:', error)
@@ -184,10 +187,14 @@ export const useP__laybackManager = ({
 
     const playTrack = useCallback(
         async (track: MediaItem, index: number) => {
+            abortControllerRef.current?.abort('abort')
+            abortControllerRef.current = new AbortController()
+            const signal = abortControllerRef.current.signal
+
             if (audioRef.current) {
                 const audio = audioRef.current
                 if (currentTrack && isPlaying) {
-                    await reportPlaybackStopped(currentTrack, audio.currentTime)
+                    await reportPlaybackStopped(currentTrack, audio.currentTime, signal)
                 }
                 audio.pause()
                 audio.currentTime = 0
@@ -200,12 +207,18 @@ export const useP__laybackManager = ({
                     await new Promise<void>(resolve => {
                         const onLoadedMetadata = () => {
                             audio.removeEventListener('loadedmetadata', onLoadedMetadata)
+                            signal.removeEventListener('abort', onAbort)
+                            audio.play()
                             resolve()
                         }
+                        const onAbort = () => {
+                            audio.removeEventListener('loadedmetadata', onLoadedMetadata)
+                            resolve()
+                        }
+                        signal.addEventListener('abort', onAbort)
                         audio.addEventListener('loadedmetadata', onLoadedMetadata)
                     })
 
-                    await audio.play()
                     setCurrentTrack(track)
                     setCurrentTrackIndex(index)
                     setIsPlaying(true)
@@ -222,7 +235,7 @@ export const useP__laybackManager = ({
                     updateMediaSessionMetadata(track)
 
                     // Report playback start to Jellyfin
-                    await reportPlaybackStart(track)
+                    await reportPlaybackStart(track, signal)
                 } catch (error) {
                     console.error('Error playing track:', error)
                     setIsPlaying(false)
