@@ -57,15 +57,19 @@ html.winOS .sidenav > .sidenav_wrapper::-webkit-scrollbar-thumb:hover {
 }
 
 html.winOS .sidenav > .sidenav_wrapper > .sidenav_header {
-    width: calc(100% + 4px);
+    width: calc(100% + 10px);
 }
 
 html.winOS .sidenav > .sidenav_wrapper > .sidenav_content {
-    width: calc(100% + 4px);
+    width: calc(100% + 10px);
 }
 
 html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
-    width: calc(100% + 4px);
+    width: calc(100% + 10px);
+}
+
+html.winOS .sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .container > .playlist {
+    margin-right: 10px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_header {
@@ -600,7 +604,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .playlists {
-    margin-top: 18px;
+    margin-top: 20px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .indicator {

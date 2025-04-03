@@ -190,6 +190,28 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return data.Items
     }
 
+    const fetchRecentlyPlayed = async (startIndex: number, limit: number): Promise<MediaItem[]> => {
+        const response = await fetch(
+            `${serverUrl}/Users/${userId}/Items?SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Audio&Filters=IsPlayed&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,MediaSourceCount,MediaStreams&Limit=${limit}&StartIndex=${startIndex}&api_key=${token}`
+        )
+        if (!response.ok) {
+            throw new ApiError('Failed to fetch recently played items', response)
+        }
+        const data = await response.json()
+        return data.Items || []
+    }
+
+    const fetchFrequentlyPlayed = async (startIndex: number, limit: number): Promise<MediaItem[]> => {
+        const response = await fetch(
+            `${serverUrl}/Users/${userId}/Items?SortBy=PlayCount&SortOrder=Descending&IncludeItemTypes=Audio&Filters=IsPlayed&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,MediaSourceCount,MediaStreams&Limit=${limit}&StartIndex=${startIndex}&api_key=${token}`
+        )
+        if (!response.ok) {
+            throw new ApiError('Failed to fetch frequently played items', response)
+        }
+        const data = await response.json()
+        return data.Items || []
+    }
+
     // Albums
     const getAllAlbums = async (startIndex = 0, limit = 40): Promise<MediaItem[]> => {
         const response = await fetch(
@@ -464,28 +486,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         )
         if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
         return response.json()
-    }
-
-    const fetchRecentlyPlayed = async (startIndex: number, limit: number): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Audio&Filters=IsPlayed&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,MediaSourceCount,MediaStreams&Limit=${limit}&StartIndex=${startIndex}&api_key=${token}`
-        )
-        if (!response.ok) {
-            throw new ApiError('Failed to fetch recently played items', response)
-        }
-        const data = await response.json()
-        return data.Items || []
-    }
-
-    const fetchFrequentlyPlayed = async (startIndex: number, limit: number): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?SortBy=PlayCount&SortOrder=Descending&IncludeItemTypes=Audio&Filters=IsPlayed&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,MediaSourceCount,MediaStreams&Limit=${limit}&StartIndex=${startIndex}&api_key=${token}`
-        )
-        if (!response.ok) {
-            throw new ApiError('Failed to fetch frequently played items', response)
-        }
-        const data = await response.json()
-        return data.Items || []
     }
 
     return {
