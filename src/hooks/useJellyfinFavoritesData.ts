@@ -3,15 +3,7 @@ import { useCallback, useEffect } from 'react'
 import { ApiError, MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext'
 
-interface JellyfinFavoritesData {
-    allFavorites: MediaItem[]
-    loading: boolean
-    error: string | null
-    hasMore: boolean
-    loadMore: () => void
-}
-
-export const useJellyfinFavoritesData = (): JellyfinFavoritesData => {
+export const useJellyfinFavoritesData = () => {
     const api = useJellyfinContext()
     const itemsPerPage = 40
 
@@ -46,9 +38,9 @@ export const useJellyfinFavoritesData = (): JellyfinFavoritesData => {
           })
         : []
 
-    const loadMore = useCallback(() => {
+    const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage()
+            await fetchNextPage()
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 

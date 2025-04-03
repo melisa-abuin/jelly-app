@@ -1,4 +1,4 @@
-export const formatDurationReadable = (ticks?: number): string => {
+export const formatDurationReadable = (ticks?: number) => {
     if (!ticks || ticks <= 0) return '0m'
 
     const seconds = Math.floor(ticks / 10_000_000)

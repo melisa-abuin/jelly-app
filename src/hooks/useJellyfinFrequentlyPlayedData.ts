@@ -3,15 +3,7 @@ import { useCallback, useEffect } from 'react'
 import { ApiError, MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext'
 
-interface JellyfinFrequentlyPlayedData {
-    items: MediaItem[]
-    loading: boolean
-    error: string | null
-    hasMore: boolean
-    loadMore: () => void
-}
-
-export const useJellyfinFrequentlyPlayedData = (): JellyfinFrequentlyPlayedData => {
+export const useJellyfinFrequentlyPlayedData = () => {
     const api = useJellyfinContext()
     const itemsPerPage = 40
 
@@ -46,9 +38,9 @@ export const useJellyfinFrequentlyPlayedData = (): JellyfinFrequentlyPlayedData 
           })
         : []
 
-    const loadMore = useCallback(() => {
+    const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage()
+            await fetchNextPage()
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 

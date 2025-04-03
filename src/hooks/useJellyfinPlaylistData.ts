@@ -3,19 +3,7 @@ import { useCallback, useEffect } from 'react'
 import { ApiError, MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext'
 
-interface JellyfinPlaylistData {
-    playlist: MediaItem | null
-    tracks: MediaItem[]
-    loading: boolean
-    error: string | null
-    hasMore: boolean
-    loadMore: () => void
-    totalPlaytime: number
-    totalTrackCount: number
-    totalPlays: number
-}
-
-export const useJellyfinPlaylistData = (playlistId: string): JellyfinPlaylistData => {
+export const useJellyfinPlaylistData = (playlistId: string) => {
     const api = useJellyfinContext()
 
     const itemsPerPage = 40
@@ -56,9 +44,9 @@ export const useJellyfinPlaylistData = (playlistId: string): JellyfinPlaylistDat
           })
         : []
 
-    const loadMore = useCallback(() => {
+    const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage()
+            await fetchNextPage()
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
