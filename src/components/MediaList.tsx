@@ -112,7 +112,8 @@ const MediaList = ({
                 if (setCurrentPlaylist) {
                     setCurrentPlaylist(items)
                 }
-                const effectiveIndex = playlistIndex !== -1 && playback.currentTrackIndex !== -1 ? playlistIndex : index
+                const effectiveIndex =
+                    playlistIndex !== -1 && playback.currentTrackIndex.current !== -1 ? playlistIndex : index
                 playTrack(item, effectiveIndex)
             }
         }
