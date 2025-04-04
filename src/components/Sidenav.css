@@ -49,11 +49,11 @@ html.winOS .sidenav > .sidenav_wrapper::-webkit-scrollbar-thumb {
 }
 
 html.winOS .sidenav > .sidenav_wrapper:hover::-webkit-scrollbar-thumb {
-    background-color: var(--bg-color-quaternary);
+    background-color: var(--scrollbar-color);
 }
 
 html.winOS .sidenav > .sidenav_wrapper::-webkit-scrollbar-thumb:hover {
-    background-color: var(--bg-color-quinary);
+    background-color: var(--scrollbar-color-hover);
 }
 
 html.winOS .sidenav > .sidenav_wrapper > .sidenav_header {
@@ -70,6 +70,10 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 html.winOS .sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .container > .playlist {
     margin-right: 10px;
+}
+
+html.winOS .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .result {
+    margin-right: -4px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_header {
@@ -678,16 +682,16 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .contai
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     border-radius: 100%;
-    background-color: var(--bg-color-quaternary);
+    background-color: var(--volume-dot-color);
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.15);
     transition: background-color 0.2s ease-out;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input::-webkit-slider-thumb:active {
-    background-color: var(--bg-color-quinary);
+    background-color: var(--volume-dot-color-active);
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account {

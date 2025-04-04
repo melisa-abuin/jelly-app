@@ -1,0 +1,74 @@
+.settings-page > .section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.settings-page > .section:last-of-type {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.settings-page > .section.appearance {
+    align-items: flex-start;
+}
+
+.settings-page > .section.session {
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.settings-page > .section > .info > .title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.settings-page > .section > .info > .desc {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--font-color-secondary);
+}
+
+.settings-page > .section > .options {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.settings-page > .section > .options > .option {
+    cursor: pointer;
+}
+
+.settings-page > .section > .options > .option > .visual {
+    width: 106px;
+    height: 66px;
+    border-radius: 12px;
+    outline: 3px solid rgba(0, 0, 0, 0);
+    background-color: var(--bg-color-secondary);
+    transition: outline-color 0.2s ease-out;
+}
+
+.settings-page > .section > .options > .option.active > .visual {
+    outline-color: var(--brand-color);
+}
+
+.settings-page > .section > .options > .option > .desc {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--font-color-tertiary);
+    margin-top: 10px;
+    transition: color 0.2s ease-out;
+}
+
+.settings-page > .section > .options > .option.active > .desc {
+    color: var(--font-color);
+}

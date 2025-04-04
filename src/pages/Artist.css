@@ -182,7 +182,7 @@
 }
 
 .artist-page > .artist-content > .section.appears-in > .section-list > .section-item > .section-info > .name {
-    margin-bottom: 0;
+    margin-bottom: 2px;
 }
 
 .artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .container {

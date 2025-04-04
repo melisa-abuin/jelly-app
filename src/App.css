@@ -21,18 +21,11 @@ a.textlink {
     color: var(--link-color);
     outline: none;
     text-decoration: none;
-    /* transition: opacity 0.2s ease-out; */
 }
 
 a.textlink:hover {
     text-decoration: underline;
 }
-
-/*
-a.textlink:active {
-    opacity: 0.3;
-}
-*/
 
 p {
     margin: 0;
@@ -141,18 +134,21 @@ svg {
     display: block;
 }
 
-/* Music App */
-
-/* Site Theme */
+/* CSS Variables */
 :root {
-    color-scheme: light;
     --system-fonts: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     --inter-font: 'Inter Variable', sans-serif;
+}
+
+/* Site Theme */
+html.light {
+    --system-fonts: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    --inter-font: 'Inter Variable', sans-serif;
+    color-scheme: light;
     --bg-color: #ffffff;
     --bg-color-secondary: #f8f8f8;
     --bg-color-tertiary: #ececec;
     --bg-color-quaternary: #bbbbbb;
-    --bg-color-quinary: #a1a1a1;
     --font-color: #303030;
     --font-color-secondary: #555555;
     --font-color-tertiary: #767676;
@@ -170,18 +166,46 @@ svg {
     --btn-brand-color: #b282e9;
     --btn-brand-color-hover: #9470e9;
     --btn-brand-color-disabled: #caa5f0;
-    --success-color: #34a52c; /* Not used */
+    --success-color: #2faf25; /* Not used */
     --overlay-bg: rgb(0 0 0 / 45%);
     --bg-color-dimmer: rgba(22, 11, 37, 0.4);
+    --volume-dot-color: #bbbbbb;
+    --volume-dot-color-active: #a1a1a1;
+    --scrollbar-color: #cecece;
+    --scrollbar-color-hover: #bbbbbb;
 }
 
-/* Moving scroll to the body as it's way more standard, think libraries... it's also needed for react-virtuoso to work!
-html {
-    overflow: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
+html.dark {
+    color-scheme: dark;
+    --bg-color: #111111;
+    --bg-color-secondary: #161616;
+    --bg-color-tertiary: #222222;
+    --bg-color-quaternary: #414141;
+    --font-color: #dfdde4;
+    --font-color-secondary: #bbb9c0;
+    --font-color-tertiary: #9b999e;
+    --font-color-inverted: #ffffff;
+    --font-color-active: #ffffff;
+    --font-color-error: #cc3a3a;
+    --border-color: #1d1d1d;
+    --border-color-secondary: #2c2c2c;
+    --link-color: #9e7de9;
+    --link-color-active: #af9cdf;
+    --error-font: #f76565;
+    --error-border: #80241b;
+    --error-background: #200c08;
+    --brand-color: #a180ec;
+    --btn-brand-color: #834ec0;
+    --btn-brand-color-hover: #9e53f3;
+    --btn-brand-color-disabled: #a47bcc;
+    --success-color: #2faf25; /* Not used */
+    --overlay-bg: rgb(0 0 0 / 65%);
+    --bg-color-dimmer: rgba(7, 3, 12, 0.6);
+    --volume-dot-color: #87868a;
+    --volume-dot-color-active: #c4c1c7;
+    --scrollbar-color: #78767c;
+    --scrollbar-color-hover: #a8a6ac;
 }
-*/
 
 html,
 body {
@@ -190,7 +214,6 @@ body {
     font-optical-sizing: auto;
     font-weight: 400;
     font-size: 16px;
-    color: var(--font-color);
     text-rendering: optimizeLegibility;
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
@@ -219,7 +242,7 @@ body.lockscroll {
     height: 100%;
 }
 
-/* Interface */
+/* Music App */
 .music-app {
     position: relative;
     display: flex;
@@ -234,6 +257,7 @@ body.lockscroll {
     background-color: var(--bg-color-secondary);
 }
 
+/* Interface */
 .interface {
     position: relative;
     display: flex;
@@ -412,6 +436,10 @@ body.lockscroll {
 
 .main > .main_header > .primary > .container > .page_title > .page-icon {
     margin-left: 6px;
+}
+
+.main > .main_header > .primary > .container > .page_title > .page-icon.playlist {
+    margin-left: 10px;
 }
 
 .main > .main_header > .secondary {
@@ -848,7 +876,6 @@ body.lockscroll {
 }
 
 /* Other page specific */
-.search-results-page,
 .albums-page,
 .favorites-page,
 .tracks-page,

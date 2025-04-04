@@ -62,7 +62,7 @@ const Sidenav = (props: SidenavProps) => {
                     const artistResponse = await api.searchArtists(searchQuery, 20)
 
                     // Fetch songs, albums, and playlists from /Items endpoint
-                    const itemsResponse = await api.searchItems(searchQuery, 20)
+                    const itemsResponse = await api.searchItems(searchQuery, 40)
                     const items = itemsResponse || []
 
                     const artists = artistResponse

@@ -13,6 +13,7 @@ import { JellyfinContextProvider } from './context/JellyfinContext'
 import { PageTitleProvider, usePageTitle } from './context/PageTitleContext'
 import { PlaybackContextProvider, usePlaybackContext } from './context/PlaybackContext'
 import { ScrollContextProvider } from './context/ScrollContext'
+import { ThemeContextProvider } from './context/ThemeContext'
 import { useSidenav } from './hooks/useSidenav'
 import Album from './pages/Album'
 import Albums from './pages/Albums'
@@ -176,7 +177,9 @@ const App = () => {
             <Router>
                 <HistoryProvider>
                     <PageTitleProvider>
-                        <ScrollContextProvider>{actualApp}</ScrollContextProvider>
+                        <ScrollContextProvider>
+                            <ThemeContextProvider>{actualApp}</ThemeContextProvider>
+                        </ScrollContextProvider>
                     </PageTitleProvider>
                 </HistoryProvider>
             </Router>
