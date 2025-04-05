@@ -220,8 +220,28 @@
 }
 
 /* Responsive */
-@media only screen and (max-width: 390px) {
+@media only screen and (max-width: 500px) {
     .artist-page > .artist-header {
         margin-left: 0;
+    }
+}
+
+@media only screen and (max-width: 360px) {
+    .artist-page > .artist-header {
+        flex-direction: column;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .artist-page > .artist-header > .thumbnail {
+        margin-right: 0;
+    }
+
+    .artist-page > .artist-header > .artist-details {
+        text-align: center;
+    }
+
+    .artist-page > .artist-header > .artist-details > .actions {
+        justify-content: center;
     }
 }

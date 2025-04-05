@@ -120,3 +120,23 @@
 .playlist-page > .playlist-header > .playlist-details > .actions > .favorite-state > svg {
     color: var(--brand-color);
 }
+
+@media only screen and (max-width: 320px) {
+    .playlist-page > .playlist-header {
+        flex-direction: column;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .playlist-page > .playlist-header > .thumbnail {
+        margin-right: 0;
+    }
+
+    .playlist-page > .playlist-header > .playlist-details {
+        text-align: center;
+    }
+
+    .playlist-page > .playlist-header > .playlist-details > .actions {
+        justify-content: center;
+    }
+}
