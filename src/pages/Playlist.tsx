@@ -8,6 +8,7 @@ import { useJellyfinContext } from '../context/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext'
 import { useJellyfinPlaylistData } from '../hooks/useJellyfinPlaylistData'
+import { formatDate } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Playlist.css'
 
@@ -74,11 +75,6 @@ const Playlist = () => {
 
     if (error || !playlist) {
         return <div className="error">{error || 'Playlist not found'}</div>
-    }
-
-    const formatDate = (date?: string) => {
-        if (!date) return 'Unknown Date'
-        return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     }
 
     return (

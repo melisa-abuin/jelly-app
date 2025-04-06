@@ -8,6 +8,7 @@ import { usePageTitle } from '../context/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext'
 import { useJellyfinArtistData } from '../hooks/useJellyfinArtistData'
 import { useJellyfinPlaylistsFeaturingArtist } from '../hooks/useJellyfinPlaylistsFeaturingArtist'
+import { formatDateYear } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Artist.css'
 
@@ -33,11 +34,6 @@ const Artist = () => {
             setPageTitle('')
         }
     }, [artist, setPageTitle])
-
-    const formatDate = (date?: string) => {
-        if (!date) return 'Unknown Date'
-        return new Date(date).toLocaleDateString('en-US', { year: 'numeric' })
-    }
 
     if (loading) {
         return <Loader />
@@ -160,7 +156,7 @@ const Artist = () => {
                                     />
                                     <div className="section-info">
                                         <div className="name">{album.Name}</div>
-                                        <div className="date">{formatDate(album.PremiereDate)}</div>
+                                        <div className="date">{formatDateYear(album.PremiereDate)}</div>
                                     </div>
                                     {album.UserData?.IsFavorite && (
                                         <div className="favorited" title="Favorited">
@@ -196,7 +192,7 @@ const Artist = () => {
                                     <div className="section-info">
                                         <div className="name">{album.Name}</div>
                                         <div className="container">
-                                            <div className="year">{formatDate(album.PremiereDate)}</div>
+                                            <div className="year">{formatDateYear(album.PremiereDate)}</div>
                                             <div className="divider" />
                                             <div className="artist">{album.AlbumArtist || 'Various Artists'}</div>
                                         </div>

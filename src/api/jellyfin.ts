@@ -1,3 +1,16 @@
+import { Jellyfin } from '@jellyfin/sdk'
+import { ItemsApi } from '@jellyfin/sdk/lib/generated-client/api/items-api'
+import { PlaystateApi } from '@jellyfin/sdk/lib/generated-client/api/playstate-api'
+import { SessionApi } from '@jellyfin/sdk/lib/generated-client/api/session-api'
+import { SystemApi } from '@jellyfin/sdk/lib/generated-client/api/system-api'
+import { UserApi } from '@jellyfin/sdk/lib/generated-client/api/user-api'
+import { UserLibraryApi } from '@jellyfin/sdk/lib/generated-client/api/user-library-api'
+import { BaseItemDto, BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models'
+import { ItemFilter } from '@jellyfin/sdk/lib/generated-client/models/item-filter'
+import { ItemSortBy } from '@jellyfin/sdk/lib/generated-client/models/item-sort-by'
+import { PlayMethod } from '@jellyfin/sdk/lib/generated-client/models/play-method'
+import { SortOrder } from '@jellyfin/sdk/lib/generated-client/models/sort-order'
+
 export class ApiError extends Error {
     constructor(message: string, public response: Response) {
         super(message)
@@ -20,26 +33,7 @@ interface AuthResponse {
     User: { Id: string; Name: string }
 }
 
-export interface MediaItem {
-    Genres?: string[]
-    Id: string
-    Name: string
-    Album?: string
-    AlbumArtist?: string
-    AlbumArtists?: Array<{ Id: string; Name: string }>
-    AlbumId?: string
-    AlbumPrimaryImageTag?: string
-    ArtistItems?: Array<{ Id: string; Name: string }>
-    Artists?: string[]
-    Type: string
-    ImageTags?: { Primary?: string }
-    DateCreated?: string
-    PremiereDate?: string
-    PlayCount?: number
-    UserData?: { IsFavorite: boolean; PlayCount?: number }
-    RunTimeTicks?: number
-    ChildCount?: number
-}
+export type MediaItem = BaseItemDto & { Id: string; Name: string }
 
 export type IJellyfinAuth = Parameters<typeof initJellyfinApi>[0]
 
@@ -73,214 +67,257 @@ export const loginToJellyfin = async (
 }
 
 export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: string; userId: string; token: string }) => {
-    // Sidenav
+    const jellyfin = new Jellyfin({
+        clientInfo: {
+            name: 'My Client Application',
+            version: '1.0.0',
+        },
+        deviceInfo: {
+            name: 'Web',
+            id: deviceId,
+        },
+    })
+
+    const api = jellyfin.createApi(serverUrl, token)
+
     const searchItems = async (searchTerm: string, limit = 40): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
-                searchTerm
-            )}&IncludeItemTypes=MusicAlbum,Playlist,Audio&Recursive=true&Limit=${limit}&Fields=ArtistItems`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                searchTerm,
+                includeItemTypes: [BaseItemKind.MusicAlbum, BaseItemKind.Playlist, BaseItemKind.Audio],
+                recursive: true,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
     const searchArtists = async (searchTerm: string, limit = 20): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Artists?searchTerm=${encodeURIComponent(
-                searchTerm
-            )}&UserId=${userId}&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                searchTerm,
+                includeItemTypes: [BaseItemKind.MusicArtist],
+                recursive: true,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
-    // SearchResults
     const searchArtistsDetailed = async (searchTerm: string, limit = 50): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Artists?searchTerm=${encodeURIComponent(
-                searchTerm
-            )}&UserId=${userId}&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags,UserData`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                searchTerm,
+                includeItemTypes: [BaseItemKind.MusicArtist],
+                recursive: true,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
     const searchAlbumsDetailed = async (searchTerm: string, limit = 50): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
-                searchTerm
-            )}&IncludeItemTypes=MusicAlbum&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags,AlbumArtists,UserData`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                searchTerm,
+                includeItemTypes: [BaseItemKind.MusicAlbum],
+                recursive: true,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
     const searchPlaylistsDetailed = async (searchTerm: string, limit = 50): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
-                searchTerm
-            )}&IncludeItemTypes=Playlist&Recursive=true&Limit=${limit}&Fields=PrimaryImageAspectRatio,ImageTags,ChildCount,UserData`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                searchTerm,
+                includeItemTypes: [BaseItemKind.Playlist],
+                recursive: true,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
-    // Home
     const getRecentlyPlayed = async (): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=12&Fields=PrimaryImageAspectRatio,ParentId,ImageTags,ArtistItems`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                sortBy: [ItemSortBy.DatePlayed],
+                sortOrder: [SortOrder.Descending],
+                includeItemTypes: [BaseItemKind.Audio],
+                recursive: true,
+                limit: 12,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
     const getFrequentlyPlayed = async (): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?SortBy=PlayCount&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Limit=12&Fields=PrimaryImageAspectRatio,ParentId,ImageTags,ArtistItems`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                sortBy: [ItemSortBy.PlayCount],
+                sortOrder: [SortOrder.Descending],
+                includeItemTypes: [BaseItemKind.Audio],
+                recursive: true,
+                limit: 12,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
     const getRecentlyAdded = async (): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=MusicAlbum&Recursive=true&Limit=12&Fields=PrimaryImageAspectRatio,ParentId,ImageTags`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                sortBy: [ItemSortBy.DateCreated],
+                sortOrder: [SortOrder.Descending],
+                includeItemTypes: [BaseItemKind.MusicAlbum],
+                recursive: true,
+                limit: 12,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
     const fetchRecentlyPlayed = async (startIndex: number, limit: number): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Audio&Filters=IsPlayed&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,MediaSourceCount,MediaStreams&Limit=${limit}&StartIndex=${startIndex}&api_key=${token}`
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
+            {
+                userId,
+                sortBy: [ItemSortBy.DatePlayed],
+                sortOrder: [SortOrder.Descending],
+                includeItemTypes: [BaseItemKind.Audio],
+                filters: [ItemFilter.IsPlayed],
+                recursive: true,
+                startIndex,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) {
-            throw new ApiError('Failed to fetch recently played items', response)
-        }
-        const data = await response.json()
-        return data.Items || []
+        return response.data.Items as MediaItem[]
     }
 
     const fetchFrequentlyPlayed = async (startIndex: number, limit: number): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?SortBy=PlayCount&SortOrder=Descending&IncludeItemTypes=Audio&Filters=IsPlayed&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,MediaSourceCount,MediaStreams&Limit=${limit}&StartIndex=${startIndex}&api_key=${token}`
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
+            {
+                userId,
+                sortBy: [ItemSortBy.PlayCount],
+                sortOrder: [SortOrder.Descending],
+                includeItemTypes: [BaseItemKind.Audio],
+                filters: [ItemFilter.IsPlayed],
+                recursive: true,
+                startIndex,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) {
-            throw new ApiError('Failed to fetch frequently played items', response)
-        }
-        const data = await response.json()
-        return data.Items || []
+        return response.data.Items as MediaItem[]
     }
 
-    // Albums
     const getAllAlbums = async (startIndex = 0, limit = 40): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=MusicAlbum&Recursive=true&StartIndex=${startIndex}&Limit=${limit}&Fields=ChildCount,ImageTags`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                sortBy: [ItemSortBy.DateCreated],
+                sortOrder: [SortOrder.Descending],
+                includeItemTypes: [BaseItemKind.MusicAlbum],
+                recursive: true,
+                startIndex,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
-    // Tracks
     const getAllTracks = async (startIndex = 0, limit = 40): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&StartIndex=${startIndex}&Limit=${limit}&Fields=PrimaryImageAspectRatio,ParentId,ImageTags,ArtistItems`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                sortBy: [ItemSortBy.DateCreated],
+                sortOrder: [SortOrder.Descending],
+                includeItemTypes: [BaseItemKind.Audio],
+                recursive: true,
+                startIndex,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
-    // Favorites
     const getFavoriteTracks = async (startIndex = 0, limit = 40): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?Filters=IsFavorite&IncludeItemTypes=Audio&Recursive=true&SortBy=DateCreated&SortOrder=Descending&StartIndex=${startIndex}&Limit=${limit}&Fields=ArtistItems`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                filters: [ItemFilter.IsFavorite],
+                includeItemTypes: [BaseItemKind.Audio],
+                recursive: true,
+                sortBy: [ItemSortBy.DateCreated],
+                sortOrder: [SortOrder.Descending],
+                startIndex,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
-    // Album
     const getAlbumDetails = async (albumId: string): Promise<{ album: MediaItem; tracks: MediaItem[] }> => {
-        const albumResponse = await fetch(
-            `${serverUrl}/Users/${userId}/Items/${albumId}?Fields=ChildCount,ImageTags,DateCreated,PremiereDate,AlbumArtists`,
+        const userLibraryApi = new UserLibraryApi(api.configuration)
+        const albumResponse = await userLibraryApi.getItem(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                itemId: albumId,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!albumResponse.ok) throw new Error(`HTTP error! status: ${albumResponse.status}`)
-        const album: MediaItem = await albumResponse.json()
+        const album = albumResponse.data as MediaItem
 
-        const tracksResponse = await fetch(
-            `${serverUrl}/Users/${userId}/Items?ParentId=${albumId}&IncludeItemTypes=Audio&SortBy=IndexNumber&SortOrder=Ascending&Fields=RunTimeTicks,ArtistItems`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const tracksResponse = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                parentId: albumId,
+                includeItemTypes: [BaseItemKind.Audio],
+                sortBy: [ItemSortBy.IndexNumber],
+                sortOrder: [SortOrder.Ascending],
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!tracksResponse.ok) throw new Error(`HTTP error! status: ${tracksResponse.status}`)
-        const tracksData: { Items: MediaItem[] } = await tracksResponse.json()
-        const tracks: MediaItem[] = tracksData.Items
+        const tracks = tracksResponse.data.Items as MediaItem[]
 
         return { album, tracks }
     }
 
-    // Artist
     const getArtistDetails = async (
         artistId: string,
         trackLimit = 5
@@ -291,56 +328,66 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         appearsInAlbums: MediaItem[]
         totalTrackCount: number
     }> => {
-        const artistResponse = await fetch(`${serverUrl}/Users/${userId}/Items/${artistId}?Fields=ImageTags`, {
-            headers: { 'X-Emby-Token': token },
-            signal: AbortSignal.timeout(20000),
-        })
-        if (!artistResponse.ok) throw new Error(`HTTP error! status: ${artistResponse.status}`)
-        const artist: MediaItem = await artistResponse.json()
-
-        const tracksResponse = await fetch(
-            `${serverUrl}/Users/${userId}/Items?ArtistIds=${artistId}&IncludeItemTypes=Audio&Recursive=true&Fields=RunTimeTicks,ParentId,ImageTags,ArtistItems&Limit=${trackLimit}`,
+        const userLibraryApi = new UserLibraryApi(api.configuration)
+        const artistResponse = await userLibraryApi.getItem(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                itemId: artistId,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!tracksResponse.ok) throw new Error(`HTTP error! status: ${tracksResponse.status}`)
-        const tracksData: { Items: MediaItem[] } = await tracksResponse.json()
-        const tracks: MediaItem[] = tracksData.Items
+        const artist = artistResponse.data as MediaItem
 
-        const totalTracksResponse = await fetch(
-            `${serverUrl}/Users/${userId}/Items?ArtistIds=${artistId}&IncludeItemTypes=Audio&Recursive=true&Limit=0`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const tracksResponse = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                artistIds: [artistId],
+                includeItemTypes: [BaseItemKind.Audio],
+                recursive: true,
+                limit: trackLimit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!totalTracksResponse.ok) throw new Error(`HTTP error! status: ${totalTracksResponse.status}`)
-        const totalTracksData: { TotalRecordCount: number } = await totalTracksResponse.json()
-        const totalTrackCount: number = totalTracksData.TotalRecordCount
+        const tracks = tracksResponse.data.Items as MediaItem[]
 
-        const artistAlbumsResponse = await fetch(
-            `${serverUrl}/Users/${userId}/Items?ArtistIds=${artistId}&IncludeItemTypes=MusicAlbum&Recursive=true&Fields=ChildCount,ImageTags,PremiereDate,Genres,AlbumArtists&SortBy=PremiereDate,ProductionYear,SortName&SortOrder=Descending`,
+        const totalTracksResponse = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                artistIds: [artistId],
+                includeItemTypes: [BaseItemKind.Audio],
+                recursive: true,
+                limit: 0,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!artistAlbumsResponse.ok) throw new Error(`HTTP error! status: ${artistAlbumsResponse.status}`)
-        const artistAlbumsData: { Items: MediaItem[] } = await artistAlbumsResponse.json()
-        const artistAlbums: MediaItem[] = artistAlbumsData.Items
+        const totalTrackCount = totalTracksResponse.data.TotalRecordCount || 0
 
-        const contributingAlbumsResponse = await fetch(
-            `${serverUrl}/Users/${userId}/Items?ContributingArtistIds=${artistId}&IncludeItemTypes=MusicAlbum&Recursive=true&Fields=ChildCount,ImageTags,PremiereDate,Genres,AlbumArtists&SortBy=PremiereDate,ProductionYear,SortName&SortOrder=Descending`,
+        const artistAlbumsResponse = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                artistIds: [artistId],
+                includeItemTypes: [BaseItemKind.MusicAlbum],
+                recursive: true,
+                sortBy: [ItemSortBy.PremiereDate, ItemSortBy.ProductionYear, ItemSortBy.SortName],
+                sortOrder: [SortOrder.Descending],
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!contributingAlbumsResponse.ok) throw new Error(`HTTP error! status: ${contributingAlbumsResponse.status}`)
-        const contributingAlbumsData: { Items: MediaItem[] } = await contributingAlbumsResponse.json()
-        const contributingAlbums: MediaItem[] = contributingAlbumsData.Items
+        const artistAlbums = artistAlbumsResponse.data.Items as MediaItem[]
+
+        const contributingAlbumsResponse = await itemsApi.getItems(
+            {
+                userId,
+                contributingArtistIds: [artistId],
+                includeItemTypes: [BaseItemKind.MusicAlbum],
+                recursive: true,
+                sortBy: [ItemSortBy.PremiereDate, ItemSortBy.ProductionYear, ItemSortBy.SortName],
+                sortOrder: [SortOrder.Descending],
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+        const contributingAlbums = contributingAlbumsResponse.data.Items as MediaItem[]
 
         const allAlbumsMap = new Map<string, MediaItem>()
         artistAlbums.forEach(album => allAlbumsMap.set(album.Id, album))
@@ -363,237 +410,234 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
     }
 
     const getPlaylistsFeaturingArtist = async (artistId: string): Promise<MediaItem[]> => {
-        const playlistsResponse = await fetch(
-            `${serverUrl}/Users/${userId}/Items?IncludeItemTypes=Playlist&Recursive=true&Fields=ChildCount,ImageTags`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const playlistsResponse = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                includeItemTypes: [BaseItemKind.Playlist],
+                recursive: true,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!playlistsResponse.ok) throw new Error(`HTTP error! status: ${playlistsResponse.status}`)
-        const playlistsData: { Items: MediaItem[] } = await playlistsResponse.json()
-        const playlists = playlistsData.Items
+        const playlists = playlistsResponse.data.Items
 
         const playlistsWithArtist: MediaItem[] = []
         const batchSize = 5
 
-        for (let i = 0; i < playlists.length; i += batchSize) {
-            const batch = playlists.slice(i, i + batchSize)
-            const batchPromises = batch.map(async playlist => {
-                let startIndex = 0
-                const limit = 100
-                while (true) {
-                    const tracksResponse = await fetch(
-                        `${serverUrl}/Users/${userId}/Items?ParentId=${playlist.Id}&IncludeItemTypes=Audio&Fields=ArtistItems&StartIndex=${startIndex}&Limit=${limit}`,
-                        {
-                            headers: { 'X-Emby-Token': token },
-                            signal: AbortSignal.timeout(20000),
+        if (playlists?.length) {
+            for (let i = 0; i < playlists.length; i += batchSize) {
+                const batch = playlists.slice(i, i + batchSize)
+                const batchPromises = batch.map(async playlist => {
+                    let startIndex = 0
+                    const limit = 100
+                    while (true) {
+                        const tracksResponse = await itemsApi.getItems(
+                            {
+                                userId,
+                                parentId: playlist.Id,
+                                includeItemTypes: [BaseItemKind.Audio],
+                                startIndex,
+                                limit,
+                            },
+                            { signal: AbortSignal.timeout(20000) }
+                        )
+                        const tracks = tracksResponse.data.Items as MediaItem[]
+                        const hasArtist = tracks.some(track => track.ArtistItems?.some(a => a.Id === artistId))
+                        if (hasArtist) {
+                            return playlist
                         }
-                    )
-                    if (!tracksResponse.ok) throw new Error(`HTTP error! status: ${tracksResponse.status}`)
-                    const tracksData: { Items: MediaItem[]; TotalRecordCount: number } = await tracksResponse.json()
-                    const tracks: MediaItem[] = tracksData.Items
-                    const hasArtist = tracks.some(track => track.ArtistItems?.some(artist => artist.Id === artistId))
-                    if (hasArtist) {
-                        return playlist
+                        if (startIndex + limit >= (tracksResponse.data.TotalRecordCount || 0)) {
+                            break
+                        }
+                        startIndex += limit
                     }
-                    if (startIndex + limit >= tracksData.TotalRecordCount) {
-                        break
-                    }
-                    startIndex += limit
-                }
-                return null
-            })
-            const results = await Promise.all(batchPromises)
-            playlistsWithArtist.push(...results.filter((result): result is MediaItem => result !== null))
+                    return null
+                })
+                const results = await Promise.all(batchPromises)
+                playlistsWithArtist.push(...results.filter((result): result is MediaItem => result !== null))
+            }
         }
 
         return playlistsWithArtist
     }
 
-    // Genre
     const getGenreTracks = async (genre: string, startIndex = 0, limit = 40): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?SortBy=DateCreated&SortOrder=Descending&IncludeItemTypes=Audio&Recursive=true&Genres=${encodeURIComponent(
-                genre
-            )}&StartIndex=${startIndex}&Limit=${limit}&Fields=PrimaryImageAspectRatio,ParentId,ImageTags,ArtistItems`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                sortBy: [ItemSortBy.DateCreated],
+                sortOrder: [SortOrder.Descending],
+                includeItemTypes: [BaseItemKind.Audio],
+                recursive: true,
+                genres: [genre],
+                startIndex,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items || []
+        return response.data.Items as MediaItem[]
     }
 
-    // Playlist
     const getPlaylist = async (playlistId: string): Promise<MediaItem> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items/${playlistId}?Fields=ChildCount,ImageTags,DateCreated`,
+        const userLibraryApi = new UserLibraryApi(api.configuration)
+        const response = await userLibraryApi.getItem(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                itemId: playlistId,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const playlist: MediaItem = await response.json()
-        return playlist
+
+        return response.data as MediaItem
     }
 
     const getPlaylistTracks = async (playlistId: string, startIndex = 0, limit = 40): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?ParentId=${playlistId}&IncludeItemTypes=Audio&SortBy=DateCreated&SortOrder=Descending&Fields=RunTimeTicks,ArtistItems,ImageTags,DateCreated&StartIndex=${startIndex}&Limit=${limit}`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                parentId: playlistId,
+                includeItemTypes: [BaseItemKind.Audio],
+                sortBy: [ItemSortBy.DateCreated],
+                sortOrder: [SortOrder.Descending],
+                startIndex,
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
     const getAllPlaylists = async (): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?IncludeItemTypes=Playlist&Recursive=true&Fields=Name`,
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
             {
-                headers: { 'X-Emby-Token': token },
-                signal: AbortSignal.timeout(20000),
-            }
+                userId,
+                includeItemTypes: [BaseItemKind.Playlist],
+                recursive: true,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
     const fetchAllTracks = async (artistId: string): Promise<MediaItem[]> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?ArtistIds=${artistId}&IncludeItemTypes=Audio&Recursive=true&Fields=RunTimeTicks,UserData`,
-            { headers: { 'X-Emby-Token': token }, signal: AbortSignal.timeout(20000) }
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
+            {
+                userId,
+                artistIds: [artistId],
+                includeItemTypes: [BaseItemKind.Audio],
+                recursive: true,
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        const data: { Items: MediaItem[] } = await response.json()
-        return data.Items
+        return response.data.Items as MediaItem[]
     }
 
     const fetchPlaylistMetadata = async (
         playlistId: string
     ): Promise<{ Items: MediaItem[]; TotalRecordCount: number }> => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?ParentId=${playlistId}&IncludeItemTypes=Audio&Fields=RunTimeTicks,UserData`,
-            { headers: { 'X-Emby-Token': token }, signal: AbortSignal.timeout(20000) }
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems(
+            {
+                userId,
+                parentId: playlistId,
+                includeItemTypes: [BaseItemKind.Audio],
+            },
+            { signal: AbortSignal.timeout(20000) }
         )
-        if (!response.ok) throw new ApiError(`HTTP error! status: ${response.status}`, response)
-        return response.json()
+        return response.data as { Items: MediaItem[]; TotalRecordCount: number }
     }
 
     const fetchUserInfo = async () => {
-        const response = await fetch(`${serverUrl}/Users/${userId}`, {
-            headers: { 'X-Emby-Token': token },
-        })
-        return response.json()
+        const usersApi = new UserApi(api.configuration)
+        const response = await usersApi.getUserById({ userId })
+        return response.data
     }
 
     const fetchClientIp = async () => {
-        const response = await fetch(`${serverUrl}/Sessions`, {
-            headers: { 'X-Emby-Token': token },
-        })
-        const sessions = await response.json()
-        return sessions.find((s: any) => s.UserId === userId)?.RemoteEndPoint || null
+        const sessionsApi = new SessionApi(api.configuration)
+        const response = await sessionsApi.getSessions({})
+        const sessions = response.data
+        return sessions.find(s => s.UserId === userId)?.RemoteEndPoint || null
     }
 
     const measureLatency = async () => {
         const startTime = performance.now()
-        await fetch(`${serverUrl}/System/Ping`, {
-            headers: { 'X-Emby-Token': token },
-        })
+        const systemApi = new SystemApi(api.configuration)
+        await systemApi.getPingSystem({})
         return Math.round(performance.now() - startTime)
     }
 
     const fetchPlayCount = async () => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?Recursive=true&IncludeItemTypes=Audio&Filters=IsPlayed`,
-            {
-                headers: { 'X-Emby-Token': token },
-            }
-        )
-        const data = await response.json()
-        return data.TotalRecordCount
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems({
+            userId,
+            recursive: true,
+            includeItemTypes: [BaseItemKind.Audio],
+            filters: [ItemFilter.IsPlayed],
+        })
+        return response.data.TotalRecordCount || null
     }
 
     const fetchSongs = async (query: string) => {
-        const response = await fetch(
-            `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
-                query
-            )}&IncludeItemTypes=Audio&Recursive=true&Limit=10&Fields=ArtistItems&api_key=${token}`
-        )
-        const data = await response.json()
-        return data.Items || []
+        const itemsApi = new ItemsApi(api.configuration)
+        const response = await itemsApi.getItems({
+            userId,
+            searchTerm: query,
+            includeItemTypes: [BaseItemKind.Audio],
+            recursive: true,
+            limit: 10,
+        })
+        return response.data.Items as MediaItem[]
     }
 
     const reportPlaybackStart = async (trackId: string, signal: AbortSignal) => {
-        const url = `${serverUrl}/Sessions/Playing`
-        const payload = {
-            ItemId: trackId,
-            PlayMethod: 'DirectStream',
-            PositionTicks: 0,
-            IsPaused: false,
-            CanSeek: true,
-            MediaSourceId: trackId,
-            AudioStreamIndex: 1,
-        }
-
-        await fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-Emby-Token': token,
-                'Content-Type': 'application/json',
+        const sessionsApi = new PlaystateApi(api.configuration)
+        await sessionsApi.reportPlaybackStart(
+            {
+                playbackStartInfo: {
+                    ItemId: trackId,
+                    PlayMethod: PlayMethod.DirectStream,
+                    PositionTicks: 0,
+                    IsPaused: false,
+                    CanSeek: true,
+                    MediaSourceId: trackId,
+                    AudioStreamIndex: 1,
+                },
             },
-            body: JSON.stringify(payload),
-            signal,
-        })
+            { signal }
+        )
     }
 
     const reportPlaybackProgress = async (trackId: string, position: number, isPaused: boolean) => {
-        const url = `${serverUrl}/Sessions/Playing/Progress`
-        const payload = {
-            ItemId: trackId,
-            PositionTicks: Math.floor(position * 10000000),
-            IsPaused: isPaused,
-            PlayMethod: 'DirectStream',
-            MediaSourceId: trackId,
-            AudioStreamIndex: 1,
-        }
-
-        await fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-Emby-Token': token,
-                'Content-Type': 'application/json',
+        const sessionsApi = new PlaystateApi(api.configuration)
+        await sessionsApi.reportPlaybackProgress({
+            playbackProgressInfo: {
+                ItemId: trackId,
+                PositionTicks: Math.floor(position * 10000000),
+                IsPaused: isPaused,
+                PlayMethod: PlayMethod.DirectStream,
+                MediaSourceId: trackId,
+                AudioStreamIndex: 1,
             },
-            body: JSON.stringify(payload),
         })
     }
 
     const reportPlaybackStopped = async (trackId: string, position: number, signal?: AbortSignal) => {
-        const url = `${serverUrl}/Sessions/Playing/Stopped`
-        const payload = {
-            ItemId: trackId,
-            PositionTicks: Math.floor(position * 10000000),
-            PlayMethod: 'DirectStream',
-            MediaSourceId: trackId,
-        }
-
-        await fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-Emby-Token': token,
-                'Content-Type': 'application/json',
+        const sessionsApi = new PlaystateApi(api.configuration)
+        await sessionsApi.reportPlaybackStopped(
+            {
+                playbackStopInfo: {
+                    ItemId: trackId,
+                    PositionTicks: Math.floor(position * 10000000),
+                    MediaSourceId: trackId,
+                },
             },
-            body: JSON.stringify(payload),
-            signal,
-        })
+            { signal }
+        )
     }
 
     return {

@@ -1,4 +1,4 @@
-export const formatDuration = (ticks?: number) => {
+export const formatDuration = (ticks?: number | null) => {
     if (!ticks) return '0:00'
     const seconds = Math.floor(ticks / 10000000)
     const hours = Math.floor(seconds / 3600)

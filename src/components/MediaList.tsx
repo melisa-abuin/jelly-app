@@ -7,11 +7,6 @@ import { useJellyfinContext } from '../context/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext'
 import Loader from './Loader'
 
-interface ExtendedMediaItem extends MediaItem {
-    AlbumId?: string
-    AlbumPrimaryImageTag?: string
-}
-
 interface MediaListProps {
     virtuosoRef?: Ref<VirtuosoHandle>
     items: MediaItem[] | undefined
@@ -126,7 +121,7 @@ const MediaList = ({
     }
 
     const renderItem = (index: number) => {
-        const item = items[index] as ExtendedMediaItem
+        const item = items[index]
         const token = localStorage.getItem('auth') ? JSON.parse(localStorage.getItem('auth')!).token : ''
         const imageUrl = item.ImageTags?.Primary
             ? `${api.auth.serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`

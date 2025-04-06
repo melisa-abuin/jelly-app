@@ -7,6 +7,7 @@ import { useJellyfinContext } from '../context/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext'
 import { useJellyfinAlbumData } from '../hooks/useJellyfinAlbumData'
+import { formatDate } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Album.css'
 
@@ -28,11 +29,6 @@ const Album = () => {
     }, [album, setPageTitle])
 
     const totalPlaytime = tracks.reduce((total, track) => total + (track.RunTimeTicks || 0), 0)
-
-    const formatDate = (date?: string) => {
-        if (!date) return 'Unknown Date'
-        return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-    }
 
     if (loading) {
         return <Loader />
