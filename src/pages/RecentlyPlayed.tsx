@@ -13,11 +13,6 @@ const RecentlyPlayed = () => {
     const [isPreloading, setIsPreloading] = useState(false)
 
     useEffect(() => {
-        playback.setLoadMoreCallback(() => loadMore)
-        playback.setHasMoreState(hasMore)
-    }, [loadMore, hasMore, playback])
-
-    useEffect(() => {
         if (hasPreloaded.current || isPreloading) return
 
         const savedIndex = localStorage.getItem('currentTrackIndex')
@@ -64,7 +59,7 @@ const RecentlyPlayed = () => {
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={index => {
-                    playback.setCurrentPlaylist(items)
+                    playback.setCurrentPlaylist(items, hasMore, loadMore)
                     playback.playTrack(index)
                 }}
                 playlist={items}

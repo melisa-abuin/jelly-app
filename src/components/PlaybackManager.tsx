@@ -635,10 +635,16 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
         repeat,
         toggleRepeat,
         hasMoreState,
-        setHasMoreState,
         currentPlaylist,
-        setCurrentPlaylist,
+        setCurrentPlaylist: (
+            playlist: MediaItem[],
+            hasMore?: boolean,
+            loadMoreCb?: () => Promise<MediaItem[] | undefined>
+        ) => {
+            setCurrentPlaylist(playlist)
+            setLoadMoreCallback(loadMoreCb)
+            setHasMoreState(hasMore || false)
+        },
         loadMoreCallback,
-        setLoadMoreCallback,
     }
 }
