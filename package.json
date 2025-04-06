@@ -6,6 +6,7 @@
     "packageManager": "yarn@1.22.19",
     "scripts": {
         "dev": "vite",
+        "dev:nocache": "vite",
         "build": "tsc -b && vite build",
         "lint": "eslint .",
         "preview": "vite preview"
@@ -16,6 +17,7 @@
         "@tanstack/query-sync-storage-persister": "^5.71.1",
         "@tanstack/react-query": "^5.71.1",
         "@tanstack/react-query-persist-client": "^5.71.1",
+        "@types/node": "^22.14.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-router-dom": "7.3.0",

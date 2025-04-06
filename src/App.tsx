@@ -1,11 +1,10 @@
 import '@fontsource-variable/inter'
 import { ArrowLeftIcon, BookmarkFillIcon, HeartFillIcon } from '@primer/octicons-react'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
-import { QueryClient } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createContext, CSSProperties, ReactNode, useContext, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'
-import { MediaItem } from './api/jellyfin'
 import './App.css'
 import './components/MediaList.css'
 import Sidenav from './components/Sidenav'
@@ -153,13 +152,7 @@ const App = () => {
                     element={
                         auth ? (
                             <JellyfinContextProvider auth={auth}>
-                                <PlaybackContextProvider
-                                    initialVolume={0.5}
-                                    updateLastPlayed={(track: MediaItem) => {
-                                        localStorage.setItem('lastPlayedTrack', JSON.stringify(track))
-                                    }}
-                                    clearOnLogout={isLoggingOut}
-                                >
+                                <PlaybackContextProvider initialVolume={0.5} clearOnLogout={isLoggingOut}>
                                     <MainLayout auth={auth} handleLogout={handleLogout} />
                                 </PlaybackContextProvider>
                             </JellyfinContextProvider>
@@ -172,18 +165,28 @@ const App = () => {
         </div>
     )
 
+    const routedApp = (
+        <Router>
+            <HistoryProvider>
+                <PageTitleProvider>
+                    <ScrollContextProvider>
+                        <ThemeContextProvider>{actualApp}</ThemeContextProvider>
+                    </ScrollContextProvider>
+                </PageTitleProvider>
+            </HistoryProvider>
+        </Router>
+    )
+
     return (
-        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-            <Router>
-                <HistoryProvider>
-                    <PageTitleProvider>
-                        <ScrollContextProvider>
-                            <ThemeContextProvider>{actualApp}</ThemeContextProvider>
-                        </ScrollContextProvider>
-                    </PageTitleProvider>
-                </HistoryProvider>
-            </Router>
-        </PersistQueryClientProvider>
+        <>
+            {window.__NPM_LIFECYCLE_EVENT__ === 'dev:nocache' ? (
+                <QueryClientProvider client={queryClient}>{routedApp}</QueryClientProvider>
+            ) : (
+                <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+                    {routedApp}
+                </PersistQueryClientProvider>
+            )}
+        </>
     )
 }
 

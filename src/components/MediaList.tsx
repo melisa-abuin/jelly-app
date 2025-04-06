@@ -19,7 +19,7 @@ interface MediaListProps {
     loading: boolean
     loadMore?: () => void
     hasMore?: boolean
-    playTrack: (track: MediaItem, index: number) => void
+    playTrack: (index: number) => void
     playlist?: MediaItem[]
     setCurrentPlaylist?: (playlist: MediaItem[]) => void
 }
@@ -114,7 +114,7 @@ const MediaList = ({
                 }
                 const effectiveIndex =
                     playlistIndex !== -1 && playback.currentTrackIndex.current !== -1 ? playlistIndex : index
-                playTrack(item, effectiveIndex)
+                playTrack(effectiveIndex)
             }
         }
     }

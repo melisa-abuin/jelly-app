@@ -2,6 +2,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
 import { ApiError, MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext'
+import { getAllTracks } from '../utils/getAllTracks'
 
 export const useJellyfinFavoritesData = () => {
     const api = useJellyfinContext()
@@ -27,25 +28,16 @@ export const useJellyfinFavoritesData = () => {
         }
     }, [error])
 
-    const seenIds = new Set<string>()
-    const allFavorites: MediaItem[] = data
-        ? data.pages.flat().filter(favorite => {
-              if (seenIds.has(favorite.Id)) {
-                  return false
-              }
-              seenIds.add(favorite.Id)
-              return true
-          })
-        : []
+    const allTracks = getAllTracks(data)
 
     const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {
-            await fetchNextPage()
+            return getAllTracks((await fetchNextPage()).data)
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
     return {
-        allFavorites,
+        allFavorites: allTracks,
         loading: isLoading || isFetchingNextPage,
         error: error ? error.message : null,
         hasMore: Boolean(hasNextPage),

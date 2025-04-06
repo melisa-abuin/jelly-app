@@ -63,9 +63,9 @@ const Tracks = () => {
                 loading={loading}
                 loadMore={loadMore}
                 hasMore={hasMore}
-                playTrack={(track, index) => {
+                playTrack={index => {
                     playback.setCurrentPlaylist(allTracks)
-                    playback.playTrack(track, index)
+                    playback.playTrack(index)
                 }}
                 playlist={allTracks}
             />

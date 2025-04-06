@@ -32,9 +32,9 @@ const Home = () => {
                     items={recentlyPlayed}
                     type="song"
                     loading={loading}
-                    playTrack={(track, index) => {
+                    playTrack={index => {
                         playback.setCurrentPlaylist(recentlyPlayed || [])
-                        playback.playTrack(track, index)
+                        playback.playTrack(index)
                     }}
                     playlist={recentlyPlayed}
                 />
@@ -53,9 +53,9 @@ const Home = () => {
                     items={frequentlyPlayed}
                     type="song"
                     loading={loading}
-                    playTrack={(track, index) => {
+                    playTrack={index => {
                         playback.setCurrentPlaylist(frequentlyPlayed || [])
-                        playback.playTrack(track, index)
+                        playback.playTrack(index)
                     }}
                     playlist={frequentlyPlayed}
                 />
@@ -71,9 +71,9 @@ const Home = () => {
                     items={recentlyAdded}
                     type="album"
                     loading={loading}
-                    playTrack={(track, index) => {
+                    playTrack={index => {
                         playback.setCurrentPlaylist(recentlyAdded || [])
-                        playback.playTrack(track, index)
+                        playback.playTrack(index)
                     }}
                     playlist={recentlyAdded}
                 />

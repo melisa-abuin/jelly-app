@@ -121,7 +121,7 @@ const Sidenav = (props: SidenavProps) => {
                 playback.togglePlayPause()
             } else {
                 playback.setCurrentPlaylist([song.mediaItem])
-                playback.playTrack(song.mediaItem, 0)
+                playback.playTrack(0)
             }
             props.closeSidenav()
         }

@@ -63,9 +63,9 @@ const RecentlyPlayed = () => {
                 loading={loading}
                 loadMore={loadMore}
                 hasMore={hasMore}
-                playTrack={(track, index) => {
+                playTrack={index => {
                     playback.setCurrentPlaylist(items)
-                    playback.playTrack(track, index)
+                    playback.playTrack(index)
                 }}
                 playlist={items}
             />

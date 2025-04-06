@@ -74,9 +74,9 @@ const Genre = () => {
                 loading={loading}
                 loadMore={loadMore}
                 hasMore={hasMore}
-                playTrack={(track, index) => {
+                playTrack={index => {
                     playback.setCurrentPlaylist(tracks)
-                    playback.playTrack(track, index)
+                    playback.playTrack(index)
                 }}
                 playlist={tracks}
             />

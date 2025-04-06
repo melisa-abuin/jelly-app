@@ -7,4 +7,7 @@ export default defineConfig({
     server: {
         allowedHosts: ['frontend.mkdir.no'],
     },
+    define: {
+        __NPM_LIFECYCLE_EVENT__: JSON.stringify(process.env.npm_lifecycle_event),
+    },
 })

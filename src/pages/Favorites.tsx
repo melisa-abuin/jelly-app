@@ -63,9 +63,9 @@ const Favorites = () => {
                 loading={loading}
                 loadMore={loadMore}
                 hasMore={hasMore}
-                playTrack={(track, index) => {
+                playTrack={index => {
                     playback.setCurrentPlaylist(allFavorites)
-                    playback.playTrack(track, index)
+                    playback.playTrack(index)
                 }}
                 playlist={allFavorites}
             />

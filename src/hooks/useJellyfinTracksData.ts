@@ -2,6 +2,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
 import { ApiError, MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext'
+import { getAllTracks } from '../utils/getAllTracks'
 
 export const useJellyfinTracksData = () => {
     const api = useJellyfinContext()
@@ -30,20 +31,12 @@ export const useJellyfinTracksData = () => {
     }, [error])
 
     // Combine pages and filter out any duplicate tracks using a Set.
-    const seenIds = new Set<string>()
-    const allTracks: MediaItem[] = data
-        ? data.pages.flat().filter(track => {
-              if (seenIds.has(track.Id)) {
-                  return false
-              }
-              seenIds.add(track.Id)
-              return true
-          })
-        : []
+
+    const allTracks = getAllTracks(data)
 
     const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {
-            await fetchNextPage()
+            return getAllTracks((await fetchNextPage()).data)
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 

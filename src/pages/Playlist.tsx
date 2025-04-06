@@ -122,7 +122,7 @@ const Playlist = () => {
                             className="play-playlist"
                             onClick={() => {
                                 playback.setCurrentPlaylist(tracks)
-                                playback.playTrack(tracks[0], 0)
+                                playback.playTrack(0)
                             }}
                         >
                             <div className="play-icon" />
@@ -144,9 +144,9 @@ const Playlist = () => {
                 loading={loading}
                 loadMore={loadMore}
                 hasMore={hasMore}
-                playTrack={(track, index) => {
+                playTrack={index => {
                     playback.setCurrentPlaylist(tracks)
-                    playback.playTrack(track, index)
+                    playback.playTrack(index)
                 }}
                 playlist={tracks}
             />

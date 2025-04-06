@@ -15,7 +15,7 @@ interface PlaylistTrackListProps {
     loading: boolean
     loadMore?: () => void
     hasMore?: boolean
-    playTrack: (track: MediaItem, index: number) => void
+    playTrack: (index: number) => void
     playlist: MediaItem[]
     playlistId?: string
 }
@@ -101,7 +101,7 @@ const PlaylistTrackList = ({
             if (playback.currentTrack?.Id === track.Id) {
                 playback.togglePlayPause()
             } else {
-                playTrack(track, index)
+                playTrack(index)
             }
         },
         [playTrack, playback]
@@ -113,7 +113,7 @@ const PlaylistTrackList = ({
             if (playback.currentTrack?.Id === track.Id && playback.isPlaying) {
                 playback.togglePlayPause()
             } else {
-                playTrack(track, index)
+                playTrack(index)
             }
         },
         [playTrack, playback]

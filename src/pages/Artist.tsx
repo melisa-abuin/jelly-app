@@ -115,7 +115,7 @@ const Artist = () => {
                             className="play-artist"
                             onClick={() => {
                                 playback.setCurrentPlaylist(tracks)
-                                playback.playTrack(tracks[0], 0)
+                                playback.playTrack(0)
                             }}
                         >
                             <div className="play-icon" />

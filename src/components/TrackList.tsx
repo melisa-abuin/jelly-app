@@ -44,7 +44,7 @@ const TrackList = ({ tracks, showAlbumLink = false }: TrackListProps) => {
                                 playback.togglePlayPause()
                             } else {
                                 playback.setCurrentPlaylist(tracks)
-                                playback.playTrack(track, index)
+                                playback.playTrack(index)
                             }
                         }}
                     >

@@ -2,6 +2,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
 import { ApiError, MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext'
+import { getAllTracks } from '../utils/getAllTracks'
 
 export const useJellyfinRecentlyPlayedData = () => {
     const api = useJellyfinContext()
@@ -28,25 +29,16 @@ export const useJellyfinRecentlyPlayedData = () => {
         }
     }, [error])
 
-    const seenIds = new Set<string>()
-    const items: MediaItem[] = data
-        ? data.pages.flat().filter(item => {
-              if (!item.Artists || !item.Album || seenIds.has(item.Id)) {
-                  return false
-              }
-              seenIds.add(item.Id)
-              return true
-          })
-        : []
+    const allTracks = getAllTracks(data)
 
     const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {
-            await fetchNextPage()
+            return getAllTracks((await fetchNextPage()).data)
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
     return {
-        items,
+        items: allTracks,
         loading: isLoading || isFetchingNextPage,
         error: error ? error.message : null,
         hasMore: Boolean(hasNextPage),
