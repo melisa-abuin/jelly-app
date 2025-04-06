@@ -79,101 +79,48 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
         [api.auth.serverUrl, api.auth.token]
     )
 
-    // Playback Reporting
-    const reportPlaybackStart = useCallback(
+    const reportPlaybackStartWrapper = useCallback(
         async (track: MediaItem, signal: AbortSignal) => {
-            const url = `${api.auth.serverUrl}/Sessions/Playing`
-            const payload = {
-                ItemId: track.Id,
-                PlayMethod: 'DirectStream',
-                PositionTicks: 0,
-                IsPaused: false,
-                CanSeek: true,
-                MediaSourceId: track.Id,
-                AudioStreamIndex: 1,
-            }
-
             try {
-                await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-Emby-Token': api.auth.token,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                    signal,
-                })
+                await api.reportPlaybackStart(track.Id, signal)
             } catch (error) {
                 console.error('Error reporting playback start:', error)
             }
         },
-        [api.auth.serverUrl, api.auth.token]
+        [api]
     )
 
-    const reportPlaybackProgress = useCallback(
+    const reportPlaybackProgressWrapper = useCallback(
         async (track: MediaItem, position: number, isPaused: boolean) => {
-            const url = `${api.auth.serverUrl}/Sessions/Playing/Progress`
-            const payload = {
-                ItemId: track.Id,
-                PositionTicks: Math.floor(position * 10000000),
-                IsPaused: isPaused,
-                PlayMethod: 'DirectStream',
-                MediaSourceId: track.Id,
-                AudioStreamIndex: 1,
-            }
-
             try {
-                await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-Emby-Token': api.auth.token,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                })
+                await api.reportPlaybackProgress(track.Id, position, isPaused)
             } catch (error) {
                 console.error('Error reporting playback progress:', error)
             }
         },
-        [api.auth.serverUrl, api.auth.token]
+        [api]
     )
 
-    const reportPlaybackStopped = useCallback(
+    const reportPlaybackStoppedWrapper = useCallback(
         async (track: MediaItem, position: number, signal?: AbortSignal) => {
-            const url = `${api.auth.serverUrl}/Sessions/Playing/Stopped`
-            const payload = {
-                ItemId: track.Id,
-                PositionTicks: Math.floor(position * 10000000),
-                PlayMethod: 'DirectStream',
-                MediaSourceId: track.Id,
-            }
-
             try {
-                await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-Emby-Token': api.auth.token,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                    signal,
-                })
+                await api.reportPlaybackStopped(track.Id, position, signal)
             } catch (error) {
                 console.error('Error reporting playback stopped:', error)
             }
         },
-        [api.auth.serverUrl, api.auth.token]
+        [api]
     )
 
     useEffect(() => {
         if (!isPlaying || !currentTrack) return
 
         const interval = setInterval(() => {
-            reportPlaybackProgress(currentTrack, audioRef.current.currentTime, false)
+            reportPlaybackProgressWrapper(currentTrack, audioRef.current.currentTime, false)
         }, 10000)
 
         return () => clearInterval(interval)
-    }, [isPlaying, currentTrack, reportPlaybackProgress])
+    }, [isPlaying, currentTrack, reportPlaybackProgressWrapper])
 
     const playTrack = useCallback(
         async (index: number, currentPlaylist: MediaItem[]) => {
@@ -190,7 +137,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
             if (audioRef.current) {
                 const audio = audioRef.current
                 if (currentTrack && isPlaying) {
-                    await reportPlaybackStopped(currentTrack, audio.currentTime, signal)
+                    await reportPlaybackStoppedWrapper(currentTrack, audio.currentTime, signal)
                 }
                 audio.pause()
                 audio.currentTime = 0
@@ -228,7 +175,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                     updateMediaSessionMetadata(track)
 
                     // Report playback start to Jellyfin
-                    await reportPlaybackStart(track, signal)
+                    await reportPlaybackStartWrapper(track, signal)
                 } catch (error) {
                     console.error('Error playing track:', error)
                     setIsPlaying(false)
@@ -242,13 +189,13 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
         [
             currentTrack,
             isPlaying,
-            reportPlaybackStopped,
+            reportPlaybackStoppedWrapper,
             api.auth.serverUrl,
             api.auth.userId,
             api.auth.token,
             shuffle,
             updateMediaSessionMetadata,
-            reportPlaybackStart,
+            reportPlaybackStartWrapper,
         ]
     )
 
@@ -258,7 +205,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
             if (isPlaying) {
                 audio.pause()
                 setIsPlaying(false)
-                reportPlaybackProgress(currentTrack, audio.currentTime, true)
+                reportPlaybackProgressWrapper(currentTrack, audio.currentTime, true)
             } else {
                 if (!audio.src) {
                     const streamUrl = `${api.auth.serverUrl}/Audio/${currentTrack.Id}/universal?UserId=${api.auth.userId}&api_key=${api.auth.token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
@@ -269,7 +216,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                     .play()
                     .then(() => {
                         setIsPlaying(true)
-                        reportPlaybackProgress(currentTrack, audio.currentTime, false)
+                        reportPlaybackProgressWrapper(currentTrack, audio.currentTime, false)
                     })
                     .catch(error => {
                         console.error('Error resuming playback:', error)
@@ -281,7 +228,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                     })
             }
         }
-    }, [currentTrack, isPlaying, reportPlaybackProgress, api.auth.serverUrl, api.auth.userId, api.auth.token])
+    }, [currentTrack, isPlaying, reportPlaybackProgressWrapper, api.auth.serverUrl, api.auth.userId, api.auth.token])
 
     const processNextTrack = useCallback(
         (playlist: MediaItem[]) => {
@@ -633,12 +580,12 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
             if (!currentTrack || currentTrackIndex.current === -1 || !currentPlaylist || currentPlaylist.length === 0) {
                 setIsPlaying(false)
                 if (currentTrack) {
-                    reportPlaybackStopped(currentTrack, audio.currentTime)
+                    reportPlaybackStoppedWrapper(currentTrack, audio.currentTime)
                 }
                 return
             }
 
-            reportPlaybackStopped(currentTrack, audio.currentTime)
+            reportPlaybackStoppedWrapper(currentTrack, audio.currentTime)
             if (repeat === 'one') {
                 playTrack(currentTrackIndex.current, currentPlaylist)
             } else {
@@ -651,11 +598,11 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
         return () => {
             audio.removeEventListener('ended', handleEnded)
         }
-    }, [currentTrack, repeat, currentPlaylist, playTrack, nextTrack, reportPlaybackStopped])
+    }, [currentTrack, repeat, currentPlaylist, playTrack, nextTrack, reportPlaybackStoppedWrapper])
 
     useEffect(() => {
         if (clearOnLogout && currentTrack) {
-            reportPlaybackStopped(currentTrack, audioRef.current.currentTime)
+            reportPlaybackStoppedWrapper(currentTrack, audioRef.current.currentTime)
             currentTrackIndex.current = -1
             setIsPlaying(false)
             setProgress(0)
@@ -666,7 +613,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                 audioRef.current.src = ''
             }
         }
-    }, [clearOnLogout, currentTrack, reportPlaybackStopped])
+    }, [clearOnLogout, currentTrack, reportPlaybackStoppedWrapper])
 
     return {
         currentTrack,

@@ -488,6 +488,114 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return response.json()
     }
 
+    const fetchUserInfo = async () => {
+        const response = await fetch(`${serverUrl}/Users/${userId}`, {
+            headers: { 'X-Emby-Token': token },
+        })
+        return response.json()
+    }
+
+    const fetchClientIp = async () => {
+        const response = await fetch(`${serverUrl}/Sessions`, {
+            headers: { 'X-Emby-Token': token },
+        })
+        const sessions = await response.json()
+        return sessions.find((s: any) => s.UserId === userId)?.RemoteEndPoint || null
+    }
+
+    const measureLatency = async () => {
+        const startTime = performance.now()
+        await fetch(`${serverUrl}/System/Ping`, {
+            headers: { 'X-Emby-Token': token },
+        })
+        return Math.round(performance.now() - startTime)
+    }
+
+    const fetchPlayCount = async () => {
+        const response = await fetch(
+            `${serverUrl}/Users/${userId}/Items?Recursive=true&IncludeItemTypes=Audio&Filters=IsPlayed`,
+            {
+                headers: { 'X-Emby-Token': token },
+            }
+        )
+        const data = await response.json()
+        return data.TotalRecordCount
+    }
+
+    const fetchSongs = async (query: string) => {
+        const response = await fetch(
+            `${serverUrl}/Users/${userId}/Items?searchTerm=${encodeURIComponent(
+                query
+            )}&IncludeItemTypes=Audio&Recursive=true&Limit=10&Fields=ArtistItems&api_key=${token}`
+        )
+        const data = await response.json()
+        return data.Items || []
+    }
+
+    const reportPlaybackStart = async (trackId: string, signal: AbortSignal) => {
+        const url = `${serverUrl}/Sessions/Playing`
+        const payload = {
+            ItemId: trackId,
+            PlayMethod: 'DirectStream',
+            PositionTicks: 0,
+            IsPaused: false,
+            CanSeek: true,
+            MediaSourceId: trackId,
+            AudioStreamIndex: 1,
+        }
+
+        await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Emby-Token': token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+            signal,
+        })
+    }
+
+    const reportPlaybackProgress = async (trackId: string, position: number, isPaused: boolean) => {
+        const url = `${serverUrl}/Sessions/Playing/Progress`
+        const payload = {
+            ItemId: trackId,
+            PositionTicks: Math.floor(position * 10000000),
+            IsPaused: isPaused,
+            PlayMethod: 'DirectStream',
+            MediaSourceId: trackId,
+            AudioStreamIndex: 1,
+        }
+
+        await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Emby-Token': token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        })
+    }
+
+    const reportPlaybackStopped = async (trackId: string, position: number, signal?: AbortSignal) => {
+        const url = `${serverUrl}/Sessions/Playing/Stopped`
+        const payload = {
+            ItemId: trackId,
+            PositionTicks: Math.floor(position * 10000000),
+            PlayMethod: 'DirectStream',
+            MediaSourceId: trackId,
+        }
+
+        await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Emby-Token': token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+            signal,
+        })
+    }
+
     return {
         loginToJellyfin,
         searchItems,
@@ -512,5 +620,13 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         fetchPlaylistMetadata,
         fetchRecentlyPlayed,
         fetchFrequentlyPlayed,
+        fetchUserInfo,
+        fetchClientIp,
+        measureLatency,
+        fetchPlayCount,
+        fetchSongs,
+        reportPlaybackStart,
+        reportPlaybackProgress,
+        reportPlaybackStopped,
     }
 }

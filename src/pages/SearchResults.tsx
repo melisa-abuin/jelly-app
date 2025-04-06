@@ -53,13 +53,7 @@ const SearchResults = () => {
                 const albumItems = await api.searchAlbumsDetailed(query, 10)
                 const playlistItems = await api.searchPlaylistsDetailed(query, 10)
 
-                const songResponse = await fetch(
-                    `${api.auth.serverUrl}/Users/${api.auth.userId}/Items?searchTerm=${encodeURIComponent(
-                        query
-                    )}&IncludeItemTypes=Audio&Recursive=true&Limit=10&Fields=ArtistItems&api_key=${api.auth.token}`
-                )
-                const songData = await songResponse.json()
-                const songs = songData.Items || []
+                const songs = await api.fetchSongs(query)
 
                 const artists = artistItems.map(artist => ({
                     type: 'Artist' as const,

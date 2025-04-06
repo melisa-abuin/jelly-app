@@ -20,12 +20,9 @@ const Settings = ({ onLogout }: SettingsProps) => {
     const [playCount, setPlayCount] = useState<number | null>(null)
 
     useEffect(() => {
-        const fetchUserInfo = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch(`${api.auth.serverUrl}/Users/${api.auth.userId}`, {
-                    headers: { 'X-Emby-Token': api.auth.token },
-                })
-                const user = await response.json()
+                const user = await api.fetchUserInfo()
                 if (user.LastLoginDate) {
                     const date = new Date(user.LastLoginDate)
                     const formatted = date
@@ -44,62 +41,22 @@ const Settings = ({ onLogout }: SettingsProps) => {
                 } else {
                     setLastLogin(null)
                 }
-            } catch (error) {
-                console.error('Failed to fetch user info:', error)
-                setLastLogin(null)
-            }
-        }
 
-        const fetchClientIp = async () => {
-            try {
-                const response = await fetch(`${api.auth.serverUrl}/Sessions`, {
-                    headers: { 'X-Emby-Token': api.auth.token },
-                })
-                const sessions = await response.json()
-                const mySession = sessions.find((s: any) => s.UserId === api.auth.userId)
-                setClientIp(mySession?.RemoteEndPoint || null)
-            } catch (error) {
-                console.error('Failed to fetch session info:', error)
-                setClientIp(null)
-            }
-        }
+                const clientIp = await api.fetchClientIp()
+                setClientIp(clientIp)
 
-        const measureLatency = async () => {
-            try {
-                const startTime = performance.now()
-                await fetch(`${api.auth.serverUrl}/System/Ping`, {
-                    headers: { 'X-Emby-Token': api.auth.token },
-                })
-                const endTime = performance.now()
-                const latencyMs = Math.round(endTime - startTime)
+                const latencyMs = await api.measureLatency()
                 setLatency(latencyMs)
+
+                const playCount = await api.fetchPlayCount()
+                setPlayCount(playCount)
             } catch (error) {
-                console.error('Failed to measure latency:', error)
-                setLatency(null)
+                console.error('Error fetching data:', error)
             }
         }
 
-        const fetchPlayCount = async () => {
-            try {
-                const response = await fetch(
-                    `${api.auth.serverUrl}/Users/${api.auth.userId}/Items?Recursive=true&IncludeItemTypes=Audio&Filters=IsPlayed`,
-                    {
-                        headers: { 'X-Emby-Token': api.auth.token },
-                    }
-                )
-                const data = await response.json()
-                setPlayCount(data.TotalRecordCount)
-            } catch (error) {
-                console.error('Failed to fetch play count:', error)
-                setPlayCount(null)
-            }
-        }
-
-        fetchUserInfo()
-        fetchClientIp()
-        measureLatency()
-        fetchPlayCount()
-    }, [api.auth.serverUrl, api.auth.token, api.auth.userId])
+        fetchData()
+    }, [api])
 
     const handleLogout = () => {
         onLogout()
