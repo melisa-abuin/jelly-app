@@ -51,8 +51,7 @@ const Artist = () => {
         .sort((a, b) => b.playCount - a.playCount)
         .slice(0, 5)
 
-    const allAlbums = [...albums, ...appearsInAlbums]
-    const genres = Array.from(new Set(allAlbums.flatMap(album => album.Genres || []))).sort()
+    const genres = artist.Genres || []
 
     return (
         <div className="artist-page">
@@ -74,10 +73,10 @@ const Artist = () => {
                     {genres.length > 0 && (
                         <>
                             <div className="genres">
-                                {genres.slice(0, 8).map((genre, index) => (
+                                {genres.slice(0, 6).map((genre, index) => (
                                     <span key={genre}>
                                         <Link to={`/genre/${encodeURIComponent(genre)}`}>{genre}</Link>
-                                        {index < genres.slice(0, 8).length - 1 && ', '}
+                                        {index < genres.slice(0, 6).length - 1 && ', '}
                                     </span>
                                 ))}
                             </div>

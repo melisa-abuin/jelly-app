@@ -69,8 +69,8 @@ export const loginToJellyfin = async (
 export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: string; userId: string; token: string }) => {
     const jellyfin = new Jellyfin({
         clientInfo: {
-            name: 'My Client Application',
-            version: '1.0.0',
+            name: 'Jellyfin Music App',
+            version: '0.1',
         },
         deviceInfo: {
             name: 'Web',
