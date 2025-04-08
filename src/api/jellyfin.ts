@@ -1,4 +1,5 @@
 import { Jellyfin } from '@jellyfin/sdk'
+import { ArtistsApi } from '@jellyfin/sdk/lib/generated-client/api/artists-api'
 import { ItemsApi } from '@jellyfin/sdk/lib/generated-client/api/items-api'
 import { PlaystateApi } from '@jellyfin/sdk/lib/generated-client/api/playstate-api'
 import { SessionApi } from '@jellyfin/sdk/lib/generated-client/api/session-api'
@@ -96,28 +97,24 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
     }
 
     const searchArtists = async (searchTerm: string, limit = 20): Promise<MediaItem[]> => {
-        const itemsApi = new ItemsApi(api.configuration)
-        const response = await itemsApi.getItems(
+        const artistsApi = new ArtistsApi(api.configuration)
+        const response = await artistsApi.getArtists(
             {
                 userId,
                 searchTerm,
-                includeItemTypes: [BaseItemKind.MusicArtist],
-                recursive: true,
                 limit,
             },
             { signal: AbortSignal.timeout(20000) }
         )
-        return response.data.Items as MediaItem[]
+        return (response.data.Items as MediaItem[]) || []
     }
 
     const searchArtistsDetailed = async (searchTerm: string, limit = 50): Promise<MediaItem[]> => {
-        const itemsApi = new ItemsApi(api.configuration)
-        const response = await itemsApi.getItems(
+        const artistsApi = new ArtistsApi(api.configuration)
+        const response = await artistsApi.getArtists(
             {
                 userId,
                 searchTerm,
-                includeItemTypes: [BaseItemKind.MusicArtist],
-                recursive: true,
                 limit,
             },
             { signal: AbortSignal.timeout(20000) }
