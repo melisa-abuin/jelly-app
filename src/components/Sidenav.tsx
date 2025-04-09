@@ -1,5 +1,5 @@
 import { GearIcon } from '@primer/octicons-react'
-import { ChangeEvent, useEffect, useState, WheelEvent } from 'react'
+import { ChangeEvent, useEffect, useRef, useState, WheelEvent } from 'react'
 import { NavLink } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import '../App.css'
@@ -26,6 +26,7 @@ interface SearchResult {
 const Sidenav = (props: SidenavProps) => {
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
+    const searchInputRef = useRef<HTMLInputElement>(null)
 
     const { playlists, loading, error } = useJellyfinPlaylistsList()
     const { disabled, setDisabled } = useScrollContext()
@@ -101,7 +102,7 @@ const Sidenav = (props: SidenavProps) => {
             }
 
             fetchSearchResults()
-        }, 400)
+        }, 200)
 
         return () => clearTimeout(debounceTimer)
     }, [searchQuery, api.auth.serverUrl, api.auth.token, api.auth.userId, api])
@@ -126,6 +127,17 @@ const Sidenav = (props: SidenavProps) => {
             props.closeSidenav()
         }
     }
+
+    useEffect(() => {
+        const focusSearch = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault()
+                searchInputRef.current?.focus()
+            }
+        }
+        window.addEventListener('keydown', focusSearch)
+        return () => window.removeEventListener('keydown', focusSearch)
+    }, [])
 
     return (
         <aside className="sidenav">
@@ -177,6 +189,7 @@ const Sidenav = (props: SidenavProps) => {
                                 placeholder="Search"
                                 value={searchQuery}
                                 onChange={handleSearchChange}
+                                ref={searchInputRef}
                             />
                             <div className="search-clear" onClick={handleClearSearch}>
                                 <svg
