@@ -17,7 +17,7 @@ const Favorites = () => {
 
         const savedIndex = localStorage.getItem('currentTrackIndex')
         if (savedIndex) {
-            const index = parseInt(savedIndex, 10)
+            const index = Number(savedIndex)
             if (index >= 0 && allFavorites.length <= index && hasMore) {
                 setIsPreloading(true)
 

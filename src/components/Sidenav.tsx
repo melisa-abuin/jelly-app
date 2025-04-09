@@ -30,7 +30,7 @@ const Sidenav = (props: SidenavProps) => {
 
     const { playlists, loading, error } = useJellyfinPlaylistsList()
     const { disabled, setDisabled } = useScrollContext()
-    const [searchQuery, setSearchQuery] = useState('')
+    const [searchQuery, setSearchQuery] = useState(new URLSearchParams(location.search).get('search') || '')
     const [searchResults, setSearchResults] = useState<SearchResult[]>([])
     const [searchLoading, setSearchLoading] = useState(false)
     const [searchError, setSearchError] = useState<string | null>(null)

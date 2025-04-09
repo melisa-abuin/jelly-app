@@ -38,7 +38,7 @@ const Playlist = () => {
 
         const savedIndex = localStorage.getItem('currentTrackIndex')
         if (savedIndex) {
-            const index = parseInt(savedIndex, 10)
+            const index = Number(savedIndex)
             if (index >= 0 && tracks.length <= index && hasMore) {
                 setIsPreloading(true)
 
