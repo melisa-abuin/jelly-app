@@ -101,7 +101,7 @@ const AuthForm = ({ onLogin }: AuthFormProps) => {
                     disabled={loading}
                 />
             </div>
-            <button className="submit_button" type="submit" disabled={loading}>
+            <button className="submit_button noSelect" type="submit" disabled={loading}>
                 {loading ? 'Logging in...' : 'Login with Jellyfin'}
             </button>
         </form>

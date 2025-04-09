@@ -158,6 +158,8 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_re
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container > .search-clear {
+    position: absolute;
+    right: 0;
     opacity: 0;
     visibility: hidden;
     cursor: pointer;
@@ -171,6 +173,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_re
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container.active > .search-clear {
+    position: relative;
     opacity: 1;
     visibility: visible;
 }

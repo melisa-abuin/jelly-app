@@ -10,6 +10,11 @@ export interface PlaybackManagerProps {
 // Broken name to prevent confusion with the context
 export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackManagerProps) => {
     const api = useJellyfinContext()
+    // Session based play count for settings page
+    const [sessionPlayCount, setSessionPlayCount] = useState(() => {
+        const saved = localStorage.getItem('sessionPlayCount')
+        return saved ? parseInt(saved, 10) : 0
+    })
     const currentTrackIndex = useRef(Number(localStorage.getItem('currentTrackIndex')) || -1)
     const [isPlaying, setIsPlaying] = useState(false)
     const [progress, setProgress] = useState(0)
@@ -122,6 +127,22 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
         return () => clearInterval(interval)
     }, [isPlaying, currentTrack, reportPlaybackProgressWrapper])
 
+    // Handle login/logout and sync to localStorage
+    useEffect(() => {
+        if (clearOnLogout || !api.auth.token) {
+            setSessionPlayCount(0)
+            localStorage.removeItem('sessionPlayCount')
+        } else if (api.auth.token) {
+            localStorage.setItem('sessionPlayCount', sessionPlayCount.toString())
+        }
+    }, [api.auth.token, clearOnLogout, sessionPlayCount])
+
+    // Force session play count to reset
+    const resetSessionCount = () => {
+        setSessionPlayCount(0)
+        localStorage.removeItem('sessionPlayCount')
+    }
+
     const playTrack = useCallback(
         async (index: number, currentPlaylist: MediaItem[]) => {
             const track = currentPlaylist[index]
@@ -170,6 +191,11 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                     if (shuffle) {
                         currentShuffledIndex.current = shuffledPlaylist.current.indexOf(index)
                     }
+
+                    setSessionPlayCount(prev => {
+                        const newCount = prev + 1
+                        return newCount
+                    })
 
                     playedIndices.current.add(index)
                     updateMediaSessionMetadata(track)
@@ -646,5 +672,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
             setHasMoreState(hasMore || false)
         },
         loadMoreCallback,
+        sessionPlayCount,
+        resetSessionCount,
     }
 }

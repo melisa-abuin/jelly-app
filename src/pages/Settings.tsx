@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useJellyfinContext } from '../context/JellyfinContext'
+import { usePlaybackContext } from '../context/PlaybackContext'
 import { useThemeContext } from '../context/ThemeContext'
 import './Settings.css'
 
@@ -17,7 +18,7 @@ const Settings = ({ onLogout }: SettingsProps) => {
     const [lastLogin, setLastLogin] = useState<string | null>(null)
     const [clientIp, setClientIp] = useState<string | null>(null)
     const [latency, setLatency] = useState<number | null>(null)
-    const [playCount, setPlayCount] = useState<number | null>(null)
+    const { sessionPlayCount, resetSessionCount } = usePlaybackContext()
 
     useEffect(() => {
         const fetchData = async () => {
@@ -32,7 +33,6 @@ const Settings = ({ onLogout }: SettingsProps) => {
                             day: 'numeric',
                             hour: '2-digit',
                             minute: '2-digit',
-                            second: '2-digit',
                             year: 'numeric',
                             hour12: true,
                         })
@@ -47,9 +47,6 @@ const Settings = ({ onLogout }: SettingsProps) => {
 
                 const latencyMs = await api.measureLatency()
                 setLatency(latencyMs)
-
-                const playCount = await api.fetchPlayCount()
-                setPlayCount(playCount)
             } catch (error) {
                 console.error('Error fetching data:', error)
             }
@@ -59,6 +56,7 @@ const Settings = ({ onLogout }: SettingsProps) => {
     }, [api])
 
     const handleLogout = () => {
+        resetSessionCount()
         onLogout()
         navigate('/login')
     }
@@ -118,7 +116,15 @@ const Settings = ({ onLogout }: SettingsProps) => {
                         <p>
                             Last login on: {lastLogin} {clientIp ? ` from ${clientIp}` : ''}
                         </p>
-                        <p>Played {playCount !== null && <span>{playCount}</span>} tracks since login</p>
+                        <p>
+                            Played{' '}
+                            {sessionPlayCount !== null && (
+                                <span>
+                                    {sessionPlayCount} {sessionPlayCount === 1 ? 'track' : 'tracks'}
+                                </span>
+                            )}{' '}
+                            since login
+                        </p>
                     </div>
                 </div>
                 <div className="options noSelect">
