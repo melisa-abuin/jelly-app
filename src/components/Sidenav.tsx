@@ -42,7 +42,7 @@ const Sidenav = (props: SidenavProps) => {
 
     const handleVolumeScroll = (e: WheelEvent<HTMLInputElement>) => {
         e.stopPropagation()
-        const delta = e.deltaY > 0 ? -0.05 : 0.05
+        const delta = e.deltaY > 0 ? -0.02 : 0.02
         const newVolume = Math.max(0, Math.min(1, playback.volume + delta))
         playback.setVolume(newVolume)
     }
@@ -143,7 +143,7 @@ const Sidenav = (props: SidenavProps) => {
         <aside className="sidenav">
             <div className={'sidenav_wrapper' + (props.showSidenav ? ' active' : '') + (disabled ? ' lockscroll' : '')}>
                 <div className="sidenav_header">
-                    <div className="logo"></div>
+                    <NavLink to="/" onClick={props.closeSidenav} className="logo"></NavLink>
                 </div>
                 <nav className="sidenav_content">
                     <ul className="links noSelect">

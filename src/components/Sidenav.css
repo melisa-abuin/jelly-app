@@ -89,6 +89,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 .sidenav > .sidenav_wrapper > .sidenav_content {
     position: relative;
+    margin-bottom: 10px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > ul {
@@ -584,7 +585,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .additional {
     margin-top: 6px;
-    margin-left: 2px;
+    margin-left: 3px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .indicator {
@@ -746,7 +747,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     }
 
     .sidenav > .sidenav_wrapper > .sidenav_header > .logo {
-        width: 32px;
-        height: 32px;
+        width: 42px;
+        height: 42px;
     }
 }
