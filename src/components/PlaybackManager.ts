@@ -551,7 +551,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     }, [repeat])
 
     useEffect(() => {
-        localStorage.setItem('currentTrackIndex', currentTrackIndex.toString())
+        localStorage.setItem('currentTrackIndex', currentTrackIndex.index.toString())
     }, [currentTrackIndex])
 
     useEffect(() => {
