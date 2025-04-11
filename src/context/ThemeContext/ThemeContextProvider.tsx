@@ -41,7 +41,7 @@ const useInitialState = () => {
         }
         systemDarkQuery.addEventListener('change', handleSystemChange)
         return () => systemDarkQuery.removeEventListener('change', handleSystemChange)
-    }, [])
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const toggleTheme = (newTheme: Theme) => {
         setTheme(newTheme)
