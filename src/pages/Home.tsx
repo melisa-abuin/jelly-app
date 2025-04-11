@@ -24,7 +24,7 @@ const Home = () => {
                         <div className="section_title">Recently Played</div>
                         <div className="section_desc">Songs you queued up lately</div>
                     </div>
-                    <Link to="/recently" className="see-more">
+                    <Link to="/recently" className="see-more noSelect">
                         See more
                     </Link>
                 </div>
@@ -45,7 +45,7 @@ const Home = () => {
                         <div className="section_title">Frequently Played</div>
                         <div className="section_desc">Songs you listen to often</div>
                     </div>
-                    <Link to="/frequently" className="see-more">
+                    <Link to="/frequently" className="see-more noSelect">
                         See more
                     </Link>
                 </div>

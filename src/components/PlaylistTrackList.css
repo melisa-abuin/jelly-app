@@ -255,11 +255,14 @@
 .playlist-tracklist .track-item > .track-indicators {
     display: flex;
     align-items: center;
+    align-self: flex-start;
+    margin: 2px;
     margin-left: 10px;
 }
 
 .playlist-tracklist .track-item > .track-indicators > .favorited {
     padding: 6px;
+    margin: -6px 0;
     color: var(--font-color-tertiary);
 }
 

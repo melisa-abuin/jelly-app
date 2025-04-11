@@ -27,13 +27,17 @@
 .settings-page > .section > .info > .title {
     font-size: 0.85rem;
     font-weight: 600;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
 .settings-page > .section > .info > .desc {
     font-size: 0.75rem;
     line-height: 1.4;
     color: var(--font-color-secondary);
+}
+
+.settings-page > .section.appearance > .options {
+    margin-top: 4px;
 }
 
 .settings-page > .section > .options {
