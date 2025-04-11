@@ -151,6 +151,10 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
 
     const playTrack = useCallback(
         async (index: number) => {
+            if (!navigator.userActivation.hasBeenActive) {
+                return
+            }
+
             const track = currentPlaylist[index]
 
             if (!track) {
@@ -195,8 +199,6 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                         audio.addEventListener('loadedmetadata', onLoadedMetadata)
                     })
 
-                    setIsPlaying(true)
-
                     localStorage.setItem('currentTrackIndex', index.toString())
 
                     setSessionPlayCount(prev => {
@@ -211,11 +213,6 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                     await reportPlaybackStartWrapper(track, signal)
                 } catch (error) {
                     console.error('Error playing track:', error)
-                    setIsPlaying(false)
-                    setCurrentTrackIndex({ index: -1 })
-                    setProgress(0)
-                    setDuration(0)
-                    setBuffered(0)
                 }
             }
         },
@@ -237,7 +234,6 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
             const audio = audioRef.current
             if (isPlaying) {
                 audio.pause()
-                setIsPlaying(false)
                 reportPlaybackProgressWrapper(currentTrack, audio.currentTime, true)
             } else {
                 if (!audio.src) {
@@ -248,12 +244,10 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                 audio
                     .play()
                     .then(() => {
-                        setIsPlaying(true)
                         reportPlaybackProgressWrapper(currentTrack, audio.currentTime, false)
                     })
                     .catch(error => {
                         console.error('Error resuming playback:', error)
-                        setIsPlaying(false)
                         setCurrentTrackIndex({ index: -1 })
                         setProgress(0)
                         setDuration(0)
@@ -274,7 +268,6 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
             if (audioRef.current) {
                 audioRef.current.pause()
             }
-            setIsPlaying(false)
         }
     }, [currentPlaylist, currentTrackIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -290,7 +283,6 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                 if (audioRef.current) {
                     audioRef.current.pause()
                 }
-                setIsPlaying(false)
             }
         }
     }, [currentShuffledIndex]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -300,7 +292,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
             if (audioRef.current) {
                 audioRef.current.pause()
             }
-            setIsPlaying(false)
+
             return
         }
 
@@ -330,7 +322,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                     if (audioRef.current) {
                         audioRef.current.pause()
                     }
-                    setIsPlaying(false)
+
                     return
                 }
             } else {
@@ -352,7 +344,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                     if (audioRef.current) {
                         audioRef.current.pause()
                     }
-                    setIsPlaying(false)
+
                     return
                 }
             } else {
@@ -374,7 +366,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
             if (audioRef.current) {
                 audioRef.current.pause()
             }
-            setIsPlaying(false)
+
             return
         }
 
@@ -397,7 +389,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                     if (audioRef.current) {
                         audioRef.current.pause()
                     }
-                    setIsPlaying(false)
+
                     return
                 }
             } else {
@@ -412,7 +404,7 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
                     if (audioRef.current) {
                         audioRef.current.pause()
                     }
-                    setIsPlaying(false)
+
                     return
                 }
             } else {
@@ -482,14 +474,18 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
     // Attach play/pause event listeners
     useEffect(() => {
         const audio = audioRef.current
+
         const handlePlay = () => {
             setIsPlaying(true)
         }
+
         const handlePause = () => {
             setIsPlaying(false)
         }
+
         audio.addEventListener('play', handlePlay)
         audio.addEventListener('pause', handlePause)
+
         return () => {
             audio.removeEventListener('play', handlePlay)
             audio.removeEventListener('pause', handlePause)
@@ -508,7 +504,6 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
 
         const handleError = (e: Event) => {
             console.error('Audio error during playback:', e)
-            setIsPlaying(false)
             setCurrentTrackIndex({ index: -1 })
             setProgress(0)
             setDuration(0)
@@ -613,7 +608,6 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
         const audio = audioRef.current
         const handleEnded = () => {
             if (!currentTrack || currentTrackIndex.index === -1 || !currentPlaylist || currentPlaylist.length === 0) {
-                setIsPlaying(false)
                 if (currentTrack) {
                     reportPlaybackStoppedWrapper(currentTrack, audio.currentTime)
                 }
@@ -647,7 +641,6 @@ export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackM
         if (clearOnLogout && currentTrack) {
             reportPlaybackStoppedWrapper(currentTrack, audioRef.current.currentTime)
             setCurrentTrackIndex({ index: -1 })
-            setIsPlaying(false)
             setProgress(0)
             setDuration(0)
             setBuffered(0)
