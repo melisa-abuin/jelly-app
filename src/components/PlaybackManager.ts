@@ -1,6 +1,6 @@
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
-import { useJellyfinContext } from '../context/JellyfinContext'
+import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 
 export interface PlaybackManagerProps {
     initialVolume: number
@@ -8,7 +8,7 @@ export interface PlaybackManagerProps {
 }
 
 // Broken name to prevent confusion with the context
-export const useP__laybackManager = ({ initialVolume, clearOnLogout }: PlaybackManagerProps) => {
+export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackManagerProps) => {
     const api = useJellyfinContext()
     // Session based play count for settings page
     const [sessionPlayCount, setSessionPlayCount] = useState(() => {

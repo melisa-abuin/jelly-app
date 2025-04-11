@@ -1,6 +1,6 @@
 import { HeartFillIcon } from '@primer/octicons-react'
 import { MediaItem } from '../api/jellyfin'
-import { usePlaybackContext } from '../context/PlaybackContext'
+import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { formatDuration } from '../utils/formatDuration'
 import './TrackList.css'
 

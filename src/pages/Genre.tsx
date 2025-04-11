@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { VirtuosoHandle } from 'react-virtuoso'
 import MediaList from '../components/MediaList'
-import { usePageTitle } from '../context/PageTitleContext'
-import { usePlaybackContext } from '../context/PlaybackContext'
+import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
+import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinGenreTracks } from '../hooks/useJellyfinGenreTracks'
 
 const Genre = () => {

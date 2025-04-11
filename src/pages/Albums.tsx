@@ -1,5 +1,5 @@
 import MediaList from '../components/MediaList'
-import { usePlaybackContext } from '../context/PlaybackContext'
+import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinAlbumsData } from '../hooks/useJellyfinAlbumsData'
 
 const Albums = () => {

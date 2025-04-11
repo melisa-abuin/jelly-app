@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
 import { ApiError, MediaItem } from '../api/jellyfin'
-import { useJellyfinContext } from '../context/JellyfinContext'
+import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 
 export const useJellyfinPlaylistData = (playlistId: string) => {
     const api = useJellyfinContext()

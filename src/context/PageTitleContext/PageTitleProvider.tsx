@@ -1,6 +1,7 @@
-import { createContext, ReactNode, useContext, useState } from 'react'
+import { ReactNode, useState } from 'react'
+import { PageTitleContext } from './PageTitleContext'
 
-type InitialState = ReturnType<typeof useInitialState>
+export type IPageTitleContext = ReturnType<typeof useInitialState>
 
 const useInitialState = () => {
     const [pageTitle, setPageTitle] = useState('')
@@ -10,10 +11,6 @@ const useInitialState = () => {
         setPageTitle,
     }
 }
-
-export const PageTitleContext = createContext<InitialState>({} as InitialState)
-
-export const usePageTitle = () => useContext(PageTitleContext)
 
 export const PageTitleProvider = ({ children }: { children: ReactNode }) => {
     const initialState = useInitialState()

@@ -4,8 +4,8 @@ import { Link, useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import Loader from '../components/Loader'
 import TrackList from '../components/TrackList'
-import { useJellyfinContext } from '../context/JellyfinContext'
-import { usePageTitle } from '../context/PageTitleContext'
+import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
+import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import './SearchResults.css'
 
 interface SearchResult {

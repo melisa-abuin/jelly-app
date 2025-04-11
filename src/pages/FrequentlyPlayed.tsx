@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { VirtuosoHandle } from 'react-virtuoso'
 import MediaList from '../components/MediaList'
-import { usePlaybackContext } from '../context/PlaybackContext'
+import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinFrequentlyPlayedData } from '../hooks/useJellyfinFrequentlyPlayedData'
 
 const FrequentlyPlayed = () => {

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useJellyfinContext } from '../context/JellyfinContext'
-import { usePlaybackContext } from '../context/PlaybackContext'
-import { useThemeContext } from '../context/ThemeContext'
+import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
+import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
+import { useThemeContext } from '../context/ThemeContext/ThemeContext'
 import './Settings.css'
 
 interface SettingsProps {
