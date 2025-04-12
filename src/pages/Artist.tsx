@@ -43,13 +43,7 @@ const Artist = () => {
         return <div className="error">{error || 'Artist not found'}</div>
     }
 
-    const topSongs = tracks
-        .map(track => ({
-            ...track,
-            playCount: track.UserData?.PlayCount || 0,
-        }))
-        .sort((a, b) => b.playCount - a.playCount)
-        .slice(0, 5)
+    const topSongs = tracks.slice(0, 5)
 
     const genres = artist.Genres || []
 
@@ -130,6 +124,13 @@ const Artist = () => {
                 {topSongs.length > 0 && (
                     <div className="section top-songs">
                         <TrackList tracks={topSongs} showAlbumLink={true} />
+                        {(totalTrackCount || 0) > 5 && (
+                            <div className="all-tracks">
+                                <Link to={`/artist/${artistId}/tracks`} className="textlink">
+                                    View all tracks
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 )}
 

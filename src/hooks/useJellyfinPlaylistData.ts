@@ -5,12 +5,22 @@ import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 
 export const useJellyfinPlaylistData = (playlistId: string) => {
     const api = useJellyfinContext()
-
     const itemsPerPage = 40
 
     const { data: playlist, error: playlistError } = useQuery<MediaItem, ApiError>({
         queryKey: ['playlist', playlistId],
         queryFn: () => api.getPlaylist(playlistId),
+    })
+
+    const { data: totals, error: totalsError } = useQuery<
+        {
+            totalTrackCount: number
+            totalPlaytime: number
+        },
+        ApiError
+    >({
+        queryKey: ['playlistTotals', playlistId],
+        queryFn: () => api.getPlaylistTotals(playlistId),
     })
 
     const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
@@ -27,11 +37,14 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
     })
 
     useEffect(() => {
-        if ((error || playlistError) instanceof ApiError && (error || playlistError)?.response?.status === 401) {
+        if (
+            (error || playlistError || totalsError) instanceof ApiError &&
+            (error || playlistError || totalsError)?.response?.status === 401
+        ) {
             localStorage.removeItem('auth')
             window.location.href = '/login'
         }
-    }, [error, playlistError])
+    }, [error, playlistError, totalsError])
 
     const seenIds = new Set<string>()
     const tracks: MediaItem[] = data
@@ -50,8 +63,8 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-    const totalPlaytime = tracks.reduce((sum, track) => sum + (track.RunTimeTicks || 0), 0)
-    const totalTrackCount = tracks.length
+    const totalPlaytime = totals?.totalPlaytime || 0
+    const totalTrackCount = totals?.totalTrackCount || 0
     const totalPlays = tracks.reduce((sum, track) => sum + (track.UserData?.PlayCount || 0), 0)
 
     return {

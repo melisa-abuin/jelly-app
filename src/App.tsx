@@ -3,7 +3,7 @@ import { ArrowLeftIcon, BookmarkFillIcon, HeartFillIcon } from '@primer/octicons
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { createContext, CSSProperties, ReactNode, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, CSSProperties, ReactNode, useContext, useEffect, useState } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'
 import './App.css'
 import './components/MediaList.css'
@@ -19,6 +19,7 @@ import { useSidenav } from './hooks/useSidenav'
 import Album from './pages/Album'
 import Albums from './pages/Albums'
 import Artist from './pages/Artist'
+import ArtistTracks from './pages/ArtistTracks'
 import Favorites from './pages/Favorites'
 import FrequentlyPlayed from './pages/FrequentlyPlayed'
 import Genre from './pages/Genre'
@@ -52,56 +53,38 @@ const HistoryContext = createContext<HistoryContextType | undefined>(undefined)
 const HistoryProvider = ({ children }: { children: ReactNode }) => {
     const [historyStack, setHistoryStack] = useState<string[]>([])
     const navigate = useNavigate()
-    const location = useLocation()
-    const prevLocationRef = useRef<string | null>(null)
+    const { pathname } = useLocation()
 
     useEffect(() => {
-        const validRoutes = [
-            '/',
-            '/tracks',
-            '/albums',
-            '/favorites',
-            '/settings',
-            '/album',
-            '/recently',
-            '/frequently',
-            '/artist',
-            '/genre',
-            '/playlist',
-            '/search',
-        ]
+        if (historyStack[historyStack.length - 1] === pathname) return
 
-        const currentPath = location.pathname
-
-        if (
-            validRoutes.some(route => currentPath === route || currentPath.startsWith(route + '/')) &&
-            currentPath !== prevLocationRef.current
-        ) {
-            setHistoryStack(prev => {
-                if (prev[prev.length - 1] === currentPath) {
-                    return prev
-                }
-                return [...prev, currentPath]
-            })
-            prevLocationRef.current = currentPath
-        }
-    }, [location.pathname])
+        setHistoryStack(prev => [...prev, pathname])
+    }, [pathname])
 
     const goBack = () => {
-        if (historyStack.length > 1) {
-            setHistoryStack(prev => {
-                const newStack = prev.slice(0, -1)
-                const previousRoute = newStack[newStack.length - 1]
-                navigate(previousRoute)
-                return newStack
-            })
-        } else {
+        if (historyStack.length <= 1) {
             navigate('/')
+            return
         }
+
+        setHistoryStack(prev => {
+            const newStack = prev.slice(0, -1)
+            navigate(newStack[newStack.length - 1])
+            return newStack
+        })
     }
 
     return <HistoryContext.Provider value={{ historyStack, goBack }}>{children}</HistoryContext.Provider>
 }
+
+// Optional?: Custom hook for easier context access
+const useHistoryContext = () => {
+    const context = useContext(HistoryContext)
+    if (!context) throw new Error('useHistoryContext must be used within HistoryProvider')
+    return context
+}
+
+export { HistoryProvider, useHistoryContext }
 
 const useAppBack = () => {
     const { goBack } = useContext(HistoryContext)!
@@ -215,7 +198,10 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
         if (pageTitle) return pageTitle
 
         if (location.pathname.startsWith('/album/')) return 'Album'
-        if (location.pathname.startsWith('/artist/')) return 'Artist'
+        if (location.pathname.startsWith('/artist/')) {
+            if (location.pathname.includes('/tracks')) return 'Tracks'
+            return 'Artist'
+        }
         if (location.pathname.startsWith('/genre/')) return 'Genre'
         if (location.pathname.startsWith('/playlist/')) return 'Playlist'
         if (location.pathname.startsWith('/search/')) {
@@ -276,26 +262,43 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                         </svg>
                                     </div>
                                 )}
-                                {location.pathname.startsWith('/artist/') && pageTitle && (
-                                    <div className="page-icon artist" title="Artist">
-                                        <svg
-                                            width="16"
-                                            height="16"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16.1328 15.7715"
-                                        >
-                                            <g>
-                                                <rect height="15.7715" opacity="0" width="16.1328" x="0" y="0" />
-                                                <path d="M7.88086 15.7617C12.2363 15.7617 15.7715 12.2363 15.7715 7.88086C15.7715 3.52539 12.2363 0 7.88086 0C3.53516 0 0 3.52539 0 7.88086C0 12.2363 3.53516 15.7617 7.88086 15.7617ZM7.88086 14.2773C4.3457 14.2773 1.49414 11.416 1.49414 7.88086C1.49414 4.3457 4.3457 1.48438 7.88086 1.48438C11.416 1.48438 14.2773 4.3457 14.2773 7.88086C14.2773 11.416 11.416 14.2773 7.88086 14.2773ZM13.1445 12.959L13.1152 12.8613C12.7637 11.7188 10.7227 10.5078 7.88086 10.5078C5.03906 10.5078 3.00781 11.7188 2.65625 12.8613L2.62695 12.959C4.02344 14.3164 6.50391 15.0879 7.88086 15.0879C9.26758 15.0879 11.748 14.3164 13.1445 12.959ZM7.88086 9.21875C9.35547 9.23828 10.5176 7.97852 10.5176 6.32812C10.5176 4.77539 9.35547 3.49609 7.88086 3.49609C6.41602 3.49609 5.24414 4.77539 5.25391 6.32812C5.26367 7.97852 6.40625 9.19922 7.88086 9.21875Z" />
-                                            </g>
-                                        </svg>
-                                    </div>
-                                )}
+
+                                {pageTitle &&
+                                    (location.pathname.match(/^\/artist\/[^/]+\/tracks$/) ? (
+                                        <div className="page-icon artist-tracks" title="Tracks">
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 38 48"
+                                                role="presentation"
+                                                focusable="false"
+                                            >
+                                                <path d="M36.15 0c-.18.02-1.76.3-1.95.33l-19.7 3.7c-.58.13-1.03.32-1.37.6a2.1 2.1 0 0 0-.74 1.36c-.02.12-.05.36-.05.72v26.81c0 1.18-.9 2.16-2.1 2.38l-5.27.86A6 6 0 0 0 0 42.57C0 45.63 2.6 48 5.64 48c.37 0 .74-.04 1.11-.1l1.82-.36a7.13 7.13 0 0 0 5.8-7.08V17.25c0-1.22.4-1.54 1.42-1.78 0 0 17.52-3.52 18.37-3.68.22-.04.43-.07.61-.07.78 0 1.17.4 1.17 1.36v15.47c0 1.18-.89 2.16-2.1 2.39l-4.86.95c-3.1.55-5.35 2.97-5.35 5.77 0 3.04 2.8 5.4 6.08 5.4.4 0 .8-.03 1.2-.1l1.96-.35c4.23-1.2 5.13-5.07 5.13-7.75v-33C38 .74 37.41 0 36.36 0h-.2z" />
+                                            </svg>
+                                        </div>
+                                    ) : location.pathname.startsWith('/artist/') ? (
+                                        <div className="page-icon artist" title="Artist">
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16.1328 15.7715"
+                                            >
+                                                <g>
+                                                    <rect height="15.7715" opacity="0" width="16.1328" x="0" y="0" />
+                                                    <path d="M7.88086 15.7617C12.2363 15.7617 15.7715 12.2363 15.7715 7.88086C15.7715 3.52539 12.2363 0 7.88086 0C3.53516 0 0 3.52539 0 7.88086C0 12.2363 3.53516 15.7617 7.88086 15.7617ZM7.88086 14.2773C4.3457 14.2773 1.49414 11.416 1.49414 7.88086C1.49414 4.3457 4.3457 1.48438 7.88086 1.48438C11.416 1.48438 14.2773 4.3457 14.2773 7.88086C14.2773 11.416 11.416 14.2773 7.88086 14.2773ZM13.1445 12.959L13.1152 12.8613C12.7637 11.7188 10.7227 10.5078 7.88086 10.5078C5.03906 10.5078 3.00781 11.7188 2.65625 12.8613L2.62695 12.959C4.02344 14.3164 6.50391 15.0879 7.88086 15.0879C9.26758 15.0879 11.748 14.3164 13.1445 12.959ZM7.88086 9.21875C9.35547 9.23828 10.5176 7.97852 10.5176 6.32812C10.5176 4.77539 9.35547 3.49609 7.88086 3.49609C6.41602 3.49609 5.24414 4.77539 5.25391 6.32812C5.26367 7.97852 6.40625 9.19922 7.88086 9.21875Z" />
+                                                </g>
+                                            </svg>
+                                        </div>
+                                    ) : null)}
+
                                 {location.pathname.startsWith('/genre/') && pageTitle && (
                                     <div className="page-icon genre" title="Genre">
                                         <BookmarkFillIcon size={16} />
                                     </div>
                                 )}
+
                                 {location.pathname.startsWith('/playlist/') && pageTitle && (
                                     <div className="page-icon playlist" title="Playlist">
                                         <svg
@@ -331,6 +334,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                         <Route path="/albums" element={<Albums />} />
                         <Route path="/album/:albumId" element={<Album />} />
                         <Route path="/artist/:artistId" element={<Artist />} />
+                        <Route path="/artist/:artistId/tracks" element={<ArtistTracks />} />
                         <Route path="/genre/:genre" element={<Genre />} />
                         <Route path="/playlist/:playlistId" element={<Playlist key={window.location.pathname} />} />
                         <Route path="/favorites" element={<Favorites />} />

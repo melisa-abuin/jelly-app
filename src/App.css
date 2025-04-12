@@ -881,7 +881,8 @@ body.lockscroll {
 .tracks-page,
 .recently-page,
 .frequently-page,
-.genre-page {
+.genre-page,
+.artist-tracks-page {
     margin-top: -4px;
 }
 
