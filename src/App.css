@@ -439,7 +439,17 @@ body.lockscroll {
 }
 
 .main > .main_header > .primary > .container > .page_title > .page-icon.playlist {
-    margin-left: 10px;
+    margin-left: 8px;
+    padding: 4px;
+    border-radius: 6px;
+    background-color: var(--bg-color-tertiary);
+}
+
+.main > .main_header > .primary > .container > .page_title > .page-icon.artist-tracks {
+    margin-left: 8px;
+    padding: 4px;
+    border-radius: 6px;
+    background-color: var(--bg-color-tertiary);
 }
 
 .main > .main_header > .secondary {
@@ -894,69 +904,6 @@ body.lockscroll {
 .genre-page > .empty {
     font-size: 0.85rem;
     margin: 4px 0;
-}
-
-/* Loader */
-.loading_container_small {
-    position: relative;
-    height: calc(100vh - 220px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.loading_container_small > .loading {
-    overflow: visible;
-    width: 28px;
-    height: 28px;
-}
-
-.loading_container_small > .loading > circle {
-    position: absolute;
-    fill: none;
-    stroke-width: 3;
-    stroke-dasharray: 124;
-    stroke-linecap: round;
-    transform: translate(0px, 0px);
-    transform: rotate(-90deg);
-    transform-origin: 50% 50%;
-}
-
-.loading_container_small > .loading > circle:nth-child(1) {
-    stroke-dashoffset: 0;
-    stroke: var(--bg-color-tertiary);
-}
-
-.loading_container_small > .loading > circle:nth-child(2) {
-    stroke-dashoffset: 94;
-    stroke: var(--brand-color);
-    animation: loaderForward 0.8s linear infinite;
-    transition: stroke-dashoffset 0.8s linear infinite;
-}
-
-@keyframes loaderForward {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* Settings Page */
-.logout-button {
-    font-size: 0.725rem;
-    font-weight: 500;
-    color: var(--font-color-inverted);
-    cursor: pointer;
-    padding: 7px 13px;
-    border-radius: 6px;
-    background-color: var(--btn-brand-color);
-    transition: background-color 0.2s ease-out;
-}
-
-.logout-button:hover {
-    background-color: var(--btn-brand-color-hover);
 }
 
 /* Responsive */

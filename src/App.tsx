@@ -267,8 +267,8 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                     (location.pathname.match(/^\/artist\/[^/]+\/tracks$/) ? (
                                         <div className="page-icon artist-tracks" title="Tracks">
                                             <svg
-                                                width="16"
-                                                height="16"
+                                                width="12"
+                                                height="12"
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 viewBox="0 0 38 48"
                                                 role="presentation"
@@ -302,8 +302,8 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                 {location.pathname.startsWith('/playlist/') && pageTitle && (
                                     <div className="page-icon playlist" title="Playlist">
                                         <svg
-                                            width="16"
-                                            height="16"
+                                            width="12"
+                                            height="12"
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 16.1523 15.9277"
                                         >

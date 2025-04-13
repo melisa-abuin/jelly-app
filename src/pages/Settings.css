@@ -76,3 +76,18 @@
 .settings-page > .section > .options > .option.active > .desc {
     color: var(--font-color);
 }
+
+.settings-page > .section > .options > .logout-button {
+    font-size: 0.725rem;
+    font-weight: 500;
+    color: var(--font-color-inverted);
+    cursor: pointer;
+    padding: 7px 13px;
+    border-radius: 6px;
+    background-color: var(--btn-brand-color);
+    transition: background-color 0.2s ease-out;
+}
+
+.settings-page > .section > .options > .logout-button:hover {
+    background-color: var(--btn-brand-color-hover);
+}

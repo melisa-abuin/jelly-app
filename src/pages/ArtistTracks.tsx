@@ -1,94 +1,82 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { VirtuosoHandle } from 'react-virtuoso'
-import { MediaItem } from '../api/jellyfin'
 import Loader from '../components/Loader'
 import PlaylistTrackList from '../components/PlaylistTrackList'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
-import { useJellyfinArtistData } from '../hooks/useJellyfinArtistData'
+import { useJellyfinArtistTracksData } from '../hooks/useJellyfinArtistTracksData'
 
 const ArtistTracks = () => {
-    const api = useJellyfinContext()
     const playback = usePlaybackContext()
     const { artistId } = useParams<{ artistId: string }>()
-    const { artist, totalTrackCount } = useJellyfinArtistData(artistId!)
+    const { allTracks, loading, error, loadMore, hasMore } = useJellyfinArtistTracksData(artistId!)
     const { setPageTitle } = usePageTitle()
-    const virtuosoRef = useRef<VirtuosoHandle | null>(null)
-
-    const [tracks, setTracks] = useState<MediaItem[]>([])
-    const [startIndex, setStartIndex] = useState(0)
-    const [loading, setLoading] = useState(true)
-    const hasMore = tracks.length < (totalTrackCount || 0)
+    const virtuosoRef = useRef<VirtuosoHandle>(null)
+    const hasPreloaded = useRef(false)
+    const [isPreloading, setIsPreloading] = useState(false)
 
     useEffect(() => {
-        if (artist) {
-            setPageTitle(`${artist.Name}'s Tracks`)
-        }
+        setPageTitle('Tracks')
         return () => {
             setPageTitle('')
         }
-    }, [artist, setPageTitle])
+    }, [setPageTitle])
 
     useEffect(() => {
-        const fetchTracks = async () => {
-            if (tracks.length > 0 || !artistId) return
-            setLoading(true)
-            try {
-                const { Items } = await api.getArtistTracks(artistId, 0, 5)
-                setTracks(Items)
-                setStartIndex(5)
-            } catch (err) {
-                console.error('Failed to load tracks:', err)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchTracks()
-    }, [api, artistId])
+        if (hasPreloaded.current || isPreloading) return
 
-    const loadMore = async () => {
-        if (loading || !hasMore) return
-        setLoading(true)
-        try {
-            const { Items: newTracks } = await api.getArtistTracks(artistId!, startIndex, 40)
-            if (newTracks.length > 0) {
-                setTracks(prev => {
-                    const existingIds = new Set(prev.map(track => track.Id))
-                    const uniqueNewTracks = newTracks.filter(track => !existingIds.has(track.Id))
-                    return [...prev, ...uniqueNewTracks]
-                })
-                setStartIndex(prev => prev + newTracks.length)
-            }
-        } catch (err) {
-            console.error('Failed to load more tracks:', err)
-        } finally {
-            setLoading(false)
-        }
-    }
+        const savedIndex = localStorage.getItem('currentTrackIndex')
+        if (savedIndex) {
+            const index = Number(savedIndex)
+            if (index >= 0 && allTracks.length <= index && hasMore) {
+                setIsPreloading(true)
 
-    if (loading && tracks.length === 0) {
+                const loadAdditionalTracks = async () => {
+                    if (allTracks.length > index || !hasMore) {
+                        setIsPreloading(false)
+                        hasPreloaded.current = true
+                        return
+                    }
+
+                    if (loading) {
+                        setTimeout(loadAdditionalTracks, 100)
+                        return
+                    }
+
+                    await loadMore()
+                    setTimeout(loadAdditionalTracks, 100)
+                }
+
+                loadAdditionalTracks()
+            } else {
+                hasPreloaded.current = true
+                setIsPreloading(false)
+            }
+        } else {
+            hasPreloaded.current = true
+            setIsPreloading(false)
+        }
+    }, [allTracks.length, hasMore, loading, loadMore, isPreloading])
+
+    if (loading && allTracks.length === 0) {
         return <Loader />
-    }
-
-    if (!artist) {
-        return <div className="error">Artist not found</div>
     }
 
     return (
         <div className="artist-tracks-page">
+            {error && <div className="error">{error}</div>}
             <PlaylistTrackList
                 virtuosoRef={virtuosoRef}
-                tracks={tracks}
+                tracks={allTracks}
                 loading={loading}
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={index => {
-                    playback.setCurrentPlaylist(tracks)
+                    playback.setCurrentPlaylist(allTracks, hasMore, loadMore)
                     playback.playTrack(index)
                 }}
-                playlist={tracks}
+                playlist={allTracks}
             />
         </div>
     )

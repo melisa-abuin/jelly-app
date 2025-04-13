@@ -61,12 +61,9 @@ const Genre = () => {
         }
     }, [tracks.length, hasMore, loading, loadMore, isPreloading])
 
-    if (error) {
-        return <div className="error">{error}</div>
-    }
-
     return (
         <div className="genre-page">
+            {error && <div className="error">{error}</div>}
             <MediaList
                 virtuosoRef={virtuosoRef}
                 items={tracks}
@@ -75,7 +72,7 @@ const Genre = () => {
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={index => {
-                    playback.setCurrentPlaylist(tracks)
+                    playback.setCurrentPlaylist(tracks, hasMore, loadMore)
                     playback.playTrack(index)
                 }}
                 playlist={tracks}

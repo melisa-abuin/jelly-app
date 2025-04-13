@@ -233,7 +233,7 @@ const Sidenav = (props: SidenavProps) => {
                                                         }`}
                                                     >
                                                         <div className="type song">
-                                                            <div className="icon" title="Song">
+                                                            <div className="icon" title="Track">
                                                                 <div className="song-icon">
                                                                     <svg
                                                                         width="14"

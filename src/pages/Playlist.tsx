@@ -141,7 +141,7 @@ const Playlist = () => {
                 loadMore={loadMore}
                 hasMore={hasMore}
                 playTrack={index => {
-                    playback.setCurrentPlaylist(tracks)
+                    playback.setCurrentPlaylist(tracks, hasMore, loadMore)
                     playback.playTrack(index)
                 }}
                 playlist={tracks}

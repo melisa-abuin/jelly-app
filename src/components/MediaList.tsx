@@ -1,11 +1,12 @@
 import { HeartFillIcon } from '@primer/octicons-react'
-import { Ref, useEffect, useRef } from 'react'
+import { Ref, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import Loader from './Loader'
+import Skeleton from './Skeleton'
 
 interface MediaListProps {
     virtuosoRef?: Ref<VirtuosoHandle>
@@ -32,12 +33,20 @@ const MediaList = ({
 }: MediaListProps) => {
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
-
     const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
     const navigate = useNavigate()
     const location = useLocation()
     const sizeMap = useRef<{ [index: number]: number }>({})
+    const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(items)
+
+    useEffect(() => {
+        if (loading && hasMore && loadMore) {
+            setDisplayItems([...items, ...Array(4).fill({ isPlaceholder: true })])
+        } else {
+            setDisplayItems(items)
+        }
+    }, [items, loading, hasMore, loadMore])
 
     useEffect(() => {
         const handleResize = () => {
@@ -85,7 +94,7 @@ const MediaList = ({
             sizeMap.current = { ...sizeMap.current, [index]: height }
         }
 
-        rowRefs.current = items.map(() => null)
+        rowRefs.current = displayItems.map(() => null)
         cleanupResizeObservers()
         measureInitialHeights()
         setupResizeObservers()
@@ -96,7 +105,7 @@ const MediaList = ({
             cleanupResizeObservers()
             window.removeEventListener('resize', handleResize)
         }
-    }, [items])
+    }, [displayItems])
 
     const handleSongClick = (item: MediaItem, index: number) => {
         if (type === 'song') {
@@ -114,13 +123,34 @@ const MediaList = ({
     }
 
     const handleEndReached = () => {
-        if (hasMore && loadMore) {
+        if (hasMore && loadMore && !loading) {
             loadMore()
         }
     }
 
-    const renderItem = (index: number) => {
-        const item = items[index]
+    const renderItem = (index: number, item: MediaItem | { isPlaceholder: true }) => {
+        if ('isPlaceholder' in item) {
+            return type === 'album' ? (
+                <div
+                    className="media-item album-item"
+                    ref={(el: HTMLDivElement | null) => {
+                        rowRefs.current[index] = el
+                    }}
+                >
+                    <Skeleton type="album" />
+                </div>
+            ) : (
+                <li
+                    className="media-item song-item"
+                    ref={(el: HTMLLIElement | null) => {
+                        rowRefs.current[index] = el
+                    }}
+                >
+                    <Skeleton type="song" />
+                </li>
+            )
+        }
+
         const token = localStorage.getItem('auth') ? JSON.parse(localStorage.getItem('auth')!).token : ''
         const imageUrl = item.ImageTags?.Primary
             ? `${api.auth.serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
@@ -136,7 +166,7 @@ const MediaList = ({
                 className={`media-item album-item`}
                 key={item.Id}
                 onClick={() => navigate(`/album/${item.Id}`)}
-                ref={el => {
+                ref={(el: HTMLDivElement | null) => {
                     rowRefs.current[index] = el
                 }}
             >
@@ -168,7 +198,7 @@ const MediaList = ({
                 className={`media-item song-item ${itemClass}`}
                 onClick={() => handleSongClick(item, index)}
                 key={item.Id}
-                ref={el => {
+                ref={(el: HTMLLIElement | null) => {
                     rowRefs.current[index] = el
                 }}
             >
@@ -234,12 +264,11 @@ const MediaList = ({
 
     return (
         <ul className="media-list noSelect">
-            {loading}
             <Virtuoso
                 ref={virtuosoRef}
-                data={items}
+                data={displayItems}
                 useWindowScroll
-                itemContent={(index: number) => renderItem(index)}
+                itemContent={renderItem}
                 endReached={handleEndReached}
                 overscan={800}
             />
