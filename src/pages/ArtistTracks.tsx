@@ -5,11 +5,13 @@ import Loader from '../components/Loader'
 import PlaylistTrackList from '../components/PlaylistTrackList'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
+import { useJellyfinArtistData } from '../hooks/useJellyfinArtistData'
 import { useJellyfinArtistTracksData } from '../hooks/useJellyfinArtistTracksData'
 
 const ArtistTracks = () => {
     const playback = usePlaybackContext()
     const { artistId } = useParams<{ artistId: string }>()
+    const { artist } = useJellyfinArtistData(artistId!)
     const { allTracks, loading, error, loadMore, hasMore } = useJellyfinArtistTracksData(artistId!)
     const { setPageTitle } = usePageTitle()
     const virtuosoRef = useRef<VirtuosoHandle>(null)
@@ -17,11 +19,13 @@ const ArtistTracks = () => {
     const [isPreloading, setIsPreloading] = useState(false)
 
     useEffect(() => {
-        setPageTitle('Tracks')
+        if (artist) {
+            setPageTitle(`${artist.Name}'s Tracks`)
+        }
         return () => {
             setPageTitle('')
         }
-    }, [setPageTitle])
+    }, [artist, setPageTitle])
 
     useEffect(() => {
         if (hasPreloaded.current || isPreloading) return
