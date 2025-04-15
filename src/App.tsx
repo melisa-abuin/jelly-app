@@ -3,11 +3,13 @@ import { ArrowLeftIcon, BookmarkFillIcon, HeartFillIcon } from '@primer/octicons
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { createContext, CSSProperties, ReactNode, useContext, useEffect, useState } from 'react'
-import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { CSSProperties, useContext, useEffect, useState } from 'react'
+import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom'
 import './App.css'
 import './components/MediaList.css'
 import Sidenav from './components/Sidenav'
+import { HistoryContext } from './context/HistoryContext/HistoryContext'
+import { HistoryContextProvider } from './context/HistoryContext/HistoryContextProvider'
 import { JellyfinContextProvider } from './context/JellyfinContext/JellyfinContextProvider'
 import { usePageTitle } from './context/PageTitleContext/PageTitleContext'
 import { PageTitleProvider } from './context/PageTitleContext/PageTitleProvider'
@@ -42,49 +44,6 @@ const queryClient = new QueryClient({
 const persister = createSyncStoragePersister({
     storage: window.localStorage,
 })
-
-interface HistoryContextType {
-    historyStack: string[]
-    goBack: () => void
-}
-
-const HistoryContext = createContext<HistoryContextType | undefined>(undefined)
-
-const HistoryProvider = ({ children }: { children: ReactNode }) => {
-    const [historyStack, setHistoryStack] = useState<string[]>([])
-    const navigate = useNavigate()
-    const { pathname } = useLocation()
-
-    useEffect(() => {
-        if (historyStack[historyStack.length - 1] === pathname) return
-
-        setHistoryStack(prev => [...prev, pathname])
-    }, [pathname])
-
-    const goBack = () => {
-        if (historyStack.length <= 1) {
-            navigate('/')
-            return
-        }
-
-        setHistoryStack(prev => {
-            const newStack = prev.slice(0, -1)
-            navigate(newStack[newStack.length - 1])
-            return newStack
-        })
-    }
-
-    return <HistoryContext.Provider value={{ historyStack, goBack }}>{children}</HistoryContext.Provider>
-}
-
-// Optional?: Custom hook for easier context access
-const useHistoryContext = () => {
-    const context = useContext(HistoryContext)
-    if (!context) throw new Error('useHistoryContext must be used within HistoryProvider')
-    return context
-}
-
-export { HistoryProvider, useHistoryContext }
 
 const useAppBack = () => {
     const { goBack } = useContext(HistoryContext)!
@@ -152,13 +111,13 @@ const App = () => {
 
     const routedApp = (
         <Router>
-            <HistoryProvider>
+            <HistoryContextProvider>
                 <PageTitleProvider>
                     <ScrollContextProvider>
                         <ThemeContextProvider>{actualApp}</ThemeContextProvider>
                     </ScrollContextProvider>
                 </PageTitleProvider>
-            </HistoryProvider>
+            </HistoryContextProvider>
         </Router>
     )
 
