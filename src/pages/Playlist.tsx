@@ -2,9 +2,9 @@ import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { VirtuosoHandle } from 'react-virtuoso'
+import { JellyImg } from '../components/JellyImg'
 import Loader from '../components/Loader'
 import PlaylistTrackList from '../components/PlaylistTrackList'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinPlaylistData } from '../hooks/useJellyfinPlaylistData'
@@ -13,7 +13,6 @@ import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Playlist.css'
 
 const Playlist = () => {
-    const api = useJellyfinContext()
     const playback = usePlaybackContext()
 
     const { playlistId } = useParams<{ playlistId: string }>()
@@ -77,19 +76,11 @@ const Playlist = () => {
         return <div className="error">{error || 'Playlist not found'}</div>
     }
 
-    const imageUrl = api.getImageUrl(playlist, 'Primary', { width: 100, height: 100 })
-
     return (
         <div className="playlist-page">
             <div className="playlist-header">
-                <img
-                    src={imageUrl}
-                    alt={playlist.Name}
-                    className="thumbnail"
-                    onError={e => {
-                        ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
-                    }}
-                />
+                <JellyImg item={playlist} type={'Primary'} width={100} height={100} />
+
                 <div className="playlist-details">
                     <div className="title">{playlist.Name}</div>
                     <div className="date">{formatDate(playlist.DateCreated)}</div>

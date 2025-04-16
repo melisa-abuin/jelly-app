@@ -2,6 +2,7 @@ import { HeartFillIcon } from '@primer/octicons-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
+import { JellyImg } from '../components/JellyImg'
 import Loader from '../components/Loader'
 import TrackList from '../components/TrackList'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
@@ -16,6 +17,7 @@ interface SearchResult {
     artists?: string[]
     totalTracks?: number
     isFavorite?: boolean
+    _mediaItem: MediaItem
 }
 
 const SearchResults = () => {
@@ -61,6 +63,7 @@ const SearchResults = () => {
                     name: artist.Name,
                     thumbnailUrl: api.getImageUrl(artist, 'Primary', { width: 36, height: 36 }),
                     isFavorite: artist.UserData?.IsFavorite || false,
+                    _mediaItem: artist,
                 }))
 
                 const albums = albumItems.map(item => ({
@@ -70,6 +73,7 @@ const SearchResults = () => {
                     thumbnailUrl: api.getImageUrl(item, 'Primary', { width: 46, height: 46 }),
                     artists: [item.AlbumArtists?.[0]?.Name || item.AlbumArtist || 'Unknown Artist'],
                     isFavorite: item.UserData?.IsFavorite || false,
+                    _mediaItem: item,
                 }))
 
                 const playlists = playlistItems.map(playlist => ({
@@ -79,6 +83,7 @@ const SearchResults = () => {
                     thumbnailUrl: api.getImageUrl(playlist, 'Primary', { width: 46, height: 46 }),
                     totalTracks: playlist.ChildCount || 0,
                     isFavorite: playlist.UserData?.IsFavorite || false,
+                    _mediaItem: playlist,
                 }))
 
                 setResults({ artists, albums, playlists, songs })
@@ -115,7 +120,7 @@ const SearchResults = () => {
                             {results.artists.map(artist => (
                                 <Link to={`/artist/${artist.id}`} key={artist.id} className="section-item">
                                     {artist.thumbnailUrl && (
-                                        <img src={artist.thumbnailUrl} alt={artist.name} className="thumbnail" />
+                                        <JellyImg item={artist._mediaItem} type={'Primary'} width={36} height={36} />
                                     )}
                                     <div className="section-info">
                                         <div className="name">{artist.name}</div>
@@ -138,7 +143,7 @@ const SearchResults = () => {
                             {results.albums.map(album => (
                                 <Link to={`/album/${album.id}`} key={album.id} className="section-item">
                                     {album.thumbnailUrl && (
-                                        <img src={album.thumbnailUrl} alt={album.name} className="thumbnail" />
+                                        <JellyImg item={album._mediaItem} type={'Primary'} width={46} height={46} />
                                     )}
                                     <div className="section-info">
                                         <div className="name">{album.name}</div>
@@ -164,7 +169,7 @@ const SearchResults = () => {
                             {results.playlists.map(playlist => (
                                 <Link to={`/playlist/${playlist.id}`} key={playlist.id} className="section-item">
                                     {playlist.thumbnailUrl && (
-                                        <img src={playlist.thumbnailUrl} alt={playlist.name} className="thumbnail" />
+                                        <JellyImg item={playlist._mediaItem} type={'Primary'} width={46} height={46} />
                                     )}
                                     <div className="section-info">
                                         <div className="name">{playlist.name}</div>

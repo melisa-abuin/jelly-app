@@ -1,9 +1,9 @@
 import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { JellyImg } from '../components/JellyImg'
 import Loader from '../components/Loader'
 import TrackList from '../components/TrackList'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinAlbumData } from '../hooks/useJellyfinAlbumData'
@@ -12,7 +12,6 @@ import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Album.css'
 
 const Album = () => {
-    const api = useJellyfinContext()
     const playback = usePlaybackContext()
 
     const { albumId } = useParams<{ albumId: string }>()
@@ -41,19 +40,11 @@ const Album = () => {
     const totalPlays = tracks.reduce((total, track) => total + (track.UserData?.PlayCount || 0), 0)
     const trackCount = album.ChildCount || tracks.length
 
-    const imageUrl = api.getImageUrl(album, 'Primary', { width: 100, height: 100 })
-
     return (
         <div className="album-page">
             <div className="album-header">
-                <img
-                    src={imageUrl}
-                    alt={album.Name}
-                    className="thumbnail"
-                    onError={e => {
-                        ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
-                    }}
-                />
+                <JellyImg item={album} type={'Primary'} width={100} height={100} />
+
                 <div className="album-details">
                     <div className="artist">
                         {album.AlbumArtists && album.AlbumArtists.length > 0 ? (

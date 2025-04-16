@@ -1,9 +1,9 @@
 import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { JellyImg } from '../components/JellyImg'
 import Loader from '../components/Loader'
 import TrackList from '../components/TrackList'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinArtistData } from '../hooks/useJellyfinArtistData'
@@ -13,7 +13,6 @@ import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Artist.css'
 
 const Artist = () => {
-    const api = useJellyfinContext()
     const playback = usePlaybackContext()
 
     const { artistId } = useParams<{ artistId: string }>()
@@ -50,14 +49,8 @@ const Artist = () => {
     return (
         <div className="artist-page">
             <div className="artist-header">
-                <img
-                    src={api.getImageUrl(artist, 'Primary', { width: 100, height: 100 })}
-                    alt={artist.Name}
-                    className="thumbnail"
-                    onError={e => {
-                        ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
-                    }}
-                />
+                <JellyImg item={artist} type={'Primary'} width={100} height={100} />
+
                 <div className="artist-details">
                     <div className="artist">{artist.Name}</div>
                     {genres.length > 0 && (
@@ -137,15 +130,8 @@ const Artist = () => {
                         <div className="section-list noSelect">
                             {albums.map(album => (
                                 <Link to={`/album/${album.Id}`} key={album.Id} className="section-item">
-                                    <img
-                                        src={api.getImageUrl(album, 'Primary', { width: 46, height: 46 })}
-                                        alt={album.Name}
-                                        className="thumbnail"
-                                        loading="lazy"
-                                        onError={e => {
-                                            ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
-                                        }}
-                                    />
+                                    <JellyImg item={album} type={'Primary'} width={46} height={46} />
+
                                     <div className="section-info">
                                         <div className="name">{album.Name}</div>
                                         <div className="date">{formatDateYear(album.PremiereDate)}</div>
@@ -168,15 +154,8 @@ const Artist = () => {
                         <div className="section-list noSelect">
                             {appearsInAlbums.map(album => (
                                 <Link to={`/album/${album.Id}`} key={album.Id} className="section-item">
-                                    <img
-                                        src={api.getImageUrl(album, 'Primary', { width: 46, height: 46 })}
-                                        alt={album.Name}
-                                        className="thumbnail"
-                                        loading="lazy"
-                                        onError={e => {
-                                            ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
-                                        }}
-                                    />
+                                    <JellyImg item={album} type={'Primary'} width={46} height={46} />
+
                                     <div className="section-info">
                                         <div className="name">{album.Name}</div>
                                         <div className="container">
@@ -211,15 +190,8 @@ const Artist = () => {
                                             key={playlist.Id}
                                             className="section-item"
                                         >
-                                            <img
-                                                src={api.getImageUrl(playlist, 'Primary', { width: 46, height: 46 })}
-                                                alt={playlist.Name}
-                                                className="thumbnail"
-                                                loading="lazy"
-                                                onError={e => {
-                                                    ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
-                                                }}
-                                            />
+                                            <JellyImg item={playlist} type={'Primary'} width={46} height={46} />
+
                                             <div className="section-info">
                                                 <div className="name">{playlist.Name}</div>
                                                 <div className="track-amount">

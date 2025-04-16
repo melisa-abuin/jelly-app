@@ -3,8 +3,8 @@ import { Ref, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
+import { JellyImg } from './JellyImg'
 import Loader from './Loader'
 import Skeleton from './Skeleton'
 
@@ -31,7 +31,6 @@ const MediaList = ({
     playlist = [],
     setCurrentPlaylist,
 }: MediaListProps) => {
-    const api = useJellyfinContext()
     const playback = usePlaybackContext()
     const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
@@ -151,8 +150,6 @@ const MediaList = ({
             )
         }
 
-        const imageUrl = api.getImageUrl(item, 'Primary', { width: 46, height: 46 })
-
         const itemClass =
             type === 'song' && playback.currentTrack?.Id === item.Id ? (playback.isPlaying ? 'playing' : 'paused') : ''
 
@@ -166,15 +163,7 @@ const MediaList = ({
                 }}
             >
                 <div className="media-state">
-                    <img
-                        src={imageUrl}
-                        alt={item.Name}
-                        className="thumbnail"
-                        loading="lazy"
-                        onError={e => {
-                            ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
-                        }}
-                    />
+                    <JellyImg item={item} type={'Primary'} width={46} height={46} />
                 </div>
                 <div className="media-details">
                     <span className="song-name">{item.Name}</span>
@@ -198,15 +187,8 @@ const MediaList = ({
                 }}
             >
                 <div className="media-state">
-                    <img
-                        src={imageUrl}
-                        alt={item.Name}
-                        className="thumbnail"
-                        loading="lazy"
-                        onError={e => {
-                            ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
-                        }}
-                    />
+                    <JellyImg item={item} type={'Primary'} width={46} height={46} />
+
                     <div className="overlay">
                         <div className="container">
                             <div className="play">

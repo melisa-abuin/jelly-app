@@ -3,9 +3,9 @@ import { Ref, useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { formatDuration } from '../utils/formatDuration'
+import { JellyImg } from './JellyImg'
 import Loader from './Loader'
 import './PlaylistTrackList.css'
 import Skeleton from './Skeleton'
@@ -32,7 +32,6 @@ const PlaylistTrackList = ({
     playlistId,
     showType,
 }: PlaylistTrackListProps) => {
-    const api = useJellyfinContext()
     const playback = usePlaybackContext()
     const rowRefs = useRef<(HTMLLIElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
@@ -139,7 +138,6 @@ const PlaylistTrackList = ({
         }
 
         const track = item
-        const imageUrl = api.getImageUrl(track, 'Primary', { width: 40, height: 40 })
 
         const trackClass = playback.currentTrack?.Id === track.Id ? (playback.isPlaying ? 'playing' : 'paused') : ''
         const isFavorite = track.UserData?.IsFavorite && location.pathname !== '/favorites'
@@ -154,15 +152,8 @@ const PlaylistTrackList = ({
                 }}
             >
                 <div className="track-state">
-                    <img
-                        src={imageUrl}
-                        alt={track.Name}
-                        className="thumbnail"
-                        loading="lazy"
-                        onError={e => {
-                            ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
-                        }}
-                    />
+                    <JellyImg item={track} type={'Primary'} width={40} height={40} />
+
                     <div className="overlay">
                         <div className="container">
                             <div className="play">
