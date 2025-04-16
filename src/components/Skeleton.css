@@ -23,6 +23,11 @@
     border-radius: 6px;
 }
 
+.skeleton-loading > .skeleton-effect.thumbnail.playlist {
+    width: 40px;
+    height: 40px;
+}
+
 .skeleton-loading > .skeleton-details {
     flex: 1;
     display: flex;
@@ -41,11 +46,11 @@
 }
 
 .skeleton-loading > .skeleton-details > .skeleton-effect.album.title {
-    width: 44%;
+    width: 50%;
 }
 
 .skeleton-loading > .skeleton-details > .skeleton-effect.album.artist {
-    width: 18%;
+    width: 20%;
 }
 
 .skeleton-loading > .skeleton-details > .skeleton-effect.track.title {
@@ -53,7 +58,29 @@
 }
 
 .skeleton-loading > .skeleton-details > .skeleton-effect.track.artist {
-    width: 44%;
+    width: 45%;
+}
+
+.skeleton-loading > .skeleton-details > .skeleton-effect.playlist.title {
+    width: 50%;
+}
+
+.skeleton-loading > .skeleton-details > .skeleton-effect.playlist.artist {
+    width: 25%;
+}
+
+.skeleton-loading > .skeleton-indicators {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 12px;
+    margin-bottom: 24px;
+}
+
+.skeleton-loading > .skeleton-indicators > .skeleton-effect.duration {
+    width: 40px;
+    height: 14px;
+    border-radius: 4px;
 }
 
 @keyframes skeleton-shine {

@@ -1,5 +1,5 @@
 import { HeartFillIcon } from '@primer/octicons-react'
-import { MouseEvent, Ref, useCallback, useEffect, useRef } from 'react'
+import { Ref, useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
@@ -8,6 +8,7 @@ import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { formatDuration } from '../utils/formatDuration'
 import Loader from './Loader'
 import './PlaylistTrackList.css'
+import Skeleton from './Skeleton'
 
 interface PlaylistTrackListProps {
     virtuosoRef?: Ref<VirtuosoHandle>
@@ -18,7 +19,7 @@ interface PlaylistTrackListProps {
     playTrack: (index: number) => void
     playlist: MediaItem[]
     playlistId?: string
-    showType?: string
+    showType?: 'artist' | 'album'
 }
 
 const PlaylistTrackList = ({
@@ -33,11 +34,19 @@ const PlaylistTrackList = ({
 }: PlaylistTrackListProps) => {
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
-
     const rowRefs = useRef<(HTMLLIElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
     const location = useLocation()
     const sizeMap = useRef<{ [index: number]: number }>({})
+    const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(tracks)
+
+    useEffect(() => {
+        if (loading && hasMore && loadMore) {
+            setDisplayItems([...tracks, ...Array(4).fill({ isPlaceholder: true })])
+        } else {
+            setDisplayItems(tracks)
+        }
+    }, [tracks, loading, hasMore, loadMore])
 
     useEffect(() => {
         const handleResize = () => {
@@ -81,7 +90,7 @@ const PlaylistTrackList = ({
             })
         }
 
-        rowRefs.current = tracks.map(() => null)
+        rowRefs.current = displayItems.map(() => null)
         cleanupResizeObservers()
         measureInitialHeights()
         setupResizeObservers()
@@ -92,7 +101,7 @@ const PlaylistTrackList = ({
             cleanupResizeObservers()
             window.removeEventListener('resize', handleResize)
         }
-    }, [tracks])
+    }, [displayItems])
 
     const setSize = (index: number, height: number) => {
         sizeMap.current = { ...sizeMap.current, [index]: height }
@@ -109,26 +118,27 @@ const PlaylistTrackList = ({
         [playTrack, playback]
     )
 
-    const handleThumbnailClick = useCallback(
-        (track: MediaItem, index: number, e: MouseEvent) => {
-            e.stopPropagation()
-            if (playback.currentTrack?.Id === track.Id && playback.isPlaying) {
-                playback.togglePlayPause()
-            } else {
-                playTrack(index)
-            }
-        },
-        [playTrack, playback]
-    )
-
     const handleEndReached = () => {
         if (hasMore && loadMore) {
             loadMore()
         }
     }
 
-    const renderTrack = (index: number) => {
-        const track = tracks[index]
+    const renderTrack = (index: number, item: MediaItem | { isPlaceholder: true }) => {
+        if ('isPlaceholder' in item) {
+            return (
+                <li
+                    className="track-item"
+                    ref={el => {
+                        rowRefs.current[index] = el
+                    }}
+                >
+                    <Skeleton type="playlist" />
+                </li>
+            )
+        }
+
+        const track = item
         const token = localStorage.getItem('auth') ? JSON.parse(localStorage.getItem('auth')!).token : ''
         const imageUrl = track.ImageTags?.Primary
             ? `${api.auth.serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=40&fillHeight=40&format=webp&api_key=${token}`
@@ -157,7 +167,6 @@ const PlaylistTrackList = ({
                         onError={e => {
                             ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
                         }}
-                        onClick={e => handleThumbnailClick(track, index, e)}
                     />
                     <div className="overlay">
                         <div className="container">
@@ -230,11 +239,11 @@ const PlaylistTrackList = ({
             <Virtuoso
                 key={playlistId}
                 ref={virtuosoRef}
-                data={tracks}
+                data={displayItems}
                 useWindowScroll
                 itemContent={renderTrack}
                 endReached={handleEndReached}
-                overscan={600}
+                overscan={800}
             />
         </ul>
     )

@@ -233,6 +233,12 @@
     font-size: 0.725rem;
     font-weight: 600;
     color: var(--font-color-tertiary);
+    transition: color 0.2s ease-out;
+}
+
+.media-list .media-item.playing > .media-details > .container > .artist,
+.media-list .media-item.paused > .media-details > .container > .artist {
+    color: var(--font-color-secondary);
 }
 
 .media-list .media-item > .media-details > .container > .divider {
@@ -244,6 +250,12 @@
     margin-top: 2px;
     border-radius: 50%;
     background-color: var(--font-color-tertiary);
+    transition: background-color 0.2s ease-out;
+}
+
+.media-list .media-item.playing > .media-details > .container > .divider,
+.media-list .media-item.paused > .media-details > .container > .divider {
+    background-color: var(--font-color-secondary);
 }
 
 .media-list .media-item > .media-details > .container > .album {
@@ -251,9 +263,21 @@
     font-size: 0.725rem;
     font-weight: 500;
     color: var(--font-color-tertiary);
+    transition: color 0.2s ease-out;
+}
+
+.media-list .media-item.playing > .media-details > .container > .album,
+.media-list .media-item.paused > .media-details > .container > .album {
+    color: var(--font-color-secondary);
 }
 
 .media-list .media-item > .favorited {
     padding: 6px;
     color: var(--font-color-tertiary);
+    transition: color 0.2s ease-out;
+}
+
+.media-list .media-item.playing > .favorited,
+.media-list .media-item.paused > .favorited {
+    color: var(--font-color-secondary);
 }
