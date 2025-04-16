@@ -59,9 +59,7 @@ const SearchResults = () => {
                     type: 'Artist' as const,
                     id: artist.Id,
                     name: artist.Name,
-                    thumbnailUrl: artist.ImageTags?.Primary
-                        ? `${api.auth.serverUrl}/Items/${artist.Id}/Images/Primary?tag=${artist.ImageTags.Primary}&quality=100&fillWidth=36&fillHeight=36&format=webp&api_key=${api.auth.token}`
-                        : '/default-thumbnail.png',
+                    thumbnailUrl: api.getImageUrl(artist, 'Primary', { width: 36, height: 36 }),
                     isFavorite: artist.UserData?.IsFavorite || false,
                 }))
 
@@ -69,11 +67,7 @@ const SearchResults = () => {
                     type: 'Album' as const,
                     id: item.Id,
                     name: item.Name,
-                    thumbnailUrl: item.ImageTags?.Primary
-                        ? `${api.auth.serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
-                        : item.AlbumPrimaryImageTag && item.AlbumId
-                        ? `${api.auth.serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
-                        : '/default-thumbnail.png',
+                    thumbnailUrl: api.getImageUrl(item, 'Primary', { width: 46, height: 46 }),
                     artists: [item.AlbumArtists?.[0]?.Name || item.AlbumArtist || 'Unknown Artist'],
                     isFavorite: item.UserData?.IsFavorite || false,
                 }))
@@ -82,9 +76,7 @@ const SearchResults = () => {
                     type: 'Playlist' as const,
                     id: playlist.Id,
                     name: playlist.Name,
-                    thumbnailUrl: playlist.ImageTags?.Primary
-                        ? `${api.auth.serverUrl}/Items/${playlist.Id}/Images/Primary?tag=${playlist.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
-                        : '/default-thumbnail.png',
+                    thumbnailUrl: api.getImageUrl(playlist, 'Primary', { width: 46, height: 46 }),
                     totalTracks: playlist.ChildCount || 0,
                     isFavorite: playlist.UserData?.IsFavorite || false,
                 }))

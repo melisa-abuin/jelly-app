@@ -77,15 +77,13 @@ const Playlist = () => {
         return <div className="error">{error || 'Playlist not found'}</div>
     }
 
+    const imageUrl = api.getImageUrl(playlist, 'Primary', { width: 100, height: 100 })
+
     return (
         <div className="playlist-page">
             <div className="playlist-header">
                 <img
-                    src={
-                        playlist.ImageTags?.Primary
-                            ? `${api.auth.serverUrl}/Items/${playlist.Id}/Images/Primary?tag=${playlist.ImageTags.Primary}&quality=100&fillWidth=100&fillHeight=100&format=webp&api_key=${api.auth.token}`
-                            : '/default-thumbnail.png'
-                    }
+                    src={imageUrl}
                     alt={playlist.Name}
                     className="thumbnail"
                     onError={e => {

@@ -139,12 +139,7 @@ const PlaylistTrackList = ({
         }
 
         const track = item
-        const token = localStorage.getItem('auth') ? JSON.parse(localStorage.getItem('auth')!).token : ''
-        const imageUrl = track.ImageTags?.Primary
-            ? `${api.auth.serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=40&fillHeight=40&format=webp&api_key=${token}`
-            : track.AlbumId
-            ? `${api.auth.serverUrl}/Items/${track.AlbumId}/Images/Primary?quality=100&fillWidth=40&fillHeight=40&format=webp&api_key=${token}`
-            : '/default-thumbnail.png'
+        const imageUrl = api.getImageUrl(track, 'Primary', { width: 40, height: 40 })
 
         const trackClass = playback.currentTrack?.Id === track.Id ? (playback.isPlaying ? 'playing' : 'paused') : ''
         const isFavorite = track.UserData?.IsFavorite && location.pathname !== '/favorites'

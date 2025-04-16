@@ -51,11 +51,7 @@ const Artist = () => {
         <div className="artist-page">
             <div className="artist-header">
                 <img
-                    src={
-                        artist.ImageTags?.Primary
-                            ? `${api.auth.serverUrl}/Items/${artist.Id}/Images/Primary?tag=${artist.ImageTags.Primary}&quality=100&fillWidth=100&fillHeight=100&format=webp&api_key=${api.auth.token}`
-                            : '/default-thumbnail.png'
-                    }
+                    src={api.getImageUrl(artist, 'Primary', { width: 100, height: 100 })}
                     alt={artist.Name}
                     className="thumbnail"
                     onError={e => {
@@ -142,11 +138,7 @@ const Artist = () => {
                             {albums.map(album => (
                                 <Link to={`/album/${album.Id}`} key={album.Id} className="section-item">
                                     <img
-                                        src={
-                                            album.ImageTags?.Primary
-                                                ? `${api.auth.serverUrl}/Items/${album.Id}/Images/Primary?tag=${album.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
-                                                : '/default-thumbnail.png'
-                                        }
+                                        src={api.getImageUrl(album, 'Primary', { width: 46, height: 46 })}
                                         alt={album.Name}
                                         className="thumbnail"
                                         loading="lazy"
@@ -177,11 +169,7 @@ const Artist = () => {
                             {appearsInAlbums.map(album => (
                                 <Link to={`/album/${album.Id}`} key={album.Id} className="section-item">
                                     <img
-                                        src={
-                                            album.ImageTags?.Primary
-                                                ? `${api.auth.serverUrl}/Items/${album.Id}/Images/Primary?tag=${album.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
-                                                : '/default-thumbnail.png'
-                                        }
+                                        src={api.getImageUrl(album, 'Primary', { width: 46, height: 46 })}
                                         alt={album.Name}
                                         className="thumbnail"
                                         loading="lazy"
@@ -224,11 +212,7 @@ const Artist = () => {
                                             className="section-item"
                                         >
                                             <img
-                                                src={
-                                                    playlist.ImageTags?.Primary
-                                                        ? `${api.auth.serverUrl}/Items/${playlist.Id}/Images/Primary?tag=${playlist.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${api.auth.token}`
-                                                        : '/default-thumbnail.png'
-                                                }
+                                                src={api.getImageUrl(playlist, 'Primary', { width: 46, height: 46 })}
                                                 alt={playlist.Name}
                                                 className="thumbnail"
                                                 loading="lazy"

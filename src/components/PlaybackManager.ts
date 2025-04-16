@@ -60,16 +60,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const updateMediaSessionMetadata = useCallback(
         (track: MediaItem) => {
             if ('mediaSession' in navigator) {
-                const songThumbnailUrl =
-                    track.Id && track.ImageTags?.Primary
-                        ? `${api.auth.serverUrl}/Items/${track.Id}/Images/Primary?tag=${track.ImageTags.Primary}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${api.auth.token}`
-                        : null
-                const albumThumbnailUrl =
-                    track.AlbumPrimaryImageTag && track.AlbumId
-                        ? `${api.auth.serverUrl}/Items/${track.AlbumId}/Images/Primary?tag=${track.AlbumPrimaryImageTag}&quality=100&fillWidth=512&fillHeight=512&format=webp&api_key=${api.auth.token}`
-                        : null
-
-                const artworkUrl = songThumbnailUrl || albumThumbnailUrl
+                const artworkUrl = api.getImageUrl(track, 'Primary', { width: 512, height: 512 })
 
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: track.Name || 'Unknown Track',
@@ -87,7 +78,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 })
             }
         },
-        [api.auth.serverUrl, api.auth.token]
+        [api]
     )
 
     const reportPlaybackStartWrapper = useCallback(
@@ -174,7 +165,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 audio.currentTime = 0
 
                 try {
-                    const streamUrl = `${api.auth.serverUrl}/Audio/${track.Id}/universal?UserId=${api.auth.userId}&api_key=${api.auth.token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
+                    const streamUrl = api.getStreamUrl(track.Id)
                     audio.src = streamUrl
                     audio.load()
 
@@ -221,9 +212,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             currentTrack,
             isPlaying,
             reportPlaybackStoppedWrapper,
-            api.auth.serverUrl,
-            api.auth.userId,
-            api.auth.token,
+            api,
             updateMediaSessionMetadata,
             reportPlaybackStartWrapper,
         ]
@@ -237,7 +226,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 reportPlaybackProgressWrapper(currentTrack, audio.currentTime, true)
             } else {
                 if (!audio.src) {
-                    const streamUrl = `${api.auth.serverUrl}/Audio/${currentTrack.Id}/universal?UserId=${api.auth.userId}&api_key=${api.auth.token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
+                    const streamUrl = api.getStreamUrl(currentTrack.Id)
                     audio.src = streamUrl
                     audio.load()
                 }
@@ -255,7 +244,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                     })
             }
         }
-    }, [currentTrack, isPlaying, reportPlaybackProgressWrapper, api.auth.serverUrl, api.auth.userId, api.auth.token])
+    }, [api, currentTrack, isPlaying, reportPlaybackProgressWrapper])
 
     useEffect(() => {
         if (
@@ -573,7 +562,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
             if (lastPlayedTrack) {
                 if (audioRef.current) {
-                    const streamUrl = `${api.auth.serverUrl}/Audio/${lastPlayedTrack.Id}/universal?UserId=${api.auth.userId}&api_key=${api.auth.token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
+                    const streamUrl = api.getStreamUrl(lastPlayedTrack.Id)
                     audioRef.current.src = streamUrl
                     audioRef.current.load()
                 }
@@ -589,6 +578,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         api.auth.userId,
         updateMediaSessionMetadata,
         currentTrackIndex.index,
+        api,
     ])
 
     useEffect(() => {

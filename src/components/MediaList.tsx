@@ -151,12 +151,7 @@ const MediaList = ({
             )
         }
 
-        const token = localStorage.getItem('auth') ? JSON.parse(localStorage.getItem('auth')!).token : ''
-        const imageUrl = item.ImageTags?.Primary
-            ? `${api.auth.serverUrl}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
-            : item.AlbumPrimaryImageTag && item.AlbumId
-            ? `${api.auth.serverUrl}/Items/${item.AlbumId}/Images/Primary?tag=${item.AlbumPrimaryImageTag}&quality=100&fillWidth=46&fillHeight=46&format=webp&api_key=${token}`
-            : '/default-thumbnail.png'
+        const imageUrl = api.getImageUrl(item, 'Primary', { width: 46, height: 46 })
 
         const itemClass =
             type === 'song' && playback.currentTrack?.Id === item.Id ? (playback.isPlaying ? 'playing' : 'paused') : ''

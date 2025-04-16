@@ -706,6 +706,26 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         )
     }
 
+    const getImageUrl = (
+        item: MediaItem,
+        type: 'Primary' | 'Backdrop',
+        size: { width: number; height: number }
+    ): string => {
+        if (item.ImageTags?.[type]) {
+            return `${serverUrl}/Items/${item.Id}/Images/${type}?tag=${item.ImageTags[type]}&quality=100&fillWidth=${size.width}&fillHeight=${size.height}&format=webp&api_key=${token}`
+        }
+
+        if (item.AlbumId) {
+            return `${serverUrl}/Items/${item.AlbumId}/Images/${type}?quality=100&fillWidth=${size.width}&fillHeight=${size.height}&format=webp&api_key=${token}`
+        }
+
+        return '/default-thumbnail.png'
+    }
+
+    const getStreamUrl = (trackId: string): string => {
+        return `${serverUrl}/Audio/${trackId}/universal?UserId=${userId}&api_key=${token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
+    }
+
     return {
         loginToJellyfin,
         searchItems,
@@ -740,5 +760,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         reportPlaybackStart,
         reportPlaybackProgress,
         reportPlaybackStopped,
+        getImageUrl,
+        getStreamUrl,
     }
 }

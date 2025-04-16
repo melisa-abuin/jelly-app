@@ -41,15 +41,13 @@ const Album = () => {
     const totalPlays = tracks.reduce((total, track) => total + (track.UserData?.PlayCount || 0), 0)
     const trackCount = album.ChildCount || tracks.length
 
+    const imageUrl = api.getImageUrl(album, 'Primary', { width: 100, height: 100 })
+
     return (
         <div className="album-page">
             <div className="album-header">
                 <img
-                    src={
-                        album.ImageTags?.Primary
-                            ? `${api.auth.serverUrl}/Items/${album.Id}/Images/Primary?tag=${album.ImageTags.Primary}&quality=100&fillWidth=100&fillHeight=100&format=webp&api_key=${api.auth.token}`
-                            : '/default-thumbnail.png'
-                    }
+                    src={imageUrl}
                     alt={album.Name}
                     className="thumbnail"
                     onError={e => {
