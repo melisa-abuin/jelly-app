@@ -20,11 +20,13 @@ export const useJellyfinArtistData = (artistId: string, trackLimit = 5) => {
     const { data, isLoading, error } = useQuery<JellyfinArtistData, Error>({
         queryKey: ['artistData', artistId, trackLimit],
         queryFn: async () => {
-            const { artist, tracks, albums, appearsInAlbums, totalTrackCount } = await api.getArtistDetails(
-                artistId,
-                trackLimit
-            )
-            const allTracks = await api.fetchAllTracks(artistId)
+            const [artistDetailsResponse, allTracks] = await Promise.all([
+                api.getArtistDetails(artistId, trackLimit),
+                api.fetchAllTracks(artistId),
+            ])
+
+            const { artist, tracks, albums, appearsInAlbums, totalTrackCount } = artistDetailsResponse
+
             const totalPlaytime = allTracks.reduce(
                 (sum: number, track: MediaItem) => sum + (track.RunTimeTicks || 0),
                 0

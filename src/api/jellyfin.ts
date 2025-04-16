@@ -290,26 +290,29 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
 
     const getAlbumDetails = async (albumId: string): Promise<{ album: MediaItem; tracks: MediaItem[] }> => {
         const userLibraryApi = new UserLibraryApi(api.configuration)
-        const albumResponse = await userLibraryApi.getItem(
-            {
-                userId,
-                itemId: albumId,
-            },
-            { signal: AbortSignal.timeout(20000) }
-        )
-        const album = albumResponse.data as MediaItem
-
         const itemsApi = new ItemsApi(api.configuration)
-        const tracksResponse = await itemsApi.getItems(
-            {
-                userId,
-                parentId: albumId,
-                includeItemTypes: [BaseItemKind.Audio],
-                sortBy: [ItemSortBy.IndexNumber],
-                sortOrder: [SortOrder.Ascending],
-            },
-            { signal: AbortSignal.timeout(20000) }
-        )
+
+        const [albumResponse, tracksResponse] = await Promise.all([
+            userLibraryApi.getItem(
+                {
+                    userId,
+                    itemId: albumId,
+                },
+                { signal: AbortSignal.timeout(20000) }
+            ),
+            itemsApi.getItems(
+                {
+                    userId,
+                    parentId: albumId,
+                    includeItemTypes: [BaseItemKind.Audio],
+                    sortBy: [ItemSortBy.IndexNumber],
+                    sortOrder: [SortOrder.Ascending],
+                },
+                { signal: AbortSignal.timeout(20000) }
+            ),
+        ])
+
+        const album = albumResponse.data as MediaItem
         const tracks = tracksResponse.data.Items as MediaItem[]
 
         return { album, tracks }
@@ -326,66 +329,67 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         totalTrackCount: number
     }> => {
         const userLibraryApi = new UserLibraryApi(api.configuration)
-        const artistResponse = await userLibraryApi.getItem(
-            {
-                userId,
-                itemId: artistId,
-            },
-            { signal: AbortSignal.timeout(20000) }
-        )
-        const artist = artistResponse.data as MediaItem
-
         const itemsApi = new ItemsApi(api.configuration)
-        const tracksResponse = await itemsApi.getItems(
-            {
-                userId,
-                artistIds: [artistId],
-                includeItemTypes: [BaseItemKind.Audio],
-                recursive: true,
-                sortBy: [ItemSortBy.PlayCount, ItemSortBy.SortName],
-                sortOrder: [SortOrder.Descending, SortOrder.Ascending],
-                limit: trackLimit,
-            },
-            { signal: AbortSignal.timeout(20000) }
-        )
+
+        const [artistResponse, tracksResponse, totalTracksResponse, artistAlbumsResponse, contributingAlbumsResponse] =
+            await Promise.all([
+                userLibraryApi.getItem(
+                    {
+                        userId,
+                        itemId: artistId,
+                    },
+                    { signal: AbortSignal.timeout(20000) }
+                ),
+                itemsApi.getItems(
+                    {
+                        userId,
+                        artistIds: [artistId],
+                        includeItemTypes: [BaseItemKind.Audio],
+                        recursive: true,
+                        sortBy: [ItemSortBy.PlayCount, ItemSortBy.SortName],
+                        sortOrder: [SortOrder.Descending, SortOrder.Ascending],
+                        limit: trackLimit,
+                    },
+                    { signal: AbortSignal.timeout(20000) }
+                ),
+                itemsApi.getItems(
+                    {
+                        userId,
+                        artistIds: [artistId],
+                        includeItemTypes: [BaseItemKind.Audio],
+                        recursive: true,
+                        limit: 0,
+                    },
+                    { signal: AbortSignal.timeout(20000) }
+                ),
+                itemsApi.getItems(
+                    {
+                        userId,
+                        artistIds: [artistId],
+                        includeItemTypes: [BaseItemKind.MusicAlbum],
+                        recursive: true,
+                        sortBy: [ItemSortBy.PremiereDate, ItemSortBy.ProductionYear, ItemSortBy.SortName],
+                        sortOrder: [SortOrder.Descending],
+                    },
+                    { signal: AbortSignal.timeout(20000) }
+                ),
+                itemsApi.getItems(
+                    {
+                        userId,
+                        contributingArtistIds: [artistId],
+                        includeItemTypes: [BaseItemKind.MusicAlbum],
+                        recursive: true,
+                        sortBy: [ItemSortBy.PremiereDate, ItemSortBy.ProductionYear, ItemSortBy.SortName],
+                        sortOrder: [SortOrder.Descending],
+                    },
+                    { signal: AbortSignal.timeout(20000) }
+                ),
+            ])
+
+        const artist = artistResponse.data as MediaItem
         const tracks = tracksResponse.data.Items as MediaItem[]
-
-        const totalTracksResponse = await itemsApi.getItems(
-            {
-                userId,
-                artistIds: [artistId],
-                includeItemTypes: [BaseItemKind.Audio],
-                recursive: true,
-                limit: 0,
-            },
-            { signal: AbortSignal.timeout(20000) }
-        )
         const totalTrackCount = totalTracksResponse.data.TotalRecordCount || 0
-
-        const artistAlbumsResponse = await itemsApi.getItems(
-            {
-                userId,
-                artistIds: [artistId],
-                includeItemTypes: [BaseItemKind.MusicAlbum],
-                recursive: true,
-                sortBy: [ItemSortBy.PremiereDate, ItemSortBy.ProductionYear, ItemSortBy.SortName],
-                sortOrder: [SortOrder.Descending],
-            },
-            { signal: AbortSignal.timeout(20000) }
-        )
         const artistAlbums = artistAlbumsResponse.data.Items as MediaItem[]
-
-        const contributingAlbumsResponse = await itemsApi.getItems(
-            {
-                userId,
-                contributingArtistIds: [artistId],
-                includeItemTypes: [BaseItemKind.MusicAlbum],
-                recursive: true,
-                sortBy: [ItemSortBy.PremiereDate, ItemSortBy.ProductionYear, ItemSortBy.SortName],
-                sortOrder: [SortOrder.Descending],
-            },
-            { signal: AbortSignal.timeout(20000) }
-        )
         const contributingAlbums = contributingAlbumsResponse.data.Items as MediaItem[]
 
         const allAlbumsMap = new Map<string, MediaItem>()
@@ -549,6 +553,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 },
                 { signal: AbortSignal.timeout(20000) }
             )
+
             totalPlaytime = (fullResponse.data.Items as MediaItem[]).reduce(
                 (sum, track) => sum + (track.RunTimeTicks || 0),
                 0

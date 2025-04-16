@@ -51,11 +51,12 @@ const SearchResults = () => {
             setError(null)
 
             try {
-                const artistItems = await api.searchArtistsDetailed(query, 10)
-                const albumItems = await api.searchAlbumsDetailed(query, 10)
-                const playlistItems = await api.searchPlaylistsDetailed(query, 10)
-
-                const songs = await api.fetchSongs(query)
+                const [artistItems, albumItems, playlistItems, songs] = await Promise.all([
+                    api.searchArtistsDetailed(query, 10),
+                    api.searchAlbumsDetailed(query, 10),
+                    api.searchPlaylistsDetailed(query, 10),
+                    api.fetchSongs(query),
+                ])
 
                 const artists = artistItems.map(artist => ({
                     type: 'Artist' as const,

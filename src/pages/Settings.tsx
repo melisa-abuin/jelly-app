@@ -23,7 +23,12 @@ const Settings = ({ onLogout }: SettingsProps) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const user = await api.fetchUserInfo()
+                const [user, clientIp, latencyMs] = await Promise.all([
+                    api.fetchUserInfo(),
+                    api.fetchClientIp(),
+                    api.measureLatency(),
+                ])
+
                 if (user.LastLoginDate) {
                     const date = new Date(user.LastLoginDate)
                     const formatted = date
@@ -42,10 +47,7 @@ const Settings = ({ onLogout }: SettingsProps) => {
                     setLastLogin(null)
                 }
 
-                const clientIp = await api.fetchClientIp()
                 setClientIp(clientIp)
-
-                const latencyMs = await api.measureLatency()
                 setLatency(latencyMs)
             } catch (error) {
                 console.error('Error fetching data:', error)
