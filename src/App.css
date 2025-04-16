@@ -486,6 +486,10 @@ body.lockscroll {
     margin: 16px 20px;
 }
 
+.main > .main_content > .error {
+    color: var(--font-color-error);
+}
+
 .main > .main_footer {
     position: sticky;
     bottom: 0;

@@ -109,12 +109,12 @@ const Settings = ({ onLogout }: SettingsProps) => {
                             Currently connected to {api.auth.serverUrl}{' '}
                             {latency !== null && (
                                 <span>
-                                    <span>with {latency}ms latency to server</span>
+                                    <span>with {latency}ms latency</span>
                                 </span>
                             )}
                         </p>
                         <p>
-                            Last login on: {lastLogin} {clientIp ? ` from ${clientIp}` : ''}
+                            Last login: {lastLogin} {clientIp ? ` from ${clientIp}` : ''}
                         </p>
                         <p>
                             Played{' '}

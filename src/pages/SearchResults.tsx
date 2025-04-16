@@ -112,7 +112,7 @@ const SearchResults = () => {
             <div className="search-content">
                 {results.songs.length > 0 && (
                     <div className="section songs">
-                        <TrackList tracks={results.songs} showAlbumLink={false} />
+                        <TrackList tracks={results.songs} />
                     </div>
                 )}
 

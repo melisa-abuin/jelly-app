@@ -135,6 +135,7 @@
 
 /* Hide play-state animation by default */
 .media-list .media-item > .media-state > .overlay > .play-state-animation {
+    margin-left: 1px;
     position: absolute;
     opacity: 0;
     visibility: hidden;

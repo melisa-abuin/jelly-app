@@ -6,10 +6,10 @@ import './TrackList.css'
 
 interface TrackListProps {
     tracks: MediaItem[]
-    showAlbumLink?: boolean
+    showAlbum?: boolean
 }
 
-const TrackList = ({ tracks, showAlbumLink = false }: TrackListProps) => {
+const TrackList = ({ tracks, showAlbum = false }: TrackListProps) => {
     const playback = usePlaybackContext()
 
     const MIN_PLAY_COUNT = 5
@@ -72,7 +72,7 @@ const TrackList = ({ tracks, showAlbumLink = false }: TrackListProps) => {
                                 <div className="name">
                                     <div className="text">{track.Name}</div>
                                 </div>
-                                {showAlbumLink ? (
+                                {showAlbum ? (
                                     <div className="album">
                                         <div className="text">{track.Album || 'Unknown Album'}</div>
                                     </div>
@@ -83,21 +83,6 @@ const TrackList = ({ tracks, showAlbumLink = false }: TrackListProps) => {
                                             : 'Unknown Artist'}
                                     </div>
                                 )}
-                                {/*
-                                {showAlbumLink ? (
-                                    <div className="album">
-                                        <Link to={`/album/${track.AlbumId}`} className="text">
-                                            {track.Album || 'Unknown Album'}
-                                        </Link>
-                                    </div>
-                                ) : (
-                                    <div className="artist">
-                                        {track.Artists && track.Artists.length > 0
-                                            ? track.Artists.join(', ')
-                                            : 'Unknown Artist'}
-                                    </div>
-                                )}
-                                */}
                             </div>
                             {track.UserData?.IsFavorite && (
                                 <div className="favorited" title="Favorited">
