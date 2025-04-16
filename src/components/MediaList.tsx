@@ -270,7 +270,7 @@ const MediaList = ({
                 useWindowScroll
                 itemContent={renderItem}
                 endReached={handleEndReached}
-                overscan={800}
+                overscan={600}
             />
         </ul>
     )

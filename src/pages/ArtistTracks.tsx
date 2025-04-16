@@ -81,6 +81,7 @@ const ArtistTracks = () => {
                     playback.playTrack(index)
                 }}
                 playlist={allTracks}
+                showType="album"
             />
         </div>
     )

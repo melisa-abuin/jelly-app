@@ -145,6 +145,7 @@ const Playlist = () => {
                     playback.playTrack(index)
                 }}
                 playlist={tracks}
+                showType="artist"
             />
         </div>
     )

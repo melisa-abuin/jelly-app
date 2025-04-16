@@ -18,6 +18,7 @@ interface PlaylistTrackListProps {
     playTrack: (index: number) => void
     playlist: MediaItem[]
     playlistId?: string
+    showType?: string
 }
 
 const PlaylistTrackList = ({
@@ -28,6 +29,7 @@ const PlaylistTrackList = ({
     hasMore,
     playTrack,
     playlistId,
+    showType,
 }: PlaylistTrackListProps) => {
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
@@ -182,11 +184,25 @@ const PlaylistTrackList = ({
                         {track.Name}
                     </span>
                     <div className="container">
-                        <div className="artist">
-                            {track.Artists && track.Artists.length > 0 ? track.Artists.join(', ') : 'Unknown Artist'}
-                        </div>
-                        <div className="divider"></div>
-                        <div className="album">{track.Album || 'Unknown Album'}</div>
+                        {showType === 'artist' ? (
+                            <div className="artist">
+                                {track.Artists && track.Artists.length > 0
+                                    ? track.Artists.join(', ')
+                                    : 'Unknown Artist'}
+                            </div>
+                        ) : showType === 'album' ? (
+                            <div className="album">{track.Album || 'Unknown Album'}</div>
+                        ) : (
+                            <>
+                                <div className="artist">
+                                    {track.Artists && track.Artists.length > 0
+                                        ? track.Artists.join(', ')
+                                        : 'Unknown Artist'}
+                                </div>
+                                <div className="divider"></div>
+                                <div className="album">{track.Album || 'Unknown Album'}</div>
+                            </>
+                        )}
                     </div>
                 </div>
                 <div className="track-indicators">
@@ -218,7 +234,7 @@ const PlaylistTrackList = ({
                 useWindowScroll
                 itemContent={renderTrack}
                 endReached={handleEndReached}
-                overscan={800}
+                overscan={600}
             />
         </ul>
     )
