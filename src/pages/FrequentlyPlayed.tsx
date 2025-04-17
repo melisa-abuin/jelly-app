@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { VirtuosoHandle } from 'react-virtuoso'
 import MediaList from '../components/MediaList'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinFrequentlyPlayedData } from '../hooks/useJellyfinFrequentlyPlayedData'
@@ -8,7 +7,6 @@ const FrequentlyPlayed = () => {
     const playback = usePlaybackContext()
 
     const { items, loading, error, loadMore, hasMore } = useJellyfinFrequentlyPlayedData()
-    const virtuosoRef = useRef<VirtuosoHandle>(null)
     const hasPreloaded = useRef(false)
     const [isPreloading, setIsPreloading] = useState(false)
 
@@ -52,7 +50,6 @@ const FrequentlyPlayed = () => {
         <div className="frequently-page">
             {error && <div className="error">{error}</div>}
             <MediaList
-                virtuosoRef={virtuosoRef}
                 items={items}
                 type="song"
                 loading={loading}

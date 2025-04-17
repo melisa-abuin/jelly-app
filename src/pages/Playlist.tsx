@@ -1,7 +1,6 @@
 import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { VirtuosoHandle } from 'react-virtuoso'
 import { JellyImg } from '../components/JellyImg'
 import Loader from '../components/Loader'
 import PlaylistTrackList from '../components/PlaylistTrackList'
@@ -19,7 +18,6 @@ const Playlist = () => {
     const { playlist, tracks, loading, error, loadMore, hasMore, totalPlaytime, totalTrackCount, totalPlays } =
         useJellyfinPlaylistData(playlistId!)
     const { setPageTitle } = usePageTitle()
-    const virtuosoRef = useRef<VirtuosoHandle | null>(null)
     const hasPreloaded = useRef(false)
     const [isPreloading, setIsPreloading] = useState(false)
 
@@ -124,7 +122,6 @@ const Playlist = () => {
             </div>
 
             <PlaylistTrackList
-                virtuosoRef={virtuosoRef}
                 tracks={tracks}
                 loading={loading}
                 loadMore={loadMore}

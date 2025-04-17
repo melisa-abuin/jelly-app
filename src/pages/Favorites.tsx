@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { VirtuosoHandle } from 'react-virtuoso'
 import MediaList from '../components/MediaList'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinFavoritesData } from '../hooks/useJellyfinFavoritesData'
@@ -8,7 +7,6 @@ const Favorites = () => {
     const playback = usePlaybackContext()
 
     const { allFavorites, loading, error, loadMore, hasMore } = useJellyfinFavoritesData()
-    const virtuosoRef = useRef<VirtuosoHandle>(null)
     const hasPreloaded = useRef(false)
     const [isPreloading, setIsPreloading] = useState(false)
 
@@ -52,7 +50,6 @@ const Favorites = () => {
         <div className="favorites-page">
             {error && <div className="error">{error}</div>}
             <MediaList
-                virtuosoRef={virtuosoRef}
                 items={allFavorites}
                 type="song"
                 loading={loading}

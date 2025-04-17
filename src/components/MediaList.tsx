@@ -1,7 +1,7 @@
 import { HeartFillIcon } from '@primer/octicons-react'
-import { Ref, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
+import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { JellyImg } from './JellyImg'
@@ -9,7 +9,6 @@ import Loader from './Loader'
 import Skeleton from './Skeleton'
 
 interface MediaListProps {
-    virtuosoRef?: Ref<VirtuosoHandle>
     items: MediaItem[] | undefined
     type: 'song' | 'album'
     loading: boolean
@@ -21,7 +20,6 @@ interface MediaListProps {
 }
 
 const MediaList = ({
-    virtuosoRef,
     items = [],
     type,
     loading,
@@ -242,7 +240,6 @@ const MediaList = ({
     return (
         <ul className="media-list noSelect">
             <Virtuoso
-                ref={virtuosoRef}
                 data={displayItems}
                 useWindowScroll
                 itemContent={renderItem}

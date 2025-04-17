@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { VirtuosoHandle } from 'react-virtuoso'
 import Loader from '../components/Loader'
 import PlaylistTrackList from '../components/PlaylistTrackList'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
@@ -14,7 +13,6 @@ const ArtistTracks = () => {
     const { artist } = useJellyfinArtistData(artistId!)
     const { allTracks, loading, error, loadMore, hasMore } = useJellyfinArtistTracksData(artistId!)
     const { setPageTitle } = usePageTitle()
-    const virtuosoRef = useRef<VirtuosoHandle>(null)
     const hasPreloaded = useRef(false)
     const [isPreloading, setIsPreloading] = useState(false)
 
@@ -71,7 +69,6 @@ const ArtistTracks = () => {
         <div className="artist-tracks-page">
             {error && <div className="error">{error}</div>}
             <PlaylistTrackList
-                virtuosoRef={virtuosoRef}
                 tracks={allTracks}
                 loading={loading}
                 loadMore={loadMore}

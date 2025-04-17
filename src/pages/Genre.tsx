@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { VirtuosoHandle } from 'react-virtuoso'
 import MediaList from '../components/MediaList'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
@@ -12,7 +11,6 @@ const Genre = () => {
     const { genre } = useParams<{ genre: string }>()
     const { tracks, loading, error, loadMore, hasMore } = useJellyfinGenreTracks(genre!)
     const { setPageTitle } = usePageTitle()
-    const virtuosoRef = useRef<VirtuosoHandle>(null)
     const hasPreloaded = useRef(false)
     const [isPreloading, setIsPreloading] = useState(false)
 
@@ -65,7 +63,6 @@ const Genre = () => {
         <div className="genre-page">
             {error && <div className="error">{error}</div>}
             <MediaList
-                virtuosoRef={virtuosoRef}
                 items={tracks}
                 type="song"
                 loading={loading}

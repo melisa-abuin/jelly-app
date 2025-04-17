@@ -292,9 +292,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             const nextIndex = currentShuffledIndex.index + 1
             if (nextIndex >= shuffledPlaylist.current.length) {
                 if (hasMoreState && loadMoreCallback.current) {
-                    const currentScrollPosition = window.scrollY
-                    window.scrollTo({ top: currentScrollPosition, behavior: 'smooth' })
-
                     setCurrentShuffledIndex({ index: nextIndex })
                     return
                 } else if (repeat === 'all') {
@@ -321,9 +318,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             const nextIndex = currentTrackIndex.index + 1
             if (nextIndex >= currentPlaylist.length) {
                 if (hasMoreState && loadMoreCallback.current) {
-                    const currentScrollPosition = window.scrollY
                     const newPlaylist = await loadMoreCallback.current()
-                    window.scrollTo({ top: currentScrollPosition, behavior: 'smooth' })
                     setCurrentTrackIndex({ index: nextIndex })
                     setCurrentPlaylist(newPlaylist || [])
                     return
@@ -585,9 +580,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         if (shuffle && hasMoreState && loadMoreCallback.current) {
             const threshold = 5
             if (currentShuffledIndex.index >= shuffledPlaylist.current.length - threshold) {
-                const currentScrollPosition = window.scrollY
                 loadMoreCallback.current()
-                window.scrollTo({ top: currentScrollPosition, behavior: 'smooth' })
             }
         }
     }, [currentShuffledIndex.index, shuffle, hasMoreState])
