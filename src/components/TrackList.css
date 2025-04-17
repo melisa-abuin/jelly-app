@@ -238,6 +238,8 @@
 .tracklist > .track-item > .track-details > .container > .name > .text {
     font-size: 0.85rem;
     font-weight: 600;
+    /* Help with CJK letter spacing */
+    line-height: 1rem;
     transition: color 0.2s ease-out;
 }
 
@@ -250,6 +252,8 @@
 .tracklist > .track-item > .track-details > .container > .album {
     font-size: 0.725rem;
     font-weight: 600;
+    /* Help with CJK letter spacing */
+    line-height: 0.875rem;
     color: var(--font-color-tertiary);
     transition: color 0.2s ease-out;
 }

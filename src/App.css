@@ -583,7 +583,7 @@ body.lockscroll {
     align-items: center;
     justify-content: space-between;
     padding: 14px 20px;
-    /* Prevents layout shifting from asian symbols increasing line heights...*/
+    /* Help with CJK letter spacing */
     max-height: 76px;
 }
 
@@ -596,6 +596,8 @@ body.lockscroll {
 .main > .main_footer > .playback > .container > .track-info > .track-name {
     font-size: 0.85rem;
     font-weight: 600;
+    /* Help with CJK letter spacing */
+    line-height: 1rem;
     display: flex;
     align-items: center;
     margin-bottom: 3px;
@@ -614,6 +616,8 @@ body.lockscroll {
 .main > .main_footer > .playback > .container > .track-info > .artist {
     font-size: 0.725rem;
     font-weight: 600;
+    /* Help with CJK letter spacing */
+    line-height: 0.875rem;
     color: var(--font-color-tertiary);
     margin-bottom: 1px;
     white-space: nowrap;
@@ -626,6 +630,8 @@ body.lockscroll {
     align-items: center;
     font-size: 0.725rem;
     font-weight: 500;
+    /* Help with CJK letter spacing */
+    line-height: 0.875rem;
     color: var(--font-color-tertiary);
 }
 

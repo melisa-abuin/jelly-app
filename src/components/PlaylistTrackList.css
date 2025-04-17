@@ -212,6 +212,8 @@
 .playlist-tracklist .track-item > .track-details > .track-name {
     font-size: 0.85rem;
     font-weight: 600;
+    /* Help with CJK letter spacing */
+    line-height: 1rem;
     transition: color 0.2s ease-out;
 }
 

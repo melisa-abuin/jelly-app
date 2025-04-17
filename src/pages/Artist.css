@@ -184,6 +184,8 @@
 .artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .name {
     font-size: 0.85rem;
     font-weight: 600;
+    /* Help with CJK letter spacing */
+    line-height: 1rem;
     margin-bottom: 4px;
 }
 

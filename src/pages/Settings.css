@@ -1,3 +1,7 @@
+.settings-page {
+    margin-bottom: 20px;
+}
+
 .settings-page > .section {
     display: flex;
     align-items: center;
