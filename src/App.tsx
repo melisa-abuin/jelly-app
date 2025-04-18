@@ -17,6 +17,7 @@ import { usePlaybackContext } from './context/PlaybackContext/PlaybackContext'
 import { PlaybackContextProvider } from './context/PlaybackContext/PlaybackContextProvider'
 import { ScrollContextProvider } from './context/ScrollContext/ScrollContextProvider'
 import { ThemeContextProvider } from './context/ThemeContext/ThemeContextProvider'
+import { useDocumentTitle } from './hooks/useDocumentTitle'
 import { useSidenav } from './hooks/useSidenav'
 import Album from './pages/Album'
 import Albums from './pages/Albums'
@@ -32,6 +33,7 @@ import RecentlyPlayed from './pages/RecentlyPlayed'
 import SearchResults from './pages/SearchResults'
 import Settings from './pages/Settings'
 import Tracks from './pages/Tracks'
+import { getPageTitle } from './utils/titleUtils'
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -142,8 +144,9 @@ interface AuthData {
 }
 
 const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () => void }) => {
-    const playback = usePlaybackContext()
+    useDocumentTitle()
 
+    const playback = usePlaybackContext()
     const location = useLocation()
     const { showSidenav, toggleSidenav, closeSidenav } = useSidenav(location)
     const { pageTitle } = usePageTitle()
@@ -151,42 +154,6 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
     }, [location.pathname])
-
-    const getPageTitle = () => {
-        // Return pageTitle if set (e.g., by SearchResults), otherwise fallback to defaults
-        if (pageTitle) return pageTitle
-
-        if (location.pathname.startsWith('/album/')) return 'Album'
-        if (location.pathname.startsWith('/artist/')) {
-            if (location.pathname.includes('/tracks')) return 'Tracks'
-            return 'Artist'
-        }
-        if (location.pathname.startsWith('/genre/')) return 'Genre'
-        if (location.pathname.startsWith('/playlist/')) return 'Playlist'
-        if (location.pathname.startsWith('/search/')) {
-            const query = decodeURIComponent(location.pathname.split('/search/')[1])
-            return `Search results for '${query}'`
-        }
-
-        switch (location.pathname) {
-            case '/':
-                return 'Home'
-            case '/tracks':
-                return 'Tracks'
-            case '/albums':
-                return 'Albums'
-            case '/favorites':
-                return 'Favorites'
-            case '/settings':
-                return 'Settings'
-            case '/recently':
-                return 'Recently Played'
-            case '/frequently':
-                return 'Frequently Played'
-            default:
-                return 'Home'
-        }
-    }
 
     const previousPage = useAppBack()
 
@@ -202,8 +169,8 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                         </div>
                         <div className="container">
                             <div className="page_title">
-                                <div className="text" title={getPageTitle()}>
-                                    {getPageTitle()}
+                                <div className="text" title={getPageTitle(pageTitle, location)}>
+                                    {getPageTitle(pageTitle, location)}
                                 </div>
                                 {location.pathname.startsWith('/album/') && pageTitle && (
                                     <div className="page-icon album" title="Album">
@@ -215,13 +182,12 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                         >
                                             <g>
                                                 <rect height="15.7715" opacity="0" width="16.1328" x="0" y="0" />
-                                                <path d="M15.7715 7.88086C15.7715 12.2266 12.2363 15.7617 7.88086 15.7617C3.53516 15.7617 0 12.2266 0 7.88086C0 3.53516 3.53516 0 7.88086 0C12.2363 0 15.7715 3.53516 15.7715 7.88086ZM4.75586 7.87109C4.75586 9.59961 6.15234 10.9961 7.88086 10.9961C9.61914 10.9961 11.0156 9.59961 11.0156 7.87109C11.0156 6.14258 9.61914 4.73633 7.88086 4.73633C6.15234 4.73633 4.75586 6.14258 4.75586 7.87109Z" />
+                                                <path d="M15.7715 7.88086C15.7715 12.2266 12.2363 15.7617 7.88086 15.7617C3.53516 15.7617 0 12.2266 0 7.88086C0 3.53516 3.53516 0 7.88086 0C12.2363 0 15.7715 3.53516 15.7715 7.88086ZM4.75586 7.87109C4.75586 9.59961 6.15234 10.9961 7.88086 10.9961C9.61962 10.9961 11.0156 9.59961 11.0156 7.87109C11.0156 6.14258 9.61914 4.73633 7.88086 4.73633C6.15234 4.73633 4.75586 6.14258 4.75586 7.87109Z" />
                                                 <circle className="spindle-hole" cx="7.88086" cy="7.87109" r="1.5" />
                                             </g>
                                         </svg>
                                     </div>
                                 )}
-
                                 {pageTitle &&
                                     (location.pathname.match(/^\/artist\/[^/]+\/tracks$/) ? (
                                         <div className="page-icon artist-tracks" title="Tracks">
@@ -251,13 +217,11 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                             </svg>
                                         </div>
                                     ) : null)}
-
                                 {location.pathname.startsWith('/genre/') && pageTitle && (
                                     <div className="page-icon genre" title="Genre">
                                         <BookmarkFillIcon size={16} />
                                     </div>
                                 )}
-
                                 {location.pathname.startsWith('/playlist/') && pageTitle && (
                                     <div className="page-icon playlist" title="Playlist">
                                         <svg
