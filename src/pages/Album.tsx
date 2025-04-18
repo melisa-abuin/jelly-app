@@ -1,6 +1,7 @@
 import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { MediaItem } from '../api/jellyfin'
 import { JellyImg } from '../components/JellyImg'
 import Loader from '../components/Loader'
 import TrackList from '../components/TrackList'
@@ -13,9 +14,8 @@ import './Album.css'
 
 const Album = () => {
     const playback = usePlaybackContext()
-
     const { albumId } = useParams<{ albumId: string }>()
-    const { album, tracks, loading, error } = useJellyfinAlbumData(albumId!)
+    const { album, tracks, discCount, loading, error } = useJellyfinAlbumData(albumId!)
     const { setPageTitle } = usePageTitle()
 
     useEffect(() => {
@@ -40,11 +40,25 @@ const Album = () => {
     const totalPlays = tracks.reduce((total, track) => total + (track.UserData?.PlayCount || 0), 0)
     const trackCount = album.ChildCount || tracks.length
 
+    const tracksByDisc = tracks.reduce((acc, track) => {
+        const discNumber = track.ParentIndexNumber || 1
+        if (!acc[discNumber]) {
+            acc[discNumber] = []
+        }
+        acc[discNumber].push(track)
+        return acc
+    }, {} as Record<number, MediaItem[]>)
+
+    const sortedTracks = Object.keys(tracksByDisc)
+        .sort((a, b) => Number(a) - Number(b))
+        .flatMap(discNumber =>
+            tracksByDisc[Number(discNumber)].sort((a, b) => (a.IndexNumber || 0) - (b.IndexNumber || 0))
+        )
+
     return (
         <div className="album-page">
             <div className="album-header">
                 <JellyImg item={album} type={'Primary'} width={100} height={100} />
-
                 <div className="album-details">
                     <div className="artist">
                         {album.AlbumArtists && album.AlbumArtists.length > 0 ? (
@@ -78,7 +92,7 @@ const Album = () => {
                         <div
                             className="play-album"
                             onClick={() => {
-                                playback.setCurrentPlaylist(tracks)
+                                playback.setCurrentPlaylist(sortedTracks)
                                 playback.playTrack(0)
                             }}
                         >
@@ -95,7 +109,14 @@ const Album = () => {
                 </div>
             </div>
 
-            <TrackList tracks={tracks} />
+            {Object.keys(tracksByDisc)
+                .sort((a, b) => Number(a) - Number(b))
+                .map((discNumber, index) => (
+                    <div className="album-content" key={discNumber}>
+                        {discCount > 1 && <div className={`disc ${index === 0 ? 'first' : ''}`}>Disc {discNumber}</div>}
+                        <TrackList tracks={tracksByDisc[Number(discNumber)]} playlist={sortedTracks} />
+                    </div>
+                ))}
         </div>
     )
 }

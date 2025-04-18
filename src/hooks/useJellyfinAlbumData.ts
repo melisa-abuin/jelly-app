@@ -5,6 +5,7 @@ import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 interface JellyfinAlbumData {
     album: MediaItem | null
     tracks: MediaItem[]
+    discCount: number
     loading: boolean
     error: string | null
 }
@@ -17,9 +18,13 @@ export const useJellyfinAlbumData = (albumId: string) => {
         queryFn: async () => {
             const { album, tracks } = await api.getAlbumDetails(albumId)
 
+            const discNumbers = new Set(tracks.map(track => track.ParentIndexNumber || 1))
+            const discCount = discNumbers.size
+
             return {
                 album,
                 tracks,
+                discCount,
                 loading: false,
                 error: null,
             }
@@ -31,5 +36,6 @@ export const useJellyfinAlbumData = (albumId: string) => {
         loading: isLoading,
         error: error ? error.message : null,
         tracks: data?.tracks || [],
+        discCount: data?.discCount || 1,
     }
 }

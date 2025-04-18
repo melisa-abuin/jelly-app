@@ -118,6 +118,17 @@
     color: var(--brand-color);
 }
 
+.album-page > .album-content > .disc {
+    font-size: 0.725rem;
+    font-weight: 600;
+    color: var(--font-color-tertiary);
+    margin: 32px 0 6px 28px;
+}
+
+.album-page > .album-content > .disc.first {
+    margin: 22px 0 6px 28px;
+}
+
 /* Responsive */
 @media only screen and (max-width: 390px) {
     .album-page > .album-header {

@@ -6,10 +6,11 @@ import './TrackList.css'
 
 interface TrackListProps {
     tracks: MediaItem[]
+    playlist?: MediaItem[]
     showAlbum?: boolean
 }
 
-const TrackList = ({ tracks, showAlbum = false }: TrackListProps) => {
+const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
     const playback = usePlaybackContext()
 
     const MIN_PLAY_COUNT = 5
@@ -43,8 +44,10 @@ const TrackList = ({ tracks, showAlbum = false }: TrackListProps) => {
                             if (isCurrentTrack) {
                                 playback.togglePlayPause()
                             } else {
-                                playback.setCurrentPlaylist(tracks)
-                                playback.playTrack(index)
+                                const tracksToPlay = playlist || tracks
+                                playback.setCurrentPlaylist(tracksToPlay)
+                                const playIndex = playlist ? playlist.findIndex(t => t.Id === track.Id) : index
+                                playback.playTrack(playIndex)
                             }
                         }}
                     >
