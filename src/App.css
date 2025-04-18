@@ -476,6 +476,9 @@ body.lockscroll {
 .main > .main_header > .secondary > .sidenav_toggle > .bar {
     height: 2px;
     width: 12px;
+    /* Force pixel alignment, on some devices the bars are uneven... subpixel rendering */
+    will-change: transform;
+    transform: translateZ(0);
     border-radius: 2px;
     background-color: var(--font-color);
 }
