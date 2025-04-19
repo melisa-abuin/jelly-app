@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { ApiError, loginToJellyfin } from '../api/jellyfin'
 
 interface AuthFormProps {
@@ -6,19 +6,11 @@ interface AuthFormProps {
 }
 
 const AuthForm = ({ onLogin }: AuthFormProps) => {
-    const [serverUrl, setServerUrl] = useState<string>('')
-    const [username, setUsername] = useState<string>('')
-    const [password, setPassword] = useState<string>('')
-    const [loading, setLoading] = useState<boolean>(false)
-    const [error, setError] = useState<string>('')
-
-    // Load the last used serverUrl from localStorage on mount
-    useEffect(() => {
-        const savedServerUrl = localStorage.getItem('lastServerUrl')
-        if (savedServerUrl) {
-            setServerUrl(savedServerUrl)
-        }
-    }, [])
+    const [serverUrl, setServerUrl] = useState(localStorage.getItem('lastServerUrl') || '')
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState('')
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
@@ -26,25 +18,31 @@ const AuthForm = ({ onLogin }: AuthFormProps) => {
         setError('')
 
         // Pre-validate serverUrl
-        if (!serverUrl.trim()) {
+        if (!serverUrl) {
             setError('Please enter a server URL.')
             setLoading(false)
             return
         }
 
+        const formattedServerUrl = serverUrl.split('/').slice(0, 3).join('/')
+
         // Basic URL format check
         const urlPattern = /^https?:\/\/.+/
-        if (!urlPattern.test(serverUrl)) {
+        if (!urlPattern.test(formattedServerUrl)) {
             setError('Invalid URL format. Use http:// or https:// followed by a valid address.')
             setLoading(false)
             return
         }
 
         try {
-            const { token, userId, username: fetchedUsername } = await loginToJellyfin(serverUrl, username, password)
+            const {
+                token,
+                userId,
+                username: fetchedUsername,
+            } = await loginToJellyfin(formattedServerUrl, username, password)
             // Save the serverUrl to localStorage on successful login
-            localStorage.setItem('lastServerUrl', serverUrl)
-            onLogin({ serverUrl, token, userId, username: fetchedUsername })
+            localStorage.setItem('lastServerUrl', formattedServerUrl)
+            onLogin({ serverUrl: formattedServerUrl, token, userId, username: fetchedUsername })
         } catch (err) {
             if (err instanceof ApiError) {
                 if (err.response) {
