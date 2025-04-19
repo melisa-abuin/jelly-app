@@ -683,18 +683,28 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         )
     }
 
+    let lastProgress = new AbortController()
+
     const reportPlaybackProgress = async (trackId: string, position: number, isPaused: boolean) => {
+        if (lastProgress) {
+            lastProgress.abort()
+            lastProgress = new AbortController()
+        }
+
         const sessionsApi = new PlaystateApi(api.configuration)
-        await sessionsApi.reportPlaybackProgress({
-            playbackProgressInfo: {
-                ItemId: trackId,
-                PositionTicks: Math.floor(position * 10000000),
-                IsPaused: isPaused,
-                PlayMethod: PlayMethod.DirectStream,
-                MediaSourceId: trackId,
-                AudioStreamIndex: 1,
+        await sessionsApi.reportPlaybackProgress(
+            {
+                playbackProgressInfo: {
+                    ItemId: trackId,
+                    PositionTicks: Math.floor(position * 10000000),
+                    IsPaused: isPaused,
+                    PlayMethod: PlayMethod.DirectStream,
+                    MediaSourceId: trackId,
+                    AudioStreamIndex: 1,
+                },
             },
-        })
+            { signal: lastProgress.signal }
+        )
     }
 
     const reportPlaybackStopped = async (trackId: string, position: number, signal?: AbortSignal) => {
