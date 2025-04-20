@@ -169,6 +169,11 @@ const Sidenav = (props: SidenavProps) => {
                                 Favorites
                             </NavLink>
                         </li>
+                        <li>
+                            <NavLink to="/queue" onClick={props.closeSidenav}>
+                                Queue
+                            </NavLink>
+                        </li>
                     </ul>
 
                     <div className="search">

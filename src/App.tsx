@@ -29,6 +29,7 @@ import Genre from './pages/Genre'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Playlist from './pages/Playlist'
+import Queue from './pages/Queue'
 import RecentlyPlayed from './pages/RecentlyPlayed'
 import SearchResults from './pages/SearchResults'
 import Settings from './pages/Settings'
@@ -260,6 +261,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                         <Route path="/artist/:artistId/tracks" element={<ArtistTracks />} />
                         <Route path="/genre/:genre" element={<Genre />} />
                         <Route path="/playlist/:playlistId" element={<Playlist key={window.location.pathname} />} />
+                        <Route path="/queue" element={<Queue />} />
                         <Route path="/favorites" element={<Favorites />} />
                         <Route path="/recently" element={<RecentlyPlayed />} />
                         <Route path="/frequently" element={<FrequentlyPlayed />} />
