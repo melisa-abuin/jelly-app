@@ -171,6 +171,10 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     visibility: visible;
 }
 
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container > .search-loading {
+    padding: 8px;
+}
+
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results {
     margin: 14px 0;
 }
@@ -600,6 +604,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .empty {
     font-size: 0.725rem;
+    line-height: 1.4;
     margin-left: 3px;
 }
 
@@ -610,13 +615,11 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 .sidenav > .sidenav_wrapper > .sidenav_content > .playlists {
     margin-top: 20px;
 }
-
 .sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .indicator {
     font-size: 0.725rem;
     font-weight: 500;
     margin: 20px 14px;
 }
-
 .sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .indicator.error {
     color: var(--font-color-error);
 }

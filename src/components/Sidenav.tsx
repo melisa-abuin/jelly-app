@@ -7,6 +7,7 @@ import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../context/ScrollContext/ScrollContext'
 import { useJellyfinPlaylistsList } from '../hooks/useJellyfinPlaylistsList'
+import InlineLoader from './inlineLoader'
 import './Sidenav.css'
 
 interface SidenavProps {
@@ -34,6 +35,7 @@ const Sidenav = (props: SidenavProps) => {
     const [searchResults, setSearchResults] = useState<SearchResult[]>([])
     const [searchLoading, setSearchLoading] = useState(false)
     const [searchError, setSearchError] = useState<string | null>(null)
+    const [searchAttempted, setSearchAttempted] = useState(false)
 
     const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(e.target.value)
@@ -50,13 +52,15 @@ const Sidenav = (props: SidenavProps) => {
     useEffect(() => {
         const debounceTimer = setTimeout(() => {
             const fetchSearchResults = async () => {
-                if (!searchQuery.trim() || !api.auth.serverUrl || !api.auth.token || !api.auth.userId) {
+                if (!searchQuery || !api.auth.serverUrl || !api.auth.token || !api.auth.userId) {
                     setSearchResults([])
+                    setSearchAttempted(false)
                     return
                 }
 
                 setSearchLoading(true)
                 setSearchError(null)
+                setSearchAttempted(true)
 
                 try {
                     // Fetch artists from /Artists endpoint
@@ -67,11 +71,9 @@ const Sidenav = (props: SidenavProps) => {
 
                     // Fetch songs, albums, and playlists from /Items endpoint
                     const items = itemsResponse || []
-
                     const artists = artistResponse
                         .map(item => ({ type: 'Artist' as const, id: item.Id, name: item.Name }))
                         .slice(0, 4)
-
                     const songs = items
                         .filter(item => item.Type === 'Audio')
                         .map(item => ({
@@ -82,12 +84,10 @@ const Sidenav = (props: SidenavProps) => {
                             mediaItem: item,
                         }))
                         .slice(0, 6)
-
                     const albums = items
                         .filter(item => item.Type === 'MusicAlbum')
                         .map(item => ({ type: 'Album' as const, id: item.Id, name: item.Name }))
                         .slice(0, 4)
-
                     const playlists = items
                         .filter(item => item.Type === 'Playlist')
                         .map(item => ({ type: 'Playlist' as const, id: item.Id, name: item.Name }))
@@ -116,6 +116,7 @@ const Sidenav = (props: SidenavProps) => {
     const handleClearSearch = () => {
         setSearchQuery('')
         setSearchResults([])
+        setSearchAttempted(false)
     }
 
     const handleSongClick = (song: SearchResult) => {
@@ -198,31 +199,40 @@ const Sidenav = (props: SidenavProps) => {
                                 onChange={handleSearchChange}
                                 ref={searchInputRef}
                             />
-                            <div className="search-clear" onClick={handleClearSearch}>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16.1328 15.7715"
-                                    width="13"
-                                    height="13"
-                                >
-                                    <g>
-                                        <rect height="15.7715" opacity="0" width="16.1328" x="0" y="0" />
-                                        <path d="M15.7715 7.88086C15.7715 12.2266 12.2363 15.7617 7.88086 15.7617C3.53516 15.7617 0 12.2266 0 7.88086C0 3.53516 3.53516 0 7.88086 0C12.2363 0 15.7715 3.53516 15.7715 7.88086ZM9.98047 4.80469L7.88086 6.88477L5.81055 4.81445C5.67383 4.6875 5.51758 4.61914 5.3125 4.61914C4.92188 4.61914 4.59961 4.92188 4.59961 5.33203C4.59961 5.51758 4.67773 5.69336 4.80469 5.83008L6.86523 7.89062L4.80469 9.95117C4.67773 10.0879 4.59961 10.2637 4.59961 10.4492C4.59961 10.8594 4.92188 11.1816 5.3125 11.1816C5.51758 11.1816 5.70312 11.1133 5.83008 10.9766L7.88086 8.90625L9.94141 10.9766C10.0684 11.1133 10.2539 11.1816 10.4492 11.1816C10.8594 11.1816 11.1816 10.8594 11.1816 10.4492C11.1816 10.2539 11.1133 10.0781 10.9668 9.94141L8.90625 7.89062L10.9766 5.82031C11.1328 5.67383 11.1914 5.50781 11.1914 5.3125C11.1914 4.91211 10.8691 4.59961 10.4688 4.59961C10.2832 4.59961 10.127 4.66797 9.98047 4.80469Z" />
-                                    </g>
-                                </svg>
-                            </div>
+                            {!searchLoading && (
+                                <div className="search-clear" onClick={handleClearSearch}>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16.1328 15.7715"
+                                        width="13"
+                                        height="13"
+                                    >
+                                        <g>
+                                            <rect height="15.7715" opacity="0" width="16.1328" x="0" y="0" />
+                                            <path d="M15.7715 7.88086C15.7715 12.2266 12.2363 15.7617 7.88086 15.7617C3.53516 15.7617 0 12.2266 0 7.88086C0 3.53516 3.53516 0 7.88086 0C12.2363 0 15.7715 3.53516 15.7715 7.88086ZM9.98047 4.80469L7.88086 6.88477L5.81055 4.81445C5.67383 4.6875 5.51758 4.61914 5.3125 4.61914C4.92188 4.61914 4.59961 4.92188 4.59961 5.33203C4.59961 5.51758 4.67773 5.69336 4.80469 5.83008L6.86523 7.89062L4.80469 9.95117C4.67773 10.0879 4.59961 10.2637 4.59961 10.4492C4.59961 10.8594 4.92188 11.1816 5.3125 11.1816C5.51758 11.1816 5.70312 11.1133 5.83008 10.9766L7.88086 8.90625L9.94141 10.9766C10.0684 11.1133 10.2539 11.1816 10.4492 11.1816C10.8594 11.1816 11.1816 10.8594 11.1816 10.4492C11.1816 10.2539 11.1133 10.0781 10.9668 9.94141L8.90625 7.89062L10.9766 5.82031C11.1328 5.67383 11.1914 5.50781 11.1914 5.3125C11.1914 4.91211 10.8691 4.59961 10.4688 4.59961C10.2832 4.59961 10.127 4.66797 9.98047 4.80469Z" />
+                                        </g>
+                                    </svg>
+                                </div>
+                            )}
+                            {searchLoading && (
+                                <div className="search-loading noSelect">
+                                    <InlineLoader />
+                                </div>
+                            )}
                         </div>
                         <div className="search_results">
-                            {searchQuery ? (
+                            {searchQuery && (
                                 <>
-                                    {searchLoading && <div className="indicator loading">Loading...</div>}
                                     {searchError && <div className="indicator error">{searchError}</div>}
-                                    {!searchLoading && !searchError && searchResults.length === 0 && (
-                                        <div className="empty">
-                                            Search for <span className="keyword">'{searchQuery}'</span> yields no
-                                            results.
-                                        </div>
-                                    )}
+                                    {!searchLoading &&
+                                        searchAttempted &&
+                                        !searchError &&
+                                        searchResults.length === 0 && (
+                                            <div className="empty">
+                                                Search for <span className="keyword">'{searchQuery}'</span> yields no
+                                                results.
+                                            </div>
+                                        )}
                                     {!searchLoading && !searchError && searchResults.length > 0 && (
                                         <div className="results noSelect">
                                             {searchResults.map(result =>
@@ -405,7 +415,7 @@ const Sidenav = (props: SidenavProps) => {
                                         </div>
                                     )}
                                 </>
-                            ) : null}
+                            )}
                         </div>
                     </div>
 
