@@ -7,7 +7,7 @@ import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../context/ScrollContext/ScrollContext'
 import { useJellyfinPlaylistsList } from '../hooks/useJellyfinPlaylistsList'
-import InlineLoader from './inlineLoader'
+import InlineLoader from './InlineLoader'
 import './Sidenav.css'
 
 interface SidenavProps {
@@ -168,11 +168,6 @@ const Sidenav = (props: SidenavProps) => {
                         <li>
                             <NavLink to="/favorites" onClick={props.closeSidenav}>
                                 Favorites
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink to="/queue" onClick={props.closeSidenav}>
-                                Queue
                             </NavLink>
                         </li>
                     </ul>

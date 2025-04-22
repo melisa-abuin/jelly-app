@@ -306,7 +306,11 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                             <div className="track-info">
                                 <div className="track-name">
                                     <div className="text" title={playback.currentTrack?.Name || 'No Track Played'}>
-                                        {playback.currentTrack?.Name || 'No Track Played'}
+                                        {playback.currentTrack?.Name ? (
+                                            <Link to="/queue">{playback.currentTrack.Name}</Link>
+                                        ) : (
+                                            'No Track Played'
+                                        )}
                                     </div>
                                     {playback.currentTrack?.UserData?.IsFavorite && (
                                         <span className="favorited" title="Favorited">
