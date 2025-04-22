@@ -73,15 +73,15 @@
 }
 
 .settings-page > .section > .options > .option.light > .visual {
-    background-image: url(/light-variant2.png);
+    background-image: url(/light-variant.png);
 }
 
 .settings-page > .section > .options > .option.dark > .visual {
-    background-image: url(dark-variant2.png);
+    background-image: url(/dark-variant.png);
 }
 
 .settings-page > .section > .options > .option.system > .visual {
-    background-image: url(dark-variant2.png);
+    background-image: url(/dark-variant.png);
     background-size: 210%;
 }
 
@@ -94,7 +94,7 @@
     height: 100%;
     background-size: 210%;
     background-repeat: no-repeat;
-    background-image: url(/light-variant2.png);
+    background-image: url(/light-variant.png);
 }
 
 .settings-page > .section > .options > .option.system > .visual:before {

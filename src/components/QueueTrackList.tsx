@@ -1,11 +1,8 @@
-import { HeartFillIcon } from '@primer/octicons-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { JellyImg } from './JellyImg'
-import Loader from './Loader'
 import './QueueTrackList.css'
 import Skeleton from './Skeleton'
 
@@ -15,11 +12,7 @@ interface QueueTrackListProps {
     loadMore?: () => Promise<MediaItem[] | undefined>
     hasMore?: boolean
     playTrack: (index: number) => void
-    playlist: MediaItem[]
-    playlistId?: string
-    showType?: 'artist' | 'album'
-    showTrackNumber?: boolean
-    disablePagination?: boolean
+    singleTrack?: boolean
 }
 
 const QueueTrackList = ({
@@ -28,25 +21,21 @@ const QueueTrackList = ({
     loadMore,
     hasMore,
     playTrack,
-    playlistId,
-    showType,
-    showTrackNumber = false,
-    disablePagination = false,
+    singleTrack = false,
 }: QueueTrackListProps) => {
     const playback = usePlaybackContext()
     const rowRefs = useRef<(HTMLLIElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
-    const location = useLocation()
     const sizeMap = useRef<{ [index: number]: number }>({})
     const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(tracks)
 
     useEffect(() => {
-        if ((loading || (hasMore && loadMore)) && !disablePagination) {
+        if (loading && hasMore && loadMore && !singleTrack) {
             setDisplayItems([...tracks, ...Array(4).fill({ isPlaceholder: true })])
         } else {
             setDisplayItems(tracks)
         }
-    }, [tracks, loading, hasMore, loadMore, disablePagination])
+    }, [tracks, loading, hasMore, loadMore, singleTrack])
 
     useEffect(() => {
         const handleResize = () => {
@@ -94,22 +83,25 @@ const QueueTrackList = ({
         cleanupResizeObservers()
         measureInitialHeights()
         setupResizeObservers()
-        document.body.style.overflowY = 'auto'
-        window.addEventListener('resize', handleResize)
+        if (!singleTrack) {
+            document.body.style.overflowY = 'auto'
+            window.addEventListener('resize', handleResize)
+        }
 
         return () => {
             cleanupResizeObservers()
-            window.removeEventListener('resize', handleResize)
+            if (!singleTrack) {
+                window.removeEventListener('resize', handleResize)
+            }
         }
-    }, [displayItems])
+    }, [displayItems, singleTrack])
 
     const setSize = (index: number, height: number) => {
         sizeMap.current = { ...sizeMap.current, [index]: height }
     }
 
     const handleTrackClick = useCallback(
-        (track: MediaItem, index: number, event: React.MouseEvent) => {
-            if (event.type !== 'click') return
+        (track: MediaItem, index: number) => {
             if (playback.currentTrack?.Id === track.Id) {
                 playback.togglePlayPause()
             } else {
@@ -119,12 +111,14 @@ const QueueTrackList = ({
         [playTrack, playback]
     )
 
-    const handleEndReached = useCallback(() => {
-        console.log('endReached:', { hasMore, loadMore: !!loadMore, disablePagination })
-        if (hasMore && loadMore && !disablePagination) {
-            loadMore()
+    const handleEndReached = async () => {
+        if (hasMore && loadMore) {
+            const newTracks = await loadMore()
+            if (newTracks && newTracks.length > 0) {
+                playback.setCurrentPlaylist([...playback.currentPlaylist, ...newTracks], hasMore, loadMore)
+            }
         }
-    }, [hasMore, loadMore, disablePagination])
+    }
 
     const renderTrack = (index: number, item: MediaItem | { isPlaceholder: true }) => {
         if ('isPlaceholder' in item) {
@@ -142,12 +136,11 @@ const QueueTrackList = ({
 
         const track = item
         const trackClass = playback.currentTrack?.Id === track.Id ? (playback.isPlaying ? 'playing' : 'paused') : ''
-        const isFavorite = track.UserData?.IsFavorite && location.pathname !== '/favorites'
 
         return (
             <li
                 className={`track-item ${trackClass}`}
-                onClick={event => handleTrackClick(track, index, event)}
+                onClick={() => handleTrackClick(track, index)}
                 key={track.Id}
                 ref={el => {
                     rowRefs.current[index] = el
@@ -175,60 +168,34 @@ const QueueTrackList = ({
                     </div>
                 </div>
                 <div className="track-details">
-                    <span className="track-name">
-                        {showTrackNumber && <span className="track-number">{index + 1}.</span>}
-                        {track.Name}
-                    </span>
+                    <span className="track-name">{track.Name}</span>
                     <div className="container">
-                        {showType === 'artist' ? (
-                            <div className="artist">
-                                {track.Artists && track.Artists.length > 0
-                                    ? track.Artists.join(', ')
-                                    : 'Unknown Artist'}
-                            </div>
-                        ) : showType === 'album' ? (
-                            <div className="album">{track.Album || 'Unknown Album'}</div>
-                        ) : (
+                        <div className="artist">
+                            {track.Artists && track.Artists.length > 0 ? track.Artists.join(', ') : 'Unknown Artist'}
+                        </div>
+                        {track.Album && (
                             <>
-                                <div className="artist">
-                                    {track.Artists && track.Artists.length > 0
-                                        ? track.Artists.join(', ')
-                                        : 'Unknown Artist'}
-                                </div>
                                 <div className="divider"></div>
-                                <div className="album">{track.Album || 'Unknown Album'}</div>
+                                <div className="album">{track.Album}</div>
                             </>
                         )}
                     </div>
-                </div>
-                <div className="track-indicators">
-                    {isFavorite && (
-                        <div className="favorited" title="Favorited">
-                            <HeartFillIcon size={14} />
-                        </div>
-                    )}
-                    <div className="actions"></div>
                 </div>
             </li>
         )
     }
 
-    if (loading && tracks.length === 0 && !disablePagination) {
-        return <Loader />
-    }
-
-    if (!loading && tracks.length === 0 && !disablePagination) {
-        return <div className="empty">No tracks were found</div>
+    if (singleTrack) {
+        return <ul className="queue-tracklist noSelect">{renderTrack(0, displayItems[0])}</ul>
     }
 
     return (
         <ul className="queue-tracklist noSelect">
             <Virtuoso
-                key={playlistId}
                 data={displayItems}
                 useWindowScroll
                 itemContent={renderTrack}
-                endReached={disablePagination ? undefined : handleEndReached}
+                endReached={handleEndReached}
                 overscan={800}
             />
         </ul>
