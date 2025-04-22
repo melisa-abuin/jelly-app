@@ -16,7 +16,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return saved ? Number(saved) : 0
     })
     const [currentTrackIndex, setCurrentTrackIndex] = useState({
-        index: Number(localStorage.getItem('currentTrackIndex')) || -1,
+        index: localStorage.getItem('currentTrackIndex') ? Number(localStorage.getItem('currentTrackIndex')) : -1,
     })
     const [isPlaying, setIsPlaying] = useState(false)
     const [progress, setProgress] = useState(0)
@@ -191,8 +191,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                         signal.addEventListener('abort', onAbort)
                         audio.addEventListener('loadedmetadata', onLoadedMetadata)
                     })
-
-                    localStorage.setItem('currentTrackIndex', index.toString())
 
                     setSessionPlayCount(prev => {
                         const newCount = prev + 1
