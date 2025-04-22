@@ -44,6 +44,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const loadMoreCallback = useRef<() => Promise<MediaItem[] | undefined>>(undefined)
     const abortControllerRef = useRef<AbortController | null>(null)
 
+    const [userInteracted, setUserInteracted] = useState(false)
+
     const currentTrack = useMemo(() => {
         return (
             currentPlaylist[
@@ -142,7 +144,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const playTrack = useCallback(
         async (index: number) => {
-            if (!navigator.userActivation.hasBeenActive) {
+            if (!userInteracted) {
                 return
             }
 
@@ -208,6 +210,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             }
         },
         [
+            userInteracted,
             currentPlaylist,
             currentTrack,
             isPlaying,
@@ -219,6 +222,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     )
 
     const togglePlayPause = useCallback(() => {
+        setUserInteracted(true)
+
         if (audioRef.current && currentTrack) {
             const audio = audioRef.current
             if (isPlaying) {
@@ -277,6 +282,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     }, [currentShuffledIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const nextTrack = useCallback(async () => {
+        setUserInteracted(true)
+
         if (!currentPlaylist || currentPlaylist.length === 0 || currentTrackIndex.index === -1 || !currentTrack) {
             if (audioRef.current) {
                 audioRef.current.pause()
@@ -346,6 +353,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     ])
 
     const previousTrack = useCallback(async () => {
+        setUserInteracted(true)
+
         if (!currentPlaylist || currentPlaylist.length === 0 || currentTrackIndex.index === -1 || !currentTrack) {
             if (audioRef.current) {
                 audioRef.current.pause()
@@ -610,15 +619,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return () => {
             audio.removeEventListener('ended', handleEnded)
         }
-    }, [
-        currentTrack,
-        repeat,
-        currentPlaylist,
-        playTrack,
-        nextTrack,
-        reportPlaybackStoppedWrapper,
-        currentTrackIndex.index,
-    ])
+    }, [currentTrack, repeat, currentPlaylist, reportPlaybackStoppedWrapper, currentTrackIndex.index, nextTrack])
 
     useEffect(() => {
         if (clearOnLogout && currentTrack) {
@@ -649,6 +650,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         volume,
         setVolume,
         playTrack: (index: number) => {
+            setUserInteracted(true)
             setCurrentTrackIndex({ index })
         },
         nextTrack,
