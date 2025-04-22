@@ -16,19 +16,9 @@ interface MediaListProps {
     hasMore?: boolean
     playTrack: (index: number) => void
     playlist?: MediaItem[]
-    setCurrentPlaylist?: (playlist: MediaItem[]) => void
 }
 
-const MediaList = ({
-    items = [],
-    type,
-    loading,
-    loadMore,
-    hasMore,
-    playTrack,
-    playlist = [],
-    setCurrentPlaylist,
-}: MediaListProps) => {
+const MediaList = ({ items = [], type, loading, loadMore, hasMore, playTrack, playlist = [] }: MediaListProps) => {
     const playback = usePlaybackContext()
     const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
@@ -110,9 +100,6 @@ const MediaList = ({
                 playback.togglePlayPause()
             } else {
                 const playlistIndex = playlist.findIndex(track => track.Id === item.Id)
-                if (setCurrentPlaylist) {
-                    setCurrentPlaylist(items)
-                }
                 const effectiveIndex = playlistIndex !== -1 && playback.currentTrackIndex !== -1 ? playlistIndex : index
                 playTrack(effectiveIndex)
             }
