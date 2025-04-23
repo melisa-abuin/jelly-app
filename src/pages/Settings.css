@@ -57,15 +57,14 @@
 
 .settings-page > .section > .options > .option > .visual {
     position: relative;
-    overflow: hidden;
     width: 106px;
     height: 66px;
     border-radius: 12px;
     outline: 3px solid rgba(0, 0, 0, 0);
+    background-size: cover;
+    background-repeat: no-repeat;
     background-color: var(--bg-color-secondary);
     transition: outline-color 0.2s ease-out;
-    background-size: 260%;
-    background-repeat: no-repeat;
 }
 
 .settings-page > .section > .options > .option.active > .visual {
@@ -73,39 +72,16 @@
 }
 
 .settings-page > .section > .options > .option.light > .visual {
-    background-image: url(/light-variant.png);
+    background-image: url(/light-variant-tiny.webp);
 }
 
 .settings-page > .section > .options > .option.dark > .visual {
-    background-image: url(/dark-variant.png);
+    background-image: url(/dark-variant-tiny.webp);
 }
 
 .settings-page > .section > .options > .option.system > .visual {
-    background-image: url(/dark-variant.png);
-    background-size: 210%;
-}
-
-.settings-page > .section > .options > .option.system > .visual:after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    display: block;
-    width: 100%;
-    height: 100%;
-    background-size: 210%;
-    background-repeat: no-repeat;
-    background-image: url(/light-variant.png);
-}
-
-.settings-page > .section > .options > .option.system > .visual:before {
-    content: '';
-    z-index: 1;
-    position: absolute;
-    left: 50%;
-    display: block;
-    height: 100%;
-    width: 1px;
-    background-color: #161616;
+    background-image: url(/dark-light-variant-tiny-split.webp);
+    background-image: url(/light-dark-variant-tiny-split.webp);
 }
 
 .settings-page > .section > .options > .option > .desc {

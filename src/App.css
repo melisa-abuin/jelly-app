@@ -295,7 +295,7 @@ body.lockscroll {
     height: 80px;
     background-size: contain;
     background-repeat: no-repeat;
-    background-image: url(/logo.png);
+    background-image: url(/logo.webp);
 }
 
 .login > .login_form {
