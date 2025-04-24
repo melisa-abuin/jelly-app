@@ -30,6 +30,11 @@
     background-color: var(--bg-color-secondary);
 }
 
+.search-results-page > .search-content > .section.genres > .section-list > .section-item {
+    padding: 10px;
+    margin: 0 -10px;
+}
+
 .search-results-page > .search-content > .section > .section-list > .section-item > .thumbnail {
     display: block;
     width: 46px;
@@ -46,6 +51,10 @@
     border-radius: 20px;
 }
 
+.search-results-page > .search-content > .section.genres > .section-list > .section-item > .icon {
+    margin-right: 8px;
+}
+
 .search-results-page > .search-content > .section > .section-list > .section-item > .section-info {
     display: flex;
     flex-direction: column;
@@ -59,6 +68,10 @@
 }
 
 .search-results-page > .search-content > .section.artists > .section-list > .section-item > .section-info > .name {
+    margin-bottom: 0;
+}
+
+.search-results-page > .search-content > .section.genres > .section-list > .section-item > .section-info > .name {
     margin-bottom: 0;
 }
 

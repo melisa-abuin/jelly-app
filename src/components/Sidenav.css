@@ -84,12 +84,12 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     height: 64px;
     background-size: contain;
     background-repeat: no-repeat;
-    background-image: url(/logo.png);
+    background-image: url(/logo.webp);
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content {
     position: relative;
-    margin-bottom: 10px;
+    margin-bottom: 30px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > ul {
@@ -120,10 +120,21 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search {
-    margin: 16px 14px;
+    margin-bottom: 8px;
 }
 
-.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container {
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_header {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    padding: 12px 14px;
+    padding-bottom: 2px;
+    margin-bottom: 12px;
+    background-color: var(--bg-color-secondary);
+    box-shadow: 0 2px 8px 4px var(--bg-color-secondary);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_header > .input_container {
     position: relative;
     display: flex;
     align-items: center;
@@ -134,14 +145,14 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     background-color: var(--bg-color);
 }
 
-.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container > .search-icon {
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_header > .input_container > .search-icon {
     position: absolute;
     left: 8px;
     pointer-events: none;
     fill: var(--font-color-tertiary);
 }
 
-.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container > input {
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_header > .input_container > input {
     font-size: 0.75rem;
     font-weight: 500;
     width: 100%;
@@ -150,7 +161,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     text-overflow: ellipsis;
 }
 
-.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container > .search-clear {
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_header > .input_container > .search-clear {
     position: absolute;
     right: 0;
     opacity: 0;
@@ -161,22 +172,22 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     transition: opacity 0.2s ease-out, visibility 0.2s ease-out, fill 0.2s ease-out;
 }
 
-.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container > .search-clear:hover {
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_header > .input_container > .search-clear:hover {
     fill: var(--font-color);
 }
 
-.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container.active > .search-clear {
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_header > .input_container.active > .search-clear {
     position: relative;
     opacity: 1;
     visibility: visible;
 }
 
-.sidenav > .sidenav_wrapper > .sidenav_content > .search > .input_container > .search-loading {
+.sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_header > .input_container > .search-loading {
     padding: 8px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results {
-    margin: 14px 0;
+    margin: 0 14px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results {
@@ -588,7 +599,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results > .results > .additional {
-    margin-top: 6px;
+    margin-top: 5px;
     margin-left: 3px;
 }
 
@@ -613,13 +624,15 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .playlists {
-    margin-top: 20px;
+    margin-top: 18px;
 }
+
 .sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .indicator {
     font-size: 0.725rem;
     font-weight: 500;
     margin: 20px 14px;
 }
+
 .sidenav > .sidenav_wrapper > .sidenav_content > .playlists > .indicator.error {
     color: var(--font-color-error);
 }
@@ -653,6 +666,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     padding-top: 8px;
     margin-top: auto;
     background-color: var(--bg-color-secondary);
+    box-shadow: 0 -6px 16px 10px var(--bg-color-secondary);
 }
 
 /* Player volume */

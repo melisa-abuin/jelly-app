@@ -1,4 +1,4 @@
-import { GearIcon } from '@primer/octicons-react'
+import { BookmarkFillIcon, GearIcon } from '@primer/octicons-react'
 import { ChangeEvent, useEffect, useRef, useState, WheelEvent } from 'react'
 import { NavLink } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
@@ -17,7 +17,7 @@ interface SidenavProps {
 }
 
 interface SearchResult {
-    type: 'Artist' | 'Album' | 'Playlist' | 'Song'
+    type: 'Artist' | 'Album' | 'Playlist' | 'Song' | 'Genre'
     id: string
     name: string
     artistName?: string
@@ -44,8 +44,8 @@ const Sidenav = (props: SidenavProps) => {
 
     const handleVolumeScroll = (e: WheelEvent<HTMLInputElement>) => {
         e.stopPropagation()
-        const delta = e.deltaY > 0 ? -0.02 : 0.02
-        const newVolume = Math.max(0, Math.min(1, playback.volume + delta))
+        const step = e.deltaY > 0 ? -0.02 : 0.02
+        const newVolume = Math.max(0, Math.min(1, playback.volume + step))
         playback.setVolume(newVolume)
     }
 
@@ -64,9 +64,10 @@ const Sidenav = (props: SidenavProps) => {
 
                 try {
                     // Fetch artists from /Artists endpoint
-                    const [artistResponse, itemsResponse] = await Promise.all([
+                    const [artistResponse, itemsResponse, genreResponse] = await Promise.all([
                         api.searchArtists(searchQuery, 20),
                         api.searchItems(searchQuery, 40),
+                        api.searchGenres(searchQuery, 20),
                     ])
 
                     // Fetch songs, albums, and playlists from /Items endpoint
@@ -92,8 +93,11 @@ const Sidenav = (props: SidenavProps) => {
                         .filter(item => item.Type === 'Playlist')
                         .map(item => ({ type: 'Playlist' as const, id: item.Id, name: item.Name }))
                         .slice(0, 4)
+                    const genres = genreResponse
+                        .map(item => ({ type: 'Genre' as const, id: item.Name, name: item.Name }))
+                        .slice(0, 4)
 
-                    const limitedResults = [...songs, ...artists, ...albums, ...playlists]
+                    const limitedResults = [...songs, ...artists, ...albums, ...playlists, ...genres]
                     setSearchResults(limitedResults)
                 } catch (err) {
                     console.error('Search Error:', err)
@@ -173,47 +177,49 @@ const Sidenav = (props: SidenavProps) => {
                     </ul>
 
                     <div className="search">
-                        <div className={`input_container ${searchQuery ? 'active' : ''}`}>
-                            <div className="search-icon noSelect">
-                                <svg
-                                    width="13"
-                                    height="13"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 15.4395 15.2246"
-                                >
-                                    <g>
-                                        <rect height="15.2246" opacity="0" width="15.4395" x="0" y="0" />
-                                        <path d="M0 6.21094C0 9.63867 2.7832 12.4121 6.21094 12.4121C7.5293 12.4121 8.74023 12.002 9.74609 11.2988L13.3789 14.9414C13.584 15.1367 13.8379 15.2246 14.1016 15.2246C14.668 15.2246 15.0781 14.7949 15.0781 14.2285C15.0781 13.9551 14.9707 13.7109 14.8047 13.5254L11.1914 9.90234C11.9629 8.86719 12.4121 7.59766 12.4121 6.21094C12.4121 2.7832 9.63867 0 6.21094 0C2.7832 0 0 2.7832 0 6.21094ZM1.50391 6.21094C1.50391 3.60352 3.60352 1.50391 6.21094 1.50391C8.80859 1.50391 10.918 3.60352 10.918 6.21094C10.918 8.80859 8.80859 10.918 6.21094 10.918C3.60352 10.918 1.50391 8.80859 1.50391 6.21094Z" />
-                                    </g>
-                                </svg>
-                            </div>
-                            <input
-                                type="search"
-                                placeholder="Search"
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                ref={searchInputRef}
-                            />
-                            {!searchLoading && (
-                                <div className="search-clear" onClick={handleClearSearch}>
+                        <div className="search_header">
+                            <div className={`input_container ${searchQuery ? 'active' : ''}`}>
+                                <div className="search-icon noSelect">
                                     <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 16.1328 15.7715"
                                         width="13"
                                         height="13"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 15.4395 15.2246"
                                     >
                                         <g>
-                                            <rect height="15.7715" opacity="0" width="16.1328" x="0" y="0" />
-                                            <path d="M15.7715 7.88086C15.7715 12.2266 12.2363 15.7617 7.88086 15.7617C3.53516 15.7617 0 12.2266 0 7.88086C0 3.53516 3.53516 0 7.88086 0C12.2363 0 15.7715 3.53516 15.7715 7.88086ZM9.98047 4.80469L7.88086 6.88477L5.81055 4.81445C5.67383 4.6875 5.51758 4.61914 5.3125 4.61914C4.92188 4.61914 4.59961 4.92188 4.59961 5.33203C4.59961 5.51758 4.67773 5.69336 4.80469 5.83008L6.86523 7.89062L4.80469 9.95117C4.67773 10.0879 4.59961 10.2637 4.59961 10.4492C4.59961 10.8594 4.92188 11.1816 5.3125 11.1816C5.51758 11.1816 5.70312 11.1133 5.83008 10.9766L7.88086 8.90625L9.94141 10.9766C10.0684 11.1133 10.2539 11.1816 10.4492 11.1816C10.8594 11.1816 11.1816 10.8594 11.1816 10.4492C11.1816 10.2539 11.1133 10.0781 10.9668 9.94141L8.90625 7.89062L10.9766 5.82031C11.1328 5.67383 11.1914 5.50781 11.1914 5.3125C11.1914 4.91211 10.8691 4.59961 10.4688 4.59961C10.2832 4.59961 10.127 4.66797 9.98047 4.80469Z" />
+                                            <rect height="15.2246" opacity="0" width="15.4395" x="0" y="0" />
+                                            <path d="M0 6.21094C0 9.63867 2.7832 12.4121 6.21094 12.4121C7.5293 12.4121 8.74023 12.002 9.74609 11.2988L13.3789 14.9414C13.584 15.1367 13.8379 15.2246 14.1016 15.2246C14.668 15.2246 15.0781 14.7949 15.0781 14.2285C15.0781 13.9551 14.9707 13.7109 14.8047 13.5254L11.1914 9.90234C11.9629 8.86719 12.4121 7.59766 12.4121 6.21094C12.4121 2.7832 9.63867 0 6.21094 0C2.7832 0 0 2.7832 0 6.21094ZM1.50391 6.21094C1.50391 3.60352 3.60352 1.50391 6.21094 1.50391C8.80859 1.50391 10.918 3.60352 10.918 6.21094C10.918 8.80859 8.80859 10.918 6.21094 10.918C3.60352 10.918 1.50391 8.80859 1.50391 6.21094Z" />
                                         </g>
                                     </svg>
                                 </div>
-                            )}
-                            {searchLoading && (
-                                <div className="search-loading noSelect">
-                                    <InlineLoader />
-                                </div>
-                            )}
+                                <input
+                                    type="search"
+                                    placeholder="Search"
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                    ref={searchInputRef}
+                                />
+                                {!searchLoading && (
+                                    <div className="search-clear" onClick={handleClearSearch}>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16.1328 15.7715"
+                                            width="13"
+                                            height="13"
+                                        >
+                                            <g>
+                                                <rect height="15.7715" opacity="0" width="16.1328" x="0" y="0" />
+                                                <path d="M15.7715 7.88086C15.7715 12.2266 12.2363 15.7617 7.88086 15.7617C3.53516 15.7617 0 12.2266 0 7.88086C0 3.53516 3.53516 0 7.88086 0C12.2363 0 15.7715 3.53516 15.7715 7.88086ZM9.98047 4.80469L7.88086 6.88477L5.81055 4.81445C5.67383 4.6875 5.51758 4.61914 5.3125 4.61914C4.92188 4.61914 4.59961 4.92188 4.59961 5.33203C4.59961 5.51758 4.67773 5.69336 4.80469 5.83008L6.86523 7.89062L4.80469 9.95117C4.67773 10.0879 4.59961 10.2637 4.59961 10.4492C4.59961 10.8594 4.92188 11.1816 5.3125 11.1816C5.51758 11.1816 5.70312 11.1133 5.83008 10.9766L7.88086 8.90625L9.94141 10.9766C10.0684 11.1133 10.2539 11.1816 10.4492 11.1816C10.8594 11.1816 11.1816 10.8594 11.1816 10.4492C11.1816 10.2539 11.1133 10.0781 10.9668 9.94141L8.90625 7.89062L10.9766 5.82031C11.1328 5.67383 11.1914 5.50781 11.1914 5.3125C11.1914 4.91211 10.8691 4.59961 10.4688 4.59961C10.2832 4.59961 10.127 4.66797 9.98047 4.80469Z" />
+                                            </g>
+                                        </svg>
+                                    </div>
+                                )}
+                                {searchLoading && (
+                                    <div className="search-loading noSelect">
+                                        <InlineLoader />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div className="search_results">
                             {searchQuery && (
@@ -395,6 +401,14 @@ const Sidenav = (props: SidenavProps) => {
                                                                 <div className="text">{result.name}</div>
                                                             </div>
                                                         )}
+                                                        {result.type === 'Genre' && (
+                                                            <div className="type genre">
+                                                                <div className="icon" title="Genre">
+                                                                    <BookmarkFillIcon size={14} />
+                                                                </div>
+                                                                <div className="text">{result.name}</div>
+                                                            </div>
+                                                        )}
                                                     </NavLink>
                                                 )
                                             )}
@@ -414,13 +428,13 @@ const Sidenav = (props: SidenavProps) => {
                         </div>
                     </div>
 
-                    <div className="playlists">
-                        {loading && <div className="indicator loading">Loading playlists...</div>}
-                        {error && <div className="indicator error">{error}</div>}
-                        {!loading && !error && playlists.length === 0 && !searchQuery && (
-                            <div className="indicator info">No playlists found</div>
-                        )}
-                        {!searchQuery && (
+                    {!searchQuery && (
+                        <div className="playlists">
+                            {loading && <div className="indicator loading">Loading playlists...</div>}
+                            {error && <div className="indicator error">{error}</div>}
+                            {!loading && !error && playlists.length === 0 && (
+                                <div className="indicator info">No playlists found</div>
+                            )}
                             <div className="container noSelect">
                                 {playlists.map(playlist => (
                                     <NavLink
@@ -433,8 +447,8 @@ const Sidenav = (props: SidenavProps) => {
                                     </NavLink>
                                 ))}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </nav>
                 <div className="sidenav_footer">
                     <div className="volume">

@@ -1,4 +1,4 @@
-import { HeartFillIcon } from '@primer/octicons-react'
+import { BookmarkFillIcon, HeartFillIcon } from '@primer/octicons-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
@@ -10,7 +10,7 @@ import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import './SearchResults.css'
 
 interface SearchResult {
-    type: 'Artist' | 'Album' | 'Playlist' | 'Song'
+    type: 'Artist' | 'Album' | 'Playlist' | 'Song' | 'Genre'
     id: string
     name: string
     thumbnailUrl?: string
@@ -30,11 +30,13 @@ const SearchResults = () => {
         albums: SearchResult[]
         playlists: SearchResult[]
         songs: MediaItem[]
+        genres: SearchResult[]
     }>({
         artists: [],
         albums: [],
         playlists: [],
         songs: [],
+        genres: [],
     })
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -51,11 +53,12 @@ const SearchResults = () => {
             setError(null)
 
             try {
-                const [artistItems, albumItems, playlistItems, songs] = await Promise.all([
+                const [artistItems, albumItems, playlistItems, songs, genreItems] = await Promise.all([
                     api.searchArtistsDetailed(query, 10),
                     api.searchAlbumsDetailed(query, 10),
                     api.searchPlaylistsDetailed(query, 10),
                     api.fetchSongs(query),
+                    api.searchGenres(query, 10),
                 ])
 
                 const artists = artistItems.map(artist => ({
@@ -87,7 +90,14 @@ const SearchResults = () => {
                     _mediaItem: playlist,
                 }))
 
-                setResults({ artists, albums, playlists, songs })
+                const genres = genreItems.map(genre => ({
+                    type: 'Genre' as const,
+                    id: genre.Name,
+                    name: genre.Name,
+                    _mediaItem: genre,
+                }))
+
+                setResults({ artists, albums, playlists, songs, genres })
             } catch (err) {
                 console.error('Search Error:', err)
                 setError('Failed to load search results')
@@ -187,10 +197,34 @@ const SearchResults = () => {
                     </div>
                 )}
 
+                {results.genres.length > 0 && (
+                    <div className="section genres">
+                        <div className="title">Genres</div>
+                        <div className="section-list noSelect">
+                            {results.genres.map(genre => (
+                                <Link to={`/genre/${genre.id}`} key={genre.id} className="section-item">
+                                    <div className="icon">
+                                        <BookmarkFillIcon size={16} />
+                                    </div>
+                                    <div className="section-info">
+                                        <div className="name">{genre.name}</div>
+                                    </div>
+                                    {genre.isFavorite && (
+                                        <div className="favorited" title="Favorited">
+                                            <HeartFillIcon size={16} />
+                                        </div>
+                                    )}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {results.artists.length === 0 &&
                     results.albums.length === 0 &&
                     results.playlists.length === 0 &&
-                    results.songs.length === 0 && <div>No results found for '{query}'.</div>}
+                    results.songs.length === 0 &&
+                    results.genres.length === 0 && <div>No results found for '{query}'.</div>}
             </div>
         </div>
     )

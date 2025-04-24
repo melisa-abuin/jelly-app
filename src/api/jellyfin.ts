@@ -1,5 +1,6 @@
 import { Jellyfin } from '@jellyfin/sdk'
 import { ArtistsApi } from '@jellyfin/sdk/lib/generated-client/api/artists-api'
+import { GenresApi } from '@jellyfin/sdk/lib/generated-client/api/genres-api'
 import { ItemsApi } from '@jellyfin/sdk/lib/generated-client/api/items-api'
 import { PlaystateApi } from '@jellyfin/sdk/lib/generated-client/api/playstate-api'
 import { SessionApi } from '@jellyfin/sdk/lib/generated-client/api/session-api'
@@ -150,6 +151,20 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             { signal: AbortSignal.timeout(20000) }
         )
         return response.data.Items as MediaItem[]
+    }
+
+    const searchGenres = async (searchTerm: string, limit = 20): Promise<MediaItem[]> => {
+        const genresApi = new GenresApi(api.configuration)
+        const response = await genresApi.getGenres(
+            {
+                userId,
+                searchTerm,
+                includeItemTypes: [BaseItemKind.Audio],
+                limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+        return (response.data.Items as MediaItem[]) || []
     }
 
     const getRecentlyPlayed = async (): Promise<MediaItem[]> => {
@@ -748,6 +763,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         searchArtistsDetailed,
         searchAlbumsDetailed,
         searchPlaylistsDetailed,
+        searchGenres,
         getRecentlyPlayed,
         getFrequentlyPlayed,
         getRecentlyAdded,
