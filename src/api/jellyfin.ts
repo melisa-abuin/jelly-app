@@ -268,13 +268,18 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return response.data.Items as MediaItem[]
     }
 
-    const getAllTracks = async (startIndex = 0, limit = 40): Promise<MediaItem[]> => {
+    const getAllTracks = async (
+        startIndex = 0,
+        limit = 40,
+        sortBy: ItemSortBy = ItemSortBy.DateCreated,
+        sortOrder: SortOrder = SortOrder.Descending
+    ): Promise<MediaItem[]> => {
         const itemsApi = new ItemsApi(api.configuration)
         const response = await itemsApi.getItems(
             {
                 userId,
-                sortBy: [ItemSortBy.DateCreated],
-                sortOrder: [SortOrder.Descending],
+                sortBy: [sortBy],
+                sortOrder: [sortOrder],
                 includeItemTypes: [BaseItemKind.Audio],
                 recursive: true,
                 startIndex,

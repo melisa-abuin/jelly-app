@@ -1,5 +1,5 @@
 import '@fontsource-variable/inter'
-import { ArrowLeftIcon, BookmarkFillIcon, HeartFillIcon } from '@primer/octicons-react'
+import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
@@ -18,6 +18,7 @@ import { PlaybackContextProvider } from './context/PlaybackContext/PlaybackConte
 import { ScrollContextProvider } from './context/ScrollContext/ScrollContextProvider'
 import { ThemeContextProvider } from './context/ThemeContext/ThemeContextProvider'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
+import { useJellyfinTracksData } from './hooks/useJellyfinTracksData'
 import { useSidenav } from './hooks/useSidenav'
 import Album from './pages/Album'
 import Albums from './pages/Albums'
@@ -151,12 +152,17 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     const location = useLocation()
     const { showSidenav, toggleSidenav, closeSidenav } = useSidenav(location)
     const { pageTitle } = usePageTitle()
+    const { updateSort } = useJellyfinTracksData()
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
     }, [location.pathname])
 
     const previousPage = useAppBack()
+
+    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        updateSort(event.target.value)
+    }
 
     return (
         <div className="interface">
@@ -245,6 +251,45 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                         </div>
                     </div>
                     <div className="secondary">
+                        {location.pathname === '/tracks' && (
+                            <div className="filter">
+                                {/* temp */}
+                                <select onChange={handleSortChange} defaultValue="Added">
+                                    <option value="Added">Added</option>
+                                    <option value="Released">Released</option>
+                                    <option value="Runtime">Runtime</option>
+                                    <option value="Random">Random</option>
+                                </select>
+                                <div className="icon">
+                                    <ChevronDownIcon size={12} />
+                                </div>
+                            </div>
+                        )}
+                        {location.pathname === '/albums' && (
+                            <div className="filter">
+                                <select defaultValue="Added">
+                                    <option value="Added">Added</option>
+                                    <option value="Released">Released</option>
+                                    <option value="Runtime">Runtime</option>
+                                    <option value="Random">Random</option>
+                                </select>
+                                <div className="icon">
+                                    <ChevronDownIcon size={12} />
+                                </div>
+                            </div>
+                        )}
+                        {location.pathname === '/favorites' && (
+                            <div className="filter">
+                                <select defaultValue="Tracks">
+                                    <option value="Tracks">Tracks</option>
+                                    <option value="Albums">Albums</option>
+                                    <option value="Artists">Artists</option>
+                                </select>
+                                <div className="icon">
+                                    <ChevronDownIcon size={12} />
+                                </div>
+                            </div>
+                        )}
                         <div className="sidenav_toggle noSelect" onClick={toggleSidenav}>
                             <div className="bar"></div>
                             <div className="bar"></div>

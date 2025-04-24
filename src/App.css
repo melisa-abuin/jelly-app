@@ -36,12 +36,16 @@ img[alt] {
 }
 
 select {
+    font-family: var(--system-fonts);
+    font-family: var(--inter-font);
+    color: var(--font-color);
+    user-select: none;
     border: none;
     border-radius: 0;
     outline: none;
-    appearance: menulist;
-    -moz-appearance: menulist;
-    -webkit-appearance: menulist;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
     -webkit-border-radius: 0;
 }
 
@@ -457,34 +461,37 @@ body.lockscroll {
 }
 
 .main > .main_header > .secondary {
-    display: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.main > .main_header > .secondary > .filter {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.main > .main_header > .secondary > .filter > select {
+    font-size: 0.725rem;
+    font-weight: 500;
+    color: var(--brand-color);
+    cursor: pointer;
+    padding: 6px 8px;
+    padding-right: 26px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+}
+
+.main > .main_header > .secondary > .filter > .icon {
+    position: absolute;
+    right: 8px;
+    color: var(--brand-color);
 }
 
 .main > .main_header > .secondary > .sidenav_toggle {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    width: 28px;
-    height: 28px;
-    border-radius: 20px;
-    transition: background-color 0.2s ease-out;
-}
-
-.main > .main_header > .secondary > .sidenav_toggle:hover {
-    background-color: var(--bg-color-tertiary);
-}
-
-.main > .main_header > .secondary > .sidenav_toggle > .bar {
-    height: 2px;
-    width: 12px;
-    /* Force pixel alignment, on some devices the bars are uneven... subpixel rendering */
-    will-change: transform;
-    transform: translateZ(0);
-    border-radius: 2px;
-    background-color: var(--font-color);
+    display: none;
 }
 
 .main > .main_content {
@@ -972,8 +979,31 @@ body.lockscroll {
         max-width: calc(100% - 50px);
     }
 
-    .main > .main_header > .secondary {
-        display: block;
+    .main > .main_header > .secondary > .sidenav_toggle {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        width: 28px;
+        height: 28px;
+        border-radius: 20px;
+        transition: background-color 0.2s ease-out;
+    }
+
+    .main > .main_header > .secondary > .sidenav_toggle:hover {
+        background-color: var(--bg-color-tertiary);
+    }
+
+    .main > .main_header > .secondary > .sidenav_toggle > .bar {
+        height: 2px;
+        width: 12px;
+        /* Force pixel alignment, on some devices the bars are uneven... subpixel rendering */
+        will-change: transform;
+        transform: translateZ(0);
+        border-radius: 2px;
+        background-color: var(--font-color);
     }
 }
 
