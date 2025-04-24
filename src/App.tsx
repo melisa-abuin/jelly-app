@@ -290,6 +290,19 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                 </div>
                             </div>
                         )}
+                        {location.pathname.startsWith('/genre') && (
+                            <div className="filter">
+                                <select defaultValue="Added">
+                                    <option value="Added">Added</option>
+                                    <option value="Released">Released</option>
+                                    <option value="Runtime">Runtime</option>
+                                    <option value="Random">Random</option>
+                                </select>
+                                <div className="icon">
+                                    <ChevronDownIcon size={12} />
+                                </div>
+                            </div>
+                        )}
                         <div className="sidenav_toggle noSelect" onClick={toggleSidenav}>
                             <div className="bar"></div>
                             <div className="bar"></div>
