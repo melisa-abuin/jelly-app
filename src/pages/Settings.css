@@ -1,5 +1,5 @@
 .settings-page {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .settings-page > .section {
@@ -21,6 +21,7 @@
 
 .settings-page > .section.appearance {
     align-items: flex-start;
+    row-gap: 4px;
 }
 
 .settings-page > .section.session {
@@ -31,7 +32,7 @@
 .settings-page > .section > .info > .title {
     font-size: 0.85rem;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .settings-page > .section > .info > .desc {
@@ -42,6 +43,7 @@
 
 .settings-page > .section.appearance > .options {
     margin-top: 4px;
+    justify-content: center;
 }
 
 .settings-page > .section > .options {
