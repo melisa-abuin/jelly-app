@@ -1,21 +1,12 @@
 import MediaList from '../components/MediaList'
-import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinAlbumsData } from '../hooks/useJellyfinAlbumsData'
 
 const Albums = () => {
-    const playback = usePlaybackContext()
-    const { allAlbums, loading, error, loadMore, hasMore } = useJellyfinAlbumsData()
+    const { error } = useJellyfinAlbumsData()
 
     return (
         <div className="albums-page">
-            <MediaList
-                items={allAlbums}
-                type="album"
-                loading={loading}
-                loadMore={loadMore}
-                hasMore={hasMore}
-                playTrack={playback.playTrack}
-            />
+            <MediaList type="album" />
             {error && <div className="error">{error}</div>}
         </div>
     )

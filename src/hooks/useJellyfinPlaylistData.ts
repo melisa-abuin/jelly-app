@@ -1,13 +1,16 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { ApiError, MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
+import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { getAllTracks } from '../utils/getAllTracks'
 
 export const useJellyfinPlaylistData = (playlistId: string) => {
     const api = useJellyfinContext()
     const itemsPerPage = 40
+    const playback = usePlaybackContext()
 
+    const { setCurrentPlaylist } = playback
     const { data: playlist, error: playlistError } = useQuery<MediaItem, ApiError>({
         queryKey: ['playlist', playlistId],
         queryFn: () => api.getPlaylist(playlistId),
@@ -24,7 +27,7 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
         queryFn: () => api.getPlaylistTotals(playlistId),
     })
 
-    const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
+    const { data, isLoading, isFetched, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
@@ -47,7 +50,9 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
         }
     }, [error, playlistError, totalsError])
 
-    const tracks = getAllTracks(data)
+    const tracks = useMemo(() => {
+        return getAllTracks(data)
+    }, [data])
 
     const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {
@@ -59,8 +64,20 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
     const totalTrackCount = totals?.totalTrackCount || 0
     const totalPlays = tracks.reduce((sum, track) => sum + (track.UserData?.PlayCount || 0), 0)
 
+    useEffect(() => {
+        if (!isFetched) {
+            return
+        }
+
+        setCurrentPlaylist({
+            playlist: tracks,
+            hasMore: Boolean(hasNextPage),
+            loadMore,
+        })
+    }, [tracks, hasNextPage, isFetchingNextPage, isLoading, loadMore, isFetched, setCurrentPlaylist])
+
     return {
-        playlist: playlist || null,
+        playlist,
         tracks,
         loading: isLoading || isFetchingNextPage,
         error: error ? error.message : null,

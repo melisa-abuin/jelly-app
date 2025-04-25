@@ -1,14 +1,18 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { ApiError, MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
+import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { getAllTracks } from '../utils/getAllTracks'
 
 export const useJellyfinAlbumsData = () => {
     const api = useJellyfinContext()
     const itemsPerPage = 40
+    const playback = usePlaybackContext()
 
-    const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
+    const { setCurrentPlaylist } = playback
+
+    const { data, isLoading, isFetched, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
@@ -28,7 +32,9 @@ export const useJellyfinAlbumsData = () => {
         }
     }, [error])
 
-    const allAlbums = getAllTracks(data)
+    const allAlbums = useMemo(() => {
+        return getAllTracks(data)
+    }, [data])
 
     const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {
@@ -36,11 +42,19 @@ export const useJellyfinAlbumsData = () => {
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
+    useEffect(() => {
+        if (!isFetched) {
+            return
+        }
+
+        setCurrentPlaylist({
+            playlist: allAlbums,
+            hasMore: Boolean(hasNextPage),
+            loadMore,
+        })
+    }, [allAlbums, hasNextPage, isFetched, isFetchingNextPage, isLoading, loadMore, playback, setCurrentPlaylist])
+
     return {
-        allAlbums,
-        loading: isLoading || isFetchingNextPage,
         error: error ? error.message : null,
-        hasMore: Boolean(hasNextPage),
-        loadMore,
     }
 }

@@ -18,7 +18,6 @@ import { PlaybackContextProvider } from './context/PlaybackContext/PlaybackConte
 import { ScrollContextProvider } from './context/ScrollContext/ScrollContextProvider'
 import { ThemeContextProvider } from './context/ThemeContext/ThemeContextProvider'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
-import { useJellyfinTracksData } from './hooks/useJellyfinTracksData'
 import { useSidenav } from './hooks/useSidenav'
 import Album from './pages/Album'
 import Albums from './pages/Albums'
@@ -152,7 +151,6 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     const location = useLocation()
     const { showSidenav, toggleSidenav, closeSidenav } = useSidenav(location)
     const { pageTitle } = usePageTitle()
-    const { updateSort } = useJellyfinTracksData()
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
@@ -161,7 +159,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     const previousPage = useAppBack()
 
     const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        updateSort(event.target.value)
+        playback.updateSort(event.target.value)
     }
 
     return (

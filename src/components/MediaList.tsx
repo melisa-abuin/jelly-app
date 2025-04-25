@@ -9,31 +9,25 @@ import Loader from './Loader'
 import Skeleton from './Skeleton'
 
 interface MediaListProps {
-    items: MediaItem[] | undefined
     type: 'song' | 'album'
-    loading: boolean
-    loadMore?: () => void
-    hasMore?: boolean
-    playTrack: (index: number) => void
-    playlist?: MediaItem[]
 }
 
-const MediaList = ({ items = [], type, loading, loadMore, hasMore, playTrack, playlist = [] }: MediaListProps) => {
+const MediaList = ({ type }: MediaListProps) => {
     const playback = usePlaybackContext()
     const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
     const navigate = useNavigate()
     const location = useLocation()
     const sizeMap = useRef<{ [index: number]: number }>({})
-    const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(items)
+    const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(playback.currentPlaylist)
 
     useEffect(() => {
-        if (loading && hasMore && loadMore) {
-            setDisplayItems([...items, ...Array(4).fill({ isPlaceholder: true })])
+        if (playback.loading && playback.hasMore && playback.loadMore) {
+            setDisplayItems([...playback.currentPlaylist, ...Array(4).fill({ isPlaceholder: true })])
         } else {
-            setDisplayItems(items)
+            setDisplayItems(playback.currentPlaylist)
         }
-    }, [items, loading, hasMore, loadMore])
+    }, [playback.loading, playback.hasMore, playback.loadMore, playback.currentPlaylist])
 
     useEffect(() => {
         const handleResize = () => {
@@ -99,16 +93,16 @@ const MediaList = ({ items = [], type, loading, loadMore, hasMore, playTrack, pl
             if (playback.currentTrack?.Id === item.Id) {
                 playback.togglePlayPause()
             } else {
-                const playlistIndex = playlist.findIndex(track => track.Id === item.Id)
+                const playlistIndex = playback.currentPlaylist.findIndex(track => track.Id === item.Id)
                 const effectiveIndex = playlistIndex !== -1 && playback.currentTrackIndex !== -1 ? playlistIndex : index
-                playTrack(effectiveIndex)
+                playback.playTrack(effectiveIndex)
             }
         }
     }
 
     const handleEndReached = () => {
-        if (hasMore && loadMore && !loading) {
-            loadMore()
+        if (playback.hasMore && playback.loadMore && !playback.loading) {
+            playback.loadMore()
         }
     }
 
@@ -216,11 +210,11 @@ const MediaList = ({ items = [], type, loading, loadMore, hasMore, playTrack, pl
         )
     }
 
-    if (loading && items.length === 0) {
+    if (playback.loading && playback.currentPlaylist.length === 0) {
         return <Loader />
     }
 
-    if (items.length === 0 && !loading) {
+    if (playback.currentPlaylist.length === 0 && !playback.loading) {
         return <div className="empty">{type === 'song' ? 'No tracks were found' : 'No albums were found'}</div>
     }
 

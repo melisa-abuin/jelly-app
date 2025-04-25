@@ -6,8 +6,14 @@ import './Queue.css'
 
 const Queue = () => {
     const { setPageTitle } = usePageTitle()
-    const { currentTrack, currentPlaylist, currentTrackIndex, playTrack, hasMoreState, loadMoreCallback } =
-        usePlaybackContext()
+    const {
+        currentTrack,
+        currentPlaylist,
+        currentTrackIndex,
+        playTrack,
+        hasMore: hasMoreState,
+        loadMoreCallback,
+    } = usePlaybackContext()
 
     useEffect(() => {
         setPageTitle('Queue')
