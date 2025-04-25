@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import Loader from '../components/Loader'
 import PlaylistTrackList from '../components/PlaylistTrackList'
@@ -13,8 +13,6 @@ const ArtistTracks = () => {
     const { artist } = useJellyfinArtistData(artistId!)
     const { allTracks, loading, error, loadMore, hasMore } = useJellyfinArtistTracksData(artistId!)
     const { setPageTitle } = usePageTitle()
-    const hasPreloaded = useRef(false)
-    const [isPreloading, setIsPreloading] = useState(false)
 
     useEffect(() => {
         if (artist) {
@@ -24,42 +22,6 @@ const ArtistTracks = () => {
             setPageTitle('')
         }
     }, [artist, setPageTitle])
-
-    useEffect(() => {
-        if (hasPreloaded.current || isPreloading) return
-
-        const savedIndex = localStorage.getItem('currentTrackIndex')
-        if (savedIndex) {
-            const index = Number(savedIndex)
-            if (index >= 0 && allTracks.length <= index && hasMore) {
-                setIsPreloading(true)
-
-                const loadAdditionalTracks = async () => {
-                    if (allTracks.length > index || !hasMore) {
-                        setIsPreloading(false)
-                        hasPreloaded.current = true
-                        return
-                    }
-
-                    if (loading) {
-                        setTimeout(loadAdditionalTracks, 100)
-                        return
-                    }
-
-                    await loadMore()
-                    setTimeout(loadAdditionalTracks, 100)
-                }
-
-                loadAdditionalTracks()
-            } else {
-                hasPreloaded.current = true
-                setIsPreloading(false)
-            }
-        } else {
-            hasPreloaded.current = true
-            setIsPreloading(false)
-        }
-    }, [allTracks.length, hasMore, loading, loadMore, isPreloading])
 
     if (loading && allTracks.length === 0) {
         return <Loader />
