@@ -47,7 +47,12 @@ export const useJellyfinFavoritesData = () => {
             return
         }
 
+        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'favorites') {
+            return
+        }
+
         setCurrentPlaylist({
+            type: 'favorites',
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,

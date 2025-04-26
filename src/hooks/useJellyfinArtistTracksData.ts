@@ -48,7 +48,12 @@ export const useJellyfinArtistTracksData = (artistId: string) => {
             return
         }
 
+        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'artistTracks') {
+            return
+        }
+
         setCurrentPlaylist({
+            type: 'artistTracks',
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,

@@ -47,7 +47,12 @@ export const useJellyfinFrequentlyPlayedData = () => {
             return
         }
 
+        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'frequentlyPlayed') {
+            return
+        }
+
         setCurrentPlaylist({
+            type: 'frequentlyPlayed',
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,

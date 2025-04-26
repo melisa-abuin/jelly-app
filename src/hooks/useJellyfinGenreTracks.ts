@@ -47,7 +47,12 @@ export const useJellyfinGenreTracks = (genre: string) => {
             return
         }
 
+        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'genreTracks') {
+            return
+        }
+
         setCurrentPlaylist({
+            type: 'genreTracks',
             playlist: tracks,
             hasMore: Boolean(hasNextPage),
             loadMore,

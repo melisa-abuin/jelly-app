@@ -69,12 +69,26 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
             return
         }
 
+        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'playlistTracks') {
+            return
+        }
+
         setCurrentPlaylist({
+            type: 'playlistTracks',
             playlist: tracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
         })
-    }, [tracks, hasNextPage, isFetchingNextPage, isLoading, loadMore, isFetched, setCurrentPlaylist])
+    }, [
+        tracks,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+        loadMore,
+        isFetched,
+        setCurrentPlaylist,
+        playback.currentPlaylistQueryKey,
+    ])
 
     return {
         playlist,

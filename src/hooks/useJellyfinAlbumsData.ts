@@ -47,7 +47,12 @@ export const useJellyfinAlbumsData = () => {
             return
         }
 
+        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'albums') {
+            return
+        }
+
         setCurrentPlaylist({
+            type: 'albums',
             playlist: allAlbums,
             hasMore: Boolean(hasNextPage),
             loadMore,

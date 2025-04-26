@@ -47,7 +47,12 @@ export const useJellyfinRecentlyPlayedData = () => {
             return
         }
 
+        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'recentlyPlayed') {
+            return
+        }
+
         setCurrentPlaylist({
+            type: 'recentlyPlayed',
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,

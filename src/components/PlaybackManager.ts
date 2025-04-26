@@ -41,19 +41,17 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const [loading, setLoading] = useState<boolean>(false)
 
     const currentPlaylist = useRef<MediaItem[]>(JSON.parse(localStorage.getItem('currentPlaylist') || '[]'))
+    const currentPlaylistType = useRef<string | undefined>(localStorage.getItem('currentPlaylistType') || undefined)
 
-    const setCurrentPlaylist = useCallback((playlist: MediaItem[]) => {
-        currentPlaylist.current = playlist
-        localStorage.setItem('currentPlaylist', JSON.stringify(currentPlaylist.current || []))
-    }, [])
-
-    const setCurrentPlaylist2 = useCallback(
+    const setCurrentPlaylist = useCallback(
         ({
+            type,
             playlist,
             hasMore,
             loadMore,
             loading,
         }: {
+            type?: string
             playlist: MediaItem[]
             hasMore?: boolean
             loadMore?: () => Promise<MediaItem[] | undefined>
@@ -63,12 +61,17 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 setShuffle(false)
             }
 
-            setCurrentPlaylist(playlist)
+            currentPlaylistType.current = type
+            localStorage.setItem('currentPlaylistType', type || '')
+
+            currentPlaylist.current = playlist
+            localStorage.setItem('currentPlaylist', JSON.stringify(currentPlaylist.current || []))
+
             loadMoreCallback.current = loadMore
             setHasMore(hasMore || false)
             setLoading(loading || false)
         },
-        [setCurrentPlaylist, shuffle]
+        [shuffle]
     )
 
     const loadMoreCallback = useRef<() => Promise<MediaItem[] | undefined>>(undefined)
@@ -358,7 +361,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 if (hasMore && loadMoreCallback.current) {
                     const newPlaylist = await loadMoreCallback.current()
                     setCurrentTrackIndex({ index: nextIndex })
-                    setCurrentPlaylist(newPlaylist || [])
+                    setCurrentPlaylist({ playlist: newPlaylist || [] })
                     return
                 } else if (repeat === 'all') {
                     setCurrentTrackIndex({ index: 0 })
@@ -721,8 +724,9 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         toggleRepeat,
         hasMore,
         loading,
+        currentPlaylistQueryKey: currentPlaylistType.current,
         currentPlaylist: currentPlaylist.current,
-        setCurrentPlaylist: setCurrentPlaylist2,
+        setCurrentPlaylist,
         loadMore: loadMoreCallback.current,
         sessionPlayCount,
         resetSessionCount,
