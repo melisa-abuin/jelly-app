@@ -1,12 +1,10 @@
 import { Link } from 'react-router-dom' // Add this import
 import Loader from '../components/Loader'
 import MediaList from '../components/MediaList'
-import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinHomeData } from '../hooks/useJellyfinHomeData'
 
 const Home = () => {
     const { recentlyPlayed, frequentlyPlayed, recentlyAdded, loading, error } = useJellyfinHomeData()
-    const playback = usePlaybackContext()
 
     if (loading) {
         return <Loader />
@@ -28,16 +26,7 @@ const Home = () => {
                         See more
                     </Link>
                 </div>
-                <MediaList
-                    items={recentlyPlayed}
-                    type="song"
-                    loading={loading}
-                    playTrack={index => {
-                        playback.setCurrentPlaylist(recentlyPlayed || [])
-                        playback.playTrack(index)
-                    }}
-                    playlist={recentlyPlayed}
-                />
+                <MediaList items={recentlyPlayed} type="song" />
             </div>
             <div className="section">
                 <div className="section-header">
@@ -49,16 +38,7 @@ const Home = () => {
                         See more
                     </Link>
                 </div>
-                <MediaList
-                    items={frequentlyPlayed}
-                    type="song"
-                    loading={loading}
-                    playTrack={index => {
-                        playback.setCurrentPlaylist(frequentlyPlayed || [])
-                        playback.playTrack(index)
-                    }}
-                    playlist={frequentlyPlayed}
-                />
+                <MediaList items={frequentlyPlayed} type="song" />
             </div>
             <div className="section">
                 <div className="section-header">
@@ -67,16 +47,7 @@ const Home = () => {
                         <div className="section_desc">Albums recently added to the Library</div>
                     </div>
                 </div>
-                <MediaList
-                    items={recentlyAdded}
-                    type="album"
-                    loading={loading}
-                    playTrack={index => {
-                        playback.setCurrentPlaylist(recentlyAdded || [])
-                        playback.playTrack(index)
-                    }}
-                    playlist={recentlyAdded}
-                />
+                <MediaList items={recentlyAdded} type="album" />
             </div>
         </div>
     )

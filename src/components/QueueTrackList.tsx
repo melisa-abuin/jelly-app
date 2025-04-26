@@ -8,21 +8,10 @@ import Skeleton from './Skeleton'
 
 interface QueueTrackListProps {
     tracks: MediaItem[]
-    loading: boolean
-    loadMore?: () => Promise<MediaItem[] | undefined>
-    hasMore?: boolean
-    playTrack: (index: number) => void
     singleTrack?: boolean
 }
 
-const QueueTrackList = ({
-    tracks,
-    loading,
-    loadMore,
-    hasMore,
-    playTrack,
-    singleTrack = false,
-}: QueueTrackListProps) => {
+const QueueTrackList = ({ tracks, singleTrack = false }: QueueTrackListProps) => {
     const playback = usePlaybackContext()
     const rowRefs = useRef<(HTMLLIElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
@@ -30,12 +19,12 @@ const QueueTrackList = ({
     const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(tracks)
 
     useEffect(() => {
-        if (loading && hasMore && loadMore && !singleTrack) {
+        if (playback.loading && playback.hasMore && playback.loadMore && !singleTrack) {
             setDisplayItems([...tracks, ...Array(4).fill({ isPlaceholder: true })])
         } else {
             setDisplayItems(tracks)
         }
-    }, [tracks, loading, hasMore, loadMore, singleTrack])
+    }, [tracks, singleTrack, playback.loading, playback.hasMore, playback.loadMore])
 
     useEffect(() => {
         const handleResize = () => {
@@ -105,18 +94,15 @@ const QueueTrackList = ({
             if (playback.currentTrack?.Id === track.Id) {
                 playback.togglePlayPause()
             } else {
-                playTrack(index)
+                playback.playTrack(index)
             }
         },
-        [playTrack, playback]
+        [playback]
     )
 
     const handleEndReached = async () => {
-        if (hasMore && loadMore) {
-            const newTracks = await loadMore()
-            if (newTracks && newTracks.length > 0) {
-                playback.setCurrentPlaylist([...playback.currentPlaylist, ...newTracks], hasMore, loadMore)
-            }
+        if (playback.hasMore && playback.loadMore && !playback.loading) {
+            playback.loadMore()
         }
     }
 

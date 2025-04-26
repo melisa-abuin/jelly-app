@@ -2,11 +2,11 @@ import MediaList from '../components/MediaList'
 import { useJellyfinAlbumsData } from '../hooks/useJellyfinAlbumsData'
 
 const Albums = () => {
-    const { error } = useJellyfinAlbumsData()
+    const { items, error } = useJellyfinAlbumsData()
 
     return (
         <div className="albums-page">
-            <MediaList type="album" />
+            <MediaList items={items} type="album" />
             {error && <div className="error">{error}</div>}
         </div>
     )

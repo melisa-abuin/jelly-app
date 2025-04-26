@@ -55,6 +55,7 @@ export const useJellyfinAlbumsData = () => {
     }, [allAlbums, hasNextPage, isFetched, isFetchingNextPage, isLoading, loadMore, playback, setCurrentPlaylist])
 
     return {
+        items: allAlbums,
         error: error ? error.message : null,
     }
 }

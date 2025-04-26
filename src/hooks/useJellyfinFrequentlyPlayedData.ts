@@ -58,7 +58,5 @@ export const useJellyfinFrequentlyPlayedData = () => {
         items: allTracks,
         loading: isLoading || isFetchingNextPage,
         error: error ? error.message : null,
-        hasMore: Boolean(hasNextPage),
-        loadMore,
     }
 }

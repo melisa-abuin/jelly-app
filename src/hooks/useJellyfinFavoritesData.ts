@@ -55,6 +55,7 @@ export const useJellyfinFavoritesData = () => {
     }, [allTracks, data, hasNextPage, isFetched, isFetchingNextPage, isLoading, loadMore, playback, setCurrentPlaylist])
 
     return {
+        items: allTracks,
         error: error ? error.message : null,
     }
 }

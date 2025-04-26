@@ -55,10 +55,8 @@ export const useJellyfinGenreTracks = (genre: string) => {
     }, [tracks, hasNextPage, isFetchingNextPage, isLoading, loadMore, playback, isFetched, setCurrentPlaylist])
 
     return {
-        tracks,
+        items: tracks,
         loading: isLoading || isFetchingNextPage,
         error: error ? error.message : null,
-        hasMore: Boolean(hasNextPage),
-        loadMore,
     }
 }

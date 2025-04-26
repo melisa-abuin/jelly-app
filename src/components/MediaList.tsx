@@ -9,25 +9,26 @@ import Loader from './Loader'
 import Skeleton from './Skeleton'
 
 interface MediaListProps {
+    items: MediaItem[] | undefined
     type: 'song' | 'album'
 }
 
-const MediaList = ({ type }: MediaListProps) => {
+const MediaList = ({ items = [], type }: MediaListProps) => {
     const playback = usePlaybackContext()
     const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
     const navigate = useNavigate()
     const location = useLocation()
     const sizeMap = useRef<{ [index: number]: number }>({})
-    const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(playback.currentPlaylist)
+    const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(items)
 
     useEffect(() => {
         if (playback.loading && playback.hasMore && playback.loadMore) {
-            setDisplayItems([...playback.currentPlaylist, ...Array(4).fill({ isPlaceholder: true })])
+            setDisplayItems([...items, ...Array(4).fill({ isPlaceholder: true })])
         } else {
-            setDisplayItems(playback.currentPlaylist)
+            setDisplayItems(items)
         }
-    }, [playback.loading, playback.hasMore, playback.loadMore, playback.currentPlaylist])
+    }, [playback.loading, playback.hasMore, playback.loadMore, items])
 
     useEffect(() => {
         const handleResize = () => {
@@ -93,7 +94,7 @@ const MediaList = ({ type }: MediaListProps) => {
             if (playback.currentTrack?.Id === item.Id) {
                 playback.togglePlayPause()
             } else {
-                const playlistIndex = playback.currentPlaylist.findIndex(track => track.Id === item.Id)
+                const playlistIndex = items.findIndex(track => track.Id === item.Id)
                 const effectiveIndex = playlistIndex !== -1 && playback.currentTrackIndex !== -1 ? playlistIndex : index
                 playback.playTrack(effectiveIndex)
             }
@@ -210,11 +211,11 @@ const MediaList = ({ type }: MediaListProps) => {
         )
     }
 
-    if (playback.loading && playback.currentPlaylist.length === 0) {
+    if (playback.loading && items.length === 0) {
         return <Loader />
     }
 
-    if (playback.currentPlaylist.length === 0 && !playback.loading) {
+    if (items.length === 0 && !playback.loading) {
         return <div className="empty">{type === 'song' ? 'No tracks were found' : 'No albums were found'}</div>
     }
 

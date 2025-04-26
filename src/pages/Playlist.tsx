@@ -15,8 +15,15 @@ const Playlist = () => {
     const playback = usePlaybackContext()
 
     const { playlistId } = useParams<{ playlistId: string }>()
-    const { playlist, tracks, loading, error, loadMore, hasMore, totalPlaytime, totalTrackCount, totalPlays } =
-        useJellyfinPlaylistData(playlistId!)
+    const {
+        playlist,
+        items: tracks,
+        loading,
+        error,
+        totalPlaytime,
+        totalTrackCount,
+        totalPlays,
+    } = useJellyfinPlaylistData(playlistId!)
     const { setPageTitle } = usePageTitle()
 
     useEffect(() => {
@@ -66,7 +73,7 @@ const Playlist = () => {
                         <div
                             className="play-playlist"
                             onClick={() => {
-                                playback.setCurrentPlaylist(tracks)
+                                playback.setCurrentPlaylist({ playlist: tracks })
                                 playback.playTrack(0)
                             }}
                         >
@@ -83,18 +90,7 @@ const Playlist = () => {
                 </div>
             </div>
 
-            <PlaylistTrackList
-                tracks={tracks}
-                loading={loading}
-                loadMore={loadMore}
-                hasMore={hasMore}
-                playTrack={index => {
-                    playback.setCurrentPlaylist(tracks, hasMore, loadMore)
-                    playback.playTrack(index)
-                }}
-                playlist={tracks}
-                showType="artist"
-            />
+            <PlaylistTrackList tracks={tracks} showType="artist" />
         </div>
     )
 }

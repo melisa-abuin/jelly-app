@@ -78,11 +78,9 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
 
     return {
         playlist,
-        tracks,
+        items: tracks,
         loading: isLoading || isFetchingNextPage,
         error: error ? error.message : null,
-        hasMore: Boolean(hasNextPage),
-        loadMore,
         totalPlaytime,
         totalTrackCount,
         totalPlays,

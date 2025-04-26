@@ -92,7 +92,7 @@ const Artist = () => {
                         <div
                             className="play-artist"
                             onClick={() => {
-                                playback.setCurrentPlaylist(tracks)
+                                playback.setCurrentPlaylist({ playlist: tracks })
                                 playback.playTrack(0)
                             }}
                         >

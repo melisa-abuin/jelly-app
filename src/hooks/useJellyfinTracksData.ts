@@ -59,6 +59,7 @@ export const useJellyfinTracksData = () => {
     }, [allTracks, data, hasNextPage, isFetched, isFetchingNextPage, isLoading, loadMore, setCurrentPlaylist])
 
     return {
+        items: allTracks,
         error: error ? error.message : null,
     }
 }

@@ -12,24 +12,11 @@ import Skeleton from './Skeleton'
 
 interface PlaylistTrackListProps {
     tracks: MediaItem[]
-    loading: boolean
-    loadMore?: () => void
-    hasMore?: boolean
-    playTrack: (index: number) => void
-    playlist: MediaItem[]
     playlistId?: string
     showType?: 'artist' | 'album'
 }
 
-const PlaylistTrackList = ({
-    tracks,
-    loading,
-    loadMore,
-    hasMore,
-    playTrack,
-    playlistId,
-    showType,
-}: PlaylistTrackListProps) => {
+const PlaylistTrackList = ({ tracks, playlistId, showType }: PlaylistTrackListProps) => {
     const playback = usePlaybackContext()
     const rowRefs = useRef<(HTMLLIElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
@@ -38,12 +25,12 @@ const PlaylistTrackList = ({
     const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(tracks)
 
     useEffect(() => {
-        if (loading && hasMore && loadMore) {
+        if (playback.loading && playback.hasMore && playback.loadMore) {
             setDisplayItems([...tracks, ...Array(4).fill({ isPlaceholder: true })])
         } else {
             setDisplayItems(tracks)
         }
-    }, [tracks, loading, hasMore, loadMore])
+    }, [tracks, playback.loading, playback.hasMore, playback.loadMore])
 
     useEffect(() => {
         const handleResize = () => {
@@ -109,15 +96,15 @@ const PlaylistTrackList = ({
             if (playback.currentTrack?.Id === track.Id) {
                 playback.togglePlayPause()
             } else {
-                playTrack(index)
+                playback.playTrack(index)
             }
         },
-        [playTrack, playback]
+        [playback]
     )
 
     const handleEndReached = () => {
-        if (hasMore && loadMore) {
-            loadMore()
+        if (playback.hasMore && playback.loadMore && !playback.loading) {
+            playback.loadMore()
         }
     }
 
@@ -210,11 +197,11 @@ const PlaylistTrackList = ({
         )
     }
 
-    if (loading && tracks.length === 0) {
+    if (playback.loading && tracks.length === 0) {
         return <Loader />
     }
 
-    if (!loading && tracks.length === 0) {
+    if (!playback.loading && tracks.length === 0) {
         return <div className="empty">No tracks were found</div>
     }
 

@@ -6,14 +6,7 @@ import './Queue.css'
 
 const Queue = () => {
     const { setPageTitle } = usePageTitle()
-    const {
-        currentTrack,
-        currentPlaylist,
-        currentTrackIndex,
-        playTrack,
-        hasMore: hasMoreState,
-        loadMoreCallback,
-    } = usePlaybackContext()
+    const { currentTrack, currentPlaylist, currentTrackIndex } = usePlaybackContext()
 
     useEffect(() => {
         setPageTitle('Queue')
@@ -30,12 +23,7 @@ const Queue = () => {
     return (
         <div className="queue-page">
             <div className="queue-header">
-                <QueueTrackList
-                    tracks={[currentTrack]}
-                    loading={false}
-                    playTrack={() => playTrack(currentTrackIndex)}
-                    singleTrack={true}
-                />
+                <QueueTrackList tracks={[currentTrack]} singleTrack={true} />
             </div>
             {queueTracks.length > 0 && (
                 <>
@@ -43,13 +31,7 @@ const Queue = () => {
                     <div className="queue-desc">
                         <span className="text">From {sourceName}</span>
                     </div>
-                    <QueueTrackList
-                        tracks={queueTracks}
-                        loading={false}
-                        loadMore={loadMoreCallback.current}
-                        hasMore={hasMoreState}
-                        playTrack={index => playTrack(currentTrackIndex + 1 + index)}
-                    />
+                    <QueueTrackList tracks={queueTracks} />
                 </>
             )}
         </div>

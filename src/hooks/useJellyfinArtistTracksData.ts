@@ -56,10 +56,8 @@ export const useJellyfinArtistTracksData = (artistId: string) => {
     }, [allTracks, data, hasNextPage, isFetched, isFetchingNextPage, isLoading, loadMore, playback, setCurrentPlaylist])
 
     return {
-        allTracks: getAllTracks(data),
+        items: getAllTracks(data),
         loading: isLoading || isFetchingNextPage,
         error: error ? error.message : null,
-        hasMore: Boolean(hasNextPage),
-        loadMore,
     }
 }
