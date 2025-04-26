@@ -16,5 +16,5 @@ export const useDocumentTitle = () => {
         } else {
             document.title = `${getPageTitle(pageTitle, location)} - Jellyfin Music App`
         }
-    }, [currentTrack, isPlaying, pageTitle, location.pathname])
+    }, [currentTrack, isPlaying, pageTitle, location.pathname, location])
 }
