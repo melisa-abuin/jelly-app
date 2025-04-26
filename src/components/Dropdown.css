@@ -1,0 +1,65 @@
+.dropdown,
+.sub-dropdown {
+    position: absolute;
+    z-index: 2;
+}
+
+.sub-dropdown {
+    top: -4px !important;
+    left: 100% !important;
+}
+
+.sub-dropdown.flip {
+    left: auto !important;
+    right: 100% !important;
+}
+
+.sub-dropdown.flip-y {
+    top: unset !important;
+    bottom: -4px !important;
+}
+
+.dropdown > .dropdown-menu {
+    min-width: 160px;
+}
+
+.dropdown > .dropdown-menu,
+.sub-dropdown > .dropdown-menu {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    cursor: initial;
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    box-shadow: var(--dropdown-shadow);
+}
+
+.sub-dropdown > .dropdown-menu {
+    max-width: 200px;
+    width: max-content;
+}
+
+.dropdown > .dropdown-menu > .dropdown-item,
+.sub-dropdown > .dropdown-menu > .dropdown-item {
+    position: relative;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown > .dropdown-menu > .dropdown-item:hover,
+.sub-dropdown > .dropdown-menu > .dropdown-item:hover {
+    background-color: var(--bg-color-tertiary);
+}
+
+.dropdown > .dropdown-menu > .dropdown-item > .icon {
+    margin-right: -2px;
+}

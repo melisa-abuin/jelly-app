@@ -181,6 +181,7 @@ html.light {
     --volume-dot-color-active: #a1a1a1;
     --scrollbar-color: #cecece;
     --scrollbar-color-hover: #bbbbbb;
+    --dropdown-shadow: 0 0 4px rgba(0, 0, 0, 0.04);
 }
 
 html.dark {
@@ -213,6 +214,7 @@ html.dark {
     --volume-dot-color-active: #c4c1c7;
     --scrollbar-color: #78767c;
     --scrollbar-color-hover: #a8a6ac;
+    --dropdown-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
 }
 
 html,

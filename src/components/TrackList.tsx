@@ -1,7 +1,12 @@
 import { HeartFillIcon } from '@primer/octicons-react'
+import { useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
+import { useDropdown } from '../hooks/useDropdown'
+import { defaultMenuItems } from '../utils/dropdownMenuItems'
 import { formatDuration } from '../utils/formatDuration'
+import { Dropdown } from './Dropdown'
 import './TrackList.css'
 
 interface TrackListProps {
@@ -12,6 +17,7 @@ interface TrackListProps {
 
 const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
     const playback = usePlaybackContext()
+    const location = useLocation()
 
     const MIN_PLAY_COUNT = 5
     const mostPlayedTracks = tracks
@@ -36,10 +42,27 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
                     .filter(Boolean)
                     .join(' ')
 
+                const itemRef = useRef<HTMLLIElement>(null)
+                const menuItems = defaultMenuItems(track).filter(
+                    item => !(location.pathname.includes('/album') && item.label === 'View album')
+                )
+                const {
+                    isOpen,
+                    position,
+                    subDropdown,
+                    openSubDropdown,
+                    closeSubDropdown,
+                    closeDropdown,
+                    onContextMenu,
+                    onTouchStart,
+                    onTouchEnd,
+                } = useDropdown(track, menuItems, itemRef)
+
                 return (
                     <li
                         key={track.Id}
                         className={`track-item ${itemClass}`}
+                        ref={itemRef}
                         onClick={() => {
                             if (isCurrentTrack) {
                                 playback.togglePlayPause()
@@ -50,6 +73,9 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
                                 playback.playTrack(playIndex)
                             }
                         }}
+                        onContextMenu={onContextMenu}
+                        onTouchStart={onTouchStart}
+                        onTouchEnd={onTouchEnd}
                     >
                         <div className="track-indicator">
                             <div className="track-number">{index + 1}</div>
@@ -94,6 +120,19 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
                             )}
                             <div className="duration">{formatDuration(track.RunTimeTicks)}</div>
                         </div>
+                        {isOpen && (
+                            <Dropdown
+                                isOpen={isOpen}
+                                position={position}
+                                selectedItem={track}
+                                menuItems={menuItems}
+                                subDropdown={subDropdown}
+                                openSubDropdown={openSubDropdown}
+                                closeSubDropdown={closeSubDropdown}
+                                closeDropdown={closeDropdown}
+                                parentRef={itemRef}
+                            />
+                        )}
                     </li>
                 )
             })}

@@ -16,6 +16,10 @@
     background-color: var(--bg-color-secondary);
 }
 
+.tracklist > .track-item:has(.dropdown) {
+    background-color: var(--bg-color-secondary);
+}
+
 .tracklist > .track-item > .track-indicator {
     position: relative;
     display: flex;
@@ -226,6 +230,11 @@
 }
 
 .tracklist > .track-item:hover > .track-details > .container > .name::after {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.tracklist > .track-item:has(.dropdown) > .track-details > .container > .name::after {
     opacity: 0;
     visibility: hidden;
 }
