@@ -4,8 +4,15 @@ import { MediaItem } from '../api/jellyfin'
 export interface DropdownMenuItem {
     label: string
     action?: (item: MediaItem) => void
-    subItems?: { label: string; action: (item: MediaItem) => void }[]
+    subItems?: {
+        label: string
+        action: (item: MediaItem) => void
+        isInput?: boolean
+        subItems?: { label: string; action: (item: MediaItem) => void; isInput?: boolean }[]
+    }[]
 }
+
+const activeDropdown: { current: string | null } = { current: null }
 
 export const useDropdown = (
     item: MediaItem,
@@ -17,7 +24,12 @@ export const useDropdown = (
     const [subDropdown, setSubDropdown] = useState<{
         isOpen: boolean
         position: { x: number; y: number }
-        items: { label: string; action: (item: MediaItem) => void }[]
+        items: {
+            label: string
+            action: (item: MediaItem) => void
+            isInput?: boolean
+            subItems?: { label: string; action: (item: MediaItem) => void; isInput?: boolean }[]
+        }[]
         activeIndex: number | null
         flip: boolean
         flipY: boolean
@@ -36,7 +48,7 @@ export const useDropdown = (
 
     const openDropdown = useCallback(
         (_item: MediaItem, x: number, y: number, _menuItems: DropdownMenuItem[]) => {
-            const menuWidth = 160
+            const menuWidth = 170
             const menuHeight = 160
             const margin = 20
             let adjustedX = x
@@ -52,6 +64,9 @@ export const useDropdown = (
                         ? window.innerHeight - menuHeight - margin - rect.top
                         : y
             }
+            const closeEvent = new CustomEvent('close-all-dropdowns', { detail: { exceptId: _item.Id } })
+            document.dispatchEvent(closeEvent)
+            activeDropdown.current = _item.Id
             setIsOpen(true)
             setPosition({ x: adjustedX, y: adjustedY })
             setSubDropdown({
@@ -81,21 +96,38 @@ export const useDropdown = (
             flipY: false,
             top: 0,
         })
+        if (activeDropdown.current === item.Id) {
+            activeDropdown.current = null
+        }
         setTimeout(() => {
             isClosing.current = false
         }, 0)
-    }, [])
+    }, [item.Id])
 
     const openSubDropdown = useCallback(
         (
             x: number,
             y: number,
-            items: { label: string; action: (item: MediaItem) => void }[],
+            items: {
+                label: string
+                action: (item: MediaItem) => void
+                isInput?: boolean
+                subItems?: { label: string; action: (item: MediaItem) => void; isInput?: boolean }[]
+            }[],
             activeIndex: number,
             flip: boolean,
             flipY: boolean,
             top: number
         ) => {
+            setSubDropdown({
+                isOpen: false,
+                position: { x: 0, y: 0 },
+                items: [],
+                activeIndex: null,
+                flip: false,
+                flipY: false,
+                top: 0,
+            })
             setSubDropdown({ isOpen: true, position: { x, y }, items, activeIndex, flip, flipY, top })
         },
         []
@@ -164,15 +196,24 @@ export const useDropdown = (
             }
         }
 
+        const handleCloseAllDropdowns = (e: Event) => {
+            const customEvent = e as CustomEvent<{ exceptId: string }>
+            if (customEvent.detail.exceptId !== item.Id) {
+                closeDropdown()
+            }
+        }
+
         document.addEventListener('click', handleClickOutside)
+        document.addEventListener('close-all-dropdowns', handleCloseAllDropdowns)
 
         return () => {
             document.removeEventListener('click', handleClickOutside)
+            document.removeEventListener('close-all-dropdowns', handleCloseAllDropdowns)
             if (touchTimeout.current) {
                 clearTimeout(touchTimeout.current)
             }
         }
-    }, [closeDropdown, elementRef, isOpen])
+    }, [closeDropdown, elementRef, isOpen, item.Id])
 
     return {
         isOpen,

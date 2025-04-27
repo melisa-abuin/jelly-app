@@ -163,6 +163,7 @@ html.light {
     --font-color-inverted: #ffffff;
     --font-color-active: #000000;
     --font-color-error: #e95151;
+    --font-color-error-light: #e64e4e;
     --border-color: #ececec;
     --border-color-secondary: #d6d6d6;
     --link-color: #a386e7;
@@ -196,6 +197,7 @@ html.dark {
     --font-color-inverted: #ffffff;
     --font-color-active: #ffffff;
     --font-color-error: #cc3a3a;
+    --font-color-error-light: #e45353;
     --border-color: #1f1f1f;
     --border-color-secondary: #303030;
     --link-color: #9e7de9;

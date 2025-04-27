@@ -12,7 +12,7 @@ interface DropdownProps {
     subDropdown: {
         isOpen: boolean
         position: { x: number; y: number }
-        items: { label: string; action: (item: MediaItem) => void }[]
+        items: { label: string; action: (item: MediaItem) => void; isInput?: boolean }[]
         activeIndex: number | null
         flip: boolean
         flipY: boolean
@@ -21,7 +21,7 @@ interface DropdownProps {
     openSubDropdown: (
         x: number,
         y: number,
-        items: { label: string; action: (item: MediaItem) => void }[],
+        items: { label: string; action: (item: MediaItem) => void; isInput?: boolean }[],
         activeIndex: number,
         flip: boolean,
         flipY: boolean,
@@ -45,7 +45,9 @@ export const Dropdown = ({
 }: DropdownProps) => {
     const menuRef = useRef<HTMLDivElement>(null)
     const subMenuRef = useRef<HTMLDivElement>(null)
+    const inputRef = useRef<HTMLInputElement>(null)
     const [subMenuHeight, setSubMenuHeight] = useState<number>(0)
+    const [playlistName, setPlaylistName] = useState<string>('')
 
     useEffect(() => {
         if (isOpen && parentRef.current) {
@@ -59,14 +61,14 @@ export const Dropdown = ({
             const height = menuElement?.offsetHeight || 0
             setSubMenuHeight(height)
         }
+        if (subDropdown.isOpen && subDropdown.items.some(item => item.isInput)) {
+            inputRef.current?.focus()
+        }
     }, [subDropdown.isOpen, subDropdown.items])
 
     const handleItemClick = (e: React.MouseEvent, menuItem: DropdownMenuItem, menuIndex: number) => {
         e.stopPropagation()
-        if (menuItem.action && selectedItem) {
-            menuItem.action(selectedItem)
-            closeDropdown()
-        } else if (menuItem.subItems) {
+        if (menuItem.subItems) {
             const menuItemElement = menuRef.current?.querySelectorAll('.dropdown-item')[menuIndex]
             if (menuItemElement) {
                 const rect = menuItemElement.getBoundingClientRect()
@@ -83,15 +85,45 @@ export const Dropdown = ({
                 } else if (rect.top + window.scrollY + cssTopOffset + menuHeight + margin > viewportBottom) {
                     top = cssTopOffset - (menuHeight - (viewportBottom - rect.bottom - margin))
                 }
+                console.log('Opening submenu for:', menuItem.label, 'Subitems:', menuItem.subItems)
                 openSubDropdown(0, 0, menuItem.subItems, menuIndex, flip, flipY, top)
             }
+        } else if (menuItem.action && selectedItem) {
+            console.log('Executing action for:', menuItem.label)
+            menuItem.action(selectedItem)
+            closeDropdown()
         }
     }
 
-    const handleSubItemClick = (e: React.MouseEvent, subItem: { action: (item: MediaItem) => void }) => {
+    const handleSubItemClick = (
+        e: React.MouseEvent,
+        subItem: { label: string; action: (item: MediaItem) => void; isInput?: boolean }
+    ) => {
         e.stopPropagation()
-        if (selectedItem) {
+        if (!subItem.isInput && selectedItem) {
+            console.log('Executing subitem action for:', subItem.label)
             subItem.action(selectedItem)
+            closeDropdown()
+        }
+    }
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPlaylistName(e.target.value)
+    }
+
+    const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && playlistName.trim() && selectedItem) {
+            console.log('Create new playlist:', playlistName, 'for item:', selectedItem.Name)
+            setPlaylistName('')
+            closeDropdown()
+        }
+    }
+
+    const handleSaveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation()
+        if (playlistName.trim() && selectedItem) {
+            console.log('Create new playlist:', playlistName, 'for item:', selectedItem.Name)
+            setPlaylistName('')
             closeDropdown()
         }
     }
@@ -114,6 +146,7 @@ export const Dropdown = ({
                 } else if (rect.top + window.scrollY + cssTopOffset + menuHeight + margin > viewportBottom) {
                     top = cssTopOffset - (menuHeight - (viewportBottom - rect.bottom - margin))
                 }
+                console.log('Mouse enter submenu for:', menuItem.label)
                 openSubDropdown(0, 0, menuItem.subItems, menuIndex, flip, flipY, top)
             }
         } else {
@@ -126,6 +159,10 @@ export const Dropdown = ({
         e.stopPropagation()
     }
 
+    const handleDropdownClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation() // Prevent clicks in empty dropdown space from bubbling
+    }
+
     return isOpen ? (
         <div
             className={`dropdown noSelect`}
@@ -135,12 +172,15 @@ export const Dropdown = ({
             }}
             ref={menuRef}
             onContextMenu={handleContextMenu}
+            onClick={handleDropdownClick}
         >
             <div className="dropdown-menu">
                 {menuItems.map((menuItem, index) => (
                     <div
                         key={index}
-                        className={`dropdown-item${menuItem.subItems ? ' has-sub-menu' : ''}`}
+                        className={`dropdown-item${menuItem.subItems ? ' has-sub-menu' : ''}${
+                            menuItem.label === 'Remove from favorites' ? ' remove-favorite' : ''
+                        }`}
                         onClick={e => handleItemClick(e, menuItem, index)}
                         onMouseEnter={() => handleMouseEnter(menuItem, index)}
                         onMouseLeave={closeSubDropdown}
@@ -166,7 +206,27 @@ export const Dropdown = ({
                                             onClick={e => handleSubItemClick(e, subItem)}
                                             onContextMenu={handleContextMenu}
                                         >
-                                            {subItem.label}
+                                            {subItem.isInput ? (
+                                                <div className="playlist-input-container">
+                                                    <input
+                                                        ref={inputRef}
+                                                        type="text"
+                                                        value={playlistName}
+                                                        onChange={handleInputChange}
+                                                        onKeyDown={handleInputKeyDown}
+                                                        onClick={e => e.stopPropagation()}
+                                                        placeholder={subItem.label}
+                                                        className="playlist-input"
+                                                    />
+                                                    {playlistName.trim() && (
+                                                        <button onClick={handleSaveClick} className="save-button">
+                                                            Save
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                subItem.label
+                                            )}
                                         </div>
                                     ))}
                                 </div>

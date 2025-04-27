@@ -20,7 +20,8 @@
 }
 
 .dropdown > .dropdown-menu {
-    min-width: 160px;
+    min-width: 170px;
+    max-width: 210px;
 }
 
 .dropdown > .dropdown-menu,
@@ -38,8 +39,13 @@
 }
 
 .sub-dropdown > .dropdown-menu {
-    max-width: 200px;
     width: max-content;
+    max-width: 210px;
+    max-height: 50dvh;
+    overflow: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .dropdown > .dropdown-menu > .dropdown-item,
@@ -60,6 +66,50 @@
     background-color: var(--bg-color-tertiary);
 }
 
+.dropdown > .dropdown-menu > .dropdown-item.has-removable {
+    color: var(--font-color-error-light);
+}
+
 .dropdown > .dropdown-menu > .dropdown-item > .icon {
-    margin-right: -2px;
+    margin-right: -4px;
+}
+
+.sub-dropdown > .dropdown-menu > .dropdown-item:has(.playlist-input-container) {
+    padding: unset;
+}
+
+.sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input {
+    font: inherit;
+    position: relative;
+    flex: 1;
+    background: transparent;
+    padding: 4px 10px;
+}
+
+.sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input::placeholder {
+    color: var(--font-color);
+}
+
+.save-button {
+    position: absolute;
+    right: 0;
+    font-size: 0.725rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 2px 4px;
+    border: none;
+    border-radius: 4px;
+    background: var(--bg-color-secondary);
+    color: var(--font-color);
+    transition: background-color 0.2s ease-out;
+}
+
+.save-button:hover {
+    background: var(--bg-color-tertiary);
 }

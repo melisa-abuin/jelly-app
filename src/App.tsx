@@ -251,7 +251,6 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                     <div className="secondary">
                         {location.pathname === '/tracks' && (
                             <div className="filter">
-                                {/* temp */}
                                 <select onChange={handleSortChange} defaultValue="Added">
                                     <option value="Added">Added</option>
                                     <option value="Released">Released</option>
@@ -265,7 +264,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                         )}
                         {location.pathname === '/albums' && (
                             <div className="filter">
-                                <select defaultValue="Added">
+                                <select onChange={handleSortChange} defaultValue="Added">
                                     <option value="Added">Added</option>
                                     <option value="Released">Released</option>
                                     <option value="Runtime">Runtime</option>
@@ -278,7 +277,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                         )}
                         {location.pathname === '/favorites' && (
                             <div className="filter">
-                                <select defaultValue="Tracks">
+                                <select onChange={handleSortChange} defaultValue="Tracks">
                                     <option value="Tracks">Tracks</option>
                                     <option value="Albums">Albums</option>
                                     <option value="Artists">Artists</option>
@@ -290,7 +289,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                         )}
                         {location.pathname.startsWith('/genre') && (
                             <div className="filter">
-                                <select defaultValue="Added">
+                                <select onChange={handleSortChange} defaultValue="Added">
                                     <option value="Added">Added</option>
                                     <option value="Released">Released</option>
                                     <option value="Runtime">Runtime</option>

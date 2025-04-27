@@ -38,17 +38,17 @@ export const defaultMenuItems = (track: MediaItem) => {
 
     // Placeholders
     const handleAddToPlaylist = (playlistId: string, item: MediaItem) => {
-        console.log(`Add to playlist ${playlistId}:`, item.Name)
+        console.log(`Add to a playlist ${playlistId}:`, item.Name)
     }
 
-    const handleAddToNewPlaylist = (item: MediaItem) => {
-        console.log('Add to new playlist:', item.Name)
+    const handleCreateNewPlaylist = (item: MediaItem, playlistName: string) => {
+        console.log('Create new playlist:', playlistName, 'for item:', item.Name)
     }
 
     const menuItems: {
         label: string
         action?: (item: MediaItem) => void
-        subItems?: { label: string; action: (item: MediaItem) => void }[]
+        subItems?: { label: string; action: (item: MediaItem) => void; isInput?: boolean }[]
     }[] = [
         {
             label: 'Play next',
@@ -57,10 +57,6 @@ export const defaultMenuItems = (track: MediaItem) => {
         {
             label: 'Add to queue',
             action: handleAddToQueue,
-        },
-        {
-            label: track.UserData?.IsFavorite ? 'Remove from favorites' : 'Add to favorites',
-            action: handleToggleFavorite,
         },
         track.ArtistItems && track.ArtistItems.length > 1
             ? {
@@ -80,11 +76,16 @@ export const defaultMenuItems = (track: MediaItem) => {
             action: handleViewAlbum,
         },
         {
-            label: 'Add to playlist',
+            label: track.UserData?.IsFavorite ? 'Remove from favorites' : 'Add to favorites',
+            action: handleToggleFavorite,
+        },
+        {
+            label: 'Add to a playlist',
             subItems: [
                 {
                     label: 'New...',
-                    action: handleAddToNewPlaylist,
+                    action: () => {}, // Placeholder, handled by input
+                    isInput: true,
                 },
                 ...playlists.map(playlist => ({
                     label: playlist.Name || 'Unnamed Playlist',
