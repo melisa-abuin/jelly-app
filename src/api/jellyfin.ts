@@ -1,4 +1,5 @@
 import { Jellyfin } from '@jellyfin/sdk'
+import { InstantMixApi } from '@jellyfin/sdk/lib/generated-client'
 import { ArtistsApi } from '@jellyfin/sdk/lib/generated-client/api/artists-api'
 import { GenresApi } from '@jellyfin/sdk/lib/generated-client/api/genres-api'
 import { ItemsApi } from '@jellyfin/sdk/lib/generated-client/api/items-api'
@@ -284,6 +285,18 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 recursive: true,
                 startIndex,
                 limit,
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+        return response.data.Items as MediaItem[]
+    }
+
+    const getInstantMixFromSong = async (songId: string): Promise<MediaItem[]> => {
+        const itemsApi = new InstantMixApi(api.configuration)
+        const response = await itemsApi.getInstantMixFromSong(
+            {
+                userId,
+                itemId: songId,
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -798,5 +811,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         reportPlaybackStopped,
         getImageUrl,
         getStreamUrl,
+        getInstantMixFromSong,
     }
 }

@@ -1,10 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
+import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
+import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinPlaylistsList } from '../hooks/useJellyfinPlaylistsList'
 
 export const defaultMenuItems = (track: MediaItem) => {
     const navigate = useNavigate()
     const { playlists } = useJellyfinPlaylistsList()
+    const playback = usePlaybackContext()
+    const api = useJellyfinContext()
 
     // Placeholders
     const handlePlayNext = (item: MediaItem) => {
@@ -92,6 +96,20 @@ export const defaultMenuItems = (track: MediaItem) => {
                     action: (item: MediaItem) => handleAddToPlaylist(playlist.Id, item),
                 })),
             ],
+        },
+        {
+            label: 'Go to song radio',
+            action: (item: MediaItem) => {
+                api.getInstantMixFromSong(item.Id).then(r => {
+                    if (r) {
+                        playback.setCurrentPlaylist({
+                            playlist: r,
+                        })
+
+                        navigate('/queue')
+                    }
+                })
+            },
         },
     ]
 
