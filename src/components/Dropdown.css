@@ -78,14 +78,14 @@
     transition: opacity 0.2s ease-out;
 }
 
-.sub-dropdown > .dropdown-menu > .dropdown-item:has(.playlist-input-container) {
-    padding: unset;
-    background-color: unset !important;
-}
-
 .sub-dropdown > .dropdown-menu > .dropdown-item:has(.playlist-input.has-text) ~ .dropdown-item {
     opacity: 0.3;
     pointer-events: none;
+}
+
+.sub-dropdown > .dropdown-menu > .dropdown-item:has(.playlist-input-container) {
+    padding: unset;
+    background-color: unset !important;
 }
 
 .sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container {
@@ -107,7 +107,7 @@
 }
 
 .sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input.has-text {
-    max-width: calc(100% - 54px);
+    max-width: calc(100% - 52px);
 }
 
 .sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input.has-text ~ .create-btn {
@@ -133,4 +133,98 @@
 
 .sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .create-btn:hover {
     background: var(--bg-color-quaternary);
+}
+
+/* Responsive */
+@media only screen and (max-width: 480px), (pointer: coarse) {
+    .dropdown.drawer {
+        position: fixed;
+        left: 16px !important;
+        bottom: 0 !important;
+        width: calc(100% - 32px);
+        z-index: 3;
+    }
+
+    .dropdown.drawer > .dropdown-menu {
+        min-width: 100%;
+        max-width: 100%;
+        border-radius: 12px 12px 0 0;
+        padding: 6px;
+        gap: 4px;
+        box-shadow: none;
+        max-height: 50dvh;
+        overflow: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dropdown.drawer > .dropdown-menu > .dropdown-item {
+        font-size: 0.825rem;
+        padding: 7px 12px;
+        border-radius: 6px;
+        transition: opacity 0.2s ease-out;
+    }
+
+    .dropdown.drawer > .dropdown-menu > .dropdown-item:has(.playlist-input.has-text) ~ .dropdown-item {
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .dropdown.drawer > .dropdown-menu > .dropdown-item:has(.playlist-input-container) {
+        padding: unset;
+        background-color: unset !important;
+    }
+
+    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input {
+        font: inherit;
+        position: relative;
+        flex: 1;
+        padding: 7px 12px;
+        background: transparent;
+    }
+
+    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input::placeholder {
+        color: var(--font-color);
+    }
+
+    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input.has-text {
+        max-width: calc(100% - 52px);
+    }
+
+    .dropdown.drawer
+        > .dropdown-menu
+        > .dropdown-item
+        > .playlist-input-container
+        > .playlist-input.has-text
+        ~ .create-btn {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container > .create-btn {
+        position: absolute;
+        right: 2px;
+        opacity: 0;
+        visibility: hidden;
+        font-size: 0.725rem;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 5px 8px;
+        border: none;
+        border-radius: 4px;
+        background: var(--bg-color-tertiary);
+        color: var(--font-color);
+        transition: background-color 0.2s ease-out, opacity 0.2s ease-out, visibility 0.2s ease-out;
+    }
+
+    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container > .create-btn:hover {
+        background: var(--bg-color-quaternary);
+    }
 }

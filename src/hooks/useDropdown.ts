@@ -4,6 +4,7 @@ import { MediaItem } from '../api/jellyfin'
 export interface DropdownMenuItem {
     label: string
     action?: (item: MediaItem) => void
+    isInput?: boolean
     subItems?: {
         label: string
         action: (item: MediaItem) => void
@@ -21,6 +22,7 @@ export const useDropdown = (
 ) => {
     const [isOpen, setIsOpen] = useState(false)
     const [position, setPosition] = useState({ x: 0, y: 0 })
+    const [isTouchDevice, setIsTouchDevice] = useState(false)
     const [subDropdown, setSubDropdown] = useState<{
         isOpen: boolean
         position: { x: number; y: number }
@@ -46,23 +48,25 @@ export const useDropdown = (
     const touchTimeout = useRef<number | null>(null)
     const isClosing = useRef(false)
 
+    useEffect(() => {
+        const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 480
+        setIsTouchDevice(isTouch)
+    }, [])
+
     const openDropdown = useCallback(
         (_item: MediaItem, x: number, y: number, _menuItems: DropdownMenuItem[]) => {
-            const menuWidth = 170
-            const menuHeight = 160
-            const margin = 20
             let adjustedX = x
             let adjustedY = y
-            if (elementRef.current) {
+            if (isTouchDevice) {
+                adjustedX = 0
+                adjustedY = window.innerHeight
+            } else if (elementRef.current) {
                 const rect = elementRef.current.getBoundingClientRect()
-                adjustedX =
-                    x + rect.left > window.innerWidth - menuWidth - margin
-                        ? window.innerWidth - menuWidth - margin - rect.left
-                        : x
-                adjustedY =
-                    y + rect.top > window.innerHeight - menuHeight - margin
-                        ? window.innerHeight - menuHeight - margin - rect.top
-                        : y
+                const menuWidth = 170
+                const menuHeight = 160
+                const margin = 20
+                adjustedX = x + rect.left + menuWidth + margin > window.innerWidth ? x - menuWidth - margin : x
+                adjustedY = y + rect.top + menuHeight + margin > window.innerHeight ? y - menuHeight - margin : y
             }
             const closeEvent = new CustomEvent('close-all-dropdowns', { detail: { exceptId: _item.Id } })
             document.dispatchEvent(closeEvent)
@@ -79,7 +83,7 @@ export const useDropdown = (
                 top: 0,
             })
         },
-        [elementRef]
+        [elementRef, isTouchDevice]
     )
 
     const closeDropdown = useCallback(() => {
@@ -219,6 +223,7 @@ export const useDropdown = (
         isOpen,
         position,
         subDropdown,
+        isTouchDevice,
         openSubDropdown,
         closeSubDropdown,
         closeDropdown,

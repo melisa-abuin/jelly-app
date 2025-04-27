@@ -42,7 +42,7 @@ export const defaultMenuItems = (track: MediaItem) => {
 
     // Placeholders
     const handleAddToPlaylist = (playlistId: string, item: MediaItem) => {
-        console.log(`Add to a playlist ${playlistId}:`, item.Name)
+        console.log(`Add to playlist ${playlistId}:`, item.Name)
     }
 
     const handleCreateNewPlaylist = (item: MediaItem, playlistName: string) => {
@@ -61,6 +61,20 @@ export const defaultMenuItems = (track: MediaItem) => {
         {
             label: 'Add to queue',
             action: handleAddToQueue,
+        },
+        {
+            label: 'Play instant mix',
+            action: (item: MediaItem) => {
+                api.getInstantMixFromSong(item.Id).then(r => {
+                    if (r) {
+                        playback.setCurrentPlaylist({
+                            playlist: r,
+                        })
+
+                        navigate('/queue')
+                    }
+                })
+            },
         },
         track.ArtistItems && track.ArtistItems.length > 1
             ? {
@@ -84,7 +98,7 @@ export const defaultMenuItems = (track: MediaItem) => {
             action: handleToggleFavorite,
         },
         {
-            label: 'Add to a playlist',
+            label: 'Add to playlist',
             subItems: [
                 {
                     label: 'New...',
@@ -96,20 +110,6 @@ export const defaultMenuItems = (track: MediaItem) => {
                     action: (item: MediaItem) => handleAddToPlaylist(playlist.Id, item),
                 })),
             ],
-        },
-        {
-            label: 'Go to song radio',
-            action: (item: MediaItem) => {
-                api.getInstantMixFromSong(item.Id).then(r => {
-                    if (r) {
-                        playback.setCurrentPlaylist({
-                            playlist: r,
-                        })
-
-                        navigate('/queue')
-                    }
-                })
-            },
         },
     ]
 
