@@ -116,10 +116,12 @@ export const Dropdown = ({
             console.log('Create new playlist:', playlistName, 'for item:', selectedItem.Name)
             setPlaylistName('')
             closeDropdown()
+        } else if (e.key === 'Escape') {
+            setPlaylistName('')
         }
     }
 
-    const handleSaveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleCreateClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation()
         if (playlistName.trim() && selectedItem) {
             console.log('Create new playlist:', playlistName, 'for item:', selectedItem.Name)
@@ -179,7 +181,7 @@ export const Dropdown = ({
                     <div
                         key={index}
                         className={`dropdown-item${menuItem.subItems ? ' has-sub-menu' : ''}${
-                            menuItem.label === 'Remove from favorites' ? ' remove-favorite' : ''
+                            menuItem.label === 'Remove from favorites' ? ' has-removable' : ''
                         }`}
                         onClick={e => handleItemClick(e, menuItem, index)}
                         onMouseEnter={() => handleMouseEnter(menuItem, index)}
@@ -216,13 +218,13 @@ export const Dropdown = ({
                                                         onKeyDown={handleInputKeyDown}
                                                         onClick={e => e.stopPropagation()}
                                                         placeholder={subItem.label}
-                                                        className="playlist-input"
+                                                        className={`playlist-input${
+                                                            playlistName.trim() ? ' has-text' : ''
+                                                        }`}
                                                     />
-                                                    {playlistName.trim() && (
-                                                        <button onClick={handleSaveClick} className="save-button">
-                                                            Save
-                                                        </button>
-                                                    )}
+                                                    <button onClick={handleCreateClick} className="create-btn">
+                                                        Create
+                                                    </button>
                                                 </div>
                                             ) : (
                                                 subItem.label

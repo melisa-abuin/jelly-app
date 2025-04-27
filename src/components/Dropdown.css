@@ -74,8 +74,18 @@
     margin-right: -4px;
 }
 
+.sub-dropdown > .dropdown-menu > .dropdown-item {
+    transition: opacity 0.2s ease-out;
+}
+
 .sub-dropdown > .dropdown-menu > .dropdown-item:has(.playlist-input-container) {
     padding: unset;
+    background-color: unset !important;
+}
+
+.sub-dropdown > .dropdown-menu > .dropdown-item:has(.playlist-input.has-text) ~ .dropdown-item {
+    opacity: 0.3;
+    pointer-events: none;
 }
 
 .sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container {
@@ -88,28 +98,39 @@
     font: inherit;
     position: relative;
     flex: 1;
-    background: transparent;
     padding: 4px 10px;
+    background: transparent;
 }
 
 .sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input::placeholder {
     color: var(--font-color);
 }
 
-.save-button {
+.sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input.has-text {
+    max-width: calc(100% - 54px);
+}
+
+.sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input.has-text ~ .create-btn {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .create-btn {
     position: absolute;
-    right: 0;
+    right: 2px;
+    opacity: 0;
+    visibility: hidden;
     font-size: 0.725rem;
     font-weight: 500;
     cursor: pointer;
-    padding: 2px 4px;
+    padding: 3px 7px;
     border: none;
     border-radius: 4px;
-    background: var(--bg-color-secondary);
+    background: var(--bg-color-tertiary);
     color: var(--font-color);
-    transition: background-color 0.2s ease-out;
+    transition: background-color 0.2s ease-out, opacity 0.2s ease-out, visibility 0.2s ease-out;
 }
 
-.save-button:hover {
-    background: var(--bg-color-tertiary);
+.sub-dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .create-btn:hover {
+    background: var(--bg-color-quaternary);
 }
