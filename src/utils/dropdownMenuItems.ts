@@ -1,15 +1,12 @@
-import { useNavigate } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
-import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
-import { useJellyfinPlaylistsList } from '../hooks/useJellyfinPlaylistsList'
 
-export const defaultMenuItems = (track: MediaItem) => {
-    const navigate = useNavigate()
-    const { playlists } = useJellyfinPlaylistsList()
-    const playback = usePlaybackContext()
-    const api = useJellyfinContext()
-
+export const defaultMenuItems = (
+    track: MediaItem,
+    navigate: (path: string) => void,
+    playback: any,
+    api: any,
+    playlists: any[]
+) => {
     // Placeholders
     const handlePlayNext = (item: MediaItem) => {
         console.log('Play next:', item.Name)
@@ -45,10 +42,6 @@ export const defaultMenuItems = (track: MediaItem) => {
         console.log(`Add to playlist ${playlistId}:`, item.Name)
     }
 
-    const handleCreateNewPlaylist = (item: MediaItem, playlistName: string) => {
-        console.log('Create new playlist:', playlistName, 'for item:', item.Name)
-    }
-
     const menuItems: {
         label: string
         action?: (item: MediaItem) => void
@@ -65,12 +58,11 @@ export const defaultMenuItems = (track: MediaItem) => {
         {
             label: 'Play instant mix',
             action: (item: MediaItem) => {
-                api.getInstantMixFromSong(item.Id).then(r => {
+                api.getInstantMixFromSong(item.Id).then((r: any) => {
                     if (r) {
                         playback.setCurrentPlaylist({
                             playlist: r,
                         })
-
                         navigate('/queue')
                     }
                 })

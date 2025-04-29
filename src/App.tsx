@@ -6,8 +6,11 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { CSSProperties, useContext, useEffect, useState } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom'
 import './App.css'
+import { Dropdown } from './components/Dropdown'
 import './components/MediaList.css'
 import Sidenav from './components/Sidenav'
+import { DropdownContext } from './context/DropdownContext/DropdownContext'
+import { DropdownProvider } from './context/DropdownContext/DropdownContextProvider'
 import { HistoryContext } from './context/HistoryContext/HistoryContext'
 import { HistoryContextProvider } from './context/HistoryContext/HistoryContextProvider'
 import { JellyfinContextProvider } from './context/JellyfinContext/JellyfinContextProvider'
@@ -117,7 +120,9 @@ const App = () => {
             <HistoryContextProvider>
                 <PageTitleProvider>
                     <ScrollContextProvider>
-                        <ThemeContextProvider>{actualApp}</ThemeContextProvider>
+                        <ThemeContextProvider>
+                            <DropdownProvider>{actualApp}</DropdownProvider>
+                        </ThemeContextProvider>
                     </ScrollContextProvider>
                 </PageTitleProvider>
             </HistoryContextProvider>
@@ -151,6 +156,9 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     const location = useLocation()
     const { showSidenav, toggleSidenav, closeSidenav } = useSidenav(location)
     const { pageTitle } = usePageTitle()
+    const dropdownContext = useContext(DropdownContext)
+    const isDropdownOpen = dropdownContext?.isOpen || false
+    const isTouchDevice = dropdownContext?.isTouchDevice || false
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
@@ -165,7 +173,10 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     return (
         <div className="interface">
             <Sidenav username={auth.username} showSidenav={showSidenav} closeSidenav={closeSidenav} />
-            <div className={showSidenav ? 'dimmer active' : 'dimmer'} onClick={toggleSidenav}></div>
+            <div
+                className={showSidenav || (isDropdownOpen && isTouchDevice) ? 'dimmer active' : 'dimmer'}
+                onClick={showSidenav ? toggleSidenav : dropdownContext?.closeDropdown}
+            ></div>
             <main className="main">
                 <div className="main_header">
                     <div className="primary">
@@ -468,6 +479,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                     </div>
                 </div>
             </main>
+            <Dropdown />
         </div>
     )
 }

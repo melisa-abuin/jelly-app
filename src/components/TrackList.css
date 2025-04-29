@@ -16,7 +16,7 @@
     background-color: var(--bg-color-secondary);
 }
 
-.tracklist > .track-item:has(.dropdown) {
+.tracklist > .track-item.active {
     background-color: var(--bg-color-secondary);
 }
 
@@ -234,7 +234,7 @@
     visibility: hidden;
 }
 
-.tracklist > .track-item:has(.dropdown) > .track-details > .container > .name::after {
+.tracklist > .track-item.active > .track-details > .container > .name::after {
     opacity: 0;
     visibility: hidden;
 }
