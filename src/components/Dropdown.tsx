@@ -6,6 +6,7 @@ import './Dropdown.css'
 
 export const Dropdown = () => {
     const context = useContext(DropdownContext)
+
     if (!context) {
         throw new Error('Dropdown must be used within a DropdownProvider')
     }

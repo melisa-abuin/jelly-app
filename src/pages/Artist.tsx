@@ -37,7 +37,7 @@ const Artist = () => {
         throw new Error('Artist must be used within a DropdownProvider')
     }
 
-    const { openDropdown, isOpen, setActiveElementId, activeElementId } = dropdownContext
+    const { openDropdown, isOpen, selectedItem, setSelectedItem } = dropdownContext
 
     useEffect(() => {
         if (artist) {
@@ -77,7 +77,7 @@ const Artist = () => {
             const closeEvent = new CustomEvent('close-all-dropdowns', { detail: { exceptId: artist.Id } })
             document.dispatchEvent(closeEvent)
             openDropdown(artist, x, y, filteredMenuItems, true)
-            setActiveElementId(artist.Id)
+            setSelectedItem(artist)
         }
     }
 
@@ -142,7 +142,7 @@ const Artist = () => {
                             </div>
                         </div>
                         <div
-                            className={`more ${isOpen && activeElementId === artist?.Id ? 'active' : ''}`}
+                            className={`more ${isOpen && selectedItem?.Id === artist?.Id ? 'active' : ''}`}
                             onClick={handleMoreClick}
                             ref={moreRef}
                         >

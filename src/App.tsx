@@ -10,7 +10,7 @@ import { Dropdown } from './components/Dropdown'
 import './components/MediaList.css'
 import Sidenav from './components/Sidenav'
 import { DropdownContext } from './context/DropdownContext/DropdownContext'
-import { DropdownProvider } from './context/DropdownContext/DropdownContextProvider'
+import { DropdownContextProvider } from './context/DropdownContext/DropdownContextProvider'
 import { HistoryContext } from './context/HistoryContext/HistoryContext'
 import { HistoryContextProvider } from './context/HistoryContext/HistoryContextProvider'
 import { JellyfinContextProvider } from './context/JellyfinContext/JellyfinContextProvider'
@@ -122,7 +122,7 @@ const App = () => {
                 <PageTitleProvider>
                     <ScrollContextProvider>
                         <ThemeContextProvider>
-                            <DropdownProvider>{actualApp}</DropdownProvider>
+                            <DropdownContextProvider>{actualApp}</DropdownContextProvider>
                         </ThemeContextProvider>
                     </ScrollContextProvider>
                 </PageTitleProvider>

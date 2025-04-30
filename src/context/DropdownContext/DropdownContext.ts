@@ -1,37 +1,4 @@
-import { createContext, Dispatch, SetStateAction } from 'react'
-import { MediaItem } from '../../api/jellyfin'
-import { DropdownMenuItem } from '../../hooks/useDropdown'
+import { createContext } from 'react'
+import { IDropdownContext } from './DropdownContextProvider'
 
-export interface DropdownContextType {
-    isOpen: boolean
-    position: { x: number; y: number }
-    selectedItem: MediaItem | null
-    menuItems: DropdownMenuItem[]
-    subDropdown: {
-        isOpen: boolean
-        position: { x: number; y: number }
-        items: { label: string; action: (item: MediaItem) => void; isInput?: boolean }[]
-        activeIndex: number | null
-        flip: boolean
-        flipY: boolean
-        top: number
-    }
-    isTouchDevice: boolean
-    openDropdown: (item: MediaItem, x: number, y: number, menuItems: DropdownMenuItem[], ignoreMargin?: boolean) => void
-    closeDropdown: () => void
-    openSubDropdown: (
-        x: number,
-        y: number,
-        items: { label: string; action: (item: MediaItem) => void; isInput?: boolean }[],
-        activeIndex: number,
-        flip: boolean,
-        flipY: boolean,
-        top: number
-    ) => void
-    closeSubDropdown: () => void
-    activeElementId: string | null
-    setActiveElementId: Dispatch<SetStateAction<string | null>>
-    ignoreMargin: boolean
-}
-
-export const DropdownContext = createContext<DropdownContextType | null>(null)
+export const DropdownContext = createContext<IDropdownContext>({} as IDropdownContext)

@@ -18,7 +18,7 @@ export const useDropdown = (
         throw new Error('useDropdown must be used within a DropdownProvider')
     }
 
-    const { isOpen, openDropdown, closeDropdown, setActiveElementId } = context
+    const { isOpen, openDropdown, closeDropdown, setSelectedItem } = context
     const touchTimeout = useRef<number | null>(null)
 
     const handleContextMenu = useCallback(
@@ -30,10 +30,10 @@ export const useDropdown = (
                 const closeEvent = new CustomEvent('close-all-dropdowns', { detail: { exceptId: item.Id } })
                 document.dispatchEvent(closeEvent)
                 openDropdown(item, x, y, menuItems)
-                setActiveElementId(item.Id)
+                setSelectedItem(item)
             }
         },
-        [item, menuItems, openDropdown, elementRef, setActiveElementId]
+        [item, menuItems, openDropdown, elementRef, setSelectedItem]
     )
 
     const handleTouchStart = useCallback(
@@ -46,11 +46,11 @@ export const useDropdown = (
                     const closeEvent = new CustomEvent('close-all-dropdowns', { detail: { exceptId: item.Id } })
                     document.dispatchEvent(closeEvent)
                     openDropdown(item, x, y, menuItems)
-                    setActiveElementId(item.Id)
+                    setSelectedItem(item)
                 }
             }, 500)
         },
-        [item, menuItems, openDropdown, elementRef, setActiveElementId]
+        [item, menuItems, openDropdown, elementRef, setSelectedItem]
     )
 
     const handleTouchEnd = useCallback(() => {

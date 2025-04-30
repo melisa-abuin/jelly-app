@@ -23,7 +23,7 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
     const navigate = useNavigate()
     const api = useJellyfinContext()
     const { playlists } = useJellyfinPlaylistsList()
-    const { activeElementId } = useContext(DropdownContext)!
+    const { selectedItem } = useContext(DropdownContext)!
 
     const MIN_PLAY_COUNT = 5
     const mostPlayedTracks = tracks
@@ -41,7 +41,7 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
             {tracks.map((track, index) => {
                 const isCurrentTrack = playback.currentTrack?.Id === track.Id
                 const isMostPlayed = mostPlayedTracks.includes(track.Id)
-                const isActive = activeElementId === track.Id
+                const isActive = selectedItem?.Id === track.Id
                 const itemClass = [
                     isCurrentTrack ? (playback.isPlaying ? 'playing' : 'paused') : '',
                     isMostPlayed ? 'most-played' : '',

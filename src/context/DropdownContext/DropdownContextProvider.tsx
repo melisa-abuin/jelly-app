@@ -8,7 +8,9 @@ interface DropdownProviderProps {
     children: ReactNode
 }
 
-export const DropdownProvider = ({ children }: DropdownProviderProps) => {
+export type IDropdownContext = ReturnType<typeof useInitialState>
+
+const useInitialState = () => {
     const [isOpen, setIsOpen] = useState(false)
     const [position, setPosition] = useState({ x: 0, y: 0 })
     const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null)
@@ -30,7 +32,6 @@ export const DropdownProvider = ({ children }: DropdownProviderProps) => {
         flipY: false,
         top: 0,
     })
-    const [activeElementId, setActiveElementId] = useState<string | null>(null)
     const [isTouchDevice, setIsTouchDevice] = useState(false)
     const [ignoreMargin, setIgnoreMargin] = useState(false)
     const scrollContext = useContext(ScrollContext)
@@ -79,7 +80,6 @@ export const DropdownProvider = ({ children }: DropdownProviderProps) => {
                 flipY: false,
                 top: 0,
             })
-            setActiveElementId(item.Id)
             setIgnoreMargin(ignoreMargin)
         },
         [isTouchDevice]
@@ -101,7 +101,6 @@ export const DropdownProvider = ({ children }: DropdownProviderProps) => {
                 flipY: false,
                 top: 0,
             })
-            setActiveElementId(null)
             setIgnoreMargin(false)
         }, 200)
     }, [])
@@ -144,25 +143,24 @@ export const DropdownProvider = ({ children }: DropdownProviderProps) => {
         }
     }, [subDropdown.isOpen])
 
-    return (
-        <DropdownContext.Provider
-            value={{
-                isOpen,
-                position,
-                selectedItem,
-                menuItems,
-                subDropdown,
-                isTouchDevice,
-                openDropdown,
-                closeDropdown,
-                openSubDropdown,
-                closeSubDropdown,
-                activeElementId,
-                setActiveElementId,
-                ignoreMargin,
-            }}
-        >
-            {children}
-        </DropdownContext.Provider>
-    )
+    return {
+        isOpen,
+        position,
+        selectedItem,
+        setSelectedItem,
+        menuItems,
+        subDropdown,
+        isTouchDevice,
+        openDropdown,
+        closeDropdown,
+        openSubDropdown,
+        closeSubDropdown,
+        ignoreMargin,
+    }
+}
+
+export const DropdownContextProvider = ({ children }: DropdownProviderProps) => {
+    const initialState = useInitialState()
+
+    return <DropdownContext.Provider value={initialState}>{children}</DropdownContext.Provider>
 }
