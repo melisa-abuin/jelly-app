@@ -1,11 +1,11 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
-import { ApiError, MediaItem } from '../api/jellyfin'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
-import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
-import { getAllTracks } from '../utils/getAllTracks'
+import { ApiError, MediaItem } from '../../api/jellyfin'
+import { useJellyfinContext } from '../../context/JellyfinContext/JellyfinContext'
+import { usePlaybackContext } from '../../context/PlaybackContext/PlaybackContext'
+import { getAllTracks } from '../../utils/getAllTracks'
 
-export const useJellyfinArtistTracksData = (artistId: string) => {
+export const useJellyfinFrequentlyPlayedData = () => {
     const api = useJellyfinContext()
     const itemsPerPage = 40
     const playback = usePlaybackContext()
@@ -16,11 +16,10 @@ export const useJellyfinArtistTracksData = (artistId: string) => {
         MediaItem[],
         ApiError
     >({
-        queryKey: ['artistTracks', artistId],
+        queryKey: ['frequentlyPlayed'],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            const { Items } = await api.getArtistTracks(artistId, startIndex, itemsPerPage)
-            return Items
+            return await api.fetchFrequentlyPlayed(startIndex, itemsPerPage)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
         initialPageParam: 0,
@@ -48,20 +47,20 @@ export const useJellyfinArtistTracksData = (artistId: string) => {
             return
         }
 
-        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'artistTracks') {
+        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'frequentlyPlayed') {
             return
         }
 
         setCurrentPlaylist({
-            type: 'artistTracks',
+            type: 'frequentlyPlayed',
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
         })
-    }, [allTracks, data, hasNextPage, isFetched, isFetchingNextPage, isLoading, loadMore, playback, setCurrentPlaylist])
+    }, [allTracks, hasNextPage, isFetched, isFetchingNextPage, isLoading, loadMore, playback, setCurrentPlaylist])
 
     return {
-        items: getAllTracks(data),
+        items: allTracks,
         loading: isLoading || isFetchingNextPage,
         error: error ? error.message : null,
     }

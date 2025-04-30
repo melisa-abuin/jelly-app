@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
-import { MediaItem } from '../api/jellyfin'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
+import { MediaItem } from '../../api/jellyfin'
+import { useJellyfinContext } from '../../context/JellyfinContext/JellyfinContext'
 
-export const useJellyfinPlaylistsList = () => {
+export const useJellyfinPlaylistsFeaturingArtist = (artistId: string) => {
     const api = useJellyfinContext()
 
     const { data, isLoading, error } = useQuery<MediaItem[], Error>({
-        queryKey: ['playlists'],
+        queryKey: ['playlistsFeaturingArtist', artistId],
         queryFn: async () => {
-            return await api.getAllPlaylists()
+            return await api.getPlaylistsFeaturingArtist(artistId)
         },
     })
 

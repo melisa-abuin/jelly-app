@@ -1,11 +1,11 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
-import { ApiError, MediaItem } from '../api/jellyfin'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
-import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
-import { getAllTracks } from '../utils/getAllTracks'
+import { ApiError, MediaItem } from '../../api/jellyfin'
+import { useJellyfinContext } from '../../context/JellyfinContext/JellyfinContext'
+import { usePlaybackContext } from '../../context/PlaybackContext/PlaybackContext'
+import { getAllTracks } from '../../utils/getAllTracks'
 
-export const useJellyfinRecentlyPlayedData = () => {
+export const useJellyfinGenreTracks = (genre: string) => {
     const api = useJellyfinContext()
     const itemsPerPage = 40
     const playback = usePlaybackContext()
@@ -16,10 +16,10 @@ export const useJellyfinRecentlyPlayedData = () => {
         MediaItem[],
         ApiError
     >({
-        queryKey: ['recentlyPlayed'],
+        queryKey: ['genreTracks', genre],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await api.fetchRecentlyPlayed(startIndex, itemsPerPage)
+            return await api.getGenreTracks(genre, startIndex, itemsPerPage)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
         initialPageParam: 0,
@@ -32,35 +32,35 @@ export const useJellyfinRecentlyPlayedData = () => {
         }
     }, [error])
 
+    const tracks = useMemo(() => {
+        return getAllTracks(data)
+    }, [data])
+
     const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {
             return getAllTracks((await fetchNextPage()).data)
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-    const allTracks = useMemo(() => {
-        return getAllTracks(data)
-    }, [data])
-
     useEffect(() => {
         if (!isFetched) {
             return
         }
 
-        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'recentlyPlayed') {
+        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'genreTracks') {
             return
         }
 
         setCurrentPlaylist({
-            type: 'recentlyPlayed',
-            playlist: allTracks,
+            type: 'genreTracks',
+            playlist: tracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
         })
-    }, [allTracks, hasNextPage, isFetched, isFetchingNextPage, isLoading, loadMore, playback, setCurrentPlaylist])
+    }, [tracks, hasNextPage, isFetchingNextPage, isLoading, loadMore, playback, isFetched, setCurrentPlaylist])
 
     return {
-        items: allTracks,
+        items: tracks,
         loading: isLoading || isFetchingNextPage,
         error: error ? error.message : null,
     }

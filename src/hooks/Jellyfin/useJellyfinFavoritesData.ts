@@ -1,9 +1,9 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
-import { ApiError, MediaItem } from '../api/jellyfin'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
-import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
-import { getAllTracks } from '../utils/getAllTracks'
+import { ApiError, MediaItem } from '../../api/jellyfin'
+import { useJellyfinContext } from '../../context/JellyfinContext/JellyfinContext'
+import { usePlaybackContext } from '../../context/PlaybackContext/PlaybackContext'
+import { getAllTracks } from '../../utils/getAllTracks'
 
 export const useJellyfinFavoritesData = () => {
     const api = useJellyfinContext()

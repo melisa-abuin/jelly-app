@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import MediaList from '../components/MediaList'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
-import { useJellyfinGenreTracks } from '../hooks/useJellyfinGenreTracks'
+import { useJellyfinGenreTracks } from '../hooks/Jellyfin/useJellyfinGenreTracks'
 
 const Genre = () => {
     const { genre } = useParams<{ genre: string }>()

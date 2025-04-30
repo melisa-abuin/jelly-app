@@ -1,5 +1,5 @@
 import MediaList from '../components/MediaList'
-import { useJellyfinTracksData } from '../hooks/useJellyfinTracksData'
+import { useJellyfinTracksData } from '../hooks/Jellyfin/useJellyfinTracksData'
 
 const Tracks = () => {
     const { items, error } = useJellyfinTracksData()

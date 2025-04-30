@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom' // Add this import
 import Loader from '../components/Loader'
 import MediaList from '../components/MediaList'
-import { useJellyfinHomeData } from '../hooks/useJellyfinHomeData'
+import { useJellyfinHomeData } from '../hooks/Jellyfin/useJellyfinHomeData'
 
 const Home = () => {
     const { recentlyPlayed, frequentlyPlayed, recentlyAdded, loading, error } = useJellyfinHomeData()

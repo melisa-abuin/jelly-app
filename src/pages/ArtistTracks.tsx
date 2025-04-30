@@ -3,8 +3,8 @@ import { useParams } from 'react-router-dom'
 import Loader from '../components/Loader'
 import PlaylistTrackList from '../components/PlaylistTrackList'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
-import { useJellyfinArtistData } from '../hooks/useJellyfinArtistData'
-import { useJellyfinArtistTracksData } from '../hooks/useJellyfinArtistTracksData'
+import { useJellyfinArtistData } from '../hooks/Jellyfin/useJellyfinArtistData'
+import { useJellyfinArtistTracksData } from '../hooks/Jellyfin/useJellyfinArtistTracksData'
 
 const ArtistTracks = () => {
     const { artistId } = useParams<{ artistId: string }>()

@@ -1,11 +1,11 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
-import { ApiError, MediaItem } from '../api/jellyfin'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
-import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
-import { getAllTracks } from '../utils/getAllTracks'
+import { ApiError, MediaItem } from '../../api/jellyfin'
+import { useJellyfinContext } from '../../context/JellyfinContext/JellyfinContext'
+import { usePlaybackContext } from '../../context/PlaybackContext/PlaybackContext'
+import { getAllTracks } from '../../utils/getAllTracks'
 
-export const useJellyfinFrequentlyPlayedData = () => {
+export const useJellyfinTracksData = () => {
     const api = useJellyfinContext()
     const itemsPerPage = 40
     const playback = usePlaybackContext()
@@ -16,21 +16,25 @@ export const useJellyfinFrequentlyPlayedData = () => {
         MediaItem[],
         ApiError
     >({
-        queryKey: ['frequentlyPlayed'],
+        queryKey: ['jellyfinTracks', playback.sortBy, playback.sortOrder],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await api.fetchFrequentlyPlayed(startIndex, itemsPerPage)
+            return await api.getAllTracks(startIndex, itemsPerPage, playback.sortBy, playback.sortOrder)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
         initialPageParam: 0,
     })
 
     useEffect(() => {
-        if (error instanceof ApiError && error.response?.status === 401) {
-            localStorage.removeItem('auth')
-            window.location.href = '/login'
+        if (error instanceof ApiError) {
+            if (error.response?.status === 401) {
+                localStorage.removeItem('auth')
+                window.location.href = '/login'
+            }
         }
     }, [error])
+
+    // Combine pages and filter out any duplicate tracks using a Set.
 
     const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {
@@ -47,21 +51,30 @@ export const useJellyfinFrequentlyPlayedData = () => {
             return
         }
 
-        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'frequentlyPlayed') {
+        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'jellyfinTracks') {
             return
         }
 
         setCurrentPlaylist({
-            type: 'frequentlyPlayed',
+            type: 'jellyfinTracks',
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
         })
-    }, [allTracks, hasNextPage, isFetched, isFetchingNextPage, isLoading, loadMore, playback, setCurrentPlaylist])
+    }, [
+        allTracks,
+        data,
+        hasNextPage,
+        isFetched,
+        isFetchingNextPage,
+        isLoading,
+        loadMore,
+        playback.currentPlaylistQueryKey,
+        setCurrentPlaylist,
+    ])
 
     return {
         items: allTracks,
-        loading: isLoading || isFetchingNextPage,
         error: error ? error.message : null,
     }
 }

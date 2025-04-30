@@ -1,5 +1,5 @@
 import MediaList from '../components/MediaList'
-import { useJellyfinAlbumsData } from '../hooks/useJellyfinAlbumsData'
+import { useJellyfinAlbumsData } from '../hooks/Jellyfin/useJellyfinAlbumsData'
 
 const Albums = () => {
     const { items, error } = useJellyfinAlbumsData()

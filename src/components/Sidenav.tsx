@@ -6,7 +6,7 @@ import '../App.css'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../context/ScrollContext/ScrollContext'
-import { useJellyfinPlaylistsList } from '../hooks/useJellyfinPlaylistsList'
+import { useJellyfinPlaylistsList } from '../hooks/Jellyfin/useJellyfinPlaylistsList'
 import InlineLoader from './InlineLoader'
 import './Sidenav.css'
 

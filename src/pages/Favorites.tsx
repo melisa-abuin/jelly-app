@@ -1,5 +1,5 @@
 import MediaList from '../components/MediaList'
-import { useJellyfinFavoritesData } from '../hooks/useJellyfinFavoritesData'
+import { useJellyfinFavoritesData } from '../hooks/Jellyfin/useJellyfinFavoritesData'
 
 const Favorites = () => {
     const { items, error } = useJellyfinFavoritesData()

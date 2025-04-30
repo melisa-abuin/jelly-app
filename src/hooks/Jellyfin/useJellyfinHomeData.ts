@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { MediaItem } from '../api/jellyfin'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
+import { MediaItem } from '../../api/jellyfin'
+import { useJellyfinContext } from '../../context/JellyfinContext/JellyfinContext'
 
 interface JellyfinHomeData {
     recentlyPlayed: MediaItem[]

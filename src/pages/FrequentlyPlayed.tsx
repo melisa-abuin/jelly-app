@@ -1,5 +1,5 @@
 import MediaList from '../components/MediaList'
-import { useJellyfinFrequentlyPlayedData } from '../hooks/useJellyfinFrequentlyPlayedData'
+import { useJellyfinFrequentlyPlayedData } from '../hooks/Jellyfin/useJellyfinFrequentlyPlayedData'
 
 const FrequentlyPlayed = () => {
     const { items, error } = useJellyfinFrequentlyPlayedData()
