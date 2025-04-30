@@ -1,9 +1,9 @@
 import { HeartFillIcon } from '@primer/octicons-react'
-import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
+import { useDisplayItems } from '../hooks/useDisplayItems'
 import { JellyImg } from './JellyImg'
 import Loader from './Loader'
 import Skeleton from './Skeleton'
@@ -15,79 +15,9 @@ interface MediaListProps {
 
 const MediaList = ({ items = [], type }: MediaListProps) => {
     const playback = usePlaybackContext()
-    const rowRefs = useRef<(HTMLLIElement | HTMLDivElement | null)[]>([])
-    const resizeObservers = useRef<ResizeObserver[]>([])
     const navigate = useNavigate()
     const location = useLocation()
-    const sizeMap = useRef<{ [index: number]: number }>({})
-    const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(items)
-
-    useEffect(() => {
-        if (playback.loading && playback.hasMore && playback.loadMore) {
-            setDisplayItems([...items, ...Array(4).fill({ isPlaceholder: true })])
-        } else {
-            setDisplayItems(items)
-        }
-    }, [playback.loading, playback.hasMore, playback.loadMore, items])
-
-    useEffect(() => {
-        const handleResize = () => {
-            measureInitialHeights()
-        }
-
-        const setupResizeObservers = () => {
-            resizeObservers.current = rowRefs.current.map((ref, index) => {
-                const observer = new ResizeObserver(() => {
-                    if (ref) {
-                        const originalHeight = ref.style.height
-                        ref.style.height = 'auto'
-                        const height = ref.getBoundingClientRect().height
-                        ref.style.height = originalHeight || `${height}px`
-                        if (height !== sizeMap.current[index]) {
-                            setSize(index, height)
-                        }
-                    }
-                })
-                if (ref) observer.observe(ref)
-                return observer
-            })
-        }
-
-        const cleanupResizeObservers = () => {
-            resizeObservers.current.forEach(observer => observer.disconnect())
-            resizeObservers.current = []
-        }
-
-        const measureInitialHeights = () => {
-            rowRefs.current.forEach((ref, index) => {
-                if (ref) {
-                    const originalHeight = ref.style.height
-                    ref.style.height = 'auto'
-                    const height = ref.getBoundingClientRect().height
-                    ref.style.height = originalHeight || `${height}px`
-                    if (height !== sizeMap.current[index]) {
-                        setSize(index, height)
-                    }
-                }
-            })
-        }
-
-        const setSize = (index: number, height: number) => {
-            sizeMap.current = { ...sizeMap.current, [index]: height }
-        }
-
-        rowRefs.current = displayItems.map(() => null)
-        cleanupResizeObservers()
-        measureInitialHeights()
-        setupResizeObservers()
-        document.body.style.overflowY = 'auto'
-        window.addEventListener('resize', handleResize)
-
-        return () => {
-            cleanupResizeObservers()
-            window.removeEventListener('resize', handleResize)
-        }
-    }, [displayItems])
+    const { displayItems, setRowRefs } = useDisplayItems(items)
 
     const handleSongClick = (item: MediaItem, index: number) => {
         if (type === 'song') {
@@ -112,21 +42,11 @@ const MediaList = ({ items = [], type }: MediaListProps) => {
     const renderItem = (index: number, item: MediaItem | { isPlaceholder: true }) => {
         if ('isPlaceholder' in item) {
             return type === 'album' ? (
-                <div
-                    className="media-item album-item"
-                    ref={(el: HTMLDivElement | null) => {
-                        rowRefs.current[index] = el
-                    }}
-                >
+                <div className="media-item album-item" ref={el => setRowRefs(index, el)}>
                     <Skeleton type="album" />
                 </div>
             ) : (
-                <li
-                    className="media-item song-item"
-                    ref={(el: HTMLLIElement | null) => {
-                        rowRefs.current[index] = el
-                    }}
-                >
+                <li className="media-item song-item" ref={el => setRowRefs(index, el)}>
                     <Skeleton type="song" />
                 </li>
             )
@@ -140,9 +60,7 @@ const MediaList = ({ items = [], type }: MediaListProps) => {
                 className={`media-item album-item`}
                 key={item.Id}
                 onClick={() => navigate(`/album/${item.Id}`)}
-                ref={(el: HTMLDivElement | null) => {
-                    rowRefs.current[index] = el
-                }}
+                ref={el => setRowRefs(index, el)}
             >
                 <div className="media-state">
                     <JellyImg item={item} type={'Primary'} width={46} height={46} />
@@ -164,9 +82,7 @@ const MediaList = ({ items = [], type }: MediaListProps) => {
                 className={`media-item song-item ${itemClass}`}
                 onClick={() => handleSongClick(item, index)}
                 key={item.Id}
-                ref={(el: HTMLLIElement | null) => {
-                    rowRefs.current[index] = el
-                }}
+                ref={el => setRowRefs(index, el)}
             >
                 <div className="media-state">
                     <JellyImg item={item} type={'Primary'} width={46} height={46} />

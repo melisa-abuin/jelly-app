@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback } from 'react'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
+import { useDisplayItems } from '../hooks/useDisplayItems'
 import { JellyImg } from './JellyImg'
 import './QueueTrackList.css'
 import Skeleton from './Skeleton'
@@ -13,81 +14,7 @@ interface QueueTrackListProps {
 
 const QueueTrackList = ({ tracks, singleTrack = false }: QueueTrackListProps) => {
     const playback = usePlaybackContext()
-    const rowRefs = useRef<(HTMLLIElement | null)[]>([])
-    const resizeObservers = useRef<ResizeObserver[]>([])
-    const sizeMap = useRef<{ [index: number]: number }>({})
-    const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(tracks)
-
-    useEffect(() => {
-        if (playback.loading && playback.hasMore && playback.loadMore && !singleTrack) {
-            setDisplayItems([...tracks, ...Array(4).fill({ isPlaceholder: true })])
-        } else {
-            setDisplayItems(tracks)
-        }
-    }, [tracks, singleTrack, playback.loading, playback.hasMore, playback.loadMore])
-
-    useEffect(() => {
-        const handleResize = () => {
-            measureInitialHeights()
-        }
-
-        const setupResizeObservers = () => {
-            resizeObservers.current = rowRefs.current.map((ref, index) => {
-                const observer = new ResizeObserver(() => {
-                    if (ref) {
-                        const originalHeight = ref.style.height
-                        ref.style.height = 'auto'
-                        const height = ref.getBoundingClientRect().height
-                        ref.style.height = originalHeight || `${height}px`
-                        if (height !== sizeMap.current[index]) {
-                            setSize(index, height)
-                        }
-                    }
-                })
-                if (ref) observer.observe(ref)
-                return observer
-            })
-        }
-
-        const cleanupResizeObservers = () => {
-            resizeObservers.current.forEach(observer => observer.disconnect())
-            resizeObservers.current = []
-        }
-
-        const measureInitialHeights = () => {
-            rowRefs.current.forEach((ref, index) => {
-                if (ref) {
-                    const originalHeight = ref.style.height
-                    ref.style.height = 'auto'
-                    const height = ref.getBoundingClientRect().height
-                    ref.style.height = originalHeight || `${height}px`
-                    if (height !== sizeMap.current[index]) {
-                        setSize(index, height)
-                    }
-                }
-            })
-        }
-
-        rowRefs.current = displayItems.map(() => null)
-        cleanupResizeObservers()
-        measureInitialHeights()
-        setupResizeObservers()
-        if (!singleTrack) {
-            document.body.style.overflowY = 'auto'
-            window.addEventListener('resize', handleResize)
-        }
-
-        return () => {
-            cleanupResizeObservers()
-            if (!singleTrack) {
-                window.removeEventListener('resize', handleResize)
-            }
-        }
-    }, [displayItems, singleTrack])
-
-    const setSize = (index: number, height: number) => {
-        sizeMap.current = { ...sizeMap.current, [index]: height }
-    }
+    const { displayItems, setRowRefs } = useDisplayItems(tracks)
 
     const handleTrackClick = useCallback(
         (track: MediaItem, index: number) => {
@@ -109,12 +36,7 @@ const QueueTrackList = ({ tracks, singleTrack = false }: QueueTrackListProps) =>
     const renderTrack = (index: number, item: MediaItem | { isPlaceholder: true }) => {
         if ('isPlaceholder' in item) {
             return (
-                <li
-                    className="track-item"
-                    ref={el => {
-                        rowRefs.current[index] = el
-                    }}
-                >
+                <li className="track-item" ref={el => setRowRefs(index, el)}>
                     <Skeleton type="playlist" />
                 </li>
             )
@@ -128,9 +50,7 @@ const QueueTrackList = ({ tracks, singleTrack = false }: QueueTrackListProps) =>
                 className={`track-item ${trackClass}`}
                 onClick={() => handleTrackClick(track, index)}
                 key={track.Id}
-                ref={el => {
-                    rowRefs.current[index] = el
-                }}
+                ref={el => setRowRefs(index, el)}
             >
                 <div className="track-state">
                     <JellyImg item={track} type={'Primary'} width={40} height={40} />
