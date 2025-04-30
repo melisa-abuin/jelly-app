@@ -74,10 +74,8 @@ const Album = () => {
         e.stopPropagation()
         if (moreRef.current && album) {
             const rect = moreRef.current.getBoundingClientRect()
-            const container = document.querySelector('.interface') || document.body
-            const containerRect = container.getBoundingClientRect()
-            const x = rect.left - containerRect.left - 142
-            const y = rect.bottom - containerRect.top + window.scrollY + 6
+            const x = rect.left - 142
+            const y = rect.top + window.pageYOffset + rect.height + 6
             const menuItems = defaultMenuItems(album, navigate, playback, api, playlists)
             const filteredMenuItems = menuItems.filter(
                 item =>
@@ -89,7 +87,7 @@ const Album = () => {
             )
             const closeEvent = new CustomEvent('close-all-dropdowns', { detail: { exceptId: album.Id } })
             document.dispatchEvent(closeEvent)
-            openDropdown(album, x, y, filteredMenuItems)
+            openDropdown(album, x, y, filteredMenuItems, true)
             setActiveElementId(album.Id)
         }
     }

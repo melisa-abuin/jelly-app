@@ -25,10 +25,8 @@ export const useDropdown = (
         (e: React.MouseEvent<HTMLElement>) => {
             e.preventDefault()
             if (elementRef.current) {
-                const container = document.querySelector('.interface') || document.body
-                const containerRect = container.getBoundingClientRect()
-                const x = e.clientX - containerRect.left
-                const y = e.clientY - containerRect.top
+                const x = e.clientX
+                const y = e.clientY + window.pageYOffset
                 const closeEvent = new CustomEvent('close-all-dropdowns', { detail: { exceptId: item.Id } })
                 document.dispatchEvent(closeEvent)
                 openDropdown(item, x, y, menuItems)
@@ -43,10 +41,8 @@ export const useDropdown = (
             touchTimeout.current = window.setTimeout(() => {
                 if (elementRef.current) {
                     const touch = e.touches[0]
-                    const container = document.querySelector('.interface') || document.body
-                    const containerRect = container.getBoundingClientRect()
-                    const x = touch.clientX - containerRect.left
-                    const y = touch.clientY - containerRect.top
+                    const x = touch.clientX
+                    const y = touch.clientY + window.pageYOffset
                     const closeEvent = new CustomEvent('close-all-dropdowns', { detail: { exceptId: item.Id } })
                     document.dispatchEvent(closeEvent)
                     openDropdown(item, x, y, menuItems)

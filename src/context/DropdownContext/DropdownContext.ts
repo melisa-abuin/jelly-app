@@ -17,7 +17,7 @@ export interface DropdownContextType {
         top: number
     }
     isTouchDevice: boolean
-    openDropdown: (item: MediaItem, x: number, y: number, menuItems: DropdownMenuItem[]) => void
+    openDropdown: (item: MediaItem, x: number, y: number, menuItems: DropdownMenuItem[], ignoreMargin?: boolean) => void
     closeDropdown: () => void
     openSubDropdown: (
         x: number,
@@ -31,6 +31,7 @@ export interface DropdownContextType {
     closeSubDropdown: () => void
     activeElementId: string | null
     setActiveElementId: Dispatch<SetStateAction<string | null>>
+    ignoreMargin: boolean
 }
 
 export const DropdownContext = createContext<DropdownContextType | null>(null)

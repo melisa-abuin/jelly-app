@@ -32,6 +32,7 @@ export const DropdownProvider = ({ children }: DropdownProviderProps) => {
     })
     const [activeElementId, setActiveElementId] = useState<string | null>(null)
     const [isTouchDevice, setIsTouchDevice] = useState(false)
+    const [ignoreMargin, setIgnoreMargin] = useState(false)
     const scrollContext = useContext(ScrollContext)
 
     useEffect(() => {
@@ -46,25 +47,24 @@ export const DropdownProvider = ({ children }: DropdownProviderProps) => {
     }, [isOpen, isTouchDevice, scrollContext])
 
     const openDropdown = useCallback(
-        (item: MediaItem, x: number, y: number, items: DropdownMenuItem[]) => {
+        (item: MediaItem, x: number, y: number, items: DropdownMenuItem[], ignoreMargin = false) => {
             let adjustedX = x
             let adjustedY = y
             if (isTouchDevice) {
                 adjustedX = 0
                 adjustedY = window.innerHeight
-            } else {
-                const menuWidth = 170
-                const menuHeight = 160
-                const margin = 10
-                const container = document.querySelector('.interface') || document.body
-                const containerRect = container.getBoundingClientRect()
-                const containerWidth = containerRect.width
-                // Adjusted to keep menu within the container's bounds
-                adjustedX = x + menuWidth + margin > containerWidth ? containerWidth - menuWidth - margin : x
-                adjustedY =
-                    y + menuHeight + margin > document.documentElement.clientHeight
-                        ? document.documentElement.clientHeight - menuHeight - margin
-                        : y
+            } else if (!ignoreMargin) {
+                const menuWidth = 210 // Approximate dropdown width
+                const menuHeight = 180 // Approximate dropdown height
+                const margin = 20
+                const viewportWidth = window.innerWidth
+                const viewportHeight = window.innerHeight + window.pageYOffset
+
+                // Ensure dropdown stays within viewport
+                adjustedX = x + menuWidth + margin > viewportWidth ? viewportWidth - menuWidth - margin : x
+                adjustedY = y + menuHeight + margin > viewportHeight ? viewportHeight - menuHeight - margin : y
+                adjustedY = y < margin ? margin : adjustedY // Prevent top overflow
+                adjustedX = x < margin ? margin : adjustedX // Prevent left overflow
             }
             setIsOpen(true)
             setPosition({ x: adjustedX, y: adjustedY })
@@ -80,6 +80,7 @@ export const DropdownProvider = ({ children }: DropdownProviderProps) => {
                 top: 0,
             })
             setActiveElementId(item.Id)
+            setIgnoreMargin(ignoreMargin)
         },
         [isTouchDevice]
     )
@@ -101,6 +102,7 @@ export const DropdownProvider = ({ children }: DropdownProviderProps) => {
                 top: 0,
             })
             setActiveElementId(null)
+            setIgnoreMargin(false)
         }, 200)
     }, [])
 
@@ -157,6 +159,7 @@ export const DropdownProvider = ({ children }: DropdownProviderProps) => {
                 closeSubDropdown,
                 activeElementId,
                 setActiveElementId,
+                ignoreMargin,
             }}
         >
             {children}

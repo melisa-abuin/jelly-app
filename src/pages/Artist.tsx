@@ -63,10 +63,8 @@ const Artist = () => {
         e.stopPropagation()
         if (moreRef.current && artist) {
             const rect = moreRef.current.getBoundingClientRect()
-            const container = document.querySelector('.interface') || document.body
-            const containerRect = container.getBoundingClientRect()
-            const x = rect.left - containerRect.left - 142
-            const y = rect.bottom - containerRect.top + window.scrollY + 6
+            const x = rect.left - 142
+            const y = rect.top + window.pageYOffset + rect.height + 6
             const menuItems = defaultMenuItems(artist, navigate, playback, api, allPlaylists)
             const filteredMenuItems = menuItems.filter(
                 item =>
@@ -78,7 +76,7 @@ const Artist = () => {
             )
             const closeEvent = new CustomEvent('close-all-dropdowns', { detail: { exceptId: artist.Id } })
             document.dispatchEvent(closeEvent)
-            openDropdown(artist, x, y, filteredMenuItems)
+            openDropdown(artist, x, y, filteredMenuItems, true)
             setActiveElementId(artist.Id)
         }
     }

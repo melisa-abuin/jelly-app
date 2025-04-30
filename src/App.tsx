@@ -112,6 +112,7 @@ const App = () => {
                     }
                 />
             </Routes>
+            <Dropdown />
         </div>
     )
 
@@ -172,11 +173,11 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
 
     return (
         <div className="interface">
-            <Sidenav username={auth.username} showSidenav={showSidenav} closeSidenav={closeSidenav} />
             <div
                 className={showSidenav || (isDropdownOpen && isTouchDevice) ? 'dimmer active' : 'dimmer'}
                 onClick={showSidenav ? toggleSidenav : dropdownContext?.closeDropdown}
             ></div>
+            <Sidenav username={auth.username} showSidenav={showSidenav} closeSidenav={closeSidenav} />
             <main className="main">
                 <div className="main_header">
                     <div className="primary">
@@ -479,7 +480,6 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                     </div>
                 </div>
             </main>
-            <Dropdown />
         </div>
     )
 }

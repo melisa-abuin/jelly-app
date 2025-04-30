@@ -1,12 +1,12 @@
 .sidenav {
     position: relative;
     flex-basis: 200px;
-    transition: flex-basis 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: flex-basis 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease;
 }
 
 .sidenav > .sidenav_wrapper {
     position: fixed;
-    z-index: 4;
+    z-index: 3;
     width: 200px;
     height: 100%;
     display: flex;
@@ -754,6 +754,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     }
 
     .sidenav > .sidenav_wrapper {
+        z-index: 4;
         transform: translate(-200px);
     }
 

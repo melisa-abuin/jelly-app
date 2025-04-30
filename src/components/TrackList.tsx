@@ -52,7 +52,12 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
 
                 const itemRef = useRef<HTMLLIElement>(null)
                 const menuItems = defaultMenuItems(track, navigate, playback, api, playlists).filter(
-                    item => !(location.pathname.includes('/album') && item.label === 'View album')
+                    item =>
+                        !(location.pathname.includes('/album') && item.label === 'View album') &&
+                        !(
+                            location.pathname.includes('/artist') &&
+                            (item.label === 'View artist' || item.label === 'View artists')
+                        )
                 )
                 const { onContextMenu, onTouchStart, onTouchEnd } = useDropdown(track, menuItems, itemRef)
 
