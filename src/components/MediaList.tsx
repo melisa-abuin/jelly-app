@@ -96,6 +96,8 @@ const MediaList = ({ items = [], type }: MediaListProps) => {
             } else {
                 const playlistIndex = items.findIndex(track => track.Id === item.Id)
                 const effectiveIndex = playlistIndex !== -1 && playback.currentTrackIndex !== -1 ? playlistIndex : index
+
+                playback.setCurrentPlaylist({ playlist: items })
                 playback.playTrack(effectiveIndex)
             }
         }
