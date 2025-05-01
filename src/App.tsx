@@ -6,7 +6,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { CSSProperties, useContext, useEffect, useState } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom'
 import './App.css'
-import { Dropdown } from './components/Dropdown'
+import { Dropdown } from './components/DropdownOld'
 import './components/MediaList.css'
 import Sidenav from './components/Sidenav'
 import { DropdownContext } from './context/DropdownContext/DropdownContext'

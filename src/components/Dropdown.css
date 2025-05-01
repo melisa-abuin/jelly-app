@@ -156,8 +156,9 @@
 
 /* Responsive */
 @media only screen and (max-width: 480px), (pointer: coarse) {
-    .dropdown.drawer {
+    .dropdown {
         position: fixed;
+        top: unset !important;
         left: 16px !important;
         bottom: 0 !important;
         width: calc(100% - 32px);
@@ -166,15 +167,15 @@
         transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .dropdown.drawer.active {
+    .dropdown.active {
         transform: translateY(0);
     }
 
-    .dropdown.drawer.closing {
+    .dropdown.closing {
         transform: translateY(100%);
     }
 
-    .dropdown.drawer > .dropdown-menu {
+    .dropdown > .dropdown-menu {
         min-width: 100%;
         max-width: 100%;
         border-radius: 12px 12px 0 0;
@@ -183,37 +184,37 @@
         box-shadow: none;
         border-bottom: none;
         background-color: var(--bg-color-secondary);
-        max-height: 50dvh;
+        max-height: 60dvh;
         overflow: auto;
         overflow-x: hidden;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
     }
 
-    .dropdown.drawer > .dropdown-menu > .dropdown-item {
+    .dropdown > .dropdown-menu > .dropdown-item {
         font-size: 0.825rem;
         padding: 7px 12px;
         border-radius: 6px;
         transition: opacity 0.2s ease-out;
     }
 
-    .dropdown.drawer > .dropdown-menu > .dropdown-item:has(.playlist-input.has-text) ~ .dropdown-item {
+    .dropdown > .dropdown-menu > .dropdown-item:has(.playlist-input.has-text) ~ .dropdown-item {
         opacity: 0.3;
         pointer-events: none;
     }
 
-    .dropdown.drawer > .dropdown-menu > .dropdown-item:has(.playlist-input-container) {
+    .dropdown > .dropdown-menu > .dropdown-item:has(.playlist-input-container) {
         padding: unset;
         background-color: unset !important;
     }
 
-    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container {
+    .dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container {
         display: flex;
         align-items: center;
         width: 100%;
     }
 
-    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input {
+    .dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input {
         font: inherit;
         position: relative;
         flex: 1;
@@ -221,25 +222,20 @@
         background: transparent;
     }
 
-    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input::placeholder {
+    .dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input::placeholder {
         font: inherit;
     }
 
-    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input.has-text {
+    .dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input.has-text {
         max-width: calc(100% - 52px);
     }
 
-    .dropdown.drawer
-        > .dropdown-menu
-        > .dropdown-item
-        > .playlist-input-container
-        > .playlist-input.has-text
-        ~ .create-btn {
+    .dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .playlist-input.has-text ~ .create-btn {
         opacity: 1;
         visibility: visible;
     }
 
-    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container > .create-btn {
+    .dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .create-btn {
         position: absolute;
         right: 2px;
         opacity: 0;
@@ -255,7 +251,7 @@
         transition: background-color 0.2s ease-out, opacity 0.2s ease-out, visibility 0.2s ease-out;
     }
 
-    .dropdown.drawer > .dropdown-menu > .dropdown-item > .playlist-input-container > .create-btn:hover {
+    .dropdown > .dropdown-menu > .dropdown-item > .playlist-input-container > .create-btn:hover {
         background: var(--bg-color-quaternary);
     }
 }
