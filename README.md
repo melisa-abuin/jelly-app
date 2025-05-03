@@ -12,13 +12,26 @@ A lightweight & elegant music interface for Jellyfin. Made to be intuitive and m
   <img src="public/dark-light-variant-split.webp" alt="Dark and light split variant" width="48%">
 </div>
 <br/>
-<div>
-  <img src="public/search-light-variant.png" alt="Search light variant" width="22.8%">
-  <img src="public/search-dark-variant.png" alt="Search dark variant" width="22.8%" hspace="20">
-  <img src="public/search-results-split-variant.webp" alt="Search results split variant" width="48%" align="top">
-</div>
-<br/>
-<div>
-  <img src="public/artist-split-variant.webp" alt="Artist split variant" width="44%" hspace="20">
-  <img src="public/playlist-split-variant.webp" alt="Playlist split variant" width="44%" align="top">
-</div>
+<details>
+  <summary>Additional screenshots</summary>
+  <br/>
+  <b>Sidenav search</b>
+  <p>Search for tracks, artists, albums, playlists, genres</p>
+  <img src="public/search-light-variant.png" alt="Search light variant" width="48%">
+  <img src="public/search-dark-variant.png" alt="Search dark variant" width="48%">
+  <br/>
+  <br/>
+  <b>Search results</b>
+  <p>View additional search results in a dedicated window</p>
+  <img src="public/search-results-split-variant.webp" alt="Search results split variant" width="100%">
+  <br/>
+  <br/>
+  <b>Artists</b>
+  <p>Features most played songs, albums, and other collaborations</p>
+  <img src="public/artist-split-variant.webp" alt="Artist split variant" width="100%">
+  <br/>
+  <br/>
+  <b>Playlists</b>
+  <p>Playlist view, with it's own numbered tracklist</p>
+  <img src="public/playlist-split-variant.webp" alt="Playlist split variant" width="100%">
+</details>
