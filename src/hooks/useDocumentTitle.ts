@@ -14,7 +14,7 @@ export const useDocumentTitle = () => {
             const artist = currentTrack.AlbumArtist || currentTrack.Artists?.[0] || 'Unknown Artist'
             document.title = `${currentTrack.Name} - ${artist}`
         } else {
-            document.title = `${getPageTitle(pageTitle, location)} - Jellyfin Music App`
+            document.title = `${getPageTitle(pageTitle, location)} - Jelly Music App`
         }
     }, [currentTrack, isPlaying, pageTitle, location.pathname, location])
 }

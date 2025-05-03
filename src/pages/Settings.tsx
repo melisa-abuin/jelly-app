@@ -97,9 +97,38 @@ const Settings = ({ onLogout }: SettingsProps) => {
                 <div className="info">
                     <div className="title">Audio Quality</div>
                     <div className="desc">
-                        1. Some options to enable transcoding, off by default. 2. The audio will be converted to AAC
-                        320/128kbps, more container/bitrate options, or rigid/tight selection? 3. Source file (quality)
-                        enabled by default, some info about that first or after mentioning transcoding?
+                        <p>
+                            1. Some options to enable transcoding, off by default. 2. The audio will be converted to AAC
+                            320/128kbps, more container/bitrate options, or rigid/tight selection? 3. Source file
+                            (quality) enabled by default, some info about that first or after mentioning transcoding?
+                            Offline support, PWA possibilities, download tracks, albums, playlists, favorites?
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div className="section about">
+                <div className="info">
+                    <div className="title">About</div>
+                    <div className="desc">
+                        <p className="subtitle">Jelly Music App - Version 0.1</p>
+                        <p>An open source music player for Jellyfin</p>
+                        <p>
+                            Carefully crafted with great attention to detail, aiming to reduce noise and distractions
+                            with a minimalistic & lightweight interface: "the quieter you become, the more you are able
+                            to hear"
+                        </p>
+                        <p className="subfooter">
+                            <span>Source code is freely available on </span>
+                            <a
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="textlink"
+                                href="https://github.com/Stannnnn/jelly-app"
+                            >
+                                GitHub
+                            </a>
+                            <span> and is licensed under the MIT license</span>
+                        </p>
                     </div>
                 </div>
             </div>

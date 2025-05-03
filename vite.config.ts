@@ -11,9 +11,9 @@ export default defineConfig({
                 globPatterns: ['**/*.{js,css,html,ico,png,webp,svg}'],
             },
             manifest: {
-                name: 'Jellyfin Music App',
+                name: 'Jelly Music App',
                 short_name: 'JMA',
-                description: 'Lightweight & elegant music interface for Jellyfin',
+                description: 'A lightweight & elegant music interface for Jellyfin',
                 start_url: '/',
                 scope: '/',
                 display: 'standalone',

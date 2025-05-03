@@ -49,7 +49,7 @@ export const loginToJellyfin = async (
         const response = await fetch(`${serverUrl}/Users/AuthenticateByName`, {
             method: 'POST',
             headers: {
-                'X-Emby-Authorization': `MediaBrowser Client="Jellyfin Music App", Device="Web", DeviceId="${deviceId}", Version="0.1"`,
+                'X-Emby-Authorization': `MediaBrowser Client="Jelly Music App", Device="Web", DeviceId="${deviceId}", Version="0.1"`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ Username: username, Pw: password }),
@@ -72,7 +72,7 @@ export const loginToJellyfin = async (
 export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: string; userId: string; token: string }) => {
     const jellyfin = new Jellyfin({
         clientInfo: {
-            name: 'Jellyfin Music App',
+            name: 'Jelly Music App',
             version: '0.1',
         },
         deviceInfo: {
