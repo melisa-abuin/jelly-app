@@ -10,7 +10,6 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
     const itemsPerPage = 40
     const playback = usePlaybackContext()
 
-    const { setCurrentPlaylist } = playback
     const { data: playlist, error: playlistError } = useQuery<MediaItem, ApiError>({
         queryKey: ['playlist', playlistId],
         queryFn: () => api.getPlaylist(playlistId),
@@ -73,7 +72,7 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
             return
         }
 
-        setCurrentPlaylist({
+        playback.setCurrentPlaylist({
             type: 'playlistTracks',
             playlist: tracks,
             hasMore: Boolean(hasNextPage),
@@ -86,8 +85,9 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
         isLoading,
         loadMore,
         isFetched,
-        setCurrentPlaylist,
+        playback.setCurrentPlaylist,
         playback.currentPlaylistQueryKey,
+        playback,
     ])
 
     return {

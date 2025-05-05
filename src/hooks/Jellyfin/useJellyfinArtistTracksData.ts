@@ -10,8 +10,6 @@ export const useJellyfinArtistTracksData = (artistId: string) => {
     const itemsPerPage = 40
     const playback = usePlaybackContext()
 
-    const { setCurrentPlaylist } = playback
-
     const { data, isLoading, isFetched, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
@@ -52,13 +50,23 @@ export const useJellyfinArtistTracksData = (artistId: string) => {
             return
         }
 
-        setCurrentPlaylist({
+        playback.setCurrentPlaylist({
             type: 'artistTracks',
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
         })
-    }, [allTracks, data, hasNextPage, isFetched, isFetchingNextPage, isLoading, loadMore, playback, setCurrentPlaylist])
+    }, [
+        allTracks,
+        data,
+        hasNextPage,
+        isFetched,
+        isFetchingNextPage,
+        isLoading,
+        loadMore,
+        playback,
+        playback.setCurrentPlaylist,
+    ])
 
     return {
         items: getAllTracks(data),

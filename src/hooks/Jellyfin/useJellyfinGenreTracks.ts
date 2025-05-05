@@ -10,8 +10,6 @@ export const useJellyfinGenreTracks = (genre: string) => {
     const itemsPerPage = 40
     const playback = usePlaybackContext()
 
-    const { setCurrentPlaylist } = playback
-
     const { data, isLoading, isFetched, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
@@ -51,13 +49,13 @@ export const useJellyfinGenreTracks = (genre: string) => {
             return
         }
 
-        setCurrentPlaylist({
+        playback.setCurrentPlaylist({
             type: 'genreTracks',
             playlist: tracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
         })
-    }, [tracks, hasNextPage, isFetchingNextPage, isLoading, loadMore, playback, isFetched, setCurrentPlaylist])
+    }, [tracks, hasNextPage, isFetchingNextPage, isLoading, loadMore, playback, isFetched, playback.setCurrentPlaylist])
 
     return {
         items: tracks,

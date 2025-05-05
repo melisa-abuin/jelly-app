@@ -10,8 +10,6 @@ export const useJellyfinFavoritesData = () => {
     const itemsPerPage = 40
     const playback = usePlaybackContext()
 
-    const { setCurrentPlaylist } = playback
-
     const { data, isLoading, isFetched, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
@@ -51,13 +49,23 @@ export const useJellyfinFavoritesData = () => {
             return
         }
 
-        setCurrentPlaylist({
+        playback.setCurrentPlaylist({
             type: 'favorites',
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
         })
-    }, [allTracks, data, hasNextPage, isFetched, isFetchingNextPage, isLoading, loadMore, playback, setCurrentPlaylist])
+    }, [
+        allTracks,
+        data,
+        hasNextPage,
+        isFetched,
+        isFetchingNextPage,
+        isLoading,
+        loadMore,
+        playback,
+        playback.setCurrentPlaylist,
+    ])
 
     return {
         items: allTracks,
