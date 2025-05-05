@@ -6,6 +6,7 @@ export default defineConfig({
     plugins: [
         react(),
         VitePWA({
+            base: process.env.npm_lifecycle_event === 'deploy' ? '/jelly-app/' : '/',
             registerType: 'autoUpdate',
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,webp,svg}'],
