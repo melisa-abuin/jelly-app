@@ -24,7 +24,7 @@ export const JellyImg = ({
             className="thumbnail"
             loading="lazy"
             onError={e => {
-                ;(e.target as HTMLImageElement).src = '/default-thumbnail.png'
+                ;(e.target as HTMLImageElement).src = import.meta.env.BASE_URL + 'default-thumbnail.png'
             }}
         />
     )

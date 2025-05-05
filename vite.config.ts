@@ -23,18 +23,18 @@ export default defineConfig({
                 background_color: '#f8f8f8',
                 icons: [
                     {
-                        src: '/web-app-manifest-192x192.png',
+                        src: './web-app-manifest-192x192.png',
                         sizes: '192x192',
                         type: 'image/png',
                         purpose: 'maskable',
                     },
                     {
-                        src: '/logo.png',
+                        src: './logo.png',
                         sizes: '256x256',
                         type: 'image/png',
                     },
                     {
-                        src: '/web-app-manifest-512x512.png',
+                        src: './web-app-manifest-512x512.png',
                         sizes: '512x512',
                         type: 'image/png',
                         purpose: 'maskable',
