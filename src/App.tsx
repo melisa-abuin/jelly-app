@@ -117,7 +117,7 @@ const App = () => {
     )
 
     const routedApp = (
-        <Router>
+        <Router basename={import.meta.env.BASE_URL}>
             <HistoryContextProvider>
                 <PageTitleProvider>
                     <ScrollContextProvider>

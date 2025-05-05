@@ -3,10 +3,10 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+    base: process.env.npm_lifecycle_event === 'deploy' ? '/jelly-app/' : '/',
     plugins: [
         react(),
         VitePWA({
-            base: process.env.npm_lifecycle_event === 'deploy' ? '/jelly-app/' : '/',
             registerType: 'autoUpdate',
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,webp,svg}'],
