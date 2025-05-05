@@ -61,15 +61,17 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 setShuffle(false)
             }
 
-            currentPlaylistType.current = type
+            currentPlaylistType.current = type || '__undefined__' // Undefined is assumed to be a fresh load, so we set it to a string
             localStorage.setItem('currentPlaylistType', type || '')
 
             currentPlaylist.current = playlist
             localStorage.setItem('currentPlaylist', JSON.stringify(currentPlaylist.current || []))
 
-            loadMoreCallback.current = loadMore
-            setHasMore(hasMore || false)
-            setLoading(loading || false)
+            if (type) {
+                loadMoreCallback.current = loadMore
+                setHasMore(hasMore || false)
+                setLoading(loading || false)
+            }
         },
         [shuffle]
     )

@@ -7,7 +7,7 @@ const Favorites = () => {
     return (
         <div className="favorites-page">
             {error && <div className="error">{error}</div>}
-            <MediaList items={items} type="song" />
+            <MediaList items={items} type="song" queryKey="favorites" />
         </div>
     )
 }

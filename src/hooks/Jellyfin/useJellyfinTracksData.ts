@@ -10,7 +10,7 @@ export const useJellyfinTracksData = () => {
     const itemsPerPage = 40
     const playback = usePlaybackContext()
 
-    const { data, isLoading, isFetched, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
+    const { data, isFetched, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
@@ -59,18 +59,7 @@ export const useJellyfinTracksData = () => {
             hasMore: Boolean(hasNextPage),
             loadMore,
         })
-    }, [
-        allTracks,
-        data,
-        hasNextPage,
-        isFetched,
-        isFetchingNextPage,
-        isLoading,
-        loadMore,
-        playback,
-        playback.currentPlaylistQueryKey,
-        playback.setCurrentPlaylist,
-    ])
+    }, [allTracks, hasNextPage, isFetched, loadMore, playback, playback.currentPlaylistQueryKey])
 
     return {
         items: allTracks,

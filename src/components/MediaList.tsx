@@ -11,9 +11,10 @@ import Skeleton from './Skeleton'
 interface MediaListProps {
     items: MediaItem[] | undefined
     type: 'song' | 'album'
+    queryKey?: string
 }
 
-const MediaList = ({ items = [], type }: MediaListProps) => {
+const MediaList = ({ items = [], type, queryKey }: MediaListProps) => {
     const playback = usePlaybackContext()
     const navigate = useNavigate()
     const location = useLocation()
@@ -27,7 +28,7 @@ const MediaList = ({ items = [], type }: MediaListProps) => {
                 const playlistIndex = items.findIndex(track => track.Id === item.Id)
                 const effectiveIndex = playlistIndex !== -1 && playback.currentTrackIndex !== -1 ? playlistIndex : index
 
-                playback.setCurrentPlaylist({ playlist: items })
+                playback.setCurrentPlaylist({ playlist: items, type: queryKey })
                 playback.playTrack(effectiveIndex)
             }
         }

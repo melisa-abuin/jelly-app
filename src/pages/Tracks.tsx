@@ -7,7 +7,7 @@ const Tracks = () => {
     return (
         <div className="tracks-page">
             {error && <div className="error">{error}</div>}
-            <MediaList items={items} type="song" />
+            <MediaList items={items} type="song" queryKey="jellyfinTracks" />
         </div>
     )
 }
