@@ -1,5 +1,8 @@
-/* Full variable Inter font with all axes included */
+/* Full normal variable Inter font with all axes included */
 @import '@fontsource-variable/inter/standard.css';
+
+/* Full italic variable Inter font with all axes included */
+@import '@fontsource-variable/inter/standard-italic.css';
 
 /* MISC changes to base styles */
 * {
@@ -284,15 +287,17 @@ body.lockscroll {
 .login {
     display: flex;
     flex-direction: column;
-    align-items: center;
     position: relative;
     margin: 0 auto;
-    width: 100%;
+    padding: 0 20px;
+    width: 360px;
+    max-width: 100%;
     min-height: 100%;
-    max-width: 360px;
 }
 
 .login > .login_header {
+    display: flex;
+    justify-content: center;
     margin-top: 40px;
     margin-bottom: 80px;
 }
@@ -341,6 +346,7 @@ body.lockscroll {
     display: flex;
     align-items: center;
     width: 260px;
+    max-width: 100%;
     margin-bottom: 10px;
 }
 
@@ -359,6 +365,7 @@ body.lockscroll {
     font-weight: 600;
     color: var(--font-color-inverted);
     width: 260px;
+    max-width: 100%;
     padding: 9px 12px;
     border-radius: 8px;
     margin-top: 4px;
@@ -381,6 +388,7 @@ body.lockscroll {
     font-size: 0.725rem;
     font-weight: 300;
     color: var(--font-color-tertiary);
+    text-align: center;
 }
 
 .dimmer {

@@ -460,7 +460,7 @@ const Sidenav = (props: SidenavProps) => {
                                 name="volume"
                                 min="0"
                                 max="1"
-                                step="0.01"
+                                step="0.02"
                                 value={playback.volume}
                                 onChange={handleVolumeChange}
                                 onWheel={handleVolumeScroll}

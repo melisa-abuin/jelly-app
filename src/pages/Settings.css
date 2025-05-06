@@ -50,6 +50,10 @@
     margin-top: 14px;
 }
 
+.settings-page > .section > .info > .desc > p > .mantra {
+    font-style: italic;
+}
+
 .settings-page > .section.appearance > .options {
     margin-top: 4px;
     justify-content: center;

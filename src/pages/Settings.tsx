@@ -114,8 +114,8 @@ const Settings = ({ onLogout }: SettingsProps) => {
                         <p>An open source music player for Jellyfin</p>
                         <p>
                             Carefully crafted with great attention to detail, aiming to reduce noise and distractions
-                            with a minimalistic & lightweight interface: "the quieter you become, the more you are able
-                            to hear"
+                            with a minimalistic & lightweight interface:
+                            <span className="mantra"> "the quieter you become, the more you are able to hear"</span>
                         </p>
                         <p className="subfooter">
                             <span>Source code is freely available on </span>
