@@ -1,13 +1,7 @@
 import { HeartFillIcon } from '@primer/octicons-react'
-import { useContext, useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
-import { DropdownContext } from '../context/DropdownContext/DropdownContext'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
+import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
-import { useJellyfinPlaylistsList } from '../hooks/Jellyfin/useJellyfinPlaylistsList'
-import { useDropdown } from '../hooks/useDropdown'
-import { defaultMenuItems } from '../utils/dropdownMenuItems'
 import { formatDuration } from '../utils/formatDuration'
 import './TrackList.css'
 
@@ -19,11 +13,7 @@ interface TrackListProps {
 
 const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
     const playback = usePlaybackContext()
-    const location = useLocation()
-    const navigate = useNavigate()
-    const api = useJellyfinContext()
-    const { playlists } = useJellyfinPlaylistsList()
-    const { selectedItem } = useContext(DropdownContext)!
+    const { selectedItem } = useDropdownContext()
 
     const MIN_PLAY_COUNT = 5
     const mostPlayedTracks = tracks
@@ -35,6 +25,8 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
         .sort((a, b) => b.playCount - a.playCount)
         .slice(0, 3)
         .map(track => track.Id)
+
+    const dropdown = useDropdownContext()
 
     return (
         <ul className="tracklist noSelect">
@@ -50,22 +42,10 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
                     .filter(Boolean)
                     .join(' ')
 
-                const itemRef = useRef<HTMLLIElement>(null)
-                const menuItems = defaultMenuItems(track, navigate, playback, api, playlists).filter(
-                    item =>
-                        !(location.pathname.includes('/album') && item.label === 'View album') &&
-                        !(
-                            location.pathname.includes('/artist') &&
-                            (item.label === 'View artist' || item.label === 'View artists')
-                        )
-                )
-                const { onContextMenu, onTouchStart, onTouchEnd } = useDropdown(track, menuItems, itemRef)
-
                 return (
                     <li
                         key={track.Id}
                         className={`track-item ${itemClass}`}
-                        ref={itemRef}
                         onClick={() => {
                             if (isCurrentTrack) {
                                 playback.togglePlayPause()
@@ -76,9 +56,9 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
                                 playback.playTrack(playIndex)
                             }
                         }}
-                        onContextMenu={onContextMenu}
-                        onTouchStart={onTouchStart}
-                        onTouchEnd={onTouchEnd}
+                        onContextMenu={e => dropdown.onContextMenu(e, track)}
+                        onTouchStart={e => dropdown.onTouchStart(e, track)}
+                        onTouchEnd={dropdown.onTouchEnd}
                     >
                         <div className="track-indicator">
                             <div className="track-number">{index + 1}</div>

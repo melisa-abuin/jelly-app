@@ -3,15 +3,15 @@ import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from 
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { CSSProperties, useContext, useEffect, useState } from 'react'
+import { CSSProperties, useEffect, useState } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom'
 import './App.css'
-import { Dropdown } from './components/DropdownOld'
+import Dropdown from './components/Dropdown'
 import './components/MediaList.css'
 import Sidenav from './components/Sidenav'
-import { DropdownContext } from './context/DropdownContext/DropdownContext'
+import { useDropdownContext } from './context/DropdownContext/DropdownContext'
 import { DropdownContextProvider } from './context/DropdownContext/DropdownContextProvider'
-import { HistoryContext } from './context/HistoryContext/HistoryContext'
+import { useHistoryContext } from './context/HistoryContext/HistoryContext'
 import { HistoryContextProvider } from './context/HistoryContext/HistoryContextProvider'
 import { JellyfinContextProvider } from './context/JellyfinContext/JellyfinContextProvider'
 import { usePageTitle } from './context/PageTitleContext/PageTitleContext'
@@ -52,7 +52,7 @@ const persister = createSyncStoragePersister({
 })
 
 const useAppBack = () => {
-    const { goBack } = useContext(HistoryContext)!
+    const { goBack } = useHistoryContext()
     return goBack
 }
 
@@ -104,6 +104,7 @@ const App = () => {
                             <JellyfinContextProvider auth={auth}>
                                 <PlaybackContextProvider initialVolume={0.5} clearOnLogout={isLoggingOut}>
                                     <MainLayout auth={auth} handleLogout={handleLogout} />
+                                    <Dropdown />
                                 </PlaybackContextProvider>
                             </JellyfinContextProvider>
                         ) : (
@@ -112,7 +113,6 @@ const App = () => {
                     }
                 />
             </Routes>
-            <Dropdown />
         </div>
     )
 
@@ -157,7 +157,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     const location = useLocation()
     const { showSidenav, toggleSidenav, closeSidenav } = useSidenav(location)
     const { pageTitle } = usePageTitle()
-    const dropdownContext = useContext(DropdownContext)
+    const dropdownContext = useDropdownContext()
     const isDropdownOpen = dropdownContext?.isOpen || false
     const isTouchDevice = dropdownContext?.isTouchDevice || false
 
