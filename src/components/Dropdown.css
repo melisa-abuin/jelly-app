@@ -5,7 +5,7 @@
 }
 
 .dropdown {
-    transform: scale(0.92);
+    transform: scale(0.8);
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease-out, visibility 0.2s ease-out, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -15,12 +15,6 @@
     transform: scale(1);
     opacity: 1;
     visibility: visible;
-}
-
-.dropdown.closing {
-    transform: scale(0.92);
-    opacity: 0;
-    visibility: hidden;
 }
 
 .sub-dropdown {
@@ -163,16 +157,14 @@
         bottom: 0 !important;
         width: calc(100% - 32px);
         z-index: 3;
-        transform: translateY(100%);
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1) translateY(100%);
         transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .dropdown.active {
-        transform: translateY(0);
-    }
-
-    .dropdown.closing {
-        transform: translateY(100%);
+        transform: scale(1) translateY(0);
     }
 
     .dropdown > .dropdown-menu {

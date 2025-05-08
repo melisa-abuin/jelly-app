@@ -137,7 +137,10 @@ const Settings = ({ onLogout }: SettingsProps) => {
                     <div className="title">Session</div>
                     <div className="desc">
                         <p>
-                            Currently connected to {api.auth.serverUrl}{' '}
+                            Currently connected to{' '}
+                            <a target="_blank" rel="noopener noreferrer" className="textlink" href={api.auth.serverUrl}>
+                                {api.auth.serverUrl}
+                            </a>{' '}
                             {latency !== null && (
                                 <span>
                                     <span>with {latency}ms latency</span>

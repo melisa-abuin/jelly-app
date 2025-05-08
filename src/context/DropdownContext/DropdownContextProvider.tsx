@@ -397,7 +397,7 @@ const useInitialState = () => {
     const dropdownNode = useMemo(() => {
         return (
             <div
-                className={'dropdown noSelect' + (isOpen ? ' active' : ' closing')}
+                className={'dropdown noSelect' + (isOpen ? ' active' : '')}
                 style={{
                     top: `${position.y}px`,
                     left: `${position.x}px`,

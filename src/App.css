@@ -954,6 +954,16 @@ body.lockscroll {
     }
 }
 
+@media only screen and (pointer: coarse) {
+    .main > .main_footer > .playback > .progress > input::-webkit-slider-runnable-track {
+        height: 12px;
+    }
+
+    .main > .main_footer > .playback > .progress > input::-moz-range-track {
+        height: 12px;
+    }
+}
+
 @media only screen and (max-width: 700px), (pointer: coarse) {
     .dimmer {
         display: block;
