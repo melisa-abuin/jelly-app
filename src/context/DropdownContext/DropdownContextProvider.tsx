@@ -206,15 +206,25 @@ const useInitialState = () => {
     )
 
     const handlePlayNext = useCallback(() => {
+        if (selectedItem) {
+            const playlist = playback.currentPlaylist
+            const currentIndex = playback.currentTrackIndex
+            const insertIndex = currentIndex >= 0 ? currentIndex + 1 : playlist.length
+            const newPlaylist = [...playlist]
+            newPlaylist.splice(insertIndex, 0, selectedItem)
+            playback.setCurrentPlaylist({ playlist: newPlaylist })
+        }
         closeDropdown()
-    }, [closeDropdown])
+    }, [closeDropdown, playback, selectedItem])
 
     const handleAddToQueue = useCallback(
         (item: MediaItem) => {
+            const playlist = playback.currentPlaylist
+            const newPlaylist = [...playlist, item]
+            playback.setCurrentPlaylist({ playlist: newPlaylist })
             closeDropdown()
-            console.log('Add to queue:', item.Name)
         },
-        [closeDropdown]
+        [closeDropdown, playback]
     )
 
     const handleToggleFavorite = useCallback(
