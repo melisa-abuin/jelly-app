@@ -227,18 +227,6 @@ const useInitialState = () => {
         [closeDropdown, playback]
     )
 
-    const handleToggleFavorite = useCallback(
-        (item: MediaItem) => {
-            closeDropdown()
-            if (item.UserData?.IsFavorite) {
-                console.log('Remove from favorites:', item.Name)
-            } else {
-                console.log('Add to favorites:', item.Name)
-            }
-        },
-        [closeDropdown]
-    )
-
     // Actually working
     const handleViewAlbum = useCallback(
         (item: MediaItem) => {
@@ -351,14 +339,29 @@ const useInitialState = () => {
                 </div>
             ),
             add_to_favorite: (
-                <div className="dropdown-item add-favorite" onClick={() => handleToggleFavorite(selectedItem!)}>
+                <div
+                    className="dropdown-item add-favorite"
+                    onClick={() => {
+                        closeDropdown()
+
+                        if (selectedItem) {
+                            api.addToFavorites(selectedItem.Id)
+                        }
+                    }}
+                >
                     <span>Add to favorites</span>
                 </div>
             ),
             remove_from_favorite: (
                 <div
                     className="dropdown-item remove-favorite has-removable"
-                    onClick={() => handleToggleFavorite(selectedItem!)}
+                    onClick={() => {
+                        closeDropdown()
+
+                        if (selectedItem) {
+                            api.removeFromFavorites(selectedItem.Id)
+                        }
+                    }}
                 >
                     <span>Remove from favorites</span>
                 </div>
@@ -416,7 +419,6 @@ const useInitialState = () => {
         handleCreateClick,
         handleInputKeyDown,
         handlePlayNext,
-        handleToggleFavorite,
         handleViewAlbum,
         handleViewArtist,
         navigate,

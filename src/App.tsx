@@ -102,10 +102,12 @@ const App = () => {
                     element={
                         auth ? (
                             <JellyfinContextProvider auth={auth}>
-                                <PlaybackContextProvider initialVolume={0.5} clearOnLogout={isLoggingOut}>
-                                    <MainLayout auth={auth} handleLogout={handleLogout} />
-                                    <Dropdown />
-                                </PlaybackContextProvider>
+                                <DropdownContextProvider>
+                                    <PlaybackContextProvider initialVolume={0.5} clearOnLogout={isLoggingOut}>
+                                        <MainLayout auth={auth} handleLogout={handleLogout} />
+                                        <Dropdown />
+                                    </PlaybackContextProvider>
+                                </DropdownContextProvider>
                             </JellyfinContextProvider>
                         ) : (
                             <Navigate to="/login" />
@@ -121,9 +123,7 @@ const App = () => {
             <HistoryContextProvider>
                 <PageTitleProvider>
                     <ScrollContextProvider>
-                        <ThemeContextProvider>
-                            <DropdownContextProvider>{actualApp}</DropdownContextProvider>
-                        </ThemeContextProvider>
+                        <ThemeContextProvider>{actualApp}</ThemeContextProvider>
                     </ScrollContextProvider>
                 </PageTitleProvider>
             </HistoryContextProvider>

@@ -774,6 +774,18 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return `${serverUrl}/Audio/${trackId}/universal?UserId=${userId}&api_key=${token}&Container=opus,webm|opus,mp3,aac,m4a|aac,m4a|alac,m4b|aac,flac,webma,webm|webma,wav,ogg&TranscodingContainer=ts&TranscodingProtocol=hls&AudioCodec=aac&MaxStreamingBitrate=140000000&StartTimeTicks=0&EnableRedirection=true&EnableRemoteMedia=false`
     }
 
+    const addToFavorites = async (itemId: string) => {
+        const userLibraryApi = new UserLibraryApi(api.configuration)
+
+        return await userLibraryApi.markFavoriteItem({ itemId, userId }, { signal: AbortSignal.timeout(20000) })
+    }
+
+    const removeFromFavorites = async (itemId: string) => {
+        const userLibraryApi = new UserLibraryApi(api.configuration)
+
+        return await userLibraryApi.unmarkFavoriteItem({ itemId, userId }, { signal: AbortSignal.timeout(20000) })
+    }
+
     return {
         loginToJellyfin,
         searchItems,
@@ -811,6 +823,8 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         reportPlaybackStopped,
         getImageUrl,
         getStreamUrl,
+        addToFavorites,
+        removeFromFavorites,
         getInstantMixFromSong,
     }
 }
