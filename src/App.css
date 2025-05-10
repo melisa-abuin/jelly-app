@@ -478,13 +478,15 @@ body.lockscroll {
     gap: 12px;
 }
 
-.main > .main_header > .secondary > .filter {
+.filter {
     position: relative;
     display: flex;
     align-items: center;
+    width: fit-content;
+    flex-shrink: 0;
 }
 
-.main > .main_header > .secondary > .filter > select {
+.filter > select {
     font-size: 0.725rem;
     font-weight: 500;
     color: var(--brand-color);
@@ -496,10 +498,12 @@ body.lockscroll {
     background-color: var(--bg-color);
 }
 
-.main > .main_header > .secondary > .filter > .icon {
+.filter > .icon {
     position: absolute;
     right: 8px;
     color: var(--brand-color);
+    user-select: none;
+    pointer-events: none;
 }
 
 .main > .main_header > .secondary > .sidenav_toggle {
