@@ -13,7 +13,6 @@ interface TrackListProps {
 
 const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
     const playback = usePlaybackContext()
-    const { selectedItem } = useDropdownContext()
 
     const MIN_PLAY_COUNT = 5
     const mostPlayedTracks = tracks
@@ -33,7 +32,7 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
             {tracks.map((track, index) => {
                 const isCurrentTrack = playback.currentTrack?.Id === track.Id
                 const isMostPlayed = mostPlayedTracks.includes(track.Id)
-                const isActive = selectedItem?.Id === track.Id
+                const isActive = dropdown.selectedItem?.Id === track.Id
                 const itemClass = [
                     isCurrentTrack ? (playback.isPlaying ? 'playing' : 'paused') : '',
                     isMostPlayed ? 'most-played' : '',

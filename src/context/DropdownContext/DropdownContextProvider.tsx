@@ -205,50 +205,66 @@ const useInitialState = () => {
         [isTouchDevice]
     )
 
-    const handlePlayNext = (item: MediaItem) => {
-        console.log('Play next:', item.Name)
-    }
+    const handlePlayNext = useCallback(() => {
+        closeDropdown()
+    }, [closeDropdown])
 
-    const handleAddToQueue = (item: MediaItem) => {
-        console.log('Add to queue:', item.Name)
-    }
+    const handleAddToQueue = useCallback(
+        (item: MediaItem) => {
+            closeDropdown()
+            console.log('Add to queue:', item.Name)
+        },
+        [closeDropdown]
+    )
 
-    const handleToggleFavorite = (item: MediaItem) => {
-        if (item.UserData?.IsFavorite) {
-            console.log('Remove from favorites:', item.Name)
-        } else {
-            console.log('Add to favorites:', item.Name)
-        }
-    }
+    const handleToggleFavorite = useCallback(
+        (item: MediaItem) => {
+            closeDropdown()
+            if (item.UserData?.IsFavorite) {
+                console.log('Remove from favorites:', item.Name)
+            } else {
+                console.log('Add to favorites:', item.Name)
+            }
+        },
+        [closeDropdown]
+    )
 
     // Actually working
     const handleViewAlbum = useCallback(
         (item: MediaItem) => {
+            closeDropdown()
+
             if (item.AlbumId) {
                 navigate(`/album/${item.AlbumId}`)
             }
         },
-        [navigate]
+        [closeDropdown, navigate]
     )
 
     const handleViewArtist = useCallback(
         (artistId: string | undefined) => {
+            closeDropdown()
+
             if (artistId) {
                 navigate(`/artist/${artistId}`)
             }
         },
-        [navigate]
+        [closeDropdown, navigate]
     )
 
     // Placeholders
-    const handleAddToPlaylist = (playlistId: string, item: MediaItem) => {
-        console.log(`Add to playlist ${playlistId}:`, item.Name)
-    }
+    const handleAddToPlaylist = useCallback(
+        (playlistId: string, item: MediaItem) => {
+            closeDropdown()
+            console.log(`Add to playlist ${playlistId}:`, item.Name)
+        },
+        [closeDropdown]
+    )
 
     const menuItems = useMemo(() => {
         return {
             next: (
-                <div className="dropdown-item play-next" onClick={() => handlePlayNext(selectedItem!)}>
+                <div className="dropdown-item play-next" onClick={() => handlePlayNext()}>
                     <span>Play next</span>
                 </div>
             ),
@@ -309,6 +325,14 @@ const useInitialState = () => {
                             </div>
                         </div>
                     )}
+                </div>
+            ),
+            view_artist: (
+                <div
+                    className="dropdown-item view-artists has-sub-menu"
+                    onClick={() => handleViewArtist(selectedItem?.ArtistItems?.[0].Id)}
+                >
+                    <span>View artist</span>
                 </div>
             ),
             view_album: (
@@ -377,8 +401,12 @@ const useInitialState = () => {
         api,
         closeDropdown,
         closeSubDropdown,
+        handleAddToPlaylist,
+        handleAddToQueue,
         handleCreateClick,
         handleInputKeyDown,
+        handlePlayNext,
+        handleToggleFavorite,
         handleViewAlbum,
         handleViewArtist,
         navigate,
@@ -409,34 +437,53 @@ const useInitialState = () => {
                     {!hidden?.next && menuItems.next}
                     {!hidden?.add_to_queue && menuItems.add_to_queue}
                     {!hidden?.instant_mix && menuItems.instant_mix}
-                    {!hidden?.view_artists && menuItems.view_artists}
+
+                    {(selectedItem?.ArtistItems?.length || 0) > 1 && (
+                        <>{!hidden?.view_artists && menuItems.view_artists}</>
+                    )}
+
+                    {(selectedItem?.ArtistItems?.length || 0) === 1 && (
+                        <>{!hidden?.view_artist && menuItems.view_artist}</>
+                    )}
+
                     {!hidden?.view_album && menuItems.view_album}
-                    {!hidden?.add_to_favorite && menuItems.add_to_favorite}
-                    {!hidden?.remove_from_favorite && menuItems.remove_from_favorite}
+
+                    {!selectedItem?.UserData?.IsFavorite && (
+                        <>{!hidden?.add_to_favorite && menuItems.add_to_favorite}</>
+                    )}
+
+                    {selectedItem?.UserData?.IsFavorite && (
+                        <>{!hidden?.remove_from_favorite && menuItems.remove_from_favorite}</>
+                    )}
+
                     {!hidden?.add_to_playlist && menuItems.add_to_playlist}
                 </div>
             </div>
         )
     }, [
         isOpen,
-        menuItems.add_to_favorite,
-        menuItems.add_to_playlist,
-        menuItems.add_to_queue,
-        menuItems.instant_mix,
-        menuItems.next,
-        menuItems.remove_from_favorite,
-        menuItems.view_album,
-        menuItems.view_artists,
-        position.x,
         position.y,
-        hidden?.add_to_favorite,
-        hidden?.add_to_playlist,
+        position.x,
+        hidden?.next,
         hidden?.add_to_queue,
         hidden?.instant_mix,
-        hidden?.next,
-        hidden?.remove_from_favorite,
-        hidden?.view_album,
         hidden?.view_artists,
+        hidden?.view_artist,
+        hidden?.view_album,
+        hidden?.add_to_favorite,
+        hidden?.remove_from_favorite,
+        hidden?.add_to_playlist,
+        menuItems.next,
+        menuItems.add_to_queue,
+        menuItems.instant_mix,
+        menuItems.view_artists,
+        menuItems.view_artist,
+        menuItems.view_album,
+        menuItems.add_to_favorite,
+        menuItems.remove_from_favorite,
+        menuItems.add_to_playlist,
+        selectedItem?.ArtistItems?.length,
+        selectedItem?.UserData?.IsFavorite,
     ])
 
     return {
@@ -481,7 +528,7 @@ const useInitialState = () => {
             closeDropdown()
         },
         dropdownNode,
-        setVisible: setHidden,
+        setHidden,
     }
 }
 

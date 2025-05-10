@@ -2,6 +2,7 @@ import { HeartFillIcon } from '@primer/octicons-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
+import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useDisplayItems } from '../hooks/useDisplayItems'
 import { JellyImg } from './JellyImg'
@@ -19,6 +20,8 @@ const MediaList = ({ items = [], type, queryKey }: MediaListProps) => {
     const navigate = useNavigate()
     const location = useLocation()
     const { displayItems, setRowRefs } = useDisplayItems(items)
+
+    const dropdown = useDropdownContext()
 
     const handleSongClick = (item: MediaItem, index: number) => {
         if (type === 'song') {
@@ -53,8 +56,14 @@ const MediaList = ({ items = [], type, queryKey }: MediaListProps) => {
             )
         }
 
-        const itemClass =
-            type === 'song' && playback.currentTrack?.Id === item.Id ? (playback.isPlaying ? 'playing' : 'paused') : ''
+        const isActive = dropdown.selectedItem?.Id === item.Id
+
+        const itemClass = [
+            type === 'song' && playback.currentTrack?.Id === item.Id ? (playback.isPlaying ? 'playing' : 'paused') : '',
+            isActive ? 'active' : '',
+        ]
+            .filter(Boolean)
+            .join(' ')
 
         return type === 'album' ? (
             <div
@@ -84,6 +93,9 @@ const MediaList = ({ items = [], type, queryKey }: MediaListProps) => {
                 onClick={() => handleSongClick(item, index)}
                 key={item.Id}
                 ref={el => setRowRefs(index, el)}
+                onContextMenu={e => dropdown.onContextMenu(e, item)}
+                onTouchStart={e => dropdown.onTouchStart(e, item)}
+                onTouchEnd={dropdown.onTouchEnd}
             >
                 <div className="media-state">
                     <JellyImg item={item} type={'Primary'} width={46} height={46} />
