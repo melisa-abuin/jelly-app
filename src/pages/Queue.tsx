@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import QueueTrackList from '../components/QueueTrackList'
+import MediaList from '../components/MediaList'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import './Queue.css'
@@ -23,7 +23,7 @@ const Queue = () => {
     return (
         <div className="queue-page">
             <div className="queue-header">
-                <QueueTrackList tracks={[currentTrack]} singleTrack={true} />
+                <MediaList items={[currentTrack]} type="song" />
             </div>
             {queueTracks.length > 0 && (
                 <>
@@ -31,7 +31,7 @@ const Queue = () => {
                     <div className="queue-desc">
                         <span className="text">From {sourceName}</span>
                     </div>
-                    <QueueTrackList tracks={queueTracks} />
+                    <MediaList items={queueTracks} type="song" />
                 </>
             )}
         </div>
