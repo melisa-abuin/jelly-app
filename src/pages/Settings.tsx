@@ -1,4 +1,4 @@
-import { CheckCircleFillIcon, ChevronDownIcon } from '@primer/octicons-react'
+import { CheckCircleFillIcon } from '@primer/octicons-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
@@ -170,6 +170,7 @@ const Settings = ({ onLogout }: SettingsProps) => {
                         </div>
                     </div>
                 </div>
+                {/*
                 <div className="inner">
                     <div className="container">
                         <div className="info">
@@ -277,6 +278,7 @@ const Settings = ({ onLogout }: SettingsProps) => {
                         </div>
                     </div>
                 </div>
+                */}
             </div>
             <div className="section about">
                 <div className="title">About</div>

@@ -3,6 +3,7 @@ import { MediaItem } from '../api/jellyfin'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { formatDuration } from '../utils/formatDuration'
+import { PlaystateAnimationTracklist } from './SvgIcons'
 import './TrackList.css'
 
 interface TrackListProps {
@@ -69,12 +70,7 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
                                     <div className="pause-icon"></div>
                                 </div>
                                 <div className="play-state-animation">
-                                    <svg width="18" height="18" viewBox="0 0 18 18" className="sound-bars">
-                                        <rect x="1" y="10" width="3" height="8" rx="1.5" className="bar bar1"></rect>
-                                        <rect x="5" y="9" width="3" height="9" rx="1.5" className="bar bar2"></rect>
-                                        <rect x="9" y="11" width="3" height="7" rx="1.5" className="bar bar3"></rect>
-                                        <rect x="13" y="10" width="3" height="8" rx="1.5" className="bar bar4"></rect>
-                                    </svg>
+                                    <PlaystateAnimationTracklist width={18} height={18} className="sound-bars" />
                                 </div>
                             </div>
                         </div>

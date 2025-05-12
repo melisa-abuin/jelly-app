@@ -9,6 +9,7 @@ import './App.css'
 import Dropdown from './components/Dropdown'
 import './components/MediaList.css'
 import Sidenav from './components/Sidenav'
+import { AlbumIcon, ArtistsIcon, PlaylistIcon, TracksIcon } from './components/SvgIcons'
 import { useDropdownContext } from './context/DropdownContext/DropdownContext'
 import { DropdownContextProvider } from './context/DropdownContext/DropdownContextProvider'
 import { useHistoryContext } from './context/HistoryContext/HistoryContext'
@@ -191,47 +192,17 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                 </div>
                                 {location.pathname.startsWith('/album/') && pageTitle && (
                                     <div className="page-icon album" title="Album">
-                                        <svg
-                                            width="16"
-                                            height="16"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16.1328 15.7715"
-                                        >
-                                            <g>
-                                                <rect height="15.7715" opacity="0" width="16.1328" x="0" y="0" />
-                                                <path d="M15.7715 7.88086C15.7715 12.2266 12.2363 15.7617 7.88086 15.7617C3.53516 15.7617 0 12.2266 0 7.88086C0 3.53516 3.53516 0 7.88086 0C12.2363 0 15.7715 3.53516 15.7715 7.88086ZM4.75586 7.87109C4.75586 9.59961 6.15234 10.9961 7.88086 10.9961C9.61914 10.9961 11.0156 9.59961 11.0156 7.87109C11.0156 6.14258 9.61914 4.73633 7.88086 4.73633C6.15234 4.73633 4.75586 6.14258 4.75586 7.87109Z" />
-                                                <circle className="spindle-hole" cx="7.88086" cy="7.87109" r="1.5" />
-                                            </g>
-                                        </svg>
+                                        <AlbumIcon width={16} height={16} />
                                     </div>
                                 )}
                                 {pageTitle &&
                                     (location.pathname.match(/^\/artist\/[^/]+\/tracks$/) ? (
                                         <div className="page-icon artist-tracks" title="Tracks">
-                                            <svg
-                                                width="12"
-                                                height="12"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 38 48"
-                                                role="presentation"
-                                                focusable="false"
-                                            >
-                                                <path d="M36.15 0c-.18.02-1.76.3-1.95.33l-19.7 3.7c-.58.13-1.03.32-1.37.6a2.1 2.1 0 0 0-.74 1.36c-.02.12-.05.36-.05.72v26.81c0 1.18-.9 2.16-2.1 2.38l-5.27.86A6 6 0 0 0 0 42.57C0 45.63 2.6 48 5.64 48c.37 0 .74-.04 1.11-.1l1.82-.36a7.13 7.13 0 0 0 5.8-7.08V17.25c0-1.22.4-1.54 1.42-1.78 0 0 17.52-3.52 18.37-3.68.22-.04.43-.07.61-.07.78 0 1.17.4 1.17 1.36v15.47c0 1.18-.89 2.16-2.1 2.39l-4.86.95c-3.1.55-5.35 2.97-5.35 5.77 0 3.04 2.8 5.4 6.08 5.4.4 0 .8-.03 1.2-.1l1.96-.35c4.23-1.2 5.13-5.07 5.13-7.75v-33C38 .74 37.41 0 36.36 0h-.2z" />
-                                            </svg>
+                                            <TracksIcon width={12} height={12} />
                                         </div>
                                     ) : location.pathname.startsWith('/artist/') ? (
                                         <div className="page-icon artist" title="Artist">
-                                            <svg
-                                                width="16"
-                                                height="16"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16.1328 15.7715"
-                                            >
-                                                <g>
-                                                    <rect height="15.7715" opacity="0" width="16.1328" x="0" y="0" />
-                                                    <path d="M7.88086 15.7617C12.2363 15.7617 15.7715 12.2363 15.7715 7.88086C15.7715 3.52539 12.2363 0 7.88086 0C3.53516 0 0 3.52539 0 7.88086C0 12.2363 3.53516 15.7617 7.88086 15.7617ZM7.88086 14.2773C4.3457 14.2773 1.49414 11.416 1.49414 7.88086C1.49414 4.3457 4.3457 1.48438 7.88086 1.48438C11.416 1.48438 14.2773 4.3457 14.2773 7.88086C14.2773 11.416 11.416 14.2773 7.88086 14.2773ZM13.1445 12.959L13.1152 12.8613C12.7637 11.7188 10.7227 10.5078 7.88086 10.5078C5.03906 10.5078 3.00781 11.7188 2.65625 12.8613L2.62695 12.959C4.02344 14.3164 6.50391 15.0879 7.88086 15.0879C9.26758 15.0879 11.748 14.3164 13.1445 12.959ZM7.88086 9.21875C9.35547 9.23828 10.5176 7.97852 10.5176 6.32812C10.5176 4.77539 9.35547 3.49609 7.88086 3.49609C6.41602 3.49609 5.24414 4.77539 5.25391 6.32812C5.26367 7.97852 6.40625 9.19922 7.88086 9.21875Z" />
-                                                </g>
-                                            </svg>
+                                            <ArtistsIcon width={16} height={16} />
                                         </div>
                                     ) : null)}
                                 {location.pathname.startsWith('/genre/') && pageTitle && (
@@ -241,20 +212,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                 )}
                                 {location.pathname.startsWith('/playlist/') && pageTitle && (
                                     <div className="page-icon playlist" title="Playlist">
-                                        <svg
-                                            width="12"
-                                            height="12"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16.1523 15.9277"
-                                        >
-                                            <g>
-                                                <rect height="15.9277" opacity="0" width="16.1523" x="0" y="0" />
-                                                <path d="M0.585938 9.82422L7.33398 9.82422C7.66602 9.82422 7.91992 9.57031 7.91992 9.23828C7.91992 8.92578 7.65625 8.66211 7.33398 8.66211L0.585938 8.66211C0.263672 8.66211 0 8.92578 0 9.23828C0 9.57031 0.253906 9.82422 0.585938 9.82422Z" />
-                                                <path d="M0.585938 7.06055L7.33398 7.06055C7.66602 7.06055 7.91992 6.79688 7.91992 6.47461C7.91992 6.15234 7.65625 5.89844 7.33398 5.89844L0.585938 5.89844C0.263672 5.89844 0 6.15234 0 6.47461C0 6.79688 0.253906 7.06055 0.585938 7.06055Z" />
-                                                <path d="M0.585938 4.30664L7.33398 4.30664C7.65625 4.30664 7.91992 4.04297 7.91992 3.7207C7.91992 3.39844 7.65625 3.13477 7.33398 3.13477L0.585938 3.13477C0.263672 3.13477 0 3.39844 0 3.7207C0 4.04297 0.263672 4.30664 0.585938 4.30664Z" />
-                                                <path d="M15.791 3.88672L15.791 0.966797C15.791 0.546875 15.4492 0.263672 15.0391 0.351562L11.0059 1.23047C10.4785 1.34766 10.1953 1.62109 10.1953 2.08008L10.1953 10.6738C10.2441 11.0254 10.0781 11.25 9.77539 11.3086L8.55469 11.5625C6.98242 11.8945 6.25 12.6953 6.25 13.8867C6.25 15.0879 7.17773 15.9277 8.47656 15.9277C9.61914 15.9277 11.3477 15.0781 11.3477 12.8125L11.3477 5.74219C11.3477 5.35156 11.4062 5.29297 11.748 5.22461L15.3516 4.42383C15.625 4.36523 15.791 4.16016 15.791 3.88672Z" />
-                                            </g>
-                                        </svg>
+                                        <PlaylistIcon width={12} height={12} />
                                     </div>
                                 )}
                             </div>
@@ -424,18 +382,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                         <div className="text">No Album</div>
                                     )}
                                     <div className="album-icon" title="Album">
-                                        <svg
-                                            width="12"
-                                            height="12"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16.1328 15.7715"
-                                        >
-                                            <g>
-                                                <rect height="15.7715" opacity="0" width="16.1328" x="0" y="0" />
-                                                <path d="M15.7715 7.88086C15.7715 12.2266 12.2363 15.7617 7.88086 15.7617C3.53516 15.7617 0 12.2266 0 7.88086C0 3.53516 3.53516 0 7.88086 0C12.2363 0 15.7715 3.53516 15.7715 7.88086ZM4.75586 7.87109C4.75586 9.59961 6.15234 10.9961 7.88086 10.9961C9.61914 10.9961 11.0156 9.59961 11.0156 7.87109C11.0156 6.14258 9.61914 4.73633 7.88086 4.73633C6.15234 4.73633 4.75586 6.14258 4.75586 7.87109Z" />
-                                                <circle className="spindle-hole" cx="7.88086" cy="7.87109" r="1.5" />
-                                            </g>
-                                        </svg>
+                                        <AlbumIcon width={12} height={12} />
                                     </div>
                                 </div>
                             </div>
