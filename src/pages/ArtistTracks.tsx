@@ -9,7 +9,7 @@ import { useJellyfinArtistTracksData } from '../hooks/Jellyfin/useJellyfinArtist
 const ArtistTracks = () => {
     const { artistId } = useParams<{ artistId: string }>()
     const { artist } = useJellyfinArtistData(artistId!)
-    const { items: allTracks, loading, error } = useJellyfinArtistTracksData(artistId!)
+    const { items: allTracks, isLoading, error } = useJellyfinArtistTracksData(artistId!)
     const { setPageTitle } = usePageTitle()
 
     useEffect(() => {
@@ -21,14 +21,14 @@ const ArtistTracks = () => {
         }
     }, [artist, setPageTitle])
 
-    if (loading && allTracks.length === 0) {
+    if (isLoading && allTracks.length === 0) {
         return <Loader />
     }
 
     return (
         <div className="artist-tracks-page">
             {error && <div className="error">{error}</div>}
-            <PlaylistTrackList tracks={allTracks} showType="album" />
+            <PlaylistTrackList tracks={allTracks} isLoading={isLoading} showType="album" />
         </div>
     )
 }

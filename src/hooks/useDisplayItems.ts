@@ -1,22 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
-import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 
-export const useDisplayItems = (tracks: MediaItem[]) => {
-    const playback = usePlaybackContext()
-
+export const useDisplayItems = (tracks: MediaItem[], isLoading: boolean) => {
     const [displayItems, setDisplayItems] = useState<(MediaItem | { isPlaceholder: true })[]>(tracks)
     const sizeMap = useRef<{ [index: number]: number }>({})
     const rowRefs = useRef<(HTMLElement | null)[]>([])
     const resizeObservers = useRef<ResizeObserver[]>([])
 
     useEffect(() => {
-        if (playback.loading && playback.hasMore && playback.loadMore) {
+        if (isLoading) {
             setDisplayItems([...tracks, ...Array(4).fill({ isPlaceholder: true })])
         } else {
             setDisplayItems(tracks)
         }
-    }, [tracks, playback.loading, playback.hasMore, playback.loadMore])
+    }, [tracks, isLoading])
 
     const setSize = (index: number, height: number) => {
         sizeMap.current = { ...sizeMap.current, [index]: height }

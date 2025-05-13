@@ -12,15 +12,16 @@ import { PlaystateAnimationMedalist } from './SvgIcons'
 
 interface MediaListProps {
     items: MediaItem[] | undefined
+    isLoading: boolean
     type: 'song' | 'album'
     queryKey?: string
 }
 
-const MediaList = ({ items = [], type, queryKey }: MediaListProps) => {
+const MediaList = ({ items = [], isLoading, type }: MediaListProps) => {
     const playback = usePlaybackContext()
     const navigate = useNavigate()
     const location = useLocation()
-    const { displayItems, setRowRefs } = useDisplayItems(items)
+    const { displayItems, setRowRefs } = useDisplayItems(items, isLoading)
 
     const dropdown = useDropdownContext()
 
@@ -32,14 +33,14 @@ const MediaList = ({ items = [], type, queryKey }: MediaListProps) => {
                 const playlistIndex = items.findIndex(track => track.Id === item.Id)
                 const effectiveIndex = playlistIndex !== -1 && playback.currentTrackIndex !== -1 ? playlistIndex : index
 
-                playback.setCurrentPlaylist({ playlist: items, type: queryKey })
+                playback.setCurrentPlaylist({ playlist: items })
                 playback.playTrack(effectiveIndex)
             }
         }
     }
 
     const handleEndReached = () => {
-        if (playback.hasMore && playback.loadMore && !playback.loading) {
+        if (playback.hasMore && playback.loadMore && !isLoading) {
             playback.loadMore()
         }
     }
@@ -136,11 +137,11 @@ const MediaList = ({ items = [], type, queryKey }: MediaListProps) => {
         )
     }
 
-    if (playback.loading && items.length === 0) {
+    if (isLoading && items.length === 0) {
         return <Loader />
     }
 
-    if (items.length === 0 && !playback.loading) {
+    if (items.length === 0 && !isLoading) {
         return <div className="empty">{type === 'song' ? 'No tracks were found' : 'No albums were found'}</div>
     }
 

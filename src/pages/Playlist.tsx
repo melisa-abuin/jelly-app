@@ -19,12 +19,13 @@ const Playlist = () => {
     const {
         playlist,
         items: tracks,
-        loading,
+        isLoading,
         error,
         totalPlaytime,
         totalTrackCount,
         totalPlays,
     } = useJellyfinPlaylistData(playlistId!)
+
     const { setPageTitle } = usePageTitle()
 
     useEffect(() => {
@@ -36,7 +37,7 @@ const Playlist = () => {
         }
     }, [playlist, setPageTitle])
 
-    if (loading && tracks.length === 0) {
+    if (isLoading && tracks.length === 0) {
         return <Loader />
     }
 
@@ -96,7 +97,7 @@ const Playlist = () => {
                 </div>
             </div>
 
-            <PlaylistTrackList tracks={tracks} showType="artist" />
+            <PlaylistTrackList tracks={tracks} isLoading={isLoading} showType="artist" />
         </div>
     )
 }

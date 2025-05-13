@@ -10,7 +10,7 @@ export const useJellyfinAlbumsData = () => {
     const itemsPerPage = 40
     const playback = usePlaybackContext()
 
-    const { data, isLoading, isFetched, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
+    const { data, isFetching, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
@@ -41,33 +41,17 @@ export const useJellyfinAlbumsData = () => {
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
     useEffect(() => {
-        if (!isFetched) {
-            return
-        }
-
-        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'albums') {
-            return
-        }
-
         playback.setCurrentPlaylist({
-            type: 'albums',
+            isInfinite: true,
             playlist: allAlbums,
             hasMore: Boolean(hasNextPage),
             loadMore,
         })
-    }, [
-        allAlbums,
-        hasNextPage,
-        isFetched,
-        isFetchingNextPage,
-        isLoading,
-        loadMore,
-        playback,
-        playback.setCurrentPlaylist,
-    ])
+    }, [allAlbums, hasNextPage, loadMore, playback])
 
     return {
         items: allAlbums,
+        isLoading: isFetching,
         error: error ? error.message : null,
     }
 }

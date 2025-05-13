@@ -23,7 +23,7 @@ const Queue = () => {
     return (
         <div className="queue-page">
             <div className="queue-header">
-                <MediaList items={[currentTrack]} type="song" />
+                <MediaList items={[currentTrack]} isLoading={false} type="song" />
             </div>
             {queueTracks.length > 0 && (
                 <>
@@ -31,7 +31,7 @@ const Queue = () => {
                     <div className="queue-desc">
                         <span className="text">From {sourceName}</span>
                     </div>
-                    <MediaList items={queueTracks} type="song" />
+                    <MediaList items={queueTracks} isLoading={false} type="song" />
                 </>
             )}
         </div>

@@ -38,39 +38,37 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const playedIndices = useRef<Set<number>>(new Set())
     const hasRestored = useRef(false)
     const [hasMore, setHasMore] = useState<boolean>(false)
-    const [loading, setLoading] = useState<boolean>(false)
 
     const currentPlaylist = useRef<MediaItem[]>(JSON.parse(localStorage.getItem('currentPlaylist') || '[]'))
-    const currentPlaylistType = useRef<string | undefined>(localStorage.getItem('currentPlaylistType') || undefined)
 
     const setCurrentPlaylist = useCallback(
-        ({
-            type,
-            playlist,
-            hasMore,
-            loadMore,
-            loading,
-        }: {
-            type?: string
-            playlist: MediaItem[]
-            hasMore?: boolean
-            loadMore?: () => Promise<MediaItem[] | undefined>
-            loading?: boolean
-        }) => {
+        (
+            props:
+                | {
+                      isInfinite?: false
+                      playlist: MediaItem[]
+                  }
+                | {
+                      isInfinite: true
+                      playlist: MediaItem[]
+                      hasMore: boolean
+                      loadMore: () => Promise<MediaItem[] | undefined>
+                  }
+        ) => {
+            if (props.isInfinite && props.loadMore === loadMoreCallback.current) {
+                return
+            }
+
             if (shuffle) {
                 setShuffle(false)
             }
 
-            currentPlaylistType.current = type || '__undefined__' // Undefined is assumed to be a fresh load, so we set it to a string
-            localStorage.setItem('currentPlaylistType', type || '')
-
-            currentPlaylist.current = playlist
+            currentPlaylist.current = props.playlist
             localStorage.setItem('currentPlaylist', JSON.stringify(currentPlaylist.current || []))
 
-            if (type) {
-                loadMoreCallback.current = loadMore
-                setHasMore(hasMore || false)
-                setLoading(loading || false)
+            if (props.isInfinite) {
+                loadMoreCallback.current = props.loadMore
+                setHasMore(props.hasMore || false)
             }
         },
         [shuffle]
@@ -725,8 +723,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         repeat,
         toggleRepeat,
         hasMore,
-        loading,
-        currentPlaylistQueryKey: currentPlaylistType.current,
         currentPlaylist: currentPlaylist.current,
         setCurrentPlaylist,
         loadMore: loadMoreCallback.current,

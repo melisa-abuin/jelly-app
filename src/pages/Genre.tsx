@@ -6,7 +6,7 @@ import { useJellyfinGenreTracks } from '../hooks/Jellyfin/useJellyfinGenreTracks
 
 const Genre = () => {
     const { genre } = useParams<{ genre: string }>()
-    const { items, error } = useJellyfinGenreTracks(genre!)
+    const { items, isLoading, error } = useJellyfinGenreTracks(genre!)
     const { setPageTitle } = usePageTitle()
 
     useEffect(() => {
@@ -21,7 +21,7 @@ const Genre = () => {
     return (
         <div className="genre-page">
             {error && <div className="error">{error}</div>}
-            <MediaList items={items} type="song" queryKey="genreTracks" />
+            <MediaList items={items} isLoading={isLoading} type="song" queryKey="genreTracks" />
         </div>
     )
 }

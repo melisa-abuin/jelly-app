@@ -26,7 +26,7 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
         queryFn: () => api.getPlaylistTotals(playlistId),
     })
 
-    const { data, isLoading, isFetched, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
+    const { data, isFetching, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
@@ -49,51 +49,33 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
         }
     }, [error, playlistError, totalsError])
 
-    const tracks = useMemo(() => {
-        return getAllTracks(data)
-    }, [data])
-
     const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {
             return getAllTracks((await fetchNextPage()).data)
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
+    const tracks = useMemo(() => {
+        return getAllTracks(data)
+    }, [data])
+
     const totalPlaytime = totals?.totalPlaytime || 0
     const totalTrackCount = totals?.totalTrackCount || 0
     const totalPlays = tracks.reduce((sum, track) => sum + (track.UserData?.PlayCount || 0), 0)
 
     useEffect(() => {
-        if (!isFetched) {
-            return
-        }
-
-        if (playback.currentPlaylistQueryKey && playback.currentPlaylistQueryKey !== 'playlistTracks') {
-            return
-        }
-
         playback.setCurrentPlaylist({
-            type: 'playlistTracks',
+            isInfinite: true,
             playlist: tracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
         })
-    }, [
-        tracks,
-        hasNextPage,
-        isFetchingNextPage,
-        isLoading,
-        loadMore,
-        isFetched,
-        playback.setCurrentPlaylist,
-        playback.currentPlaylistQueryKey,
-        playback,
-    ])
+    }, [hasNextPage, loadMore, playback, tracks])
 
     return {
         playlist,
         items: tracks,
-        loading: isLoading || isFetchingNextPage,
+        isLoading: isFetching,
         error: error ? error.message : null,
         totalPlaytime,
         totalTrackCount,

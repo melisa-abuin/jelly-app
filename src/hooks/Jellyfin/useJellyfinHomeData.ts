@@ -33,7 +33,7 @@ export const useJellyfinHomeData = () => {
 
     return {
         ...data,
-        loading: isLoading,
+        isLoading,
         error: error ? error.message : null,
     }
 }

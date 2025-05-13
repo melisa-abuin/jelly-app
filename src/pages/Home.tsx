@@ -4,9 +4,9 @@ import MediaList from '../components/MediaList'
 import { useJellyfinHomeData } from '../hooks/Jellyfin/useJellyfinHomeData'
 
 const Home = () => {
-    const { recentlyPlayed, frequentlyPlayed, recentlyAdded, loading, error } = useJellyfinHomeData()
+    const { recentlyPlayed, frequentlyPlayed, recentlyAdded, isLoading, error } = useJellyfinHomeData()
 
-    if (loading) {
+    if (isLoading) {
         return <Loader />
     }
 
@@ -26,7 +26,7 @@ const Home = () => {
                         See more
                     </Link>
                 </div>
-                <MediaList items={recentlyPlayed} type="song" />
+                <MediaList items={recentlyPlayed} isLoading={isLoading} type="song" />
             </div>
             <div className="section">
                 <div className="section-header">
@@ -38,7 +38,7 @@ const Home = () => {
                         See more
                     </Link>
                 </div>
-                <MediaList items={frequentlyPlayed} type="song" />
+                <MediaList items={frequentlyPlayed} isLoading={isLoading} type="song" />
             </div>
             <div className="section">
                 <div className="section-header">
@@ -47,7 +47,7 @@ const Home = () => {
                         <div className="section_desc">Albums recently added to the Library</div>
                     </div>
                 </div>
-                <MediaList items={recentlyAdded} type="album" />
+                <MediaList items={recentlyAdded} isLoading={isLoading} type="album" />
             </div>
         </div>
     )

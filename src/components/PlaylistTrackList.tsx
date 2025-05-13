@@ -14,14 +14,15 @@ import { PlaystateAnimationTracklist } from './SvgIcons'
 
 interface PlaylistTrackListProps {
     tracks: MediaItem[]
+    isLoading: boolean
     playlistId?: string
     showType?: 'artist' | 'album'
 }
 
-const PlaylistTrackList = ({ tracks, playlistId, showType }: PlaylistTrackListProps) => {
+const PlaylistTrackList = ({ tracks, isLoading, playlistId, showType }: PlaylistTrackListProps) => {
     const playback = usePlaybackContext()
     const location = useLocation()
-    const { displayItems, setRowRefs } = useDisplayItems(tracks)
+    const { displayItems, setRowRefs } = useDisplayItems(tracks, isLoading)
 
     const handleTrackClick = useCallback(
         (track: MediaItem, index: number) => {
@@ -35,7 +36,7 @@ const PlaylistTrackList = ({ tracks, playlistId, showType }: PlaylistTrackListPr
     )
 
     const handleEndReached = () => {
-        if (playback.hasMore && playback.loadMore && !playback.loading) {
+        if (playback.hasMore && playback.loadMore && !isLoading) {
             playback.loadMore()
         }
     }
@@ -117,11 +118,11 @@ const PlaylistTrackList = ({ tracks, playlistId, showType }: PlaylistTrackListPr
         )
     }
 
-    if (playback.loading && tracks.length === 0) {
+    if (isLoading && tracks.length === 0) {
         return <Loader />
     }
 
-    if (!playback.loading && tracks.length === 0) {
+    if (!isLoading && tracks.length === 0) {
         return <div className="empty">No tracks were found</div>
     }
 
