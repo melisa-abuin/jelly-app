@@ -498,6 +498,28 @@ const useInitialState = () => {
         selectedItem?.UserData?.IsFavorite,
     ])
 
+    const touchTimeoutRef = useRef<number | null>(null)
+
+    const handleTouchStart = useCallback(
+        (e: React.TouchEvent<HTMLLIElement>, item: MediaItem) => {
+            e.preventDefault()
+            touchTimeoutRef.current = window.setTimeout(() => {
+                const touch = e.touches[0]
+                const x = touch.clientX
+                const y = touch.clientY + window.pageYOffset
+                openDropdown(item, x, y)
+            }, 500)
+        },
+        [openDropdown]
+    )
+
+    const clearTouchTimer = useCallback(() => {
+        if (touchTimeoutRef.current !== null) {
+            clearTimeout(touchTimeoutRef.current)
+            touchTimeoutRef.current = null
+        }
+    }, [])
+
     return {
         isOpen,
         position,
@@ -523,22 +545,8 @@ const useInitialState = () => {
             const y = e.clientY + window.pageYOffset
             openDropdown(item, x, y)
         },
-        onTouchStart: (e: React.TouchEvent<HTMLLIElement>, item: MediaItem) => {
-            e.preventDefault()
-
-            if (selectedItem?.Id === item.Id) {
-                closeDropdown()
-                return
-            }
-
-            const touch = e.touches[0]
-            const x = touch.clientX
-            const y = touch.clientY + window.pageYOffset
-            openDropdown(item, x, y)
-        },
-        onTouchEnd: () => {
-            closeDropdown()
-        },
+        onTouchStart: handleTouchStart,
+        onTouchClear: clearTouchTimer,
         dropdownNode,
         setHidden,
     }

@@ -58,7 +58,8 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
                         }}
                         onContextMenu={e => dropdown.onContextMenu(e, track)}
                         onTouchStart={e => dropdown.onTouchStart(e, track)}
-                        onTouchEnd={dropdown.onTouchEnd}
+                        onTouchMove={dropdown.onTouchClear}
+                        onTouchEnd={dropdown.onTouchClear}
                     >
                         <div className="track-indicator">
                             <div className="track-number">{index + 1}</div>

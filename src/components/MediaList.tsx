@@ -97,7 +97,8 @@ const MediaList = ({ items = [], isLoading, type }: MediaListProps) => {
                 ref={el => setRowRefs(index, el)}
                 onContextMenu={e => dropdown.onContextMenu(e, item)}
                 onTouchStart={e => dropdown.onTouchStart(e, item)}
-                onTouchEnd={dropdown.onTouchEnd}
+                onTouchMove={dropdown.onTouchClear}
+                onTouchEnd={dropdown.onTouchClear}
             >
                 <div className="media-state">
                     <JellyImg item={item} type={'Primary'} width={46} height={46} />
