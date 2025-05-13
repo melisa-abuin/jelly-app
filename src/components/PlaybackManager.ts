@@ -79,8 +79,13 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const [userInteracted, setUserInteracted] = useState(false)
 
-    const [sortBy, setSortBy] = useState<ItemSortBy[]>([ItemSortBy.DateCreated])
-    const [sortOrder, setSortOrder] = useState<SortOrder[]>([SortOrder.Descending])
+    const [sort, setSort] = useState(
+        location.pathname === '/tracks' || location.pathname === '/albums' || location.pathname === '/genre'
+            ? 'Added'
+            : location.pathname === '/favorites'
+            ? 'Tracks'
+            : ''
+    )
 
     const currentTrack = useMemo(() => {
         return (
@@ -671,7 +676,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         }
     }, [clearOnLogout, currentTrack, reportPlaybackStoppedWrapper])
 
-    const updateSort = useCallback((sortOption: string) => {
+    const calcSort = useCallback((sortOption: string) => {
         let newSortBy: ItemSortBy[]
         let newSortOrder: SortOrder[] = [SortOrder.Ascending]
 
@@ -694,8 +699,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 newSortOrder = [SortOrder.Descending]
         }
 
-        setSortBy(newSortBy)
-        setSortOrder(newSortOrder)
+        return { sortBy: newSortBy, sortOrder: newSortOrder }
     }, [])
 
     return {
@@ -728,10 +732,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         loadMore: loadMoreCallback.current,
         sessionPlayCount,
         resetSessionCount,
-        sortBy,
-        setSortBy,
-        sortOrder,
-        setSortOrder,
-        updateSort,
+        sort,
+        setSort,
+        getSort: () => calcSort(sort),
     }
 }

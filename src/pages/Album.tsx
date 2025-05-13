@@ -1,17 +1,15 @@
 import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect, useRef } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import { JellyImg } from '../components/JellyImg'
 import Loader from '../components/Loader'
 import { MoreIcon } from '../components/SvgIcons'
 import TrackList from '../components/TrackList'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinAlbumData } from '../hooks/Jellyfin/useJellyfinAlbumData'
-import { useJellyfinPlaylistsList } from '../hooks/Jellyfin/useJellyfinPlaylistsList'
 import { formatDate } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Album.css'
@@ -21,13 +19,8 @@ const Album = () => {
     const { albumId } = useParams<{ albumId: string }>()
     const { album, tracks, discCount, loading, error } = useJellyfinAlbumData(albumId!)
     const { setPageTitle } = usePageTitle()
-    const navigate = useNavigate()
-    const api = useJellyfinContext()
-    const { playlists } = useJellyfinPlaylistsList()
-    const dropdown = useDropdownContext()
+    const { isOpen, selectedItem, setHidden } = useDropdownContext()
     const moreRef = useRef<HTMLDivElement>(null)
-
-    const { openDropdown, isOpen, selectedItem, setSelectedItem } = dropdown
 
     useEffect(() => {
         if (album) {
@@ -37,6 +30,12 @@ const Album = () => {
             setPageTitle('')
         }
     }, [album, setPageTitle])
+
+    useEffect(() => {
+        setHidden({
+            view_album: true,
+        })
+    }, [setHidden])
 
     const totalPlaytime = tracks.reduce((total, track) => total + (track.RunTimeTicks || 0), 0)
 
@@ -68,24 +67,6 @@ const Album = () => {
 
     const handleMoreClick = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation()
-        if (moreRef.current && album) {
-            const rect = moreRef.current.getBoundingClientRect()
-            const x = rect.left - 142
-            const y = rect.top + window.pageYOffset + rect.height + 6
-            // const menuItems = defaultMenuItems(album, navigate, playback, api, playlists)
-            // const filteredMenuItems = menuItems.filter(
-            //     item =>
-            //         item.label !== 'View artist' &&
-            //         item.label !== 'View artists' &&
-            //         item.label !== 'View album' &&
-            //         item.label !== 'Add to favorites' &&
-            //         item.label !== 'Remove from favorites'
-            // )
-            // const closeEvent = new CustomEvent('close-all-dropdowns', { detail: { exceptId: album.Id } })
-            // document.dispatchEvent(closeEvent)
-            // openDropdown(album, x, y, filteredMenuItems, true)
-            // setSelectedItem(album)
-        }
     }
 
     return (

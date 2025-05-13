@@ -1,17 +1,15 @@
 import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect, useRef } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
 import Loader from '../components/Loader'
 import { MoreIcon } from '../components/SvgIcons'
 import TrackList from '../components/TrackList'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinArtistData } from '../hooks/Jellyfin/useJellyfinArtistData'
 import { useJellyfinPlaylistsFeaturingArtist } from '../hooks/Jellyfin/useJellyfinPlaylistsFeaturingArtist'
-import { useJellyfinPlaylistsList } from '../hooks/Jellyfin/useJellyfinPlaylistsList'
 import { formatDateYear } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Artist.css'
@@ -27,13 +25,8 @@ const Artist = () => {
         error: playlistsError,
     } = useJellyfinPlaylistsFeaturingArtist(artistId!)
     const { setPageTitle } = usePageTitle()
-    const navigate = useNavigate()
-    const api = useJellyfinContext()
-    const { playlists: allPlaylists } = useJellyfinPlaylistsList()
-    const dropdown = useDropdownContext()
+    const { isOpen, selectedItem, setHidden } = useDropdownContext()
     const moreRef = useRef<HTMLDivElement>(null)
-
-    const { openDropdown, isOpen, selectedItem, setSelectedItem } = dropdown
 
     useEffect(() => {
         if (artist) {
@@ -43,6 +36,13 @@ const Artist = () => {
             setPageTitle('')
         }
     }, [artist, setPageTitle])
+
+    useEffect(() => {
+        setHidden({
+            view_artist: true,
+            view_artists: true,
+        })
+    }, [setHidden])
 
     if (loading) {
         return <Loader />
@@ -57,24 +57,6 @@ const Artist = () => {
 
     const handleMoreClick = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation()
-        if (moreRef.current && artist) {
-            const rect = moreRef.current.getBoundingClientRect()
-            const x = rect.left - 142
-            const y = rect.top + window.pageYOffset + rect.height + 6
-            // const menuItems = defaultMenuItems(artist, navigate, playback, api, allPlaylists)
-            // const filteredMenuItems = menuItems.filter(
-            //     item =>
-            //         item.label !== 'View artist' &&
-            //         item.label !== 'View artists' &&
-            //         item.label !== 'View album' &&
-            //         item.label !== 'Add to favorites' &&
-            //         item.label !== 'Remove from favorites'
-            // )
-            // const closeEvent = new CustomEvent('close-all-dropdowns', { detail: { exceptId: artist.Id } })
-            // document.dispatchEvent(closeEvent)
-            // openDropdown(artist, x, y, filteredMenuItems, true)
-            // setSelectedItem(artist)
-        }
     }
 
     return (

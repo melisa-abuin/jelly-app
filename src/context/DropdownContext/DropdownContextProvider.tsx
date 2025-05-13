@@ -41,7 +41,7 @@ const useInitialState = () => {
     const [isTouchDevice, setIsTouchDevice] = useState(false)
     const [ignoreMargin, setIgnoreMargin] = useState(false)
     const scrollContext = useScrollContext()
-    const [hidden, setHidden] = useState<{ [x in keyof typeof menuItems]: boolean }>()
+    const [hidden, setHidden] = useState<{ [x in keyof typeof menuItems]?: boolean }>()
     const navigate = useNavigate()
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
@@ -93,7 +93,6 @@ const useInitialState = () => {
 
     const closeDropdown = useCallback(() => {
         setIsOpen(false)
-        setSelectedItem(null)
         setSubDropdown({
             isOpen: false,
             type: '',
@@ -524,7 +523,6 @@ const useInitialState = () => {
         isOpen,
         position,
         selectedItem,
-        setSelectedItem,
         menuItems,
         subDropdown,
         isTouchDevice,
@@ -535,12 +533,6 @@ const useInitialState = () => {
         ignoreMargin,
         onContextMenu: (e: React.MouseEvent<HTMLLIElement, MouseEvent>, item: MediaItem) => {
             e.preventDefault()
-
-            if (selectedItem?.Id === item.Id) {
-                closeDropdown()
-                return
-            }
-
             const x = e.clientX
             const y = e.clientY + window.pageYOffset
             openDropdown(item, x, y)

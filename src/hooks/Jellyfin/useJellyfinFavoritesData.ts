@@ -9,15 +9,16 @@ export const useJellyfinFavoritesData = () => {
     const api = useJellyfinContext()
     const itemsPerPage = 40
     const playback = usePlaybackContext()
+    const { sortBy, sortOrder } = playback.getSort()
 
     const { data, isFetching, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
-        queryKey: ['favorites', playback.sortBy, playback.sortOrder],
+        queryKey: ['favorites', sortBy, sortOrder],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await api.getFavoriteTracks(startIndex, itemsPerPage, playback.sortBy, playback.sortOrder)
+            return await api.getFavoriteTracks(startIndex, itemsPerPage, sortBy, sortOrder)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
         initialPageParam: 0,

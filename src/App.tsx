@@ -168,10 +168,6 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
 
     const previousPage = useAppBack()
 
-    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        playback.updateSort(event.target.value)
-    }
-
     return (
         <div className="interface">
             <div
@@ -219,9 +215,11 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                         </div>
                     </div>
                     <div className="secondary">
-                        {location.pathname === '/tracks' && (
+                        {(location.pathname === '/tracks' ||
+                            location.pathname === '/albums' ||
+                            location.pathname === '/genre') && (
                             <div className="filter">
-                                <select onChange={handleSortChange} defaultValue="Added">
+                                <select onChange={e => playback.setSort(e.target.value)} value={playback.sort}>
                                     <option value="Added">Added</option>
                                     <option value="Released">Released</option>
                                     <option value="Runtime">Runtime</option>
@@ -232,22 +230,10 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                 </div>
                             </div>
                         )}
-                        {location.pathname === '/albums' && (
-                            <div className="filter">
-                                <select onChange={handleSortChange} defaultValue="Added">
-                                    <option value="Added">Added</option>
-                                    <option value="Released">Released</option>
-                                    <option value="Runtime">Runtime</option>
-                                    <option value="Random">Random</option>
-                                </select>
-                                <div className="icon">
-                                    <ChevronDownIcon size={12} />
-                                </div>
-                            </div>
-                        )}
+
                         {location.pathname === '/favorites' && (
                             <div className="filter">
-                                <select onChange={handleSortChange} defaultValue="Tracks">
+                                <select onChange={e => playback.setSort(e.target.value)} value={playback.sort}>
                                     <option value="Tracks">Tracks</option>
                                     <option value="Albums">Albums</option>
                                     <option value="Artists">Artists</option>
@@ -257,19 +243,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                 </div>
                             </div>
                         )}
-                        {location.pathname.startsWith('/genre') && (
-                            <div className="filter">
-                                <select onChange={handleSortChange} defaultValue="Added">
-                                    <option value="Added">Added</option>
-                                    <option value="Released">Released</option>
-                                    <option value="Runtime">Runtime</option>
-                                    <option value="Random">Random</option>
-                                </select>
-                                <div className="icon">
-                                    <ChevronDownIcon size={12} />
-                                </div>
-                            </div>
-                        )}
+
                         <div className="sidenav_toggle noSelect" onClick={toggleSidenav}>
                             <div className="bar"></div>
                             <div className="bar"></div>
