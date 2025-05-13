@@ -164,8 +164,8 @@ const useInitialState = () => {
     }, [])
 
     useEffect(() => {
-        if (scrollContext) {
-            scrollContext.setDisabled(isOpen && isTouchDevice)
+        if (scrollContext && isTouchDevice) {
+            scrollContext.setDisabled(isOpen)
         }
     }, [isOpen, isTouchDevice, scrollContext])
 
