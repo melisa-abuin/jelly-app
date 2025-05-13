@@ -14,10 +14,10 @@ export const useJellyfinGenreTracks = (genre: string) => {
         MediaItem[],
         ApiError
     >({
-        queryKey: ['genreTracks', genre],
+        queryKey: ['genreTracks', genre, playback.sortBy, playback.sortOrder],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await api.getGenreTracks(genre, startIndex, itemsPerPage)
+            return await api.getGenreTracks(genre, startIndex, itemsPerPage, playback.sortBy, playback.sortOrder)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
         initialPageParam: 0,

@@ -14,10 +14,10 @@ export const useJellyfinAlbumsData = () => {
         MediaItem[],
         ApiError
     >({
-        queryKey: ['albums'],
+        queryKey: ['albums', playback.sortBy, playback.sortOrder],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await api.getAllAlbums(startIndex, itemsPerPage)
+            return await api.getAllAlbums(startIndex, itemsPerPage, playback.sortBy, playback.sortOrder)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
         initialPageParam: 0,

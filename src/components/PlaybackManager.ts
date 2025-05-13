@@ -79,8 +79,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const [userInteracted, setUserInteracted] = useState(false)
 
-    const [sortBy, setSortBy] = useState<ItemSortBy>(ItemSortBy.DateCreated)
-    const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.Descending)
+    const [sortBy, setSortBy] = useState<ItemSortBy[]>([ItemSortBy.DateCreated])
+    const [sortOrder, setSortOrder] = useState<SortOrder[]>([SortOrder.Descending])
 
     const currentTrack = useMemo(() => {
         return (
@@ -672,26 +672,26 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     }, [clearOnLogout, currentTrack, reportPlaybackStoppedWrapper])
 
     const updateSort = useCallback((sortOption: string) => {
-        let newSortBy: ItemSortBy
-        let newSortOrder: SortOrder = SortOrder.Ascending
+        let newSortBy: ItemSortBy[]
+        let newSortOrder: SortOrder[] = [SortOrder.Ascending]
 
         switch (sortOption) {
             case 'Added':
-                newSortBy = ItemSortBy.DateCreated
-                newSortOrder = SortOrder.Descending
+                newSortBy = [ItemSortBy.DateCreated]
+                newSortOrder = [SortOrder.Descending]
                 break
             case 'Released':
-                newSortBy = ItemSortBy.PremiereDate
+                newSortBy = [ItemSortBy.PremiereDate]
                 break
             case 'Runtime':
-                newSortBy = ItemSortBy.Runtime
+                newSortBy = [ItemSortBy.Runtime]
                 break
             case 'Random':
-                newSortBy = ItemSortBy.Random
+                newSortBy = [ItemSortBy.Random]
                 break
             default:
-                newSortBy = ItemSortBy.DateCreated
-                newSortOrder = SortOrder.Descending
+                newSortBy = [ItemSortBy.DateCreated]
+                newSortOrder = [SortOrder.Descending]
         }
 
         setSortBy(newSortBy)

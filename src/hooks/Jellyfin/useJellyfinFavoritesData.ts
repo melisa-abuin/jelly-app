@@ -14,10 +14,10 @@ export const useJellyfinFavoritesData = () => {
         MediaItem[],
         ApiError
     >({
-        queryKey: ['favorites'],
+        queryKey: ['favorites', playback.sortBy, playback.sortOrder],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await api.getFavoriteTracks(startIndex, itemsPerPage)
+            return await api.getFavoriteTracks(startIndex, itemsPerPage, playback.sortBy, playback.sortOrder)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
         initialPageParam: 0,
