@@ -83,6 +83,10 @@
     color: var(--font-color-error-light);
 }
 
+.dropdown > .dropdown-menu > .dropdown-item.add-favorite {
+    color: var(--brand-color);
+}
+
 .dropdown > .dropdown-menu > .dropdown-item > .icon {
     margin-right: -4px;
 }

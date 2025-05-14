@@ -7,9 +7,11 @@ import Loader from '../components/Loader'
 import { MoreIcon } from '../components/SvgIcons'
 import TrackList from '../components/TrackList'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
+import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinAlbumData } from '../hooks/Jellyfin/useJellyfinAlbumData'
+import { usePatchQueries } from '../hooks/usePatchQueries'
 import { formatDate } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Album.css'
@@ -21,6 +23,8 @@ const Album = () => {
     const { setPageTitle } = usePageTitle()
     const { isOpen, selectedItem } = useDropdownContext()
     const moreRef = useRef<HTMLDivElement>(null)
+    const api = useJellyfinContext()
+    const { patchMediaItem } = usePatchQueries()
 
     useEffect(() => {
         if (album) {
@@ -111,6 +115,22 @@ const Album = () => {
                             <div
                                 className="favorite-state"
                                 title={album.UserData?.IsFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                                onClick={async () => {
+                                    if (album?.Id) {
+                                        try {
+                                            const res = album.UserData?.IsFavorite
+                                                ? await api.removeFromFavorites(album.Id)
+                                                : await api.addToFavorites(album.Id)
+
+                                            patchMediaItem(album.Id, item => ({
+                                                ...item,
+                                                UserData: res.data,
+                                            }))
+                                        } catch (error) {
+                                            console.error('Failed to update favorite status:', error)
+                                        }
+                                    }
+                                }}
                             >
                                 {album.UserData?.IsFavorite ? <HeartFillIcon size={16} /> : <HeartIcon size={16} />}
                             </div>

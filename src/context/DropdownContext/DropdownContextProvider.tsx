@@ -104,6 +104,7 @@ const useInitialState = () => {
             top: 0,
         })
         setIgnoreMargin(false)
+        setSelectedItem(null)
     }, [])
 
     useEffect(() => {

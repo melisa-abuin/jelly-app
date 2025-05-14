@@ -362,7 +362,9 @@ const Sidenav = (props: SidenavProps) => {
                     <div className="account">
                         <div className="status">
                             <div className="indicator">Connected</div>
-                            <div className="username">{props.username}</div>
+                            <div className="username" title={props.username}>
+                                {props.username}
+                            </div>
                         </div>
                         <NavLink to="/settings" className="settings" onClick={props.closeSidenav}>
                             <GearIcon size={16} />

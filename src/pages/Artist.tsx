@@ -6,10 +6,12 @@ import Loader from '../components/Loader'
 import { MoreIcon } from '../components/SvgIcons'
 import TrackList from '../components/TrackList'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
+import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinArtistData } from '../hooks/Jellyfin/useJellyfinArtistData'
 import { useJellyfinPlaylistsFeaturingArtist } from '../hooks/Jellyfin/useJellyfinPlaylistsFeaturingArtist'
+import { usePatchQueries } from '../hooks/usePatchQueries'
 import { formatDateYear } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Artist.css'
@@ -27,6 +29,8 @@ const Artist = () => {
     const { setPageTitle } = usePageTitle()
     const { isOpen, selectedItem } = useDropdownContext()
     const moreRef = useRef<HTMLDivElement>(null)
+    const api = useJellyfinContext()
+    const { patchMediaItem } = usePatchQueries()
 
     useEffect(() => {
         if (artist) {
@@ -108,6 +112,22 @@ const Artist = () => {
                             <div
                                 className="favorite-state"
                                 title={artist.UserData?.IsFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                                onClick={async () => {
+                                    if (artist?.Id) {
+                                        try {
+                                            const res = artist.UserData?.IsFavorite
+                                                ? await api.removeFromFavorites(artist.Id)
+                                                : await api.addToFavorites(artist.Id)
+
+                                            patchMediaItem(artist.Id, item => ({
+                                                ...item,
+                                                UserData: res.data,
+                                            }))
+                                        } catch (error) {
+                                            console.error('Failed to update favorite status:', error)
+                                        }
+                                    }
+                                }}
                             >
                                 {artist.UserData?.IsFavorite ? <HeartFillIcon size={16} /> : <HeartIcon size={16} />}
                             </div>
