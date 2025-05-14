@@ -7,7 +7,7 @@ const RecentlyPlayed = () => {
     return (
         <div className="recently-page">
             {error && <div className="error">{error}</div>}
-            <MediaList items={items} isLoading={isLoading} type="song" queryKey="recentlyPlayed" />
+            <MediaList items={items} isLoading={isLoading} type="song" />
         </div>
     )
 }

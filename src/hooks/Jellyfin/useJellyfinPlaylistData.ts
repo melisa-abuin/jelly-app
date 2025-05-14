@@ -26,7 +26,7 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
         queryFn: () => api.getPlaylistTotals(playlistId),
     })
 
-    const { data, isFetching, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
+    const { data, isFetching, isPending, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
@@ -75,7 +75,7 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
     return {
         playlist,
         items: tracks,
-        isLoading: isFetching,
+        isLoading: isFetching || isPending,
         error: error ? error.message : null,
         totalPlaytime,
         totalTrackCount,

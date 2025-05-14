@@ -19,7 +19,7 @@ const Album = () => {
     const { albumId } = useParams<{ albumId: string }>()
     const { album, tracks, discCount, loading, error } = useJellyfinAlbumData(albumId!)
     const { setPageTitle } = usePageTitle()
-    const { isOpen, selectedItem, setHidden } = useDropdownContext()
+    const { isOpen, selectedItem } = useDropdownContext()
     const moreRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -30,12 +30,6 @@ const Album = () => {
             setPageTitle('')
         }
     }, [album, setPageTitle])
-
-    useEffect(() => {
-        setHidden({
-            view_album: true,
-        })
-    }, [setHidden])
 
     const totalPlaytime = tracks.reduce((total, track) => total + (track.RunTimeTicks || 0), 0)
 

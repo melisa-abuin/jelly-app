@@ -13,7 +13,7 @@ export const formatDurationReadable = (ticks?: number) => {
     }
 
     if (minutes > 0 || hours > 0) {
-        parts.push(`${hours > 0 ? minutes.toString().padStart(2, '0') : minutes}m`)
+        parts.push(`${minutes}m`)
     }
 
     if (hours === 0 && minutes === 0 && remainingSeconds > 0) {

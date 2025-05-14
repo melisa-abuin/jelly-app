@@ -2,6 +2,7 @@ import { ChevronRightIcon } from '@primer/octicons-react'
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MediaItem } from '../../api/jellyfin'
+import { usePatchQueries } from '../../hooks/usePatchQueries'
 import { useJellyfinContext } from '../JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../ScrollContext/ScrollContext'
@@ -45,6 +46,7 @@ const useInitialState = () => {
     const navigate = useNavigate()
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
+    const { patchMediaItem } = usePatchQueries()
 
     const subMenuRef = useRef<HTMLDivElement>(null)
 
@@ -340,11 +342,15 @@ const useInitialState = () => {
             add_to_favorite: (
                 <div
                     className="dropdown-item add-favorite"
-                    onClick={() => {
+                    onClick={async () => {
                         closeDropdown()
 
                         if (selectedItem) {
-                            api.addToFavorites(selectedItem.Id)
+                            const res = await api.addToFavorites(selectedItem.Id)
+
+                            patchMediaItem(selectedItem.Id, item => {
+                                return { ...item, UserData: res.data }
+                            })
                         }
                     }}
                 >
@@ -354,11 +360,15 @@ const useInitialState = () => {
             remove_from_favorite: (
                 <div
                     className="dropdown-item remove-favorite has-removable"
-                    onClick={() => {
+                    onClick={async () => {
                         closeDropdown()
 
                         if (selectedItem) {
-                            api.removeFromFavorites(selectedItem.Id)
+                            const res = await api.removeFromFavorites(selectedItem.Id)
+
+                            patchMediaItem(selectedItem.Id, item => {
+                                return { ...item, UserData: res.data }
+                            })
                         }
                     }}
                 >
@@ -422,6 +432,7 @@ const useInitialState = () => {
         handleViewArtist,
         navigate,
         openSubDropdown,
+        patchMediaItem,
         playback,
         playlistName,
         selectedItem,

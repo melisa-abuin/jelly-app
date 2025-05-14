@@ -7,7 +7,7 @@ const FrequentlyPlayed = () => {
     return (
         <div className="frequently-page">
             {error && <div className="error">{error}</div>}
-            <MediaList items={items} isLoading={isLoading} type="song" queryKey="frequentlyPlayed" />
+            <MediaList items={items} isLoading={isLoading} type="song" />
         </div>
     )
 }

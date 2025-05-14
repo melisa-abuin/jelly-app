@@ -14,7 +14,6 @@ interface MediaListProps {
     items: MediaItem[] | undefined
     isLoading: boolean
     type: 'song' | 'album'
-    queryKey?: string
 }
 
 const MediaList = ({ items = [], isLoading, type }: MediaListProps) => {

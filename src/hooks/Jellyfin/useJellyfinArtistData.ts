@@ -17,7 +17,7 @@ interface JellyfinArtistData {
 export const useJellyfinArtistData = (artistId: string, trackLimit = 5) => {
     const api = useJellyfinContext()
 
-    const { data, isLoading, error } = useQuery<JellyfinArtistData, Error>({
+    const { data, isFetching, isPending, error } = useQuery<JellyfinArtistData, Error>({
         queryKey: ['artistData', artistId, trackLimit],
         queryFn: async () => {
             const [artistDetailsResponse, allTracks] = await Promise.all([
@@ -51,7 +51,7 @@ export const useJellyfinArtistData = (artistId: string, trackLimit = 5) => {
 
     return {
         ...data,
-        loading: isLoading,
+        loading: isFetching || isPending,
         error: error ? error.message : null,
         appearsInAlbums: data?.appearsInAlbums || [],
         albums: data?.albums || [],

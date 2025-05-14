@@ -21,7 +21,7 @@ const Genre = () => {
     return (
         <div className="genre-page">
             {error && <div className="error">{error}</div>}
-            <MediaList items={items} isLoading={isLoading} type="song" queryKey="genreTracks" />
+            <MediaList items={items} isLoading={isLoading} type="song" />
         </div>
     )
 }

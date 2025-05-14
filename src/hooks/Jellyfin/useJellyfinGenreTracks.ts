@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
 import { ApiError, MediaItem } from '../../api/jellyfin'
+import { useFilterContext } from '../../context/FilterContext/FilterContext'
 import { useJellyfinContext } from '../../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../../context/PlaybackContext/PlaybackContext'
 import { getAllTracks } from '../../utils/getAllTracks'
@@ -9,16 +10,16 @@ export const useJellyfinGenreTracks = (genre: string) => {
     const api = useJellyfinContext()
     const itemsPerPage = 40
     const playback = usePlaybackContext()
-    const { sortBy, sortOrder } = playback.getSort()
+    const { jellySort } = useFilterContext()
 
-    const { data, isFetching, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
+    const { data, isFetching, isPending, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<
         MediaItem[],
         ApiError
     >({
-        queryKey: ['genreTracks', genre, sortBy, sortOrder],
+        queryKey: ['genreTracks', genre, jellySort.sortBy, jellySort.sortOrder],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await api.getGenreTracks(genre, startIndex, itemsPerPage, sortBy, sortOrder)
+            return await api.getGenreTracks(genre, startIndex, itemsPerPage, jellySort.sortBy, jellySort.sortOrder)
         },
         getNextPageParam: (lastPage, pages) => (lastPage.length === itemsPerPage ? pages.length : undefined),
         initialPageParam: 0,
@@ -52,7 +53,7 @@ export const useJellyfinGenreTracks = (genre: string) => {
 
     return {
         items: tracks,
-        isLoading: isFetching,
+        isLoading: isFetching || isPending,
         error: error ? error.message : null,
     }
 }

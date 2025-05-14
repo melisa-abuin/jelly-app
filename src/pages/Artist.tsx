@@ -25,7 +25,7 @@ const Artist = () => {
         error: playlistsError,
     } = useJellyfinPlaylistsFeaturingArtist(artistId!)
     const { setPageTitle } = usePageTitle()
-    const { isOpen, selectedItem, setHidden } = useDropdownContext()
+    const { isOpen, selectedItem } = useDropdownContext()
     const moreRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -36,13 +36,6 @@ const Artist = () => {
             setPageTitle('')
         }
     }, [artist, setPageTitle])
-
-    useEffect(() => {
-        setHidden({
-            view_artist: true,
-            view_artists: true,
-        })
-    }, [setHidden])
 
     if (loading) {
         return <Loader />

@@ -1,4 +1,3 @@
-import { ItemSortBy, SortOrder } from '@jellyfin/sdk/lib/generated-client'
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
@@ -78,14 +77,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const abortControllerRef = useRef<AbortController | null>(null)
 
     const [userInteracted, setUserInteracted] = useState(false)
-
-    const [sort, setSort] = useState(
-        location.pathname === '/tracks' || location.pathname === '/albums' || location.pathname === '/genre'
-            ? 'Added'
-            : location.pathname === '/favorites'
-            ? 'Tracks'
-            : ''
-    )
 
     const currentTrack = useMemo(() => {
         return (
@@ -676,32 +667,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         }
     }, [clearOnLogout, currentTrack, reportPlaybackStoppedWrapper])
 
-    const calcSort = useCallback((sortOption: string) => {
-        let newSortBy: ItemSortBy[]
-        let newSortOrder: SortOrder[] = [SortOrder.Ascending]
-
-        switch (sortOption) {
-            case 'Added':
-                newSortBy = [ItemSortBy.DateCreated]
-                newSortOrder = [SortOrder.Descending]
-                break
-            case 'Released':
-                newSortBy = [ItemSortBy.PremiereDate]
-                break
-            case 'Runtime':
-                newSortBy = [ItemSortBy.Runtime]
-                break
-            case 'Random':
-                newSortBy = [ItemSortBy.Random]
-                break
-            default:
-                newSortBy = [ItemSortBy.DateCreated]
-                newSortOrder = [SortOrder.Descending]
-        }
-
-        return { sortBy: newSortBy, sortOrder: newSortOrder }
-    }, [])
-
     return {
         currentTrack,
         currentTrackIndex: shuffle
@@ -732,8 +697,5 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         loadMore: loadMoreCallback.current,
         sessionPlayCount,
         resetSessionCount,
-        sort,
-        setSort,
-        getSort: () => calcSort(sort),
     }
 }

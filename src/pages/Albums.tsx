@@ -6,7 +6,7 @@ const Albums = () => {
 
     return (
         <div className="albums-page">
-            <MediaList items={items} isLoading={isLoading} type="album" queryKey="albums" />
+            <MediaList items={items} isLoading={isLoading} type="album" />
             {error && <div className="error">{error}</div>}
         </div>
     )

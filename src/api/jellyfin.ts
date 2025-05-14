@@ -322,14 +322,15 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         startIndex = 0,
         limit = 40,
         sortBy: ItemSortBy[] = [ItemSortBy.DateCreated],
-        sortOrder: SortOrder[] = [SortOrder.Descending]
+        sortOrder: SortOrder[] = [SortOrder.Descending],
+        itemKind: BaseItemKind = BaseItemKind.Audio
     ): Promise<MediaItem[]> => {
         const itemsApi = new ItemsApi(api.configuration)
         const response = await itemsApi.getItems(
             {
                 userId,
                 filters: [ItemFilter.IsFavorite],
-                includeItemTypes: [BaseItemKind.Audio],
+                includeItemTypes: [itemKind],
                 recursive: true,
                 sortBy,
                 sortOrder,

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Location } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
-export const useSidenav = (location?: Location) => {
+export const useSidenav = () => {
     const [showSidenav, setShowSidenav] = useState(false)
+    const location = useLocation()
 
     // Close sidenav on route change if location is provided
     useEffect(() => {

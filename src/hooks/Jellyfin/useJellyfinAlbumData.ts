@@ -13,7 +13,7 @@ interface JellyfinAlbumData {
 export const useJellyfinAlbumData = (albumId: string) => {
     const api = useJellyfinContext()
 
-    const { data, isLoading, error } = useQuery<JellyfinAlbumData, Error>({
+    const { data, isFetching, isPending, error } = useQuery<JellyfinAlbumData, Error>({
         queryKey: ['albumData', albumId],
         queryFn: async () => {
             const { album, tracks } = await api.getAlbumDetails(albumId)
@@ -33,7 +33,7 @@ export const useJellyfinAlbumData = (albumId: string) => {
 
     return {
         ...data,
-        loading: isLoading,
+        loading: isFetching || isPending,
         error: error ? error.message : null,
         tracks: data?.tracks || [],
         discCount: data?.discCount || 1,

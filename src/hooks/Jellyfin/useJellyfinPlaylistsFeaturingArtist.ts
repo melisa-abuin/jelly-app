@@ -5,7 +5,7 @@ import { useJellyfinContext } from '../../context/JellyfinContext/JellyfinContex
 export const useJellyfinPlaylistsFeaturingArtist = (artistId: string) => {
     const api = useJellyfinContext()
 
-    const { data, isLoading, error } = useQuery<MediaItem[], Error>({
+    const { data, isFetching, isPending, error } = useQuery<MediaItem[], Error>({
         queryKey: ['playlistsFeaturingArtist', artistId],
         queryFn: async () => {
             return await api.getPlaylistsFeaturingArtist(artistId)
@@ -14,7 +14,7 @@ export const useJellyfinPlaylistsFeaturingArtist = (artistId: string) => {
 
     return {
         playlists: data || [],
-        loading: isLoading,
+        loading: isFetching || isPending,
         error: error ? error.message : null,
     }
 }
