@@ -117,7 +117,7 @@ const Playlist = () => {
                 </div>
             </div>
 
-            <PlaylistTrackList tracks={tracks} isLoading={isLoading} showType="artist" />
+            <PlaylistTrackList tracks={tracks} isLoading={isLoading} showType="artist" playlistId={playlistId} />
         </div>
     )
 }

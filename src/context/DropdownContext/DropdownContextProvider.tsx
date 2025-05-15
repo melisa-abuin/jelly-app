@@ -2,28 +2,21 @@ import { ChevronRightIcon } from '@primer/octicons-react'
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MediaItem } from '../../api/jellyfin'
+import { useJellyfinPlaylistsList } from '../../hooks/Jellyfin/useJellyfinPlaylistsList'
 import { usePatchQueries } from '../../hooks/usePatchQueries'
 import { useJellyfinContext } from '../JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../ScrollContext/ScrollContext'
 import { DropdownContext } from './DropdownContext'
 
-export interface DropdownMenuItem {
-    label: string
-    action?: (item: MediaItem) => void
-    subItems?: { label: string; action: (item: MediaItem) => void; isInput?: boolean }[]
-}
-
-interface DropdownProviderProps {
-    children: ReactNode
-}
-
 export type IDropdownContext = ReturnType<typeof useInitialState>
+
+type IContext = { item: MediaItem; playlistId?: string }
 
 const useInitialState = () => {
     const [isOpen, setIsOpen] = useState(false)
     const [position, setPosition] = useState({ x: 0, y: 0 })
-    const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null)
+    const [context, setContext] = useState<IContext>()
     const [subDropdown, setSubDropdown] = useState<{
         isOpen: boolean
         type: 'view-artists' | 'add-playlist' | ''
@@ -47,6 +40,7 @@ const useInitialState = () => {
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
     const { patchMediaItem } = usePatchQueries()
+    const { playlists } = useJellyfinPlaylistsList()
 
     const subMenuRef = useRef<HTMLDivElement>(null)
 
@@ -57,41 +51,6 @@ const useInitialState = () => {
     const closeSubDropdown = useCallback(() => {
         setSubDropdown(prev => ({ ...prev, isOpen: false, type: '' }))
     }, [])
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setPlaylistName(e.target.value)
-    const handleInputKeyDown = useCallback(
-        (e: React.KeyboardEvent<HTMLInputElement>) => {
-            if (e.key === 'Enter' && playlistName.trim() && selectedItem) {
-                // api.createPlaylist(playlistName.trim())
-                //     .then(id => api.addItemToPlaylist(id, dropdown.selectedItem!.Id))
-                //     .then(() => {
-                //         setPlaylistName('')
-                //         closeSubDropdown()
-                //         dropdown.closeDropdown()
-                //     })
-            } else if (e.key === 'Escape') {
-                setPlaylistName('')
-                closeSubDropdown()
-            }
-        },
-        [closeSubDropdown, playlistName, selectedItem]
-    )
-
-    const handleCreateClick = useCallback(
-        (e: React.MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation()
-            if (playlistName.trim() && selectedItem) {
-                // api.createPlaylist(playlistName.trim())
-                //     .then(id => api.addItemToPlaylist(id, dropdown.selectedItem!.Id))
-                //     .then(() => {
-                //         setPlaylistName('')
-                //         closeSubDropdown()
-                //         dropdown.closeDropdown()
-                //     })
-            }
-        },
-        [playlistName, selectedItem]
-    )
 
     const closeDropdown = useCallback(() => {
         setIsOpen(false)
@@ -104,8 +63,35 @@ const useInitialState = () => {
             top: 0,
         })
         setIgnoreMargin(false)
-        setSelectedItem(null)
     }, [])
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setPlaylistName(e.target.value)
+    const handleInputKeyDown = useCallback(
+        async (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === 'Enter' && playlistName.trim() && context) {
+                const playlist = await api.createPlaylist(playlistName.trim())
+                await api.addToPlaylist(playlist.Id!, context.item.Id)
+                setPlaylistName('')
+                closeDropdown()
+            } else if (e.key === 'Escape') {
+                setPlaylistName('')
+            }
+        },
+        [playlistName, context, api, closeDropdown]
+    )
+
+    const handleCreateClick = useCallback(
+        async (e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation()
+            if (playlistName.trim() && context) {
+                const playlist = await api.createPlaylist(playlistName.trim())
+                await api.addToPlaylist(playlist.Id!, context.item.Id)
+                setPlaylistName('')
+                closeDropdown()
+            }
+        },
+        [playlistName, context, api, closeDropdown]
+    )
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -172,7 +158,7 @@ const useInitialState = () => {
     }, [isOpen, isTouchDevice, scrollContext])
 
     const openDropdown = useCallback(
-        (item: MediaItem, x: number, y: number, ignoreMargin = false) => {
+        (context: IContext, x: number, y: number, ignoreMargin = false) => {
             let adjustedX = x
             let adjustedY = y
             if (isTouchDevice) {
@@ -193,7 +179,7 @@ const useInitialState = () => {
             }
             setIsOpen(true)
             setPosition({ x: adjustedX, y: adjustedY })
-            setSelectedItem(item)
+            setContext(context)
             setSubDropdown({
                 isOpen: false,
                 type: '',
@@ -208,16 +194,16 @@ const useInitialState = () => {
     )
 
     const handlePlayNext = useCallback(() => {
-        if (selectedItem) {
+        if (context) {
             const playlist = playback.currentPlaylist
             const currentIndex = playback.currentTrackIndex
             const insertIndex = currentIndex >= 0 ? currentIndex + 1 : playlist.length
             const newPlaylist = [...playlist]
-            newPlaylist.splice(insertIndex, 0, selectedItem)
+            newPlaylist.splice(insertIndex, 0, context.item)
             playback.setCurrentPlaylist({ playlist: newPlaylist })
         }
         closeDropdown()
-    }, [closeDropdown, playback, selectedItem])
+    }, [closeDropdown, playback, context])
 
     const handleAddToQueue = useCallback(
         (item: MediaItem) => {
@@ -252,15 +238,6 @@ const useInitialState = () => {
         [closeDropdown, navigate]
     )
 
-    // Placeholders
-    const handleAddToPlaylist = useCallback(
-        (playlistId: string, item: MediaItem) => {
-            closeDropdown()
-            console.log(`Add to playlist ${playlistId}:`, item.Name)
-        },
-        [closeDropdown]
-    )
-
     const menuItems = useMemo(() => {
         return {
             next: (
@@ -269,7 +246,7 @@ const useInitialState = () => {
                 </div>
             ),
             add_to_queue: (
-                <div className="dropdown-item add-queue" onClick={() => handleAddToQueue(selectedItem!)}>
+                <div className="dropdown-item add-queue" onClick={() => handleAddToQueue(context!.item)}>
                     <span>Add to queue</span>
                 </div>
             ),
@@ -277,11 +254,11 @@ const useInitialState = () => {
                 <div
                     className="dropdown-item instant-mix"
                     onClick={() => {
-                        if (!selectedItem) return
+                        if (!context) return
 
                         closeDropdown()
 
-                        api.getInstantMixFromSong(selectedItem.Id).then(r => {
+                        api.getInstantMixFromSong(context.item.Id).then(r => {
                             if (r) {
                                 playback.setCurrentPlaylist({
                                     playlist: r,
@@ -313,7 +290,7 @@ const useInitialState = () => {
                             }}
                         >
                             <div className="dropdown-menu">
-                                {selectedItem?.ArtistItems?.map(artist => (
+                                {context?.item?.ArtistItems?.map(artist => (
                                     <div
                                         key={artist.Id}
                                         className="dropdown-item"
@@ -330,13 +307,13 @@ const useInitialState = () => {
             view_artist: (
                 <div
                     className="dropdown-item view-artists has-sub-menu"
-                    onClick={() => handleViewArtist(selectedItem?.ArtistItems?.[0].Id)}
+                    onClick={() => handleViewArtist(context?.item?.ArtistItems?.[0].Id)}
                 >
                     <span>View artist</span>
                 </div>
             ),
             view_album: (
-                <div className="dropdown-item view-album" onClick={() => handleViewAlbum(selectedItem!)}>
+                <div className="dropdown-item view-album" onClick={() => handleViewAlbum(context!.item)}>
                     <span>View album</span>
                 </div>
             ),
@@ -346,10 +323,10 @@ const useInitialState = () => {
                     onClick={async () => {
                         closeDropdown()
 
-                        if (selectedItem) {
-                            const res = await api.addToFavorites(selectedItem.Id)
+                        if (context) {
+                            const res = await api.addToFavorites(context.item.Id)
 
-                            patchMediaItem(selectedItem.Id, item => {
+                            patchMediaItem(context.item.Id, item => {
                                 return { ...item, UserData: res.data }
                             })
                         }
@@ -364,10 +341,10 @@ const useInitialState = () => {
                     onClick={async () => {
                         closeDropdown()
 
-                        if (selectedItem) {
-                            const res = await api.removeFromFavorites(selectedItem.Id)
+                        if (context) {
+                            const res = await api.removeFromFavorites(context.item.Id)
 
-                            patchMediaItem(selectedItem.Id, item => {
+                            patchMediaItem(context.item.Id, item => {
                                 return { ...item, UserData: res.data }
                             })
                         }
@@ -410,21 +387,43 @@ const useInitialState = () => {
                                         </button>
                                     </div>
                                 </div>
-                                <div className="dropdown-item" onClick={() => handleAddToPlaylist(playlist.id, item)}>
-                                    Playlist 1
-                                </div>
-                                <div className="dropdown-item">Playlist 2</div>
+
+                                {playlists.map(playlist => (
+                                    <div
+                                        key={playlist.Id}
+                                        className="dropdown-item"
+                                        onClick={() => {
+                                            closeDropdown()
+                                            api.addToPlaylist(playlist.Id, context!.item.Id)
+                                        }}
+                                    >
+                                        {playlist.Name}
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}
                 </div>
             ),
+            remove_from_playlist: context?.playlistId ? (
+                <div
+                    className="dropdown-item remove-playlist"
+                    onClick={() => {
+                        closeDropdown()
+
+                        if (context) {
+                            api.removeFromPlaylist(context.playlistId!, context.item.Id)
+                        }
+                    }}
+                >
+                    <span>Remove from playlist</span>
+                </div>
+            ) : null,
         }
     }, [
         api,
         closeDropdown,
         closeSubDropdown,
-        handleAddToPlaylist,
         handleAddToQueue,
         handleCreateClick,
         handleInputKeyDown,
@@ -436,7 +435,8 @@ const useInitialState = () => {
         patchMediaItem,
         playback,
         playlistName,
-        selectedItem,
+        playlists,
+        context,
         subDropdown.flipY,
         subDropdown.height,
         subDropdown.isOpen,
@@ -461,25 +461,27 @@ const useInitialState = () => {
                     {!hidden?.add_to_queue && menuItems.add_to_queue}
                     {!hidden?.instant_mix && menuItems.instant_mix}
 
-                    {(selectedItem?.ArtistItems?.length || 0) > 1 && (
+                    {(context?.item?.ArtistItems?.length || 0) > 1 && (
                         <>{!hidden?.view_artists && menuItems.view_artists}</>
                     )}
 
-                    {(selectedItem?.ArtistItems?.length || 0) === 1 && (
+                    {(context?.item?.ArtistItems?.length || 0) === 1 && (
                         <>{!hidden?.view_artist && menuItems.view_artist}</>
                     )}
 
                     {!hidden?.view_album && menuItems.view_album}
 
-                    {!selectedItem?.UserData?.IsFavorite && (
+                    {!context?.item?.UserData?.IsFavorite && (
                         <>{!hidden?.add_to_favorite && menuItems.add_to_favorite}</>
                     )}
 
-                    {selectedItem?.UserData?.IsFavorite && (
+                    {context?.item?.UserData?.IsFavorite && (
                         <>{!hidden?.remove_from_favorite && menuItems.remove_from_favorite}</>
                     )}
 
                     {!hidden?.add_to_playlist && menuItems.add_to_playlist}
+
+                    {!hidden?.remove_from_playlist && menuItems.remove_from_playlist}
                 </div>
             </div>
         )
@@ -496,6 +498,7 @@ const useInitialState = () => {
         hidden?.add_to_favorite,
         hidden?.remove_from_favorite,
         hidden?.add_to_playlist,
+        hidden?.remove_from_playlist,
         menuItems.next,
         menuItems.add_to_queue,
         menuItems.instant_mix,
@@ -505,20 +508,21 @@ const useInitialState = () => {
         menuItems.add_to_favorite,
         menuItems.remove_from_favorite,
         menuItems.add_to_playlist,
-        selectedItem?.ArtistItems?.length,
-        selectedItem?.UserData?.IsFavorite,
+        menuItems.remove_from_playlist,
+        context?.item?.ArtistItems?.length,
+        context?.item?.UserData?.IsFavorite,
     ])
 
     const touchTimeoutRef = useRef<number | null>(null)
 
     const handleTouchStart = useCallback(
-        (e: React.TouchEvent<HTMLLIElement>, item: MediaItem) => {
+        (e: React.TouchEvent<HTMLElement>, context: IContext) => {
             e.preventDefault()
             touchTimeoutRef.current = window.setTimeout(() => {
                 const touch = e.touches[0]
                 const x = touch.clientX
                 const y = touch.clientY + window.pageYOffset
-                openDropdown(item, x, y)
+                openDropdown(context, x, y)
             }, 500)
         },
         [openDropdown]
@@ -534,7 +538,7 @@ const useInitialState = () => {
     return {
         isOpen,
         position,
-        selectedItem,
+        selectedItem: context?.item,
         menuItems,
         subDropdown,
         isTouchDevice,
@@ -543,11 +547,11 @@ const useInitialState = () => {
         openSubDropdown,
         closeSubDropdown,
         ignoreMargin,
-        onContextMenu: (e: React.MouseEvent<HTMLLIElement, MouseEvent>, item: MediaItem) => {
+        onContextMenu: (e: React.MouseEvent<HTMLElement, MouseEvent>, context: IContext) => {
             e.preventDefault()
             const x = e.clientX
             const y = e.clientY + window.pageYOffset
-            openDropdown(item, x, y)
+            openDropdown(context, x, y)
         },
         onTouchStart: handleTouchStart,
         onTouchClear: clearTouchTimer,
@@ -556,7 +560,7 @@ const useInitialState = () => {
     }
 }
 
-export const DropdownContextProvider = ({ children }: DropdownProviderProps) => {
+export const DropdownContextProvider = ({ children }: { children: ReactNode }) => {
     const initialState = useInitialState()
 
     return <DropdownContext.Provider value={initialState}>{children}</DropdownContext.Provider>

@@ -33,7 +33,7 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
             {tracks.map((track, index) => {
                 const isCurrentTrack = playback.currentTrack?.Id === track.Id
                 const isMostPlayed = mostPlayedTracks.includes(track.Id)
-                const isActive = dropdown.selectedItem?.Id === track.Id
+                const isActive = dropdown.selectedItem?.Id === track.Id && dropdown.isOpen
                 const itemClass = [
                     isCurrentTrack ? (playback.isPlaying ? 'playing' : 'paused') : '',
                     isMostPlayed ? 'most-played' : '',
@@ -56,8 +56,8 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
                                 playback.playTrack(playIndex)
                             }
                         }}
-                        onContextMenu={e => dropdown.onContextMenu(e, track)}
-                        onTouchStart={e => dropdown.onTouchStart(e, track)}
+                        onContextMenu={e => dropdown.onContextMenu(e, { item: track })}
+                        onTouchStart={e => dropdown.onTouchStart(e, { item: track })}
                         onTouchMove={dropdown.onTouchClear}
                         onTouchEnd={dropdown.onTouchClear}
                     >

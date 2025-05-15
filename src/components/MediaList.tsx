@@ -57,7 +57,7 @@ const MediaList = ({ items = [], isLoading, type }: MediaListProps) => {
             )
         }
 
-        const isActive = dropdown.selectedItem?.Id === item.Id
+        const isActive = dropdown.selectedItem?.Id === item.Id && dropdown.isOpen
 
         const itemClass = [
             type === 'song' && playback.currentTrack?.Id === item.Id ? (playback.isPlaying ? 'playing' : 'paused') : '',
@@ -68,10 +68,14 @@ const MediaList = ({ items = [], isLoading, type }: MediaListProps) => {
 
         return type === 'album' ? (
             <div
-                className={`media-item album-item`}
+                className={`media-item album-item ${itemClass}`}
                 key={item.Id}
                 onClick={() => navigate(`/album/${item.Id}`)}
                 ref={el => setRowRefs(index, el)}
+                onContextMenu={e => dropdown.onContextMenu(e, { item })}
+                onTouchStart={e => dropdown.onTouchStart(e, { item })}
+                onTouchMove={dropdown.onTouchClear}
+                onTouchEnd={dropdown.onTouchClear}
             >
                 <div className="media-state">
                     <JellyImg item={item} type={'Primary'} width={46} height={46} />
@@ -94,8 +98,8 @@ const MediaList = ({ items = [], isLoading, type }: MediaListProps) => {
                 onClick={() => handleSongClick(item, index)}
                 key={item.Id}
                 ref={el => setRowRefs(index, el)}
-                onContextMenu={e => dropdown.onContextMenu(e, item)}
-                onTouchStart={e => dropdown.onTouchStart(e, item)}
+                onContextMenu={e => dropdown.onContextMenu(e, { item })}
+                onTouchStart={e => dropdown.onTouchStart(e, { item })}
                 onTouchMove={dropdown.onTouchClear}
                 onTouchEnd={dropdown.onTouchClear}
             >

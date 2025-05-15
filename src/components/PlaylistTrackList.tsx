@@ -3,6 +3,7 @@ import { useCallback } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
+import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useDisplayItems } from '../hooks/useDisplayItems'
 import { formatDuration } from '../utils/formatDuration'
@@ -23,6 +24,8 @@ const PlaylistTrackList = ({ tracks, isLoading, playlistId, showType }: Playlist
     const playback = usePlaybackContext()
     const location = useLocation()
     const { displayItems, setRowRefs } = useDisplayItems(tracks, isLoading)
+
+    const dropdown = useDropdownContext()
 
     const handleTrackClick = useCallback(
         (track: MediaItem, index: number) => {
@@ -51,8 +54,15 @@ const PlaylistTrackList = ({ tracks, isLoading, playlistId, showType }: Playlist
         }
 
         const track = item
+        const isActive = dropdown.selectedItem?.Id === item.Id && dropdown.isOpen
 
-        const trackClass = playback.currentTrack?.Id === track.Id ? (playback.isPlaying ? 'playing' : 'paused') : ''
+        const trackClass = [
+            playback.currentTrack?.Id === track.Id ? (playback.isPlaying ? 'playing' : 'paused') : '',
+            isActive ? 'active' : '',
+        ]
+            .filter(Boolean)
+            .join(' ')
+
         const isFavorite = track.UserData?.IsFavorite && location.pathname !== '/favorites'
 
         return (
@@ -61,6 +71,10 @@ const PlaylistTrackList = ({ tracks, isLoading, playlistId, showType }: Playlist
                 onClick={() => handleTrackClick(track, index)}
                 key={track.Id}
                 ref={el => setRowRefs(index, el)}
+                onContextMenu={e => dropdown.onContextMenu(e, { item, playlistId })}
+                onTouchStart={e => dropdown.onTouchStart(e, { item, playlistId })}
+                onTouchMove={dropdown.onTouchClear}
+                onTouchEnd={dropdown.onTouchClear}
             >
                 <div className="track-state">
                     <JellyImg item={track} type={'Primary'} width={40} height={40} />

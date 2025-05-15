@@ -1,5 +1,5 @@
 import { Jellyfin } from '@jellyfin/sdk'
-import { InstantMixApi } from '@jellyfin/sdk/lib/generated-client'
+import { InstantMixApi, PlaylistsApi } from '@jellyfin/sdk/lib/generated-client'
 import { ArtistsApi } from '@jellyfin/sdk/lib/generated-client/api/artists-api'
 import { GenresApi } from '@jellyfin/sdk/lib/generated-client/api/genres-api'
 import { ItemsApi } from '@jellyfin/sdk/lib/generated-client/api/items-api'
@@ -821,6 +821,52 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return await userLibraryApi.unmarkFavoriteItem({ itemId, userId }, { signal: AbortSignal.timeout(20000) })
     }
 
+    const addToPlaylist = async (playlistId: string, itemId: string) => {
+        const playlistApi = new PlaylistsApi(api.configuration)
+
+        const response = await playlistApi.addItemToPlaylist(
+            {
+                userId,
+                playlistId,
+                ids: [itemId],
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+
+        return response.data
+    }
+
+    const removeFromPlaylist = async (playlistId: string, itemId: string) => {
+        const playlistApi = new PlaylistsApi(api.configuration)
+
+        const response = await playlistApi.removeItemFromPlaylist(
+            {
+                playlistId,
+                entryIds: [itemId],
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+
+        return response.data
+    }
+
+    const createPlaylist = async (name: string) => {
+        const playlistApi = new PlaylistsApi(api.configuration)
+
+        const response = await playlistApi.createPlaylist(
+            {
+                // Seems to be bugged, need to pass both
+                createPlaylistDto: {
+                    Name: name,
+                },
+                name,
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+
+        return response.data
+    }
+
     return {
         loginToJellyfin,
         searchItems,
@@ -861,5 +907,8 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         addToFavorites,
         removeFromFavorites,
         getInstantMixFromSong,
+        addToPlaylist,
+        removeFromPlaylist,
+        createPlaylist,
     }
 }
