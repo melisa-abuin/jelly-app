@@ -130,7 +130,7 @@ const useInitialState = () => {
             const el = e.currentTarget
             const rect = el.getBoundingClientRect()
             const menuHeight = (subMenuRef.current?.querySelector('.dropdown-menu') as HTMLElement)?.offsetHeight || 0
-            const margin = 8
+            const margin = 40
             const viewportBottom = window.innerHeight
             const flipY = rect.top + menuHeight + margin > viewportBottom
             const top = flipY ? -menuHeight + rect.height : 0
@@ -280,7 +280,9 @@ const useInitialState = () => {
             ),
             view_artists: (
                 <div
-                    className="dropdown-item view-artists has-sub-menu"
+                    className={`dropdown-item view-artists has-sub-menu${
+                        subDropdown.isOpen && subDropdown.type === 'view-artists' ? ' active' : ''
+                    }`}
                     onMouseEnter={e => openSubDropdown('view-artists', e)}
                 >
                     <span>View artists</span>
@@ -312,9 +314,7 @@ const useInitialState = () => {
             ),
             view_artist: (
                 <div
-                    className={`dropdown-item view-artists has-sub-menu${
-                        subDropdown.isOpen && subDropdown.type === 'view-artists' ? ' active' : ''
-                    }`}
+                    className="dropdown-item view-artist"
                     onClick={() => handleViewArtist(context?.item?.ArtistItems?.[0].Id)}
                     onMouseEnter={closeSubDropdown}
                 >
@@ -533,7 +533,7 @@ const useInitialState = () => {
                 const x = touch.clientX
                 const y = touch.clientY + window.pageYOffset
                 openDropdown(context, x, y)
-            }, 500)
+            }, 400)
         },
         [openDropdown]
     )
