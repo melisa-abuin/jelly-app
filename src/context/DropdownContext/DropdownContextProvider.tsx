@@ -3,7 +3,7 @@ import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 're
 import { useNavigate } from 'react-router-dom'
 import { MediaItem } from '../../api/jellyfin'
 import { useJellyfinPlaylistsList } from '../../hooks/Jellyfin/useJellyfinPlaylistsList'
-import { usePatchQueries } from '../../hooks/usePatchQueries'
+import { useFavorites } from '../../hooks/useFavorites'
 import { useJellyfinContext } from '../JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../ScrollContext/ScrollContext'
@@ -39,8 +39,8 @@ const useInitialState = () => {
     const navigate = useNavigate()
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
-    const { patchMediaItem } = usePatchQueries()
     const { playlists } = useJellyfinPlaylistsList()
+    const { addToFavorites, removeFromFavorites } = useFavorites()
 
     const subMenuRef = useRef<HTMLDivElement>(null)
 
@@ -337,11 +337,7 @@ const useInitialState = () => {
                         closeDropdown()
 
                         if (context) {
-                            const res = await api.addToFavorites(context.item.Id)
-
-                            patchMediaItem(context.item.Id, item => {
-                                return { ...item, UserData: res.data }
-                            })
+                            await addToFavorites(context.item)
                         }
                     }}
                     onMouseEnter={closeSubDropdown}
@@ -356,11 +352,7 @@ const useInitialState = () => {
                         closeDropdown()
 
                         if (context) {
-                            const res = await api.removeFromFavorites(context.item.Id)
-
-                            patchMediaItem(context.item.Id, item => {
-                                return { ...item, UserData: res.data }
-                            })
+                            await removeFromFavorites(context.item)
                         }
                     }}
                     onMouseEnter={closeSubDropdown}
@@ -438,28 +430,29 @@ const useInitialState = () => {
             ) : null,
         }
     }, [
-        api,
-        closeDropdown,
         closeSubDropdown,
-        handleAddToQueue,
-        handleCreateClick,
+        subDropdown.isOpen,
+        subDropdown.type,
+        subDropdown.flipY,
+        subDropdown.top,
+        subDropdown.height,
+        subDropdown.width,
+        context,
+        playlistName,
         handleInputKeyDown,
+        handleCreateClick,
+        playlists,
         handlePlayNext,
-        handleViewAlbum,
-        handleViewArtist,
+        handleAddToQueue,
+        closeDropdown,
+        api,
+        playback,
         navigate,
         openSubDropdown,
-        patchMediaItem,
-        playback,
-        playlistName,
-        playlists,
-        context,
-        subDropdown.flipY,
-        subDropdown.height,
-        subDropdown.isOpen,
-        subDropdown.top,
-        subDropdown.type,
-        subDropdown.width,
+        handleViewArtist,
+        handleViewAlbum,
+        addToFavorites,
+        removeFromFavorites,
     ])
 
     const dropdownNode = useMemo(() => {

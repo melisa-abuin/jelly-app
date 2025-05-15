@@ -5,19 +5,17 @@ import { JellyImg } from '../components/JellyImg'
 import Loader from '../components/Loader'
 import PlaylistTrackList from '../components/PlaylistTrackList'
 import { MoreIcon } from '../components/SvgIcons'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinPlaylistData } from '../hooks/Jellyfin/useJellyfinPlaylistData'
-import { usePatchQueries } from '../hooks/usePatchQueries'
+import { useFavorites } from '../hooks/useFavorites'
 import { formatDate } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Playlist.css'
 
 const Playlist = () => {
     const playback = usePlaybackContext()
-    const api = useJellyfinContext()
-    const { patchMediaItem } = usePatchQueries()
+    const { addToFavorites, removeFromFavorites } = useFavorites()
 
     const { playlistId } = useParams<{ playlistId: string }>()
     const {
@@ -93,14 +91,11 @@ const Playlist = () => {
                                 onClick={async () => {
                                     if (playlist?.Id) {
                                         try {
-                                            const res = playlist.UserData?.IsFavorite
-                                                ? await api.removeFromFavorites(playlist.Id)
-                                                : await api.addToFavorites(playlist.Id)
-
-                                            patchMediaItem(playlist.Id, item => ({
-                                                ...item,
-                                                UserData: res.data,
-                                            }))
+                                            if (playlist.UserData?.IsFavorite) {
+                                                await removeFromFavorites(playlist)
+                                            } else {
+                                                await addToFavorites(playlist)
+                                            }
                                         } catch (error) {
                                             console.error('Failed to update favorite status:', error)
                                         }

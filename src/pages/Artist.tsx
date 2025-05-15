@@ -6,12 +6,11 @@ import Loader from '../components/Loader'
 import { MoreIcon } from '../components/SvgIcons'
 import TrackList from '../components/TrackList'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinArtistData } from '../hooks/Jellyfin/useJellyfinArtistData'
 import { useJellyfinPlaylistsFeaturingArtist } from '../hooks/Jellyfin/useJellyfinPlaylistsFeaturingArtist'
-import { usePatchQueries } from '../hooks/usePatchQueries'
+import { useFavorites } from '../hooks/useFavorites'
 import { formatDateYear } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Artist.css'
@@ -29,8 +28,7 @@ const Artist = () => {
     const { setPageTitle } = usePageTitle()
     const { isOpen, selectedItem } = useDropdownContext()
     const moreRef = useRef<HTMLDivElement>(null)
-    const api = useJellyfinContext()
-    const { patchMediaItem } = usePatchQueries()
+    const { addToFavorites, removeFromFavorites } = useFavorites()
 
     useEffect(() => {
         if (artist) {
@@ -115,14 +113,11 @@ const Artist = () => {
                                 onClick={async () => {
                                     if (artist?.Id) {
                                         try {
-                                            const res = artist.UserData?.IsFavorite
-                                                ? await api.removeFromFavorites(artist.Id)
-                                                : await api.addToFavorites(artist.Id)
-
-                                            patchMediaItem(artist.Id, item => ({
-                                                ...item,
-                                                UserData: res.data,
-                                            }))
+                                            if (artist.UserData?.IsFavorite) {
+                                                await removeFromFavorites(artist)
+                                            } else {
+                                                await addToFavorites(artist)
+                                            }
                                         } catch (error) {
                                             console.error('Failed to update favorite status:', error)
                                         }
