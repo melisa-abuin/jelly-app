@@ -241,12 +241,20 @@ const useInitialState = () => {
     const menuItems = useMemo(() => {
         return {
             next: (
-                <div className="dropdown-item play-next" onClick={() => handlePlayNext()}>
+                <div
+                    className="dropdown-item play-next"
+                    onClick={() => handlePlayNext()}
+                    onMouseEnter={closeSubDropdown}
+                >
                     <span>Play next</span>
                 </div>
             ),
             add_to_queue: (
-                <div className="dropdown-item add-queue" onClick={() => handleAddToQueue(context!.item)}>
+                <div
+                    className="dropdown-item add-queue"
+                    onClick={() => handleAddToQueue(context!.item)}
+                    onMouseEnter={closeSubDropdown}
+                >
                     <span>Add to queue</span>
                 </div>
             ),
@@ -260,13 +268,12 @@ const useInitialState = () => {
 
                         api.getInstantMixFromSong(context.item.Id).then(r => {
                             if (r) {
-                                playback.setCurrentPlaylist({
-                                    playlist: r,
-                                })
+                                playback.setCurrentPlaylist({ playlist: r })
                                 navigate('/queue')
                             }
                         })
                     }}
+                    onMouseEnter={closeSubDropdown}
                 >
                     <span>Play instant mix</span>
                 </div>
@@ -275,7 +282,6 @@ const useInitialState = () => {
                 <div
                     className="dropdown-item view-artists has-sub-menu"
                     onMouseEnter={e => openSubDropdown('view-artists', e)}
-                    onMouseLeave={closeSubDropdown}
                 >
                     <span>View artists</span>
                     <ChevronRightIcon size={12} className="icon" />
@@ -306,14 +312,21 @@ const useInitialState = () => {
             ),
             view_artist: (
                 <div
-                    className="dropdown-item view-artists has-sub-menu"
+                    className={`dropdown-item view-artists has-sub-menu${
+                        subDropdown.isOpen && subDropdown.type === 'view-artists' ? ' active' : ''
+                    }`}
                     onClick={() => handleViewArtist(context?.item?.ArtistItems?.[0].Id)}
+                    onMouseEnter={closeSubDropdown}
                 >
                     <span>View artist</span>
                 </div>
             ),
             view_album: (
-                <div className="dropdown-item view-album" onClick={() => handleViewAlbum(context!.item)}>
+                <div
+                    className="dropdown-item view-album"
+                    onClick={() => handleViewAlbum(context!.item)}
+                    onMouseEnter={closeSubDropdown}
+                >
                     <span>View album</span>
                 </div>
             ),
@@ -331,6 +344,7 @@ const useInitialState = () => {
                             })
                         }
                     }}
+                    onMouseEnter={closeSubDropdown}
                 >
                     <span>Add to favorites</span>
                 </div>
@@ -349,15 +363,17 @@ const useInitialState = () => {
                             })
                         }
                     }}
+                    onMouseEnter={closeSubDropdown}
                 >
                     <span>Remove from favorites</span>
                 </div>
             ),
             add_to_playlist: (
                 <div
-                    className="dropdown-item add-playlist has-sub-menu"
+                    className={`dropdown-item add-playlist has-sub-menu${
+                        subDropdown.isOpen && subDropdown.type === 'add-playlist' ? ' active' : ''
+                    }`}
                     onMouseEnter={e => openSubDropdown('add-playlist', e)}
-                    onMouseLeave={closeSubDropdown}
                 >
                     <span>Add to playlist</span>
                     <ChevronRightIcon size={12} className="icon" />
@@ -407,7 +423,7 @@ const useInitialState = () => {
             ),
             remove_from_playlist: context?.playlistId ? (
                 <div
-                    className="dropdown-item remove-playlist"
+                    className="dropdown-item remove-playlist has-removable"
                     onClick={() => {
                         closeDropdown()
 
@@ -415,6 +431,7 @@ const useInitialState = () => {
                             api.removeFromPlaylist(context.playlistId!, context.item.Id)
                         }
                     }}
+                    onMouseEnter={closeSubDropdown}
                 >
                     <span>Remove from playlist</span>
                 </div>

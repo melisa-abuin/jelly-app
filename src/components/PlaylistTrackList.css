@@ -18,6 +18,10 @@
     background-color: var(--bg-color-secondary);
 }
 
+.playlist-tracklist .track-item.active {
+    background-color: var(--bg-color-secondary);
+}
+
 .playlist-tracklist .track-item > .track-state {
     position: relative;
     flex-shrink: 0;

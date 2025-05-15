@@ -858,6 +858,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 // Seems to be bugged, need to pass both
                 createPlaylistDto: {
                     Name: name,
+                    IsPublic: false,
                 },
                 name,
             },

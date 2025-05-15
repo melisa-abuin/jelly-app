@@ -79,6 +79,10 @@
     background-color: var(--bg-color-tertiary);
 }
 
+.dropdown > .dropdown-menu > .dropdown-item.active {
+    background-color: var(--bg-color-tertiary);
+}
+
 .dropdown > .dropdown-menu > .dropdown-item.has-removable {
     color: var(--font-color-error-light);
 }
