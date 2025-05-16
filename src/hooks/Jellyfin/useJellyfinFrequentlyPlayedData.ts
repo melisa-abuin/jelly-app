@@ -46,7 +46,7 @@ export const useJellyfinFrequentlyPlayedData = () => {
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
-            title: '',
+            title: 'Frequently Played',
         })
     }, [allTracks, hasNextPage, loadMore, playback])
 

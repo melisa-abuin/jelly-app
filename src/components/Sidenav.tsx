@@ -366,7 +366,7 @@ const Sidenav = (props: SidenavProps) => {
                                 {props.username}
                             </div>
                         </div>
-                        <NavLink to="/settings" className="settings" onClick={props.closeSidenav}>
+                        <NavLink to="/settings" className="settings" onClick={props.closeSidenav} title="Settings">
                             <GearIcon size={16} />
                         </NavLink>
                     </div>

@@ -59,7 +59,7 @@ export const MainContent = ({
         <main className="main">
             <div className="main_header">
                 <div className="primary">
-                    <div onClick={previousPage} className="return_icon">
+                    <div onClick={previousPage} className="return_icon" title="Back">
                         <ArrowLeftIcon size={16}></ArrowLeftIcon>
                     </div>
                     <div className="container">
@@ -222,28 +222,30 @@ export const MainContent = ({
                                 <div
                                     className={`shuffle ${playback.shuffle ? 'active' : ''}`}
                                     onClick={playback.toggleShuffle}
+                                    title="Shuffle"
                                 >
                                     <div className="shuffle-icon"></div>
                                 </div>
                                 <div className="primary">
-                                    <div className="previous" onClick={playback.previousTrack}>
+                                    <div className="previous" onClick={playback.previousTrack} title="Previous">
                                         <div className="previous-icon"></div>
                                     </div>
                                     <div className="container">
-                                        <div className="play" onClick={playback.togglePlayPause}>
+                                        <div className="play" onClick={playback.togglePlayPause} title="Play">
                                             <div className="play-icon"></div>
                                         </div>
-                                        <div className="pause" onClick={playback.togglePlayPause}>
+                                        <div className="pause" onClick={playback.togglePlayPause} title="Pause">
                                             <div className="pause-icon"></div>
                                         </div>
                                     </div>
-                                    <div className="next" onClick={playback.nextTrack}>
+                                    <div className="next" onClick={playback.nextTrack} title="Next">
                                         <div className="next-icon"></div>
                                     </div>
                                 </div>
                                 <div
                                     className={`repeat ${playback.repeat === 'off' ? '' : 'active'}`}
                                     onClick={playback.toggleRepeat}
+                                    title="Repeat"
                                 >
                                     <div className={`repeat-icon${playback.repeat === 'one' ? '-one' : ''}`}></div>
                                 </div>

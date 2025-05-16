@@ -652,6 +652,10 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         const itemsApi = new ItemsApi(api.configuration)
         const response = await itemsApi.getItems(
             {
+                sortBy: ['PlayCount', 'DatePlayed'],
+                sortOrder: [SortOrder.Descending],
+                //sortBy: ['SortName', 'PlayCount', 'DatePlayed'],
+                //sortOrder: ['Ascending', 'Descending', 'Descending'],
                 userId,
                 includeItemTypes: [BaseItemKind.Playlist],
                 recursive: true,

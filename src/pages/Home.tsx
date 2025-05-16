@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom' // Add this import
+import { Link } from 'react-router-dom'
 import Loader from '../components/Loader'
 import MediaList from '../components/MediaList'
 import { useJellyfinHomeData } from '../hooks/Jellyfin/useJellyfinHomeData'

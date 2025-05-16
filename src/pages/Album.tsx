@@ -103,7 +103,7 @@ const Album = () => {
                             <div
                                 className="play-album"
                                 onClick={() => {
-                                    playback.setCurrentPlaylist({ playlist: sortedTracks, title: '' })
+                                    playback.setCurrentPlaylist({ playlist: sortedTracks, title: album.Name })
                                     playback.playTrack(0)
                                 }}
                             >
@@ -134,6 +134,7 @@ const Album = () => {
                             className={`more ${isOpen && selectedItem?.Id === album?.Id ? 'active' : ''}`}
                             onClick={handleMoreClick}
                             ref={moreRef}
+                            title="More"
                         >
                             <MoreIcon width={14} height={14} />
                         </div>

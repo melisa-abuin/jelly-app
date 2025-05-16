@@ -78,7 +78,7 @@ const Playlist = () => {
                             <div
                                 className="play-playlist"
                                 onClick={() => {
-                                    playback.setCurrentPlaylist({ playlist: tracks, title: '' })
+                                    playback.setCurrentPlaylist({ playlist: tracks, title: playlist.Name })
                                     playback.playTrack(0)
                                 }}
                             >
@@ -105,7 +105,7 @@ const Playlist = () => {
                                 {playlist.UserData?.IsFavorite ? <HeartFillIcon size={16} /> : <HeartIcon size={16} />}
                             </div>
                         </div>
-                        <div className="more">
+                        <div className="more" title="More">
                             <MoreIcon width={14} height={14} />
                         </div>
                     </div>

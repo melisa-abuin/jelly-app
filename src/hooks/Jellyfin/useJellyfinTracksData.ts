@@ -52,7 +52,7 @@ export const useJellyfinTracksData = () => {
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
-            title: '',
+            title: 'Tracks',
         })
     }, [allTracks, hasNextPage, loadMore, playback])
 

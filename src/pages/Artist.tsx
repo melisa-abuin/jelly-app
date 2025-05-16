@@ -100,7 +100,7 @@ const Artist = () => {
                             <div
                                 className="play-artist"
                                 onClick={() => {
-                                    playback.setCurrentPlaylist({ playlist: tracks, title: '' })
+                                    playback.setCurrentPlaylist({ playlist: tracks, title: artist.Name })
                                     playback.playTrack(0)
                                 }}
                             >
@@ -131,6 +131,7 @@ const Artist = () => {
                             className={`more ${isOpen && selectedItem?.Id === artist?.Id ? 'active' : ''}`}
                             onClick={handleMoreClick}
                             ref={moreRef}
+                            title="More"
                         >
                             <MoreIcon width={14} height={14} />
                         </div>

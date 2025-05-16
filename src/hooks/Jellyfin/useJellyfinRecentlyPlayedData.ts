@@ -46,7 +46,7 @@ export const useJellyfinRecentlyPlayedData = () => {
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
-            title: '',
+            title: 'Recently Played',
         })
     }, [allTracks, hasNextPage, loadMore, playback])
 
