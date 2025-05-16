@@ -259,24 +259,27 @@ const useInitialState = () => {
                 </div>
             ),
             instant_mix: (
-                <div
-                    className="dropdown-item instant-mix"
-                    onClick={() => {
-                        if (!context) return
+                <>
+                    <div
+                        className="dropdown-item instant-mix"
+                        onClick={() => {
+                            if (!context) return
 
-                        closeDropdown()
+                            closeDropdown()
 
-                        api.getInstantMixFromSong(context.item.Id).then(r => {
-                            if (r) {
-                                playback.setCurrentPlaylist({ playlist: r })
-                                navigate('/queue')
-                            }
-                        })
-                    }}
-                    onMouseEnter={closeSubDropdown}
-                >
-                    <span>Play instant mix</span>
-                </div>
+                            api.getInstantMixFromSong(context.item.Id).then(r => {
+                                if (r) {
+                                    playback.setCurrentPlaylist({ playlist: r })
+                                    navigate('/queue')
+                                }
+                            })
+                        }}
+                        onMouseEnter={closeSubDropdown}
+                    >
+                        <span>Play instant mix</span>
+                    </div>
+                    <div className="dropdown-separator" />
+                </>
             ),
             view_artists: (
                 <div
@@ -331,34 +334,40 @@ const useInitialState = () => {
                 </div>
             ),
             add_to_favorite: (
-                <div
-                    className="dropdown-item add-favorite"
-                    onClick={async () => {
-                        closeDropdown()
+                <>
+                    <div className="dropdown-separator" />
+                    <div
+                        className="dropdown-item add-favorite"
+                        onClick={async () => {
+                            closeDropdown()
 
-                        if (context) {
-                            await addToFavorites(context.item)
-                        }
-                    }}
-                    onMouseEnter={closeSubDropdown}
-                >
-                    <span>Add to favorites</span>
-                </div>
+                            if (context) {
+                                await addToFavorites(context.item)
+                            }
+                        }}
+                        onMouseEnter={closeSubDropdown}
+                    >
+                        <span>Add to favorites</span>
+                    </div>
+                </>
             ),
             remove_from_favorite: (
-                <div
-                    className="dropdown-item remove-favorite has-removable"
-                    onClick={async () => {
-                        closeDropdown()
+                <>
+                    <div className="dropdown-separator" />
+                    <div
+                        className="dropdown-item remove-favorite has-removable"
+                        onClick={async () => {
+                            closeDropdown()
 
-                        if (context) {
-                            await removeFromFavorites(context.item)
-                        }
-                    }}
-                    onMouseEnter={closeSubDropdown}
-                >
-                    <span>Remove from favorites</span>
-                </div>
+                            if (context) {
+                                await removeFromFavorites(context.item)
+                            }
+                        }}
+                        onMouseEnter={closeSubDropdown}
+                    >
+                        <span>Remove from favorites</span>
+                    </div>
+                </>
             ),
             add_to_playlist: (
                 <div
@@ -395,6 +404,8 @@ const useInitialState = () => {
                                         </button>
                                     </div>
                                 </div>
+
+                                <div className="dropdown-separator" />
 
                                 {playlists.map(playlist => (
                                     <div

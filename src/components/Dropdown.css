@@ -61,6 +61,19 @@
     -webkit-overflow-scrolling: touch;
 }
 
+.dropdown > .dropdown-menu > .dropdown-separator,
+.sub-dropdown > .dropdown-menu > .dropdown-separator {
+    flex-shrink: 0;
+    width: calc(100% - 16px);
+    height: 1px;
+    margin: 2px 8px;
+    background-color: var(--border-color);
+}
+
+.sub-dropdown > .dropdown-menu > .dropdown-item:has(.playlist-input.has-text) ~ .dropdown-separator {
+    width: calc(100% - 10px);
+}
+
 .dropdown > .dropdown-menu > .dropdown-item,
 .sub-dropdown > .dropdown-menu > .dropdown-item {
     position: relative;
@@ -189,6 +202,11 @@
         overflow-x: hidden;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
+    }
+
+    .dropdown > .dropdown-menu > .dropdown-separator,
+    .sub-dropdown > .dropdown-menu > .dropdown-separator {
+        display: none;
     }
 
     .dropdown > .dropdown-menu > .dropdown-item {
