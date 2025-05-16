@@ -49,14 +49,16 @@ export const usePatchQueries = () => {
                 queryClient.setQueryData(query.queryKey, patchData(data, mediaItemId, patch))
             }
         },
-        prependItemToQueryData: (queryKey: string, item: MediaItem) => {
+        prependItemToQueryData: (queryKey: string[], item: MediaItem) => {
             const allQueries = queryClient.getQueryCache().findAll()
 
             for (const query of allQueries) {
                 const data = query.state.data
 
                 if (!data) continue
-                if (query.queryKey[0] !== queryKey) continue
+
+                // check if the query.queryKey starts with the queryKey
+                if (query.queryKey.slice(0, queryKey.length).join(',') !== queryKey.join(',')) continue
 
                 if (isPages(data)) {
                     const [first, ...pages] = data.pages
@@ -70,14 +72,16 @@ export const usePatchQueries = () => {
                 }
             }
         },
-        removeItemFromQueryData: (queryKey: string, itemId: string) => {
+        removeItemFromQueryData: (queryKey: string[], itemId: string) => {
             const allQueries = queryClient.getQueryCache().findAll()
 
             for (const query of allQueries) {
                 const data = query.state.data
 
                 if (!data) continue
-                if (query.queryKey[0] !== queryKey) continue
+
+                // check if the query.queryKey starts with the queryKey
+                if (query.queryKey.slice(0, queryKey.length).join(',') !== queryKey.join(',')) continue
 
                 if (isPages(data)) {
                     query.setData({

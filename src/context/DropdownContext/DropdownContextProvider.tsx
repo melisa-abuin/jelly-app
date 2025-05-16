@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { MediaItem } from '../../api/jellyfin'
 import { useJellyfinPlaylistsList } from '../../hooks/Jellyfin/useJellyfinPlaylistsList'
 import { useFavorites } from '../../hooks/useFavorites'
+import { usePatchQueries } from '../../hooks/usePatchQueries'
 import { useJellyfinContext } from '../JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../ScrollContext/ScrollContext'
@@ -41,6 +42,7 @@ const useInitialState = () => {
     const playback = usePlaybackContext()
     const { playlists } = useJellyfinPlaylistsList()
     const { addToFavorites, removeFromFavorites } = useFavorites()
+    const { prependItemToQueryData, removeItemFromQueryData } = usePatchQueries()
 
     const subMenuRef = useRef<HTMLDivElement>(null)
 
@@ -411,9 +413,10 @@ const useInitialState = () => {
                                     <div
                                         key={playlist.Id}
                                         className="dropdown-item"
-                                        onClick={() => {
+                                        onClick={async () => {
                                             closeDropdown()
-                                            api.addToPlaylist(playlist.Id, context!.item.Id)
+                                            await api.addToPlaylist(playlist.Id, context!.item.Id)
+                                            prependItemToQueryData(['playlistTracks', playlist.Id], context!.item)
                                         }}
                                     >
                                         {playlist.Name}
@@ -427,12 +430,10 @@ const useInitialState = () => {
             remove_from_playlist: context?.playlistId ? (
                 <div
                     className="dropdown-item remove-playlist has-removable"
-                    onClick={() => {
+                    onClick={async () => {
                         closeDropdown()
-
-                        if (context) {
-                            api.removeFromPlaylist(context.playlistId!, context.item.Id)
-                        }
+                        await api.removeFromPlaylist(context.playlistId!, context.item.Id)
+                        removeItemFromQueryData(['playlistTracks', context.playlistId!], context.item.Id)
                     }}
                     onMouseEnter={closeSubDropdown}
                 >
@@ -464,6 +465,8 @@ const useInitialState = () => {
         handleViewAlbum,
         addToFavorites,
         removeFromFavorites,
+        prependItemToQueryData,
+        removeItemFromQueryData,
     ])
 
     const dropdownNode = useMemo(() => {
