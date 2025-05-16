@@ -6,7 +6,7 @@ import './Queue.css'
 
 const Queue = () => {
     const { setPageTitle } = usePageTitle()
-    const { currentTrack, currentPlaylist, currentTrackIndex } = usePlaybackContext()
+    const { currentTrack, currentPlaylist, currentTrackIndex, playlistTitle } = usePlaybackContext()
 
     useEffect(() => {
         setPageTitle('Queue')
@@ -18,7 +18,6 @@ const Queue = () => {
     }
 
     const queueTracks = currentPlaylist.slice(currentTrackIndex + 1)
-    const sourceName = currentTrack.Album || currentTrack.ParentId ? 'Playlist' : 'Unknown Source'
 
     return (
         <div className="queue-page">
@@ -29,7 +28,7 @@ const Queue = () => {
                 <>
                     <div className="queue-title">Playing Next</div>
                     <div className="queue-desc">
-                        <span className="text">From {sourceName}</span>
+                        <span className="text">From {playlistTitle}</span>
                     </div>
                     <MediaList items={queueTracks} isLoading={false} type="song" />
                 </>

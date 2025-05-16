@@ -47,6 +47,7 @@ export const useJellyfinArtistTracksData = (artistId: string) => {
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
+            title: '',
         })
     }, [allTracks, hasNextPage, loadMore, playback])
 

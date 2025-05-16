@@ -29,7 +29,7 @@ const MediaList = ({ items = [], isLoading, type }: MediaListProps) => {
             if (playback.currentTrack?.Id === item.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ playlist: items })
+                playback.setCurrentPlaylist({ playlist: items, title: '' })
                 playback.playTrack(index)
             }
         }

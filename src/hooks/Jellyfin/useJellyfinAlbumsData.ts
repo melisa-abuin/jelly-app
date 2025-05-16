@@ -48,6 +48,7 @@ export const useJellyfinAlbumsData = () => {
             playlist: allAlbums,
             hasMore: Boolean(hasNextPage),
             loadMore,
+            title: '',
         })
     }, [allAlbums, hasNextPage, loadMore, playback])
 

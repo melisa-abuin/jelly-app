@@ -78,7 +78,7 @@ const Playlist = () => {
                             <div
                                 className="play-playlist"
                                 onClick={() => {
-                                    playback.setCurrentPlaylist({ playlist: tracks })
+                                    playback.setCurrentPlaylist({ playlist: tracks, title: '' })
                                     playback.playTrack(0)
                                 }}
                             >

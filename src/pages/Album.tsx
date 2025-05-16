@@ -103,7 +103,7 @@ const Album = () => {
                             <div
                                 className="play-album"
                                 onClick={() => {
-                                    playback.setCurrentPlaylist({ playlist: sortedTracks })
+                                    playback.setCurrentPlaylist({ playlist: sortedTracks, title: '' })
                                     playback.playTrack(0)
                                 }}
                             >

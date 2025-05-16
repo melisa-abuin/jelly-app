@@ -39,6 +39,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const [hasMore, setHasMore] = useState<boolean>(false)
 
     const currentPlaylist = useRef<MediaItem[]>(JSON.parse(localStorage.getItem('currentPlaylist') || '[]'))
+    const [playlistTitle, setPlaylistTitle] = useState('')
 
     const setCurrentPlaylist = useCallback(
         (
@@ -46,12 +47,14 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 | {
                       isInfinite?: false
                       playlist: MediaItem[]
+                      title: string
                   }
                 | {
                       isInfinite: true
                       playlist: MediaItem[]
                       hasMore: boolean
                       loadMore: () => Promise<MediaItem[] | undefined>
+                      title: string
                   }
         ) => {
             if (props.isInfinite && props.loadMore === loadMoreCallback.current) {
@@ -69,6 +72,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 loadMoreCallback.current = props.loadMore
                 setHasMore(props.hasMore || false)
             }
+
+            setPlaylistTitle(props.title)
         },
         [shuffle]
     )
@@ -357,7 +362,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 if (hasMore && loadMoreCallback.current) {
                     const newPlaylist = await loadMoreCallback.current()
                     setCurrentTrackIndex({ index: nextIndex })
-                    setCurrentPlaylist({ playlist: newPlaylist || [] })
+                    setCurrentPlaylist({ playlist: newPlaylist || [], title: '' })
                     return
                 } else if (repeat === 'all') {
                     setCurrentTrackIndex({ index: 0 })
@@ -697,5 +702,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         loadMore: loadMoreCallback.current,
         sessionPlayCount,
         resetSessionCount,
+        playlistTitle,
     }
 }

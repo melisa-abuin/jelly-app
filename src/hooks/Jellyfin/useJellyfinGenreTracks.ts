@@ -48,6 +48,7 @@ export const useJellyfinGenreTracks = (genre: string) => {
             playlist: tracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
+            title: '',
         })
     }, [hasNextPage, loadMore, playback, tracks])
 

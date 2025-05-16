@@ -51,7 +51,7 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
                                 playback.togglePlayPause()
                             } else {
                                 const tracksToPlay = playlist || tracks
-                                playback.setCurrentPlaylist({ playlist: tracksToPlay })
+                                playback.setCurrentPlaylist({ playlist: tracksToPlay, title: '' })
                                 const playIndex = playlist ? playlist.findIndex(t => t.Id === track.Id) : index
                                 playback.playTrack(playIndex)
                             }

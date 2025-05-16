@@ -54,6 +54,7 @@ export const useJellyfinFavoritesData = () => {
             playlist: allTracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
+            title: '',
         })
     }, [allTracks, hasNextPage, loadMore, playback])
 

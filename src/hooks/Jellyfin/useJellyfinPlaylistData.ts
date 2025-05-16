@@ -69,6 +69,7 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
             playlist: tracks,
             hasMore: Boolean(hasNextPage),
             loadMore,
+            title: '',
         })
     }, [hasNextPage, loadMore, playback, tracks])
 
