@@ -54,6 +54,20 @@ const useInitialState = () => {
         setSubDropdown(prev => ({ ...prev, isOpen: false, type: '' }))
     }, [])
 
+    useEffect(() => {
+        let timeoutId: NodeJS.Timeout
+
+        if (!isOpen) {
+            timeoutId = setTimeout(() => {
+                setPosition({ x: 0, y: 0 })
+            }, 200)
+        }
+
+        return () => {
+            clearTimeout(timeoutId)
+        }
+    }, [isOpen])
+
     const closeDropdown = useCallback(() => {
         setIsOpen(false)
         setSubDropdown({
