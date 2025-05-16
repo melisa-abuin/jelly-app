@@ -29,11 +29,8 @@ const MediaList = ({ items = [], isLoading, type }: MediaListProps) => {
             if (playback.currentTrack?.Id === item.Id) {
                 playback.togglePlayPause()
             } else {
-                const playlistIndex = items.findIndex(track => track.Id === item.Id)
-                const effectiveIndex = playlistIndex !== -1 && playback.currentTrackIndex !== -1 ? playlistIndex : index
-
                 playback.setCurrentPlaylist({ playlist: items })
-                playback.playTrack(effectiveIndex)
+                playback.playTrack(index)
             }
         }
     }

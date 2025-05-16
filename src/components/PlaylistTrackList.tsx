@@ -32,10 +32,11 @@ const PlaylistTrackList = ({ tracks, isLoading, playlistId, showType }: Playlist
             if (playback.currentTrack?.Id === track.Id) {
                 playback.togglePlayPause()
             } else {
+                playback.setCurrentPlaylist({ playlist: tracks })
                 playback.playTrack(index)
             }
         },
-        [playback]
+        [playback, tracks]
     )
 
     const handleEndReached = () => {
