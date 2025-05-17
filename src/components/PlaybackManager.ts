@@ -528,11 +528,21 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     // Attach progress, metadata, and error event listeners
     useEffect(() => {
         const audio = audioRef.current
+        let animationFrameId: number
+
         const updateProgress = () => {
-            setProgress(audio.currentTime)
+            if (audio.src && !audio.paused) {
+                setProgress(audio.currentTime)
+                setDuration(audio.duration || 0)
+                const bufferedEnd = audio.buffered.length > 0 ? audio.buffered.end(audio.buffered.length - 1) : 0
+                setBuffered(bufferedEnd)
+            }
+            animationFrameId = requestAnimationFrame(updateProgress)
+        }
+
+        const handleLoadedMetadata = () => {
             setDuration(audio.duration || 0)
-            const bufferedEnd = audio.buffered.length > 0 ? audio.buffered.end(audio.buffered.length - 1) : 0
-            setBuffered(bufferedEnd)
+            animationFrameId = requestAnimationFrame(updateProgress)
         }
 
         const handleError = (e: Event) => {
@@ -541,17 +551,16 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             setProgress(0)
             setDuration(0)
             setBuffered(0)
+            cancelAnimationFrame(animationFrameId)
         }
 
-        audio.addEventListener('timeupdate', updateProgress)
-        audio.addEventListener('loadedmetadata', updateProgress)
+        audio.addEventListener('loadedmetadata', handleLoadedMetadata)
         audio.addEventListener('error', handleError)
 
         return () => {
-            audio.pause()
-            audio.removeEventListener('timeupdate', updateProgress)
-            audio.removeEventListener('loadedmetadata', updateProgress)
+            audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
             audio.removeEventListener('error', handleError)
+            cancelAnimationFrame(animationFrameId)
         }
     }, [])
 
