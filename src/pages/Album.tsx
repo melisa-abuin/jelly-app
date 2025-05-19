@@ -3,9 +3,9 @@ import { useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import { JellyImg } from '../components/JellyImg'
-import Loader from '../components/Loader'
+import { Loader } from '../components/Loader'
 import { MoreIcon } from '../components/SvgIcons'
-import TrackList from '../components/TrackList'
+import { TrackList } from '../components/TrackList'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
@@ -15,7 +15,7 @@ import { formatDate } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Album.css'
 
-const Album = () => {
+export const Album = () => {
     const playback = usePlaybackContext()
     const { albumId } = useParams<{ albumId: string }>()
     const { album, tracks, discCount, loading, error } = useJellyfinAlbumData(albumId!)
@@ -147,11 +147,9 @@ const Album = () => {
                 .map((discNumber, index) => (
                     <div className="album-content" key={discNumber}>
                         {discCount > 1 && <div className={`disc ${index === 0 ? 'first' : ''}`}>Disc {discNumber}</div>}
-                        <TrackList tracks={tracksByDisc[Number(discNumber)]} playlist={sortedTracks} />
+                        <TrackList tracks={tracksByDisc[Number(discNumber)]} playlist={sortedTracks} title={''} />
                     </div>
                 ))}
         </div>
     )
 }
-
-export default Album

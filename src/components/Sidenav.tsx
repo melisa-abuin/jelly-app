@@ -6,8 +6,9 @@ import '../App.css'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../context/ScrollContext/ScrollContext'
+import { useSidenavContext } from '../context/SidenavContext/SidenavContext'
 import { useJellyfinPlaylistsList } from '../hooks/Jellyfin/useJellyfinPlaylistsList'
-import InlineLoader from './InlineLoader'
+import { InlineLoader } from './InlineLoader'
 import './Sidenav.css'
 import {
     AlbumIcon,
@@ -19,12 +20,6 @@ import {
     TrackIcon,
 } from './SvgIcons'
 
-interface SidenavProps {
-    username: string
-    showSidenav: boolean
-    closeSidenav: () => void
-}
-
 interface SearchResult {
     type: 'Artist' | 'Album' | 'Playlist' | 'Song' | 'Genre'
     id: string
@@ -33,10 +28,11 @@ interface SearchResult {
     mediaItem?: MediaItem
 }
 
-const Sidenav = (props: SidenavProps) => {
+export const Sidenav = (props: { username: string }) => {
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
     const searchInputRef = useRef<HTMLInputElement>(null)
+    const { showSidenav, closeSidenav } = useSidenavContext()
 
     const { playlists, loading, error } = useJellyfinPlaylistsList()
     const { disabled, setDisabled } = useScrollContext()
@@ -140,7 +136,8 @@ const Sidenav = (props: SidenavProps) => {
                 playback.setCurrentPlaylist({ playlist: [song.mediaItem], title: '' })
                 playback.playTrack(0)
             }
-            props.closeSidenav()
+
+            closeSidenav()
         }
     }
 
@@ -157,29 +154,29 @@ const Sidenav = (props: SidenavProps) => {
 
     return (
         <aside className="sidenav">
-            <div className={'sidenav_wrapper' + (props.showSidenav ? ' active' : '') + (disabled ? ' lockscroll' : '')}>
+            <div className={'sidenav_wrapper' + (showSidenav ? ' active' : '') + (disabled ? ' lockscroll' : '')}>
                 <div className="sidenav_header">
-                    <NavLink to="/" onClick={props.closeSidenav} className="logo"></NavLink>
+                    <NavLink to="/" onClick={closeSidenav} className="logo"></NavLink>
                 </div>
                 <nav className="sidenav_content">
                     <ul className="links noSelect">
                         <li>
-                            <NavLink to="/" onClick={props.closeSidenav}>
+                            <NavLink to="/" onClick={closeSidenav}>
                                 Home
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/tracks" onClick={props.closeSidenav}>
+                            <NavLink to="/tracks" onClick={closeSidenav}>
                                 Tracks
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/albums" onClick={props.closeSidenav}>
+                            <NavLink to="/albums" onClick={closeSidenav}>
                                 Albums
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/favorites" onClick={props.closeSidenav}>
+                            <NavLink to="/favorites" onClick={closeSidenav}>
                                 Favorites
                             </NavLink>
                         </li>
@@ -264,7 +261,7 @@ const Sidenav = (props: SidenavProps) => {
                                                     <NavLink
                                                         key={`${result.type}-${result.id}`}
                                                         to={`/${result.type.toLowerCase()}/${result.id}`}
-                                                        onClick={props.closeSidenav}
+                                                        onClick={closeSidenav}
                                                         className="result"
                                                     >
                                                         {result.type === 'Artist' && (
@@ -305,7 +302,7 @@ const Sidenav = (props: SidenavProps) => {
                                             <div className="additional">
                                                 <NavLink
                                                     to={`/search/${encodeURIComponent(searchQuery)}`}
-                                                    onClick={props.closeSidenav}
+                                                    onClick={closeSidenav}
                                                     className="textlink"
                                                 >
                                                     See more results
@@ -330,7 +327,7 @@ const Sidenav = (props: SidenavProps) => {
                                     <NavLink
                                         to={`/playlist/${playlist.Id}`}
                                         key={playlist.Id}
-                                        onClick={props.closeSidenav}
+                                        onClick={closeSidenav}
                                         className={({ isActive }) => (isActive ? 'playlist active' : 'playlist')}
                                     >
                                         {playlist.Name}
@@ -366,7 +363,7 @@ const Sidenav = (props: SidenavProps) => {
                                 {props.username}
                             </div>
                         </div>
-                        <NavLink to="/settings" className="settings" onClick={props.closeSidenav} title="Settings">
+                        <NavLink to="/settings" className="settings" onClick={closeSidenav} title="Settings">
                             <GearIcon size={16} />
                         </NavLink>
                     </div>
@@ -375,5 +372,3 @@ const Sidenav = (props: SidenavProps) => {
         </aside>
     )
 }
-
-export default Sidenav

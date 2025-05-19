@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
-import Loader from '../components/Loader'
-import MediaList from '../components/MediaList'
+import { Loader } from '../components/Loader'
+import { MediaList } from '../components/MediaList'
 import { useJellyfinHomeData } from '../hooks/Jellyfin/useJellyfinHomeData'
 
-const Home = () => {
+export const Home = () => {
     const { recentlyPlayed, frequentlyPlayed, recentlyAdded, isLoading, error } = useJellyfinHomeData()
 
     if (isLoading) {
@@ -26,7 +26,7 @@ const Home = () => {
                         See more
                     </Link>
                 </div>
-                <MediaList items={recentlyPlayed} isLoading={isLoading} type="song" />
+                <MediaList items={recentlyPlayed} isLoading={isLoading} type="song" title={''} />
             </div>
             <div className="section">
                 <div className="section-header">
@@ -38,7 +38,7 @@ const Home = () => {
                         See more
                     </Link>
                 </div>
-                <MediaList items={frequentlyPlayed} isLoading={isLoading} type="song" />
+                <MediaList items={frequentlyPlayed} isLoading={isLoading} type="song" title={''} />
             </div>
             <div className="section">
                 <div className="section-header">
@@ -47,10 +47,8 @@ const Home = () => {
                         <div className="section_desc">Albums recently added to the Library</div>
                     </div>
                 </div>
-                <MediaList items={recentlyAdded} isLoading={isLoading} type="album" />
+                <MediaList items={recentlyAdded} isLoading={isLoading} type="album" title={''} />
             </div>
         </div>
     )
 }
-
-export default Home

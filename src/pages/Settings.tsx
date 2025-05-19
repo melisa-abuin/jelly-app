@@ -6,11 +6,7 @@ import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useThemeContext } from '../context/ThemeContext/ThemeContext'
 import './Settings.css'
 
-interface SettingsProps {
-    onLogout: () => void
-}
-
-const Settings = ({ onLogout }: SettingsProps) => {
+export const Settings = ({ onLogout }: { onLogout: () => void }) => {
     const navigate = useNavigate()
     const api = useJellyfinContext()
 
@@ -340,5 +336,3 @@ const Settings = ({ onLogout }: SettingsProps) => {
         </div>
     )
 }
-
-export default Settings

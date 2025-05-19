@@ -2,18 +2,18 @@ import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
-import Loader from '../components/Loader'
-import PlaylistTrackList from '../components/PlaylistTrackList'
+import { Loader } from '../components/Loader'
+import { PlaylistTrackList } from '../components/PlaylistTrackList'
 import { MoreIcon } from '../components/SvgIcons'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
-import { useJellyfinPlaylistData } from '../hooks/Jellyfin/useJellyfinPlaylistData'
+import { useJellyfinPlaylistData } from '../hooks/Jellyfin/Infinite/useJellyfinPlaylistData'
 import { useFavorites } from '../hooks/useFavorites'
 import { formatDate } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Playlist.css'
 
-const Playlist = () => {
+export const Playlist = () => {
     const playback = usePlaybackContext()
     const { addToFavorites, removeFromFavorites } = useFavorites()
 
@@ -26,6 +26,8 @@ const Playlist = () => {
         totalPlaytime,
         totalTrackCount,
         totalPlays,
+        reviver,
+        loadMore,
     } = useJellyfinPlaylistData(playlistId!)
 
     const { setPageTitle } = usePageTitle()
@@ -112,9 +114,15 @@ const Playlist = () => {
                 </div>
             </div>
 
-            <PlaylistTrackList tracks={tracks} isLoading={isLoading} showType="artist" playlistId={playlistId} />
+            <PlaylistTrackList
+                tracks={tracks}
+                isLoading={isLoading}
+                showType="artist"
+                playlistId={playlistId}
+                title={''}
+                reviver={reviver}
+                loadMore={loadMore}
+            />
         </div>
     )
 }
-
-export default Playlist

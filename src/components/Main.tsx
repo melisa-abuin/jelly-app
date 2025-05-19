@@ -7,7 +7,7 @@ import { FilterContextProvider } from '../context/FilterContext/FilterContextPro
 import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
-import { useSidenav } from '../hooks/useSidenav'
+import { useSidenavContext } from '../context/SidenavContext/SidenavContext'
 import { getPageTitle } from '../utils/titleUtils'
 import { AlbumIcon, ArtistsIcon, PlaylistIcon, TracksIcon } from './SvgIcons'
 
@@ -32,7 +32,7 @@ export const MainContent = ({
     const { pageTitle } = usePageTitle()
     const { goBack: previousPage } = useHistoryContext()
     const location = useLocation()
-    const { toggleSidenav } = useSidenav()
+    const { toggleSidenav } = useSidenavContext()
     const { sort, setSort } = useFilterContext()
     const { setHidden } = useDropdownContext()
 

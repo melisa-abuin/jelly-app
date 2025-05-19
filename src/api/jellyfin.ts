@@ -36,7 +36,7 @@ interface AuthResponse {
     User: { Id: string; Name: string }
 }
 
-export type MediaItem = BaseItemDto & { Id: string; Name: string }
+export type MediaItem = BaseItemDto & { Id: string; Name: string; pageIndex?: number }
 
 export type IJellyfinAuth = Parameters<typeof initJellyfinApi>[0]
 

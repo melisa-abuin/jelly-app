@@ -8,7 +8,7 @@ export const useDependencyDebug = (deps: any[], name = 'deps') => {
     useEffect(() => {
         deps.forEach((dep, i) => {
             if (dep !== prev.current[i]) {
-                console.log(`[${name}] Dependency[${i}] changed`, {
+                console.info(`[${name}] Dependency[${i}] changed`, {
                     prev: prev.current[i],
                     next: dep,
                 })

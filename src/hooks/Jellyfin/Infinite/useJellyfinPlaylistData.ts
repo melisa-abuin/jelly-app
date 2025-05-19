@@ -1,0 +1,61 @@
+import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
+import { ApiError, MediaItem } from '../../../api/jellyfin'
+import { ___PAGE_PARAM_INDEX___ } from '../../../components/PlaybackManager'
+import { useJellyfinContext } from '../../../context/JellyfinContext/JellyfinContext'
+import { useJellyfinInfiniteData } from './useJellyfinInfiniteData'
+
+export const useJellyfinPlaylistData = (playlistId: string) => {
+    const api = useJellyfinContext()
+    const itemsPerPage = 40
+
+    const { data: playlist, error: playlistError } = useQuery<MediaItem, ApiError>({
+        queryKey: ['playlist', playlistId],
+        queryFn: () => api.getPlaylist(playlistId),
+    })
+
+    const { data: totals, error: totalsError } = useQuery<
+        {
+            totalTrackCount: number
+            totalPlaytime: number
+        },
+        ApiError
+    >({
+        queryKey: ['playlistTotals', playlistId],
+        queryFn: () => api.getPlaylistTotals(playlistId),
+    })
+
+    useEffect(() => {
+        if (
+            (playlistError || totalsError) instanceof ApiError &&
+            (playlistError || totalsError)?.response?.status === 401
+        ) {
+            localStorage.removeItem('auth')
+            window.location.href = '/login'
+        }
+    }, [playlistError, totalsError])
+
+    const infiniteData = useJellyfinInfiniteData({
+        queryKey: ['playlistTracks', playlistId],
+        queryFn: async ({ pageParam = 0 }) => {
+            const startIndex = (pageParam as number) * itemsPerPage
+            return await api.getPlaylistTracks(playlistId, startIndex, itemsPerPage)
+        },
+        queryFnReviver: {
+            fn: 'getPlaylistTracks',
+            params: [playlistId, ___PAGE_PARAM_INDEX___, itemsPerPage],
+        },
+    })
+
+    const totalPlaytime = totals?.totalPlaytime || 0
+    const totalTrackCount = totals?.totalTrackCount || 0
+    const totalPlays = infiniteData.items.reduce((sum, track) => sum + (track.UserData?.PlayCount || 0), 0)
+
+    return {
+        ...infiniteData,
+        playlist,
+        totalPlaytime,
+        totalTrackCount,
+        totalPlays,
+    }
+}

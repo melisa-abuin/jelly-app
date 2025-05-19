@@ -278,17 +278,17 @@ const useInitialState = () => {
                 <>
                     <div
                         className="dropdown-item instant-mix"
-                        onClick={() => {
+                        onClick={async () => {
                             if (!context) return
 
                             closeDropdown()
 
-                            api.getInstantMixFromSong(context.item.Id).then(r => {
-                                if (r) {
-                                    playback.setCurrentPlaylist({ playlist: r, title: '' })
-                                    navigate('/queue')
-                                }
-                            })
+                            const r = await api.getInstantMixFromSong(context.item.Id)
+
+                            if (r) {
+                                playback.setCurrentPlaylist({ playlist: r, title: '' })
+                                navigate('/queue')
+                            }
                         }}
                         onMouseEnter={closeSubDropdown}
                     >

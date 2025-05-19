@@ -1,11 +1,11 @@
 import { FormEvent, useState } from 'react'
 import { ApiError, loginToJellyfin } from '../api/jellyfin'
 
-interface AuthFormProps {
+export const AuthForm = ({
+    onLogin,
+}: {
     onLogin: (authData: { serverUrl: string; token: string; userId: string; username: string }) => void
-}
-
-const AuthForm = ({ onLogin }: AuthFormProps) => {
+}) => {
     const [serverUrl, setServerUrl] = useState(localStorage.getItem('lastServerUrl') || '')
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -105,5 +105,3 @@ const AuthForm = ({ onLogin }: AuthFormProps) => {
         </form>
     )
 }
-
-export default AuthForm

@@ -8,19 +8,29 @@ import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useDisplayItems } from '../hooks/useDisplayItems'
 import { formatDuration } from '../utils/formatDuration'
 import { JellyImg } from './JellyImg'
-import Loader from './Loader'
+import { Loader } from './Loader'
+import { IReviver } from './PlaybackManager'
 import './PlaylistTrackList.css'
-import Skeleton from './Skeleton'
+import { Skeleton } from './Skeleton'
 import { PlaystateAnimationTracklist } from './SvgIcons'
 
-interface PlaylistTrackListProps {
+export const PlaylistTrackList = ({
+    tracks,
+    isLoading,
+    playlistId,
+    showType,
+    title,
+    reviver,
+    loadMore,
+}: {
     tracks: MediaItem[]
     isLoading: boolean
     playlistId?: string
     showType?: 'artist' | 'album'
-}
-
-const PlaylistTrackList = ({ tracks, isLoading, playlistId, showType }: PlaylistTrackListProps) => {
+    title: string
+    reviver?: IReviver
+    loadMore?: () => void
+}) => {
     const playback = usePlaybackContext()
     const location = useLocation()
     const { displayItems, setRowRefs } = useDisplayItems(tracks, isLoading)
@@ -32,18 +42,12 @@ const PlaylistTrackList = ({ tracks, isLoading, playlistId, showType }: Playlist
             if (playback.currentTrack?.Id === track.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ playlist: tracks, title: '' })
+                playback.setCurrentPlaylist({ playlist: tracks, title, reviver })
                 playback.playTrack(index)
             }
         },
-        [playback, tracks]
+        [playback, reviver, title, tracks]
     )
-
-    const handleEndReached = () => {
-        if (playback.hasMore && playback.loadMore && !isLoading) {
-            playback.loadMore()
-        }
-    }
 
     const renderTrack = (index: number, item: MediaItem | { isPlaceholder: true }) => {
         if ('isPlaceholder' in item) {
@@ -148,11 +152,9 @@ const PlaylistTrackList = ({ tracks, isLoading, playlistId, showType }: Playlist
                 data={displayItems}
                 useWindowScroll
                 itemContent={renderTrack}
-                endReached={handleEndReached}
+                endReached={loadMore}
                 overscan={800}
             />
         </ul>
     )
 }
-
-export default PlaylistTrackList

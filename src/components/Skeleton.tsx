@@ -1,10 +1,6 @@
 import './Skeleton.css'
 
-interface SkeletonProps {
-    type?: 'song' | 'album' | 'playlist'
-}
-
-const Skeleton = ({ type = 'album' }: SkeletonProps) => (
+export const Skeleton = ({ type = 'album' }: { type?: 'song' | 'album' | 'playlist' }) => (
     <div className="skeleton-loading">
         <div className={`skeleton-effect thumbnail ${type === 'playlist' ? 'playlist' : ''}`}></div>
         <div className="skeleton-details">
@@ -34,5 +30,3 @@ const Skeleton = ({ type = 'album' }: SkeletonProps) => (
         )}
     </div>
 )
-
-export default Skeleton

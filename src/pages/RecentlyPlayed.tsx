@@ -1,15 +1,20 @@
-import MediaList from '../components/MediaList'
-import { useJellyfinRecentlyPlayedData } from '../hooks/Jellyfin/useJellyfinRecentlyPlayedData'
+import { MediaList } from '../components/MediaList'
+import { useJellyfinRecentlyPlayedData } from '../hooks/Jellyfin/Infinite/useJellyfinRecentlyPlayedData'
 
-const RecentlyPlayed = () => {
-    const { items, isLoading, error } = useJellyfinRecentlyPlayedData()
+export const RecentlyPlayed = () => {
+    const { items, isLoading, error, reviver, loadMore } = useJellyfinRecentlyPlayedData()
 
     return (
         <div className="recently-page">
             {error && <div className="error">{error}</div>}
-            <MediaList items={items} isLoading={isLoading} type="song" />
+            <MediaList
+                items={items}
+                isLoading={isLoading}
+                type="song"
+                title={''}
+                reviver={reviver}
+                loadMore={loadMore}
+            />
         </div>
     )
 }
-
-export default RecentlyPlayed

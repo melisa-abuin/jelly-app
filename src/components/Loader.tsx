@@ -1,6 +1,6 @@
 import './Loader.css'
 
-const Loader = () => (
+export const Loader = () => (
     <div className="loading_container">
         <svg className="loading">
             <circle cx="14" cy="14" r="14"></circle>
@@ -8,5 +8,3 @@ const Loader = () => (
         </svg>
     </div>
 )
-
-export default Loader

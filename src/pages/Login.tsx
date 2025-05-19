@@ -1,10 +1,10 @@
-import AuthForm from '../components/AuthForm'
+import { AuthForm } from '../components/AuthForm'
 
-interface LoginProps {
+export const Login = ({
+    onLogin,
+}: {
     onLogin: (authData: { serverUrl: string; token: string; userId: string; username: string }) => void
-}
-
-const Login = ({ onLogin }: LoginProps) => {
+}) => {
     return (
         <div className="login">
             <div className="login_header">
@@ -15,5 +15,3 @@ const Login = ({ onLogin }: LoginProps) => {
         </div>
     )
 }
-
-export default Login

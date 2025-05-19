@@ -6,17 +6,26 @@ import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useDisplayItems } from '../hooks/useDisplayItems'
 import { JellyImg } from './JellyImg'
-import Loader from './Loader'
-import Skeleton from './Skeleton'
+import { Loader } from './Loader'
+import { IReviver } from './PlaybackManager'
+import { Skeleton } from './Skeleton'
 import { PlaystateAnimationMedalist } from './SvgIcons'
 
-interface MediaListProps {
+export const MediaList = ({
+    items = [],
+    isLoading,
+    type,
+    title,
+    reviver,
+    loadMore,
+}: {
     items: MediaItem[] | undefined
     isLoading: boolean
     type: 'song' | 'album'
-}
-
-const MediaList = ({ items = [], isLoading, type }: MediaListProps) => {
+    title: string
+    reviver?: IReviver
+    loadMore?: () => void
+}) => {
     const playback = usePlaybackContext()
     const navigate = useNavigate()
     const location = useLocation()
@@ -29,15 +38,9 @@ const MediaList = ({ items = [], isLoading, type }: MediaListProps) => {
             if (playback.currentTrack?.Id === item.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ playlist: items, title: '' })
+                playback.setCurrentPlaylist({ playlist: items, title, reviver })
                 playback.playTrack(index)
             }
-        }
-    }
-
-    const handleEndReached = () => {
-        if (playback.hasMore && playback.loadMore && !isLoading) {
-            playback.loadMore()
         }
     }
 
@@ -152,11 +155,9 @@ const MediaList = ({ items = [], isLoading, type }: MediaListProps) => {
                 data={displayItems}
                 useWindowScroll
                 itemContent={renderItem}
-                endReached={handleEndReached}
+                endReached={loadMore}
                 overscan={800}
             />
         </ul>
     )
 }
-
-export default MediaList

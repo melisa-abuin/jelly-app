@@ -1,6 +1,6 @@
 import './InlineLoader.css'
 
-const InlineLoader = () => (
+export const InlineLoader = () => (
     <div className="inline-loader">
         <svg className="loading">
             <circle cx="6" cy="6" r="6"></circle>
@@ -8,5 +8,3 @@ const InlineLoader = () => (
         </svg>
     </div>
 )
-
-export default InlineLoader

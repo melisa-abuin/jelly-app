@@ -1,15 +1,20 @@
-import MediaList from '../components/MediaList'
-import { useJellyfinAlbumsData } from '../hooks/Jellyfin/useJellyfinAlbumsData'
+import { MediaList } from '../components/MediaList'
+import { useJellyfinAlbumsData } from '../hooks/Jellyfin/Infinite/useJellyfinAlbumsData'
 
-const Albums = () => {
-    const { items, isLoading, error } = useJellyfinAlbumsData()
+export const Albums = () => {
+    const { items, isLoading, error, reviver, loadMore } = useJellyfinAlbumsData()
 
     return (
         <div className="albums-page">
-            <MediaList items={items} isLoading={isLoading} type="album" />
+            <MediaList
+                items={items}
+                isLoading={isLoading}
+                type="album"
+                title={''}
+                reviver={reviver}
+                loadMore={loadMore}
+            />
             {error && <div className="error">{error}</div>}
         </div>
     )
 }
-
-export default Albums

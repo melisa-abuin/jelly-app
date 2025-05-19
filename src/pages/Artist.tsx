@@ -2,9 +2,9 @@ import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
-import Loader from '../components/Loader'
+import { Loader } from '../components/Loader'
 import { MoreIcon } from '../components/SvgIcons'
-import TrackList from '../components/TrackList'
+import { TrackList } from '../components/TrackList'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
@@ -15,7 +15,7 @@ import { formatDateYear } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Artist.css'
 
-const Artist = () => {
+export const Artist = () => {
     const playback = usePlaybackContext()
     const { artistId } = useParams<{ artistId: string }>()
     const { artist, tracks, albums, appearsInAlbums, totalTrackCount, totalPlaytime, totalPlays, loading, error } =
@@ -142,7 +142,7 @@ const Artist = () => {
             <div className="artist-content">
                 {topSongs.length > 0 && (
                     <div className="section top-songs">
-                        <TrackList tracks={topSongs} showAlbum={true} />
+                        <TrackList tracks={topSongs} showAlbum={true} title={''} />
                         {(totalTrackCount || 0) > 5 && (
                             <div className="all-tracks">
                                 <Link to={`/artist/${artistId}/tracks`} className="textlink">
@@ -243,5 +243,3 @@ const Artist = () => {
         </div>
     )
 }
-
-export default Artist

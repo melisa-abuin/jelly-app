@@ -5,10 +5,10 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { useEffect, useState } from 'react'
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import './App.css'
-import Dropdown from './components/Dropdown'
+import { Dropdown } from './components/Dropdown'
 import { Main } from './components/Main'
 import './components/MediaList.css'
-import Sidenav from './components/Sidenav'
+import { Sidenav } from './components/Sidenav'
 import { useDropdownContext } from './context/DropdownContext/DropdownContext'
 import { DropdownContextProvider } from './context/DropdownContext/DropdownContextProvider'
 import { HistoryContextProvider } from './context/HistoryContext/HistoryContextProvider'
@@ -16,24 +16,25 @@ import { JellyfinContextProvider } from './context/JellyfinContext/JellyfinConte
 import { PageTitleProvider } from './context/PageTitleContext/PageTitleProvider'
 import { PlaybackContextProvider } from './context/PlaybackContext/PlaybackContextProvider'
 import { ScrollContextProvider } from './context/ScrollContext/ScrollContextProvider'
+import { useSidenavContext } from './context/SidenavContext/SidenavContext'
+import { SidenavContextProvider } from './context/SidenavContext/SidenavContextProvider'
 import { ThemeContextProvider } from './context/ThemeContext/ThemeContextProvider'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
-import { useSidenav } from './hooks/useSidenav'
-import Album from './pages/Album'
-import Albums from './pages/Albums'
-import Artist from './pages/Artist'
-import ArtistTracks from './pages/ArtistTracks'
-import Favorites from './pages/Favorites'
-import FrequentlyPlayed from './pages/FrequentlyPlayed'
-import Genre from './pages/Genre'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Playlist from './pages/Playlist'
-import Queue from './pages/Queue'
-import RecentlyPlayed from './pages/RecentlyPlayed'
-import SearchResults from './pages/SearchResults'
-import Settings from './pages/Settings'
-import Tracks from './pages/Tracks'
+import { Album } from './pages/Album'
+import { Albums } from './pages/Albums'
+import { Artist } from './pages/Artist'
+import { ArtistTracks } from './pages/ArtistTracks'
+import { Favorites } from './pages/Favorites'
+import { FrequentlyPlayed } from './pages/FrequentlyPlayed'
+import { Genre } from './pages/Genre'
+import { Home } from './pages/Home'
+import { Login } from './pages/Login'
+import { Playlist } from './pages/Playlist'
+import { Queue } from './pages/Queue'
+import { RecentlyPlayed } from './pages/RecentlyPlayed'
+import { SearchResults } from './pages/SearchResults'
+import { Settings } from './pages/Settings'
+import { Tracks } from './pages/Tracks'
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -47,7 +48,7 @@ const persister = createSyncStoragePersister({
     storage: window.localStorage,
 })
 
-const App = () => {
+export const App = () => {
     const [auth, setAuth] = useState<AuthData | null>(() => {
         const savedAuth = localStorage.getItem('auth')
         return savedAuth ? JSON.parse(savedAuth) : null
@@ -95,7 +96,9 @@ const App = () => {
                             <JellyfinContextProvider auth={auth}>
                                 <DropdownContextProvider>
                                     <PlaybackContextProvider initialVolume={0.5} clearOnLogout={isLoggingOut}>
-                                        <MainLayout auth={auth} handleLogout={handleLogout} />
+                                        <SidenavContextProvider>
+                                            <MainLayout auth={auth} handleLogout={handleLogout} />
+                                        </SidenavContextProvider>
                                         <Dropdown />
                                     </PlaybackContextProvider>
                                 </DropdownContextProvider>
@@ -144,7 +147,7 @@ interface AuthData {
 const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () => void }) => {
     useDocumentTitle()
 
-    const { showSidenav, toggleSidenav, closeSidenav } = useSidenav()
+    const { showSidenav, toggleSidenav } = useSidenavContext()
     const dropdownContext = useDropdownContext()
     const isDropdownOpen = dropdownContext?.isOpen || false
     const isTouchDevice = dropdownContext?.isTouchDevice || false
@@ -156,7 +159,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                 onClick={showSidenav ? toggleSidenav : dropdownContext?.closeDropdown}
             />
 
-            <Sidenav username={auth.username} showSidenav={showSidenav} closeSidenav={closeSidenav} />
+            <Sidenav username={auth.username} />
 
             <Routes>
                 <Route path="/" element={<Main content={<Home />}></Main>} />
@@ -187,5 +190,3 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
         </div>
     )
 }
-
-export default App

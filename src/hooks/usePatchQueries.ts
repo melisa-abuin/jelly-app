@@ -1,7 +1,7 @@
-import { useQueryClient } from '@tanstack/react-query'
+import { InfiniteData, useQueryClient } from '@tanstack/react-query'
 import { MediaItem } from '../api/jellyfin'
 
-const isPages = (data: object): data is { pages: MediaItem[][] } => {
+const isPages = (data: object): data is InfiniteData<MediaItem[], unknown> => {
     return 'pages' in data && !!data.pages
 }
 

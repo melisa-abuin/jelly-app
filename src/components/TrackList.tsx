@@ -3,16 +3,23 @@ import { MediaItem } from '../api/jellyfin'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { formatDuration } from '../utils/formatDuration'
+import { IReviver } from './PlaybackManager'
 import { PlaystateAnimationTracklist } from './SvgIcons'
 import './TrackList.css'
 
-interface TrackListProps {
+export const TrackList = ({
+    tracks,
+    playlist,
+    showAlbum = false,
+    title,
+    reviver,
+}: {
     tracks: MediaItem[]
     playlist?: MediaItem[]
     showAlbum?: boolean
-}
-
-const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
+    title: string
+    reviver?: IReviver
+}) => {
     const playback = usePlaybackContext()
 
     const MIN_PLAY_COUNT = 5
@@ -51,7 +58,7 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
                                 playback.togglePlayPause()
                             } else {
                                 const tracksToPlay = playlist || tracks
-                                playback.setCurrentPlaylist({ playlist: tracksToPlay, title: '' })
+                                playback.setCurrentPlaylist({ playlist: tracksToPlay, title, reviver })
                                 const playIndex = playlist ? playlist.findIndex(t => t.Id === track.Id) : index
                                 playback.playTrack(playIndex)
                             }
@@ -105,5 +112,3 @@ const TrackList = ({ tracks, playlist, showAlbum = false }: TrackListProps) => {
         </ul>
     )
 }
-
-export default TrackList

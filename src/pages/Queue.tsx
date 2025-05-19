@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
-import MediaList from '../components/MediaList'
+import { MediaList } from '../components/MediaList'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import './Queue.css'
 
-const Queue = () => {
+export const Queue = () => {
     const { setPageTitle } = usePageTitle()
     const { currentTrack, currentPlaylist, currentTrackIndex, playlistTitle } = usePlaybackContext()
 
@@ -22,7 +22,7 @@ const Queue = () => {
     return (
         <div className="queue-page">
             <div className="queue-header">
-                <MediaList items={[currentTrack]} isLoading={false} type="song" />
+                <MediaList items={[currentTrack]} isLoading={false} type="song" title={''} />
             </div>
             {queueTracks.length > 0 && (
                 <>
@@ -30,11 +30,9 @@ const Queue = () => {
                     <div className="queue-desc">
                         <span className="text">From {playlistTitle}</span>
                     </div>
-                    <MediaList items={queueTracks} isLoading={false} type="song" />
+                    <MediaList items={queueTracks} isLoading={false} type="song" title={''} />
                 </>
             )}
         </div>
     )
 }
-
-export default Queue

@@ -1,15 +1,20 @@
-import MediaList from '../components/MediaList'
-import { useJellyfinTracksData } from '../hooks/Jellyfin/useJellyfinTracksData'
+import { MediaList } from '../components/MediaList'
+import { useJellyfinTracksData } from '../hooks/Jellyfin/Infinite/useJellyfinTracksData'
 
-const Tracks = () => {
-    const { items, isLoading, error } = useJellyfinTracksData()
+export const Tracks = () => {
+    const { items, isLoading, error, reviver, loadMore } = useJellyfinTracksData()
 
     return (
         <div className="tracks-page">
             {error && <div className="error">{error}</div>}
-            <MediaList items={items} isLoading={isLoading} type="song" />
+            <MediaList
+                items={items}
+                isLoading={isLoading}
+                reviver={reviver}
+                type="song"
+                loadMore={loadMore}
+                title={''}
+            />
         </div>
     )
 }
-
-export default Tracks
