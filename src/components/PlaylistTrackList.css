@@ -160,6 +160,10 @@
 }
 
 /* Play-state animation */
+.playlist-tracklist .track-item > .track-state > .overlay > .play-state-animation > .sound-bars {
+    animation-play-state: paused;
+}
+
 /* Animation is active when a track is playing */
 .playlist-tracklist .track-item.playing > .track-state > .overlay > .play-state-animation > .sound-bars {
     animation-play-state: running;

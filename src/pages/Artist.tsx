@@ -142,7 +142,7 @@ export const Artist = () => {
             <div className="artist-content">
                 {topSongs.length > 0 && (
                     <div className="section top-songs">
-                        <TrackList tracks={topSongs} showAlbum={true} title={''} />
+                        <TrackList tracks={topSongs} showAlbum={true} title={artist.Name} />
                         {(totalTrackCount || 0) > 5 && (
                             <div className="all-tracks">
                                 <Link to={`/artist/${artistId}/tracks`} className="textlink">

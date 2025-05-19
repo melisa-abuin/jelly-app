@@ -10,7 +10,7 @@ export const Albums = () => {
                 items={items}
                 isLoading={isLoading}
                 type="album"
-                title={''}
+                title={'Albums'}
                 reviver={reviver}
                 loadMore={loadMore}
             />

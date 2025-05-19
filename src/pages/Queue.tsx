@@ -22,7 +22,7 @@ export const Queue = () => {
     return (
         <div className="queue-page">
             <div className="queue-header">
-                <MediaList items={[currentTrack]} isLoading={false} type="song" title={''} />
+                <MediaList items={[currentTrack]} isLoading={false} type="song" title={'Current Track - Queue'} />
             </div>
             {queueTracks.length > 0 && (
                 <>
@@ -30,7 +30,7 @@ export const Queue = () => {
                     <div className="queue-desc">
                         <span className="text">From {playlistTitle}</span>
                     </div>
-                    <MediaList items={queueTracks} isLoading={false} type="song" title={''} />
+                    <MediaList items={queueTracks} isLoading={false} type="song" title={'Next Up - Queue'} />
                 </>
             )}
         </div>

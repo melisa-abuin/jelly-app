@@ -147,7 +147,11 @@ export const Album = () => {
                 .map((discNumber, index) => (
                     <div className="album-content" key={discNumber}>
                         {discCount > 1 && <div className={`disc ${index === 0 ? 'first' : ''}`}>Disc {discNumber}</div>}
-                        <TrackList tracks={tracksByDisc[Number(discNumber)]} playlist={sortedTracks} title={''} />
+                        <TrackList
+                            tracks={tracksByDisc[Number(discNumber)]}
+                            playlist={sortedTracks}
+                            title={album.Name}
+                        />
                     </div>
                 ))}
         </div>

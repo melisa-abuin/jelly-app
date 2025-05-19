@@ -13,7 +13,7 @@ export const Favorites = () => {
                 type="song"
                 reviver={reviver}
                 loadMore={loadMore}
-                title={''}
+                title={'Favorites'}
             />
         </div>
     )

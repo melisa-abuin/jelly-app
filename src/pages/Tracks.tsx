@@ -13,7 +13,7 @@ export const Tracks = () => {
                 reviver={reviver}
                 type="song"
                 loadMore={loadMore}
-                title={''}
+                title={'Tracks'}
             />
         </div>
     )

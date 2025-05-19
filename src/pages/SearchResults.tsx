@@ -120,7 +120,7 @@ export const SearchResults = () => {
             <div className="search-content">
                 {results.songs.length > 0 && (
                     <div className="section songs">
-                        <TrackList tracks={results.songs} title={''} />
+                        <TrackList tracks={results.songs} title={`Search results for '${query}'`} />
                     </div>
                 )}
 

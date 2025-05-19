@@ -11,7 +11,7 @@ export const FrequentlyPlayed = () => {
                 items={items}
                 isLoading={isLoading}
                 type="song"
-                title={''}
+                title={'Frequently Played'}
                 reviver={reviver}
                 loadMore={loadMore}
             />

@@ -477,6 +477,20 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 }
 
 /* Play-state animation */
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_results
+    > .results
+    > .result
+    > .type
+    > .icon
+    > .play-state-animation
+    > .sound-bars {
+    animation-play-state: paused;
+}
+
 /* Animation is active when a track is playing */
 .sidenav
     > .sidenav_wrapper

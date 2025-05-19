@@ -25,7 +25,7 @@ export const Genre = () => {
                 items={items}
                 isLoading={isLoading}
                 type="song"
-                title={''}
+                title={'Genres'}
                 reviver={reviver}
                 loadMore={loadMore}
             />
