@@ -960,11 +960,11 @@ body.lockscroll {
 
 @media only screen and (pointer: coarse) {
     .main > .main_footer > .playback > .progress > input::-webkit-slider-runnable-track {
-        height: 12px;
+        height: 14px;
     }
 
     .main > .main_footer > .playback > .progress > input::-moz-range-track {
-        height: 12px;
+        height: 14px;
     }
 }
 

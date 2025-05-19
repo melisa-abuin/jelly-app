@@ -59,6 +59,7 @@
     overflow-x: hidden;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
 }
 
 .dropdown > .dropdown-menu > .dropdown-separator,
@@ -192,10 +193,10 @@
         min-width: 100%;
         max-width: 100%;
         border-radius: 12px 12px 0 0;
-        padding: 6px;
+        padding: 7px;
         gap: 4px;
         box-shadow: none;
-        border-bottom: none;
+        border: none;
         background-color: var(--bg-color-secondary);
         max-height: 60dvh;
         overflow: auto;
