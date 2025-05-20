@@ -27,13 +27,12 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         index: localStorage.getItem('currentTrackIndex') ? Number(localStorage.getItem('currentTrackIndex')) : -1,
     })
     const [isPlaying, setIsPlaying] = useState(false)
-    const [progress, setProgress] = useState(0)
-    const [duration, setDuration] = useState(0)
-    const [buffered, setBuffered] = useState(0)
+
     const [volume, setVolume] = useState(() => {
         const savedVolume = localStorage.getItem('volume')
         return savedVolume ? parseFloat(savedVolume) : initialVolume
     })
+
     const [shuffle, setShuffle] = useState(false)
     const [repeat, setRepeat] = useState<'off' | 'all' | 'one'>(() => {
         const savedRepeat = localStorage.getItem('repeatMode')
@@ -252,9 +251,11 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 } catch (error) {
                     console.error('Error resuming playback:', error)
                     setCurrentTrackIndex({ index: -1 })
-                    setProgress(0)
-                    setDuration(0)
-                    setBuffered(0)
+
+                    if (audioRef.current) {
+                        audioRef.current.pause()
+                        audioRef.current.src = ''
+                    }
                 }
             }
         }
@@ -438,9 +439,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const handleSeek = (e: ChangeEvent<HTMLInputElement>) => {
         if (audioRef.current) {
-            const newTime = parseFloat(e.target.value)
-            audioRef.current.currentTime = newTime
-            setProgress(newTime)
+            audioRef.current.currentTime = parseFloat(e.target.value)
         }
     }
 
@@ -482,42 +481,24 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         }
     }, [])
 
-    // Attach progress, metadata, and error event listeners
+    // Attach error event listeners
     useEffect(() => {
         const audio = audioRef.current
-        let animationFrameId: number
-
-        const updateProgress = () => {
-            if (audio.src && !audio.paused) {
-                setProgress(audio.currentTime)
-                setDuration(audio.duration || 0)
-                const bufferedEnd = audio.buffered.length > 0 ? audio.buffered.end(audio.buffered.length - 1) : 0
-                setBuffered(bufferedEnd)
-            }
-            animationFrameId = requestAnimationFrame(updateProgress)
-        }
-
-        const handleLoadedMetadata = () => {
-            setDuration(audio.duration || 0)
-            animationFrameId = requestAnimationFrame(updateProgress)
-        }
 
         const handleError = (e: Event) => {
             console.error('Audio error during playback:', e)
             setCurrentTrackIndex({ index: -1 })
-            setProgress(0)
-            setDuration(0)
-            setBuffered(0)
-            cancelAnimationFrame(animationFrameId)
+
+            if (audioRef.current) {
+                audioRef.current.pause()
+                audioRef.current.src = ''
+            }
         }
 
-        audio.addEventListener('loadedmetadata', handleLoadedMetadata)
         audio.addEventListener('error', handleError)
 
         return () => {
-            audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
             audio.removeEventListener('error', handleError)
-            cancelAnimationFrame(animationFrameId)
         }
     }, [])
 
@@ -625,9 +606,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         if (clearOnLogout && currentTrack) {
             api.reportPlaybackStopped(currentTrack.Id, audioRef.current.currentTime)
             setCurrentTrackIndex({ index: -1 })
-            setProgress(0)
-            setDuration(0)
-            setBuffered(0)
+
             if (audioRef.current) {
                 audioRef.current.pause()
                 audioRef.current.src = ''
@@ -642,9 +621,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             : currentTrackIndex.index,
         isPlaying,
         togglePlayPause,
-        progress,
-        duration,
-        buffered,
         handleSeek,
         formatTime,
         volume,
@@ -665,5 +641,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         sessionPlayCount,
         resetSessionCount,
         playlistTitle,
+        audioRef,
     }
 }

@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
-import { CSSProperties, ReactElement, useEffect } from 'react'
+import { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
@@ -35,6 +35,9 @@ export const MainContent = ({
     const { toggleSidenav } = useSidenavContext()
     const { sort, setSort } = useFilterContext()
     const { setHidden } = useDropdownContext()
+    const audio = playback.audioRef.current
+    const progressRef = useRef<HTMLDivElement>(null)
+    const bufferedRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
@@ -55,8 +58,63 @@ export const MainContent = ({
         )
     }, [dropdownType, setHidden])
 
-    return (
-        <main className="main">
+    useEffect(() => {
+        if (!audio || !progressRef.current || !bufferedRef.current) return
+
+        const progressEl = progressRef.current
+        const bufferedEl = bufferedRef.current
+
+        const updateBuffered = () => {
+            const duration = audio.duration || 1
+            const bufferedEnd = audio.buffered.length > 0 ? audio.buffered.end(audio.buffered.length - 1) : 0
+            const percent = (bufferedEnd / duration) * 100
+            bufferedEl.style.width = `${percent}%`
+        }
+
+        const syncProgress = () => {
+            const current = audio.currentTime
+            const duration = audio.duration || 1
+            const remaining = duration - current
+
+            const progress = current / duration
+            progressEl.style.transitionDuration = `${remaining}s`
+            progressEl.style.transform = `scaleX(${1 - progress})`
+            void progressEl.offsetWidth
+            progressEl.style.transitionDuration = `${remaining}s`
+            progressEl.style.transform = `scaleX(1)`
+        }
+
+        const pauseProgress = () => {
+            const computed = window.getComputedStyle(progressEl)
+            const matrix = new WebKitCSSMatrix(computed.transform)
+            const scaleX = matrix.a
+            progressEl.style.transition = 'none'
+            progressEl.style.transform = `scaleX(${scaleX})`
+        }
+
+        const handleProgress = updateBuffered
+        const handleLoadedMetadata = () => {
+            updateBuffered()
+            syncProgress()
+        }
+
+        audio.addEventListener('play', syncProgress)
+        audio.addEventListener('pause', pauseProgress)
+        audio.addEventListener('seeked', syncProgress)
+        audio.addEventListener('progress', handleProgress)
+        audio.addEventListener('loadedmetadata', handleLoadedMetadata)
+
+        return () => {
+            audio.removeEventListener('play', syncProgress)
+            audio.removeEventListener('pause', pauseProgress)
+            audio.removeEventListener('seeked', syncProgress)
+            audio.removeEventListener('progress', handleProgress)
+            audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
+        }
+    }, [audio])
+
+    const memoHeader = useMemo(() => {
+        return (
             <div className="main_header">
                 <div className="primary">
                     <div onClick={previousPage} className="return_icon" title="Back">
@@ -129,35 +187,22 @@ export const MainContent = ({
                     </div>
                 </div>
             </div>
-            <div className="main_content">{content}</div>
+        )
+    }, [filterType, location, pageTitle, previousPage, setSort, sort, toggleSidenav])
+
+    const memoFooter = useMemo(() => {
+        return (
             <div className="main_footer">
                 <div
                     className={
                         playback.isPlaying ? 'playback playing' : playback.currentTrack ? 'playback paused' : 'playback'
                     }
                 >
-                    <div className="progress">
-                        <input
-                            type="range"
-                            id="track-progress"
-                            name="track-progress"
-                            min="0"
-                            max={playback.duration || 1}
-                            step="0.01"
-                            value={playback.progress}
-                            style={
-                                {
-                                    '--progress-width': `${
-                                        playback.duration ? (playback.progress / playback.duration) * 100 : 0
-                                    }%`,
-                                    '--buffered-width': `${
-                                        playback.duration ? (playback.buffered / playback.duration) * 100 : 0
-                                    }%`,
-                                } as CSSProperties
-                            }
-                            onChange={playback.handleSeek}
-                        />
+                    <div className="progress-bar-container">
+                        <div className="buffered-bar" ref={bufferedRef}></div>
+                        <div className="progress-bar" ref={progressRef}></div>
                     </div>
+
                     <div className="container">
                         <div className="track-info">
                             <div className="track-name">
@@ -250,15 +295,63 @@ export const MainContent = ({
                                     <div className={`repeat-icon${playback.repeat === 'one' ? '-one' : ''}`}></div>
                                 </div>
                             </div>
-                            <div className="duration noSelect">
-                                <div className="current">{playback.formatTime(playback.progress)}</div>
-                                <div className="divider">/</div>
-                                <div className="total">{playback.formatTime(playback.duration)}</div>
-                            </div>
+
+                            <Duration />
                         </div>
                     </div>
                 </div>
             </div>
+        )
+    }, [
+        playback.currentTrack,
+        playback.isPlaying,
+        playback.nextTrack,
+        playback.previousTrack,
+        playback.repeat,
+        playback.shuffle,
+        playback.togglePlayPause,
+        playback.toggleRepeat,
+        playback.toggleShuffle,
+    ])
+
+    return (
+        <main className="main">
+            {memoHeader}
+            <div className="main_content">{content}</div>
+            {memoFooter}
         </main>
     )
 }
+
+const Duration = memo(() => {
+    const playback = usePlaybackContext()
+    const audio = playback.audioRef.current
+
+    const [progress, setProgress] = useState(audio.currentTime || 0)
+    const [duration, setDuration] = useState(audio.duration || 0)
+
+    useEffect(() => {
+        if (!audio) return
+
+        const updateProgress = () => {
+            setProgress(audio.currentTime)
+            setDuration(audio.duration)
+        }
+
+        audio.addEventListener('timeupdate', updateProgress)
+        audio.addEventListener('loadedmetadata', updateProgress)
+
+        return () => {
+            audio.removeEventListener('timeupdate', updateProgress)
+            audio.removeEventListener('loadedmetadata', updateProgress)
+        }
+    }, [audio])
+
+    return (
+        <div className="duration noSelect">
+            <div className="current">{playback.formatTime(progress)}</div>
+            <div className="divider">/</div>
+            <div className="total">{playback.formatTime(duration)}</div>
+        </div>
+    )
+})
