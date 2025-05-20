@@ -36,8 +36,6 @@ export const MainContent = ({
     const { sort, setSort } = useFilterContext()
     const { setHidden } = useDropdownContext()
     const audio = playback.audioRef.current
-    const progressRef = useRef<HTMLDivElement>(null)
-    const bufferedRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
@@ -58,52 +56,96 @@ export const MainContent = ({
         )
     }, [dropdownType, setHidden])
 
+    const progressRef = useRef<HTMLInputElement>(null)
+
     useEffect(() => {
-        if (!audio || !progressRef.current || !bufferedRef.current) return
+        if (!audio || !progressRef.current) return
+        const input = progressRef.current
 
-        const progressEl = progressRef.current
-        const bufferedEl = bufferedRef.current
-
-        const updateBuffered = () => {
-            const duration = audio.duration || 1
-            const bufferedEnd = audio.buffered.length > 0 ? audio.buffered.end(audio.buffered.length - 1) : 0
-            const percent = (bufferedEnd / duration) * 100
-            bufferedEl.style.setProperty('--buffered-width', `${percent}%`)
+        const setBuffered = () => {
+            const d = audio.duration || 1
+            const end = audio.buffered.length > 0 ? audio.buffered.end(audio.buffered.length - 1) : 0
+            input.style.setProperty('--buffered-width', `${(end / d) * 100}%`)
         }
 
-        const syncProgress = () => {
-            const current = audio.currentTime
-            const duration = audio.duration || 1
-            const progress = current / duration
-            progressEl.style.setProperty('--progress-width', `${progress * 100}%`)
+        const setProgressNow = (time: number) => {
+            const d = audio.duration || 1
+            input.style.setProperty('--progress-width', `${(time / d) * 100}%`)
         }
 
-        const pauseProgress = () => {
-            const computed = window.getComputedStyle(progressEl)
-            const matrix = new WebKitCSSMatrix(computed.transform)
-            const scaleX = matrix.a
-            progressEl.style.transition = 'none'
-            progressEl.style.setProperty('--progress-width', `${scaleX * 100}%`)
+        const onPlay = () => {
+            if (isNaN(audio.duration) || audio.duration === 0) return
+            const remaining = audio.duration - audio.currentTime
+            input.style.setProperty('--transition-duration', `${remaining}s`)
+            input.style.setProperty('--progress-width', `100%`)
         }
 
-        const handleProgress = updateBuffered
-        const handleLoadedMetadata = () => {
-            updateBuffered()
-            syncProgress()
+        const onPause = () => {
+            input.style.setProperty('--transition-duration', `0s`)
+            setProgressNow(audio.currentTime)
         }
 
-        audio.addEventListener('play', syncProgress)
-        audio.addEventListener('pause', pauseProgress)
-        audio.addEventListener('seeked', syncProgress)
-        audio.addEventListener('progress', handleProgress)
-        audio.addEventListener('loadedmetadata', handleLoadedMetadata)
+        // **NEW**: snap to the new time on seek, then restart animation if still playing
+        const onSeeked = () => {
+            if (isNaN(audio.duration) || audio.duration === 0) return
+
+            // 1) snap
+            input.style.setProperty('--transition-duration', `0s`)
+            setProgressNow(audio.currentTime)
+            // 2) if playing, restart the CSS transition from here
+            if (!audio.paused) onPlay()
+        }
+
+        // initialize both bars when metadata (or a new src) lands
+        const onLoaded = () => {
+            // reset the slider’s range whenever metadata (or a new src) arrives
+            const d = audio.duration || 0
+            progressRef.current!.max = String(d)
+
+            setBuffered()
+            setProgressNow(audio.currentTime || 0)
+            if (!audio.paused) onPlay()
+        }
+
+        const resetBars = () => {
+            const input = progressRef.current!
+            // stop any in-flight animation
+            input.style.setProperty('--transition-duration', '0s')
+            // clear both progress & buffer
+            input.style.setProperty('--progress-width', '0%')
+            input.style.setProperty('--buffered-width', '0%')
+        }
+
+        // observe any time someone writes audio.src = '…'
+        const mo = new MutationObserver(muts => {
+            for (const m of muts) {
+                if (m.attributeName === 'src') {
+                    resetBars()
+                }
+            }
+        })
+        mo.observe(audio, { attributes: true, attributeFilter: ['src'] })
+
+        audio.addEventListener('play', onPlay)
+        audio.addEventListener('pause', onPause)
+        audio.addEventListener('seeked', onSeeked)
+        audio.addEventListener('progress', setBuffered)
+        audio.addEventListener('loadedmetadata', onLoaded)
+        audio.addEventListener('durationchange', onLoaded)
+        audio.addEventListener('loadstart', resetBars)
+        audio.addEventListener('emptied', resetBars)
 
         return () => {
-            audio.removeEventListener('play', syncProgress)
-            audio.removeEventListener('pause', pauseProgress)
-            audio.removeEventListener('seeked', syncProgress)
-            audio.removeEventListener('progress', handleProgress)
-            audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
+            audio.removeEventListener('play', onPlay)
+            audio.removeEventListener('pause', onPause)
+            audio.removeEventListener('seeked', onSeeked)
+            audio.removeEventListener('progress', setBuffered)
+            audio.removeEventListener('loadedmetadata', onLoaded)
+            audio.removeEventListener('durationchange', onLoaded)
+            audio.removeEventListener('loadstart', resetBars)
+            audio.removeEventListener('emptied', resetBars)
+
+            mo.disconnect()
         }
     }, [audio])
 
@@ -192,19 +234,33 @@ export const MainContent = ({
                         playback.isPlaying ? 'playback playing' : playback.currentTrack ? 'playback paused' : 'playback'
                     }
                 >
-                    <div className="progress noSelect">
+                    <div className="progress">
                         <input
                             type="range"
                             id="track-progress"
                             name="track-progress"
-                            min="0"
-                            max={audio.duration || 1}
                             step="0.01"
-                            value={audio.currentTime}
-                            onChange={playback.handleSeek}
+                            ref={progressRef}
+                            style={
+                                {
+                                    '--progress-width': '0%',
+                                    '--buffered-width': '0%',
+                                    '--transition-duration': '0s',
+                                } as React.CSSProperties
+                            }
+                            onChange={e => {
+                                if (!audio) return
+                                const t = parseFloat(e.currentTarget.value)
+                                audio.currentTime = t
+                                // snap the CSS‐only bar
+                                const input = progressRef.current!
+                                input.style.setProperty('--transition-duration', '0s')
+                                input.style.setProperty(
+                                    '--progress-width',
+                                    `${isNaN(audio.duration) ? t : (t / (audio.duration || 1)) * 100}%`
+                                )
+                            }}
                         />
-                        <div className="buffered-bar" ref={bufferedRef}></div>
-                        <div className="progress-bar" ref={progressRef}></div>
                     </div>
 
                     <div className="container">
@@ -307,6 +363,7 @@ export const MainContent = ({
             </div>
         )
     }, [
+        audio,
         playback.currentTrack,
         playback.isPlaying,
         playback.nextTrack,

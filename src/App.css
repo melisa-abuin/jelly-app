@@ -534,8 +534,11 @@ body.lockscroll {
     position: relative;
 }
 
+.main > .main_footer > .playback > .progress {
+    display: flex;
+}
+
 /* Progress bar */
-/*
 .main > .main_footer > .playback > .progress > input {
     cursor: pointer;
     width: 100%;
@@ -544,117 +547,55 @@ body.lockscroll {
     margin-top: -4px;
 }
 
-/* TEST */
-.main > .main_footer > .playback > .progress {
-    position: relative;
-    cursor: pointer;
-    width: 100%;
-    min-height: 8px;
-    margin-top: -4px;
-    transform: scaleY(0.6);
-    transition: transform 0.1s linear;
-}
-
-.main > .main_footer > .playback > .progress:hover,
-.main > .main_footer > .playback > .progress:active {
-    transform: scaleY(1);
-}
-
+/* base track */
 .main > .main_footer > .playback > .progress > input {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    cursor: pointer;
-    background: var(--bg-color-secondary);
+    /* make sure the CSS vars exist */
+    --progress-width: 0%;
+    --buffered-width: 0%;
+    --transition-duration: 0s;
 }
 
-.main > .main_footer > .playback > .progress > .progress-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    background: var(--bg-color-quaternary);
-    transform-origin: left;
-    transform: scaleX(var(--progress-width));
-    opacity: 0;
-    visibility: hidden;
-    transition: transform 0.1s linear, opacity 0.2s ease, visibility 0.2s ease;
-}
-
-.main > .main_footer > .playback > .progress > .buffered-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    background: var(--bg-color-tertiary);
-    transform-origin: left;
-    transform: scaleX(var(--buffered-width));
-    opacity: 0;
-    visibility: hidden;
-    transition: transform 0.1s linear, opacity 0.2s ease, visibility 0.2s ease;
-}
-
-.main > .main_footer > .playback.playing > .progress > .progress-bar,
-.main > .main_footer > .playback.paused > .progress > .progress-bar,
-.main > .main_footer > .playback.playing > .progress > .buffered-bar,
-.main > .main_footer > .playback.paused > .progress > .buffered-bar {
-    width: 100%;
-    opacity: 1;
-    visibility: visible;
-}
-/* tesT END*/
-
-/* Progress, buffered, seeking, visualized bar for webkit browsers */
-/*
+/* WebKit */
 .main > .main_footer > .playback > .progress > input::-webkit-slider-runnable-track {
     width: 100%;
     height: 8px;
     transform: scaleY(0.6);
-    background: linear-gradient(
-        to right,
-        var(--bg-color-quaternary) 0%,
-        var(--bg-color-quaternary) var(--progress-width),
-        var(--bg-color-tertiary) var(--progress-width),
-        var(--bg-color-tertiary) var(--buffered-width),
-        var(--bg-color-secondary) var(--buffered-width)
-    );
-    transition: transform 0.1s ease;
+    /* three‐layer background:
+     1) played part
+     2) buffered‐but‐unplayed
+     3) remainder
+  */
+    background:
+    /* played */ linear-gradient(var(--bg-color-quaternary), var(--bg-color-quaternary)) no-repeat 0 /
+            var(--progress-width) 100%,
+        /* buffered */ linear-gradient(var(--bg-color-tertiary), var(--bg-color-tertiary)) no-repeat 0 /
+            var(--buffered-width) 100%,
+        /* leftover */ var(--bg-color-secondary);
+    transition: background-size var(--transition-duration) linear;
 }
 
+/* on hover/active, you can still scale up if you like */
 .main > .main_footer > .playback > .progress:hover > input::-webkit-slider-runnable-track,
 .main > .main_footer > .playback > .progress:active > input::-webkit-slider-runnable-track {
     transform: scaleY(1);
 }
 
-/* Progress, buffered, seeking, visualized bar for firefox */
-/*
+/* Firefox */
 .main > .main_footer > .playback > .progress > input::-moz-range-track {
     width: 100%;
     height: 8px;
     transform: scaleY(0.6);
-    background: linear-gradient(
-        to right,
-        var(--bg-color-quaternary) 0%,
-        var(--bg-color-quaternary) var(--progress-width),
-        var(--bg-color-tertiary) var(--progress-width),
-        var(--bg-color-tertiary) var(--buffered-width),
-        var(--bg-color-secondary) var(--buffered-width)
-    );
-    transition: transform 0.1s ease;
+    background: linear-gradient(var(--bg-color-quaternary), var(--bg-color-quaternary)) no-repeat 0 /
+            var(--progress-width) 100%,
+        linear-gradient(var(--bg-color-tertiary), var(--bg-color-tertiary)) no-repeat 0 / var(--buffered-width) 100%,
+        var(--bg-color-secondary);
+    transition: background-size var(--transition-duration) linear;
 }
 
 .main > .main_footer > .playback > .progress:hover > input::-moz-range-track,
 .main > .main_footer > .playback > .progress:active > input::-moz-range-track {
     transform: scaleY(1);
 }
-
 /* Hiding the input slider thumbs for different browsers */
 .main > .main_footer > .playback > .progress > input::-webkit-slider-thumb {
     -webkit-appearance: none;
