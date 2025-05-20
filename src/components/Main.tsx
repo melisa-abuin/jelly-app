@@ -68,20 +68,14 @@ export const MainContent = ({
             const duration = audio.duration || 1
             const bufferedEnd = audio.buffered.length > 0 ? audio.buffered.end(audio.buffered.length - 1) : 0
             const percent = (bufferedEnd / duration) * 100
-            bufferedEl.style.width = `${percent}%`
+            bufferedEl.style.setProperty('--buffered-width', `${percent}%`)
         }
 
         const syncProgress = () => {
             const current = audio.currentTime
             const duration = audio.duration || 1
-            const remaining = duration - current
-
             const progress = current / duration
-            progressEl.style.transitionDuration = `${remaining}s`
-            progressEl.style.transform = `scaleX(${1 - progress})`
-            void progressEl.offsetWidth
-            progressEl.style.transitionDuration = `${remaining}s`
-            progressEl.style.transform = `scaleX(1)`
+            progressEl.style.setProperty('--progress-width', `${progress * 100}%`)
         }
 
         const pauseProgress = () => {
@@ -89,7 +83,7 @@ export const MainContent = ({
             const matrix = new WebKitCSSMatrix(computed.transform)
             const scaleX = matrix.a
             progressEl.style.transition = 'none'
-            progressEl.style.transform = `scaleX(${scaleX})`
+            progressEl.style.setProperty('--progress-width', `${scaleX * 100}%`)
         }
 
         const handleProgress = updateBuffered
@@ -198,7 +192,17 @@ export const MainContent = ({
                         playback.isPlaying ? 'playback playing' : playback.currentTrack ? 'playback paused' : 'playback'
                     }
                 >
-                    <div className="progress-bar-container">
+                    <div className="progress noSelect">
+                        <input
+                            type="range"
+                            id="track-progress"
+                            name="track-progress"
+                            min="0"
+                            max={audio.duration || 1}
+                            step="0.01"
+                            value={audio.currentTime}
+                            onChange={playback.handleSeek}
+                        />
                         <div className="buffered-bar" ref={bufferedRef}></div>
                         <div className="progress-bar" ref={progressRef}></div>
                     </div>
