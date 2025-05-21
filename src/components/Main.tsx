@@ -36,6 +36,7 @@ export const MainContent = ({
     const { sort, setSort } = useFilterContext()
     const { setHidden } = useDropdownContext()
     const audio = playback.audioRef.current
+    const progressRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
@@ -44,19 +45,12 @@ export const MainContent = ({
     useEffect(() => {
         setHidden(
             dropdownType === 'album'
-                ? {
-                      view_album: true,
-                  }
+                ? { view_album: true }
                 : dropdownType === 'artist'
-                ? {
-                      view_artist: true,
-                      view_artists: true,
-                  }
+                ? { view_artist: true, view_artists: true }
                 : {}
         )
     }, [dropdownType, setHidden])
-
-    const progressRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         if (!audio || !progressRef.current) return
@@ -73,45 +67,69 @@ export const MainContent = ({
             input.style.setProperty('--progress-width', `${(time / d) * 100}%`)
         }
 
-        const onPlay = () => {
+        const startAnimation = () => {
             if (isNaN(audio.duration) || audio.duration === 0) return
-            const remaining = audio.duration - audio.currentTime
-            input.style.setProperty('--transition-duration', `${remaining}s`)
-            input.style.setProperty('--progress-width', `100%`)
+            const currentTime = audio.currentTime || 0
+            const remaining = audio.duration - currentTime
+            // Delay to ensure initial position is rendered
+            setTimeout(() => {
+                input.style.setProperty('--transition-duration', `${remaining}s`)
+                input.style.setProperty('--progress-width', `100%`)
+            }, 0)
+            input.max = String(audio.duration)
+            input.value = String(currentTime)
+        }
+
+        const onPlay = () => {
+            startAnimation()
         }
 
         const onPause = () => {
             input.style.setProperty('--transition-duration', `0s`)
             setProgressNow(audio.currentTime)
+            input.max = String(audio.duration || 0)
+            input.value = String(audio.currentTime || 0)
         }
 
         const onSeeked = () => {
             if (isNaN(audio.duration) || audio.duration === 0) return
-
             input.style.setProperty('--transition-duration', `0s`)
             setProgressNow(audio.currentTime)
-            if (!audio.paused) onPlay()
+            input.value = String(audio.currentTime)
+            input.max = String(audio.duration)
+            if (!audio.paused) startAnimation()
         }
 
         const onLoaded = () => {
-            const d = audio.duration || 0
-            input.max = String(d)
-
-            setBuffered()
-            setProgressNow(audio.currentTime || 0)
-            if (!audio.paused) onPlay()
+            if (!isNaN(audio.duration) && audio.duration > 0) {
+                const currentTime = audio.currentTime || 0
+                input.max = String(audio.duration)
+                input.value = String(currentTime)
+                input.style.setProperty('--transition-duration', `0s`)
+                setProgressNow(currentTime)
+                setBuffered()
+            } else {
+                input.max = '0'
+                input.value = '0'
+                input.style.setProperty('--progress-width', '0%')
+                input.style.setProperty('--buffered-width', '0%')
+                input.style.setProperty('--transition-duration', `0s`)
+            }
         }
 
         const resetBars = () => {
             input.style.setProperty('--transition-duration', '0s')
             input.style.setProperty('--progress-width', '0%')
             input.style.setProperty('--buffered-width', '0%')
+            input.value = '0'
+            input.max = '0'
         }
 
         const mo = new MutationObserver(muts => {
             for (const m of muts) {
                 if (m.attributeName === 'src') {
                     resetBars()
+                    audio.load()
                 }
             }
         })
@@ -126,6 +144,11 @@ export const MainContent = ({
         audio.addEventListener('durationchange', onLoaded)
         audio.addEventListener('emptied', resetBars)
 
+        onLoaded()
+        if (!audio.paused && !isNaN(audio.duration) && audio.duration > 0) {
+            startAnimation()
+        }
+
         return () => {
             audio.removeEventListener('play', onPlay)
             audio.removeEventListener('pause', onPause)
@@ -134,7 +157,6 @@ export const MainContent = ({
             audio.removeEventListener('loadedmetadata', onLoaded)
             audio.removeEventListener('durationchange', onLoaded)
             audio.removeEventListener('emptied', resetBars)
-
             mo.disconnect()
         }
     }, [audio])
@@ -230,18 +252,19 @@ export const MainContent = ({
                             id="track-progress"
                             name="track-progress"
                             step="0.01"
+                            min="0"
                             ref={progressRef}
                             onChange={e => {
                                 if (!audio) return
                                 const t = parseFloat(e.currentTarget.value)
                                 audio.currentTime = t
-                                // snap the CSS‐only bar
                                 const input = progressRef.current!
                                 input.style.setProperty('--transition-duration', '0s')
                                 input.style.setProperty(
                                     '--progress-width',
-                                    `${isNaN(audio.duration) ? t : (t / (audio.duration || 1)) * 100}%`
+                                    `${isNaN(audio.duration) || audio.duration === 0 ? 0 : (t / audio.duration) * 100}%`
                                 )
+                                input.value = String(t)
                             }}
                         />
                     </div>
