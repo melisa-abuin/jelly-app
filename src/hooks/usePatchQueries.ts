@@ -9,6 +9,10 @@ const isMediaItem = (data: object): data is MediaItem => {
     return 'Id' in data && !!data.Id
 }
 
+const isObject = (data: unknown): data is { [x: string]: unknown } => {
+    return typeof data === 'object'
+}
+
 const patchData = (data: unknown, itemId: string, patch: IPatch): unknown => {
     if (!data) return data
 
@@ -16,7 +20,7 @@ const patchData = (data: unknown, itemId: string, patch: IPatch): unknown => {
         return data.map(item => patchData(item, itemId, patch))
     }
 
-    if (typeof data === 'object') {
+    if (isObject(data)) {
         if (isMediaItem(data) && data.Id === itemId) {
             return patch(data)
         }
@@ -27,6 +31,15 @@ const patchData = (data: unknown, itemId: string, patch: IPatch): unknown => {
                 pages: data.pages.map(page => patchData(page, itemId, patch)),
             }
         }
+
+        // Fallback for objects that are not MediaItem or InfiniteData, e.g. album data
+        const newData: { [x: string]: unknown } = {}
+
+        for (const key in data) {
+            newData[key] = patchData(data[key], itemId, patch)
+        }
+
+        return newData
     }
 
     return data
