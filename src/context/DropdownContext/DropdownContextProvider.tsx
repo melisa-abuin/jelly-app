@@ -1,6 +1,7 @@
 import { ChevronRightIcon } from '@primer/octicons-react'
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { BaseItemKind } from '../../../node_modules/@jellyfin/sdk/lib/generated-client/models/base-item-kind'
 import { MediaItem } from '../../api/jellyfin'
 import { useJellyfinPlaylistsList } from '../../hooks/Jellyfin/useJellyfinPlaylistsList'
 import { useFavorites } from '../../hooks/useFavorites'
@@ -507,7 +508,7 @@ const useInitialState = () => {
                         <>{!hidden?.view_artist && menuItems.view_artist}</>
                     )}
 
-                    {!hidden?.view_album && menuItems.view_album}
+                    {!hidden?.view_album && context?.item.Type !== BaseItemKind.MusicAlbum && menuItems.view_album}
 
                     {!context?.item?.UserData?.IsFavorite && (
                         <>{!hidden?.add_to_favorite && menuItems.add_to_favorite}</>
@@ -547,8 +548,7 @@ const useInitialState = () => {
         menuItems.remove_from_favorite,
         menuItems.add_to_playlist,
         menuItems.remove_from_playlist,
-        context?.item?.ArtistItems?.length,
-        context?.item?.UserData?.IsFavorite,
+        context,
     ])
 
     const touchTimeoutRef = useRef<number | null>(null)
