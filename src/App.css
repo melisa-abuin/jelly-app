@@ -534,22 +534,18 @@ body.lockscroll {
     position: relative;
 }
 
+/* Progress bar */
 .main > .main_footer > .playback > .progress {
+    position: relative;
     display: flex;
 }
 
-/* Progress bar */
 .main > .main_footer > .playback > .progress > input {
     cursor: pointer;
     width: 100%;
     height: 8px;
     background-color: rgba(0, 0, 0, 0);
     margin-top: -4px;
-}
-
-/* base track */
-.main > .main_footer > .playback > .progress > input {
-    /* make sure the CSS vars exist */
     --progress-width: 0%;
     --buffered-width: 0%;
     --transition-duration: 0s;
@@ -560,21 +556,13 @@ body.lockscroll {
     width: 100%;
     height: 8px;
     transform: scaleY(0.6);
-    /* three‐layer background:
-     1) played part
-     2) buffered‐but‐unplayed
-     3) remainder
-  */
-    background:
-    /* played */ linear-gradient(var(--bg-color-quaternary), var(--bg-color-quaternary)) no-repeat 0 /
+    background: linear-gradient(var(--bg-color-quaternary), var(--bg-color-quaternary)) no-repeat 0 /
             var(--progress-width) 100%,
-        /* buffered */ linear-gradient(var(--bg-color-tertiary), var(--bg-color-tertiary)) no-repeat 0 /
-            var(--buffered-width) 100%,
-        /* leftover */ var(--bg-color-secondary);
-    transition: background-size var(--transition-duration) linear;
+        linear-gradient(var(--bg-color-tertiary), var(--bg-color-tertiary)) no-repeat 0 / var(--buffered-width) 100%,
+        var(--bg-color-secondary);
+    transition: transform 0.1s linear, background-size var(--transition-duration) linear;
 }
 
-/* on hover/active, you can still scale up if you like */
 .main > .main_footer > .playback > .progress:hover > input::-webkit-slider-runnable-track,
 .main > .main_footer > .playback > .progress:active > input::-webkit-slider-runnable-track {
     transform: scaleY(1);
@@ -589,13 +577,14 @@ body.lockscroll {
             var(--progress-width) 100%,
         linear-gradient(var(--bg-color-tertiary), var(--bg-color-tertiary)) no-repeat 0 / var(--buffered-width) 100%,
         var(--bg-color-secondary);
-    transition: background-size var(--transition-duration) linear;
+    transition: transform 0.1s linear, background-size var(--transition-duration) linear;
 }
 
 .main > .main_footer > .playback > .progress:hover > input::-moz-range-track,
 .main > .main_footer > .playback > .progress:active > input::-moz-range-track {
     transform: scaleY(1);
 }
+
 /* Hiding the input slider thumbs for different browsers */
 .main > .main_footer > .playback > .progress > input::-webkit-slider-thumb {
     -webkit-appearance: none;

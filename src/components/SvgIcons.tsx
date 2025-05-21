@@ -204,7 +204,7 @@ export class MoreIcon extends Component<IconProps> {
                     <rect height="3" opacity="0" width="12.1562" x="0" y="0" />
                     <circle cx="10.5391" cy="1.5" r="1.3" />
                     <circle cx="5.875" cy="1.5" r="1.3" />
-                    <circle cx="1.21094" cy="1.5" r="1.3" />
+                    <circle cx="1.31094" cy="1.5" r="1.3" />
                 </g>
             </svg>
         )
