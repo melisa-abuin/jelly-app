@@ -157,10 +157,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const playTrack = useCallback(
         async (index: number) => {
-            if (!userInteracted) {
-                return
-            }
-
             const track = items[index]
 
             if (!track) {
@@ -196,7 +192,9 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                             signal.removeEventListener('abort', onAbort)
 
                             try {
-                                await audio.play()
+                                if (userInteracted) {
+                                    await audio.play()
+                                }
                             } catch (e) {
                                 reject(e)
                             }

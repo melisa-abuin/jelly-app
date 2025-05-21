@@ -85,22 +85,17 @@ export const MainContent = ({
             setProgressNow(audio.currentTime)
         }
 
-        // **NEW**: snap to the new time on seek, then restart animation if still playing
         const onSeeked = () => {
             if (isNaN(audio.duration) || audio.duration === 0) return
 
-            // 1) snap
             input.style.setProperty('--transition-duration', `0s`)
             setProgressNow(audio.currentTime)
-            // 2) if playing, restart the CSS transition from here
             if (!audio.paused) onPlay()
         }
 
-        // initialize both bars when metadata (or a new src) lands
         const onLoaded = () => {
-            // reset the slider’s range whenever metadata (or a new src) arrives
             const d = audio.duration || 0
-            progressRef.current!.max = String(d)
+            input.max = String(d)
 
             setBuffered()
             setProgressNow(audio.currentTime || 0)
@@ -108,15 +103,11 @@ export const MainContent = ({
         }
 
         const resetBars = () => {
-            const input = progressRef.current!
-            // stop any in-flight animation
             input.style.setProperty('--transition-duration', '0s')
-            // clear both progress & buffer
             input.style.setProperty('--progress-width', '0%')
             input.style.setProperty('--buffered-width', '0%')
         }
 
-        // observe any time someone writes audio.src = '…'
         const mo = new MutationObserver(muts => {
             for (const m of muts) {
                 if (m.attributeName === 'src') {
@@ -124,6 +115,7 @@ export const MainContent = ({
                 }
             }
         })
+
         mo.observe(audio, { attributes: true, attributeFilter: ['src'] })
 
         audio.addEventListener('play', onPlay)
@@ -132,7 +124,6 @@ export const MainContent = ({
         audio.addEventListener('progress', setBuffered)
         audio.addEventListener('loadedmetadata', onLoaded)
         audio.addEventListener('durationchange', onLoaded)
-        audio.addEventListener('loadstart', resetBars)
         audio.addEventListener('emptied', resetBars)
 
         return () => {
@@ -142,7 +133,6 @@ export const MainContent = ({
             audio.removeEventListener('progress', setBuffered)
             audio.removeEventListener('loadedmetadata', onLoaded)
             audio.removeEventListener('durationchange', onLoaded)
-            audio.removeEventListener('loadstart', resetBars)
             audio.removeEventListener('emptied', resetBars)
 
             mo.disconnect()
@@ -241,13 +231,6 @@ export const MainContent = ({
                             name="track-progress"
                             step="0.01"
                             ref={progressRef}
-                            style={
-                                {
-                                    '--progress-width': '0%',
-                                    '--buffered-width': '0%',
-                                    '--transition-duration': '0s',
-                                } as React.CSSProperties
-                            }
                             onChange={e => {
                                 if (!audio) return
                                 const t = parseFloat(e.currentTarget.value)
