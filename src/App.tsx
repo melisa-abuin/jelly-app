@@ -2,7 +2,7 @@ import '@fontsource-variable/inter'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import './App.css'
 import { Dropdown } from './components/Dropdown'
@@ -152,6 +152,10 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     const isDropdownOpen = dropdownContext?.isOpen || false
     const isTouchDevice = dropdownContext?.isTouchDevice || false
 
+    const memoSettings = useCallback(() => {
+        return <Settings onLogout={handleLogout} />
+    }, [handleLogout])
+
     return (
         <div className="interface">
             <div
@@ -162,29 +166,26 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
             <Sidenav username={auth.username} />
 
             <Routes>
-                <Route path="/" element={<Main content={<Home />}></Main>} />
-                <Route path="/tracks" element={<Main content={<Tracks />} filterType={'mediaItems'} />} />
+                <Route path="/" element={<Main content={Home}></Main>} />
+                <Route path="/tracks" element={<Main content={Tracks} filterType={'mediaItems'} />} />
                 <Route
                     path="/albums"
-                    element={<Main content={<Albums />} filterType={'mediaItems'} dropdownType={'album'} />}
+                    element={<Main content={Albums} filterType={'mediaItems'} dropdownType={'album'} />}
                 />
-                <Route path="/album/:albumId" element={<Main content={<Album />} dropdownType={'album'} />} />
-                <Route path="/artist/:artistId" element={<Main content={<Artist />} dropdownType={'artist'} />} />
+                <Route path="/album/:albumId" element={<Main content={Album} dropdownType={'album'} />} />
+                <Route path="/artist/:artistId" element={<Main content={Artist} dropdownType={'artist'} />} />
                 <Route
                     path="/artist/:artistId/tracks"
-                    element={<Main content={<ArtistTracks />} dropdownType={'artist'} />}
+                    element={<Main content={ArtistTracks} dropdownType={'artist'} />}
                 />
-                <Route path="/genre/:genre" element={<Main content={<Genre />} filterType={'mediaItems'} />} />
-                <Route
-                    path="/playlist/:playlistId"
-                    element={<Main content={<Playlist key={window.location.pathname} />} />}
-                />
-                <Route path="/queue" element={<Main content={<Queue />} />} />
-                <Route path="/favorites" element={<Main content={<Favorites />} filterType={'favorites'} />} />
-                <Route path="/recently" element={<Main content={<RecentlyPlayed />} />} />
-                <Route path="/frequently" element={<Main content={<FrequentlyPlayed />} />} />
-                <Route path="/settings" element={<Main content={<Settings onLogout={handleLogout} />} />} />
-                <Route path="/search/:query" element={<Main content={<SearchResults />} />} />
+                <Route path="/genre/:genre" element={<Main content={Genre} filterType={'mediaItems'} />} />
+                <Route path="/playlist/:playlistId" element={<Main content={Playlist} />} />
+                <Route path="/queue" element={<Main content={Queue} />} />
+                <Route path="/favorites" element={<Main content={Favorites} filterType={'favorites'} />} />
+                <Route path="/recently" element={<Main content={RecentlyPlayed} />} />
+                <Route path="/frequently" element={<Main content={FrequentlyPlayed} />} />
+                <Route path="/settings" element={<Main content={memoSettings} />} />
+                <Route path="/search/:query" element={<Main content={SearchResults} />} />
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </div>

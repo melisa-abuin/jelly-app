@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
-import { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react'
+import { JSX, memo, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
@@ -13,18 +13,18 @@ import { AlbumIcon, ArtistsIcon, PlaylistIcon, TracksIcon } from './SvgIcons'
 
 export const Main = (props: Parameters<typeof MainContent>[0]) => {
     return (
-        <FilterContextProvider key={(props.content?.type as { name?: string })?.name}>
+        <FilterContextProvider key={(props.content as { name?: string })?.name}>
             <MainContent {...props} />
         </FilterContextProvider>
     )
 }
 
 export const MainContent = ({
-    content,
+    content: Content,
     filterType,
     dropdownType,
 }: {
-    content: ReactElement
+    content: () => JSX.Element
     filterType?: 'mediaItems' | 'favorites'
     dropdownType?: 'default' | 'album' | 'artist'
 }) => {
@@ -238,6 +238,14 @@ export const MainContent = ({
         )
     }, [filterType, location, pageTitle, previousPage, setSort, sort, toggleSidenav])
 
+    const memoContent = useMemo(() => {
+        return (
+            <div className="main_content">
+                <Content />
+            </div>
+        )
+    }, [Content])
+
     const memoFooter = useMemo(() => {
         return (
             <div className="main_footer">
@@ -384,7 +392,7 @@ export const MainContent = ({
     return (
         <main className="main">
             {memoHeader}
-            <div className="main_content">{content}</div>
+            {memoContent}
             {memoFooter}
         </main>
     )
