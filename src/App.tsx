@@ -95,12 +95,12 @@ export const App = () => {
                         auth ? (
                             <JellyfinContextProvider auth={auth}>
                                 <SidenavContextProvider>
-                                    <DropdownContextProvider>
-                                        <PlaybackContextProvider initialVolume={0.5} clearOnLogout={isLoggingOut}>
+                                    <PlaybackContextProvider initialVolume={0.5} clearOnLogout={isLoggingOut}>
+                                        <DropdownContextProvider>
                                             <MainLayout auth={auth} handleLogout={handleLogout} />
-                                        </PlaybackContextProvider>
-                                        <Dropdown />
-                                    </DropdownContextProvider>
+                                            <Dropdown />
+                                        </DropdownContextProvider>
+                                    </PlaybackContextProvider>
                                 </SidenavContextProvider>
                             </JellyfinContextProvider>
                         ) : (
