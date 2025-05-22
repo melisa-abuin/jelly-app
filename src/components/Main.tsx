@@ -269,6 +269,7 @@ const Progressbar = () => {
     const playback = usePlaybackContext()
     const audio = playback.audioRef.current as HTMLAudioElement | undefined
     const progressRef = useRef<HTMLInputElement>(null)
+    const bufferRef = useRef(false)
 
     const calcDuration = useCallback(() => {
         return audio?.duration || 0
@@ -286,6 +287,23 @@ const Progressbar = () => {
 
         return 0
     }, [audio, calcDuration])
+
+    const restoreProgress = useCallback(() => {
+        if (bufferRef.current) {
+            return
+        }
+
+        progressRef.current?.style.setProperty('--transition-duration', `0s`)
+        progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
+
+        void progressRef.current?.offsetWidth // Trigger reflow
+
+        progressRef.current?.style.setProperty(
+            '--transition-duration',
+            `${calcDuration() - (audio?.currentTime || 0)}s`
+        )
+        progressRef.current?.style.setProperty('--progress-width', `100%`)
+    }, [audio?.currentTime, calcDuration, calcProgress])
 
     const calcBuffered = useCallback(() => {
         if (!audio) return 0
@@ -309,21 +327,12 @@ const Progressbar = () => {
         if (!audio) return
 
         if (playback.isPlaying) {
-            progressRef.current?.style.setProperty('--transition-duration', `0s`)
-            progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
-
-            void progressRef.current?.offsetWidth // Trigger reflow
-
-            progressRef.current?.style.setProperty(
-                '--transition-duration',
-                `${calcDuration() - (audio?.currentTime || 0)}s`
-            )
-            progressRef.current?.style.setProperty('--progress-width', `100%`)
+            restoreProgress()
         } else {
             progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
             progressRef.current?.style.setProperty('--transition-duration', `0s`)
         }
-    }, [audio, audio?.src, calcDuration, calcProgress, playback.isPlaying])
+    }, [audio, audio?.src, calcProgress, playback.isPlaying, restoreProgress])
 
     useEffect(() => {
         if (!audio) return
@@ -333,16 +342,7 @@ const Progressbar = () => {
                 return
             }
 
-            progressRef.current?.style.setProperty('--transition-duration', `0s`)
-            progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
-
-            void progressRef.current?.offsetWidth // Trigger reflow
-
-            progressRef.current?.style.setProperty(
-                '--transition-duration',
-                `${calcDuration() - (audio?.currentTime || 0)}s`
-            )
-            progressRef.current?.style.setProperty('--progress-width', `100%`)
+            restoreProgress()
         }
 
         const handleBuffered = () => {
@@ -362,18 +362,34 @@ const Progressbar = () => {
             progressRef.current?.style.setProperty('--transition-duration', `${calcDuration()}s`)
         }
 
+        const handleWaiting = () => {
+            bufferRef.current = true
+            progressRef.current?.style.setProperty('--transition-duration', `0s`)
+            progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
+        }
+
+        const handlePlaying = () => {
+            bufferRef.current = false
+
+            restoreProgress()
+        }
+
         audio.addEventListener('timeupdate', handleTimeUpdate)
         audio.addEventListener('emptied', handleEmptied)
         audio.addEventListener('progress', handleBuffered)
         audio.addEventListener('loadedmetadata', handleChange)
+        audio.addEventListener('waiting', handleWaiting)
+        audio.addEventListener('playing', handlePlaying)
 
         return () => {
             audio.removeEventListener('timeupdate', handleTimeUpdate)
             audio.removeEventListener('emptied', handleEmptied)
             audio.removeEventListener('progress', handleBuffered)
             audio.removeEventListener('loadedmetadata', handleChange)
+            audio.removeEventListener('waiting', handleWaiting)
+            audio.removeEventListener('playing', handlePlaying)
         }
-    }, [audio, calcBuffered, calcDuration, calcProgress])
+    }, [audio, calcBuffered, calcDuration, calcProgress, restoreProgress])
 
     return (
         <div className="progress">
@@ -396,17 +412,7 @@ const Progressbar = () => {
                     if (!audio) return
                     const t = parseFloat(e.currentTarget.value)
                     audio.currentTime = t
-
-                    progressRef.current?.style.setProperty('--transition-duration', `0s`)
-                    progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
-
-                    void progressRef.current?.offsetWidth // Trigger reflow
-
-                    progressRef.current?.style.setProperty(
-                        '--transition-duration',
-                        `${calcDuration() - (audio?.currentTime || 0)}s`
-                    )
-                    progressRef.current?.style.setProperty('--progress-width', `100%`)
+                    restoreProgress()
                 }}
             />
         </div>
