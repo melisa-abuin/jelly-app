@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
-import { JSX, memo, useEffect, useMemo, useRef, useState } from 'react'
+import { JSX, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
@@ -35,8 +35,6 @@ export const MainContent = ({
     const { toggleSidenav } = useSidenavContext()
     const { sort, setSort } = useFilterContext()
     const { setHidden } = useDropdownContext()
-    const audio = playback.audioRef.current
-    const progressRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
@@ -51,115 +49,6 @@ export const MainContent = ({
                 : {}
         )
     }, [dropdownType, setHidden])
-
-    useEffect(() => {
-        if (!audio || !progressRef.current) return
-        const input = progressRef.current
-
-        const setBuffered = () => {
-            const d = audio.duration || 1
-            const end = audio.buffered.length > 0 ? audio.buffered.end(audio.buffered.length - 1) : 0
-            input.style.setProperty('--buffered-width', `${(end / d) * 100}%`)
-        }
-
-        const setProgressNow = (time: number) => {
-            const d = audio.duration || 1
-            input.style.setProperty('--progress-width', `${(time / d) * 100}%`)
-        }
-
-        const startAnimation = () => {
-            if (isNaN(audio.duration) || audio.duration === 0) return
-            const currentTime = audio.currentTime || 0
-            const remaining = audio.duration - currentTime
-            // Delay to ensure initial position is rendered
-            setTimeout(() => {
-                input.style.setProperty('--transition-duration', `${remaining}s`)
-                input.style.setProperty('--progress-width', `100%`)
-            }, 0)
-            input.max = String(audio.duration)
-            input.value = String(currentTime)
-        }
-
-        const onPlay = () => {
-            startAnimation()
-        }
-
-        const onPause = () => {
-            input.style.setProperty('--transition-duration', `0s`)
-            setProgressNow(audio.currentTime)
-            input.max = String(audio.duration || 0)
-            input.value = String(audio.currentTime || 0)
-        }
-
-        const onSeeked = () => {
-            if (isNaN(audio.duration) || audio.duration === 0) return
-            input.style.setProperty('--transition-duration', `0s`)
-            setProgressNow(audio.currentTime)
-            input.value = String(audio.currentTime)
-            input.max = String(audio.duration)
-            if (!audio.paused) startAnimation()
-        }
-
-        const onLoaded = () => {
-            if (!isNaN(audio.duration) && audio.duration > 0) {
-                const currentTime = audio.currentTime || 0
-                input.max = String(audio.duration)
-                input.value = String(currentTime)
-                input.style.setProperty('--transition-duration', `0s`)
-                setProgressNow(currentTime)
-                setBuffered()
-            } else {
-                input.max = '0'
-                input.value = '0'
-                input.style.setProperty('--progress-width', '0%')
-                input.style.setProperty('--buffered-width', '0%')
-                input.style.setProperty('--transition-duration', `0s`)
-            }
-        }
-
-        const resetBars = () => {
-            input.style.setProperty('--transition-duration', '0s')
-            input.style.setProperty('--progress-width', '0%')
-            input.style.setProperty('--buffered-width', '0%')
-            input.value = '0'
-            input.max = '0'
-        }
-
-        const mo = new MutationObserver(muts => {
-            for (const m of muts) {
-                if (m.attributeName === 'src') {
-                    resetBars()
-                    audio.load()
-                }
-            }
-        })
-
-        mo.observe(audio, { attributes: true, attributeFilter: ['src'] })
-
-        audio.addEventListener('play', onPlay)
-        audio.addEventListener('pause', onPause)
-        audio.addEventListener('seeked', onSeeked)
-        audio.addEventListener('progress', setBuffered)
-        audio.addEventListener('loadedmetadata', onLoaded)
-        audio.addEventListener('durationchange', onLoaded)
-        audio.addEventListener('emptied', resetBars)
-
-        onLoaded()
-        if (!audio.paused && !isNaN(audio.duration) && audio.duration > 0) {
-            startAnimation()
-        }
-
-        return () => {
-            audio.removeEventListener('play', onPlay)
-            audio.removeEventListener('pause', onPause)
-            audio.removeEventListener('seeked', onSeeked)
-            audio.removeEventListener('progress', setBuffered)
-            audio.removeEventListener('loadedmetadata', onLoaded)
-            audio.removeEventListener('durationchange', onLoaded)
-            audio.removeEventListener('emptied', resetBars)
-            mo.disconnect()
-        }
-    }, [audio])
 
     const memoHeader = useMemo(() => {
         return (
@@ -254,28 +143,7 @@ export const MainContent = ({
                         playback.isPlaying ? 'playback playing' : playback.currentTrack ? 'playback paused' : 'playback'
                     }
                 >
-                    <div className="progress">
-                        <input
-                            type="range"
-                            id="track-progress"
-                            name="track-progress"
-                            step="0.01"
-                            min="0"
-                            ref={progressRef}
-                            onChange={e => {
-                                if (!audio) return
-                                const t = parseFloat(e.currentTarget.value)
-                                audio.currentTime = t
-                                const input = progressRef.current!
-                                input.style.setProperty('--transition-duration', '0s')
-                                input.style.setProperty(
-                                    '--progress-width',
-                                    `${isNaN(audio.duration) || audio.duration === 0 ? 0 : (t / audio.duration) * 100}%`
-                                )
-                                input.value = String(t)
-                            }}
-                        />
-                    </div>
+                    <Progressbar />
 
                     <div className="container">
                         <div className="track-info">
@@ -377,7 +245,6 @@ export const MainContent = ({
             </div>
         )
     }, [
-        audio,
         playback.currentTrack,
         playback.isPlaying,
         playback.nextTrack,
@@ -395,6 +262,154 @@ export const MainContent = ({
             {memoContent}
             {memoFooter}
         </main>
+    )
+}
+
+const Progressbar = () => {
+    const playback = usePlaybackContext()
+    const audio = playback.audioRef.current as HTMLAudioElement | undefined
+    const progressRef = useRef<HTMLInputElement>(null)
+
+    const calcDuration = useCallback(() => {
+        return audio?.duration || 0
+    }, [audio])
+
+    const calcProgress = useCallback(() => {
+        if (!audio) return 0
+
+        const d = calcDuration()
+        const t = audio.currentTime || 0
+
+        if (d > 0) {
+            return (t / d) * 100
+        }
+
+        return 0
+    }, [audio, calcDuration])
+
+    const calcBuffered = useCallback(() => {
+        if (!audio) return 0
+
+        if (audio.buffered.length > 0) {
+            const end = audio.buffered.end(audio.buffered.length - 1)
+            return (end / (audio.duration || 1)) * 100
+        }
+
+        return 0
+    }, [audio])
+
+    useEffect(() => {
+        if (!audio) return
+
+        progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
+        progressRef.current?.style.setProperty('--transition-duration', `${calcDuration()}s`)
+    }, [audio, calcDuration, calcProgress])
+
+    useEffect(() => {
+        if (!audio) return
+
+        if (playback.isPlaying) {
+            progressRef.current?.style.setProperty('--transition-duration', `0s`)
+            progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
+
+            void progressRef.current?.offsetWidth // Trigger reflow
+
+            progressRef.current?.style.setProperty(
+                '--transition-duration',
+                `${calcDuration() - (audio?.currentTime || 0)}s`
+            )
+            progressRef.current?.style.setProperty('--progress-width', `100%`)
+        } else {
+            progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
+            progressRef.current?.style.setProperty('--transition-duration', `0s`)
+        }
+    }, [audio, audio?.src, calcDuration, calcProgress, playback.isPlaying])
+
+    useEffect(() => {
+        if (!audio) return
+
+        const handleTimeUpdate = () => {
+            if (!audio.duration) {
+                return
+            }
+
+            progressRef.current?.style.setProperty('--transition-duration', `0s`)
+            progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
+
+            void progressRef.current?.offsetWidth // Trigger reflow
+
+            progressRef.current?.style.setProperty(
+                '--transition-duration',
+                `${calcDuration() - (audio?.currentTime || 0)}s`
+            )
+            progressRef.current?.style.setProperty('--progress-width', `100%`)
+        }
+
+        const handleBuffered = () => {
+            progressRef.current?.style.setProperty('--buffered-width', `${calcBuffered()}%`)
+        }
+
+        const handleEmptied = () => {
+            progressRef.current?.style.setProperty('--buffered-width', `0%`)
+            progressRef.current?.style.setProperty('--progress-width', `0%`)
+            progressRef.current?.style.setProperty('--transition-duration', `0s`)
+
+            void progressRef.current?.offsetWidth // Trigger reflow
+        }
+
+        const handleChange = () => {
+            progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
+            progressRef.current?.style.setProperty('--transition-duration', `${calcDuration()}s`)
+        }
+
+        audio.addEventListener('timeupdate', handleTimeUpdate)
+        audio.addEventListener('emptied', handleEmptied)
+        audio.addEventListener('progress', handleBuffered)
+        audio.addEventListener('loadedmetadata', handleChange)
+
+        return () => {
+            audio.removeEventListener('timeupdate', handleTimeUpdate)
+            audio.removeEventListener('emptied', handleEmptied)
+            audio.removeEventListener('progress', handleBuffered)
+            audio.removeEventListener('loadedmetadata', handleChange)
+        }
+    }, [audio, calcBuffered, calcDuration, calcProgress])
+
+    return (
+        <div className="progress">
+            <input
+                ref={progressRef}
+                type="range"
+                id="track-progress"
+                name="track-progress"
+                step="0.01"
+                min="0"
+                max={audio?.duration || 0}
+                style={
+                    {
+                        '--progress-width': `${calcProgress()}%`,
+                        '--buffered-width': `${calcBuffered()}%`,
+                        '--transition-duration': `${calcDuration()}s`,
+                    } as React.CSSProperties
+                }
+                onChange={e => {
+                    if (!audio) return
+                    const t = parseFloat(e.currentTarget.value)
+                    audio.currentTime = t
+
+                    progressRef.current?.style.setProperty('--transition-duration', `0s`)
+                    progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
+
+                    void progressRef.current?.offsetWidth // Trigger reflow
+
+                    progressRef.current?.style.setProperty(
+                        '--transition-duration',
+                        `${calcDuration() - (audio?.currentTime || 0)}s`
+                    )
+                    progressRef.current?.style.setProperty('--progress-width', `100%`)
+                }}
+            />
+        </div>
     )
 }
 
