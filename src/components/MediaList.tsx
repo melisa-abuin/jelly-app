@@ -21,7 +21,7 @@ export const MediaList = ({
 }: {
     items: MediaItem[] | undefined
     isLoading: boolean
-    type: 'song' | 'album'
+    type: 'song' | 'album' | 'artist'
     title: string
     reviver?: IReviver
     loadMore?: () => void
