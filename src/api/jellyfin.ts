@@ -325,6 +325,21 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         sortOrder: SortOrder[] = [SortOrder.Descending],
         itemKind: BaseItemKind = BaseItemKind.Audio
     ): Promise<MediaItem[]> => {
+        if (itemKind === BaseItemKind.MusicArtist) {
+            const artistsApi = new ArtistsApi(api.configuration)
+            const response = await artistsApi.getArtists(
+                {
+                    userId,
+                    isFavorite: true,
+                    startIndex,
+                    limit,
+                    sortBy,
+                    sortOrder,
+                },
+                { signal: AbortSignal.timeout(20000) }
+            )
+            return response.data.Items as MediaItem[]
+        }
         const itemsApi = new ItemsApi(api.configuration)
         const response = await itemsApi.getItems(
             {

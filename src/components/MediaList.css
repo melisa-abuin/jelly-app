@@ -31,6 +31,12 @@
     border-radius: 6px;
 }
 
+.media-list .media-item.artist-item > .media-state {
+    width: 36px;
+    height: 36px;
+    border-radius: 20px;
+}
+
 .media-list .media-item > .media-state > .thumbnail {
     display: block;
     width: 46px;
@@ -38,6 +44,12 @@
     object-fit: cover;
     border-radius: 6px;
     background-color: var(--bg-color-secondary);
+}
+
+.media-list .media-item.artist-item > .media-state > .thumbnail {
+    width: 36px;
+    height: 36px;
+    border-radius: 20px;
 }
 
 /* Hide thumbnail overlay by default */
@@ -232,6 +244,10 @@
     line-height: 1rem;
     margin-bottom: 1px;
     transition: color 0.2s ease-out;
+}
+
+.media-list .media-item.artist-item > .media-details > .song-name {
+    margin-bottom: 0;
 }
 
 .media-list .media-item.playing > .media-details > .song-name,

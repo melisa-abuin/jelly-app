@@ -23,9 +23,17 @@
     border-radius: 6px;
 }
 
+/* Playlist thumbnail */
 .skeleton-loading > .skeleton-effect.thumbnail.playlist {
     width: 40px;
     height: 40px;
+}
+
+/* Artist thumbnail */
+.skeleton-loading > .skeleton-effect.thumbnail.artist {
+    width: 36px;
+    height: 36px;
+    border-radius: 20px;
 }
 
 .skeleton-loading > .skeleton-details {
@@ -45,6 +53,7 @@
     border-radius: 4px;
 }
 
+/* Albums */
 .skeleton-loading > .skeleton-details > .skeleton-effect.album.title {
     width: 50%;
 }
@@ -53,6 +62,13 @@
     width: 20%;
 }
 
+/* Artists */
+.skeleton-loading > .skeleton-details > .skeleton-effect.artist.title {
+    width: 35%;
+    margin-bottom: 0;
+}
+
+/* Tracks */
 .skeleton-loading > .skeleton-details > .skeleton-effect.track.title {
     width: 30%;
 }
@@ -61,6 +77,7 @@
     width: 45%;
 }
 
+/* Playlists */
 .skeleton-loading > .skeleton-details > .skeleton-effect.playlist.title {
     width: 50%;
 }

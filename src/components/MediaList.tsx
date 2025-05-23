@@ -46,15 +46,25 @@ export const MediaList = ({
 
     const renderItem = (index: number, item: MediaItem | { isPlaceholder: true }) => {
         if ('isPlaceholder' in item) {
-            return type === 'album' ? (
-                <div className="media-item album-item" ref={el => setRowRefs(index, el)}>
-                    <Skeleton type="album" />
-                </div>
-            ) : (
-                <li className="media-item song-item" ref={el => setRowRefs(index, el)}>
-                    <Skeleton type="song" />
-                </li>
-            )
+            if (type === 'album') {
+                return (
+                    <div className="media-item album-item" ref={el => setRowRefs(index, el)}>
+                        <Skeleton type="album" />
+                    </div>
+                )
+            } else if (type === 'artist') {
+                return (
+                    <div className="media-item artist-item" ref={el => setRowRefs(index, el)}>
+                        <Skeleton type="artist" />
+                    </div>
+                )
+            } else {
+                return (
+                    <li className="media-item song-item" ref={el => setRowRefs(index, el)}>
+                        <Skeleton type="song" />
+                    </li>
+                )
+            }
         }
 
         const isActive = dropdown.selectedItem?.Id === item.Id && dropdown.isOpen
@@ -66,79 +76,108 @@ export const MediaList = ({
             .filter(Boolean)
             .join(' ')
 
-        return type === 'album' ? (
-            <div
-                className={`media-item album-item ${itemClass}`}
-                key={item.Id}
-                onClick={() => navigate(`/album/${item.Id}`)}
-                ref={el => setRowRefs(index, el)}
-                onContextMenu={e => dropdown.onContextMenu(e, { item })}
-                onTouchStart={e => dropdown.onTouchStart(e, { item })}
-                onTouchMove={dropdown.onTouchClear}
-                onTouchEnd={dropdown.onTouchClear}
-            >
-                <div className="media-state">
-                    <JellyImg item={item} type={'Primary'} width={46} height={46} />
-                </div>
-                <div className="media-details">
-                    <span className="song-name">{item.Name}</span>
-                    <div className="container">
-                        <div className="artist">{item.AlbumArtist || 'Unknown Artist'}</div>
+        if (type === 'album') {
+            return (
+                <div
+                    className={`media-item album-item ${itemClass}`}
+                    key={item.Id}
+                    onClick={() => navigate(`/album/${item.Id}`)}
+                    ref={el => setRowRefs(index, el)}
+                    onContextMenu={e => dropdown.onContextMenu(e, { item })}
+                    onTouchStart={e => dropdown.onTouchStart(e, { item })}
+                    onTouchMove={dropdown.onTouchClear}
+                    onTouchEnd={dropdown.onTouchClear}
+                >
+                    <div className="media-state">
+                        <JellyImg item={item} type={'Primary'} width={46} height={46} />
                     </div>
-                </div>
-                {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
-                    <div className="favorited" title="Favorited">
-                        <HeartFillIcon size={16} />
-                    </div>
-                )}
-            </div>
-        ) : (
-            <li
-                className={`media-item song-item ${itemClass}`}
-                onClick={() => handleSongClick(item, index)}
-                key={item.Id}
-                ref={el => setRowRefs(index, el)}
-                onContextMenu={e => dropdown.onContextMenu(e, { item })}
-                onTouchStart={e => dropdown.onTouchStart(e, { item })}
-                onTouchMove={dropdown.onTouchClear}
-                onTouchEnd={dropdown.onTouchClear}
-            >
-                <div className="media-state">
-                    <JellyImg item={item} type={'Primary'} width={46} height={46} />
-
-                    <div className="overlay">
+                    <div className="media-details">
+                        <span className="song-name">{item.Name}</span>
                         <div className="container">
-                            <div className="play">
-                                <div className="play-icon"></div>
-                            </div>
-                            <div className="pause">
-                                <div className="pause-icon"></div>
-                            </div>
-                        </div>
-                        <div className="play-state-animation">
-                            <PlaystateAnimationMedalist width={28} height={20} className="sound-bars" />
+                            <div className="artist">{item.AlbumArtist || 'Unknown Artist'}</div>
                         </div>
                     </div>
+                    {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
+                        <div className="favorited" title="Favorited">
+                            <HeartFillIcon size={16} />
+                        </div>
+                    )}
                 </div>
-                <div className="media-details">
-                    <span className="song-name">{item.Name}</span>
-                    <div className="container">
-                        <div className="artist">
-                            {item.Artists && item.Artists.length > 0 ? item.Artists.join(', ') : 'Unknown Artist'}
+            )
+        } else if (type === 'artist') {
+            return (
+                <div
+                    className={`media-item artist-item ${itemClass}`}
+                    key={item.Id}
+                    onClick={() => navigate(`/artist/${item.Id}`)}
+                    ref={el => setRowRefs(index, el)}
+                    onContextMenu={e => dropdown.onContextMenu(e, { item })}
+                    onTouchStart={e => dropdown.onTouchStart(e, { item })}
+                    onTouchMove={dropdown.onTouchClear}
+                    onTouchEnd={dropdown.onTouchClear}
+                >
+                    <div className="media-state">
+                        <JellyImg item={item} type={'Primary'} width={36} height={36} />
+                    </div>
+                    <div className="media-details">
+                        <div className="song-name">{item.Name || 'Unknown Artist'}</div>
+                    </div>
+                    {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
+                        <div className="favorited" title="Favorited">
+                            <HeartFillIcon size={16} />
                         </div>
-                        <>
-                            <div className="divider"></div>
-                            <div className="album">{item.Album || 'Unknown Album'}</div>
-                        </>
-                    </div>
+                    )}
                 </div>
-                {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
-                    <div className="favorited" title="Favorited">
-                        <HeartFillIcon size={16} />
+            )
+        } else {
+            return (
+                <li
+                    className={`media-item song-item ${itemClass}`}
+                    onClick={() => handleSongClick(item, index)}
+                    key={item.Id}
+                    ref={el => setRowRefs(index, el)}
+                    onContextMenu={e => dropdown.onContextMenu(e, { item })}
+                    onTouchStart={e => dropdown.onTouchStart(e, { item })}
+                    onTouchMove={dropdown.onTouchClear}
+                    onTouchEnd={dropdown.onTouchClear}
+                >
+                    <div className="media-state">
+                        <JellyImg item={item} type={'Primary'} width={46} height={46} />
+
+                        <div className="overlay">
+                            <div className="container">
+                                <div className="play">
+                                    <div className="play-icon"></div>
+                                </div>
+                                <div className="pause">
+                                    <div className="pause-icon"></div>
+                                </div>
+                            </div>
+                            <div className="play-state-animation">
+                                <PlaystateAnimationMedalist width={28} height={20} className="sound-bars" />
+                            </div>
+                        </div>
                     </div>
-                )}
-            </li>
-        )
+                    <div className="media-details">
+                        <span className="song-name">{item.Name}</span>
+                        <div className="container">
+                            <div className="artist">
+                                {item.Artists && item.Artists.length > 0 ? item.Artists.join(', ') : 'Unknown Artist'}
+                            </div>
+                            <>
+                                <div className="divider"></div>
+                                <div className="album">{item.Album || 'Unknown Album'}</div>
+                            </>
+                        </div>
+                    </div>
+                    {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
+                        <div className="favorited" title="Favorited">
+                            <HeartFillIcon size={16} />
+                        </div>
+                    )}
+                </li>
+            )
+        }
     }
 
     if (isLoading && items.length === 0) {
@@ -146,7 +185,15 @@ export const MediaList = ({
     }
 
     if (items.length === 0 && !isLoading) {
-        return <div className="empty">{type === 'song' ? 'No tracks were found' : 'No albums were found'}</div>
+        return (
+            <div className="empty">
+                {type === 'song'
+                    ? 'No tracks were found'
+                    : type === 'album'
+                    ? 'No albums were found'
+                    : 'No artists were found'}
+            </div>
+        )
     }
 
     return (
