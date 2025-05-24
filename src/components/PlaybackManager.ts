@@ -562,14 +562,16 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         }
     }, [api, currentTrackIndex.index, items, updateMediaSessionMetadata])
 
+    // Preload next page when near end
     useEffect(() => {
-        if (shuffle && hasNextPage) {
-            const threshold = 5
-            if (currentShuffledIndex.index >= shuffledPlaylist.current.length - threshold) {
-                loadMore()
-            }
+        const threshold = 5
+        const index = shuffle ? currentShuffledIndex.index : currentTrackIndex.index
+        const length = shuffle ? shuffledPlaylist.current.length : items.length
+
+        if (hasNextPage && index >= length - threshold) {
+            loadMore()
         }
-    }, [currentShuffledIndex.index, hasNextPage, loadMore, shuffle])
+    }, [currentShuffledIndex.index, currentTrackIndex.index, hasNextPage, items.length, loadMore, shuffle])
 
     useEffect(() => {
         if (!audioRef.current) return
