@@ -364,12 +364,14 @@ const Progressbar = () => {
 
         const handleWaiting = () => {
             bufferRef.current = true
+            progressRef.current?.classList.add('loading')
             progressRef.current?.style.setProperty('--transition-duration', `0s`)
             progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
         }
 
         const handlePlaying = () => {
             bufferRef.current = false
+            progressRef.current?.classList.remove('loading')
 
             restoreProgress()
         }
