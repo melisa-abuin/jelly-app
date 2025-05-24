@@ -48,6 +48,12 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const [playlistTitle, setPlaylistTitle] = useState('')
     const [reviver, setReviver] = useState<IReviver>(JSON.parse(localStorage.getItem('reviver') || '{}') || {})
 
+    const [bitrate, setBitrate] = useState(Number(localStorage.getItem('bitrate')))
+
+    useEffect(() => {
+        localStorage.setItem('bitrate', bitrate.toString())
+    }, [bitrate])
+
     const reviverFn = useMemo(() => {
         const queryFn = reviver.queryFn?.fn || ''
         const params = reviver.queryFn?.params || []
@@ -182,7 +188,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 audio.currentTime = 0
 
                 try {
-                    const streamUrl = api.getStreamUrl(track.Id)
+                    const streamUrl = api.getStreamUrl(track.Id, bitrate)
                     audio.src = streamUrl
                     audio.load()
 
@@ -224,7 +230,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 }
             }
         },
-        [api, currentTrack, isPlaying, items, updateMediaSessionMetadata, userInteracted]
+        [api, bitrate, currentTrack, isPlaying, items, updateMediaSessionMetadata, userInteracted]
     )
 
     const togglePlayPause = useCallback(async () => {
@@ -237,7 +243,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 await api.reportPlaybackProgress(currentTrack.Id, audio.currentTime, true)
             } else {
                 if (!audio.src) {
-                    const streamUrl = api.getStreamUrl(currentTrack.Id)
+                    const streamUrl = api.getStreamUrl(currentTrack.Id, bitrate)
                     audio.src = streamUrl
                     audio.load()
                 }
@@ -257,7 +263,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 }
             }
         }
-    }, [api, currentTrack, isPlaying, updateMediaSessionMetadata])
+    }, [api, bitrate, currentTrack, isPlaying, updateMediaSessionMetadata])
 
     useEffect(() => {
         if (currentTrackIndex.index >= 0 && currentTrackIndex.index < items.length && items[currentTrackIndex.index]) {
@@ -551,7 +557,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
             if (lastPlayedTrack) {
                 if (audioRef.current) {
-                    const streamUrl = api.getStreamUrl(lastPlayedTrack.Id)
+                    const streamUrl = api.getStreamUrl(lastPlayedTrack.Id, bitrate)
                     audioRef.current.src = streamUrl
                     audioRef.current.load()
                 }
@@ -560,7 +566,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         } else if (!api.auth.token) {
             setCurrentTrackIndex({ index: -1 })
         }
-    }, [api, currentTrackIndex.index, items, updateMediaSessionMetadata])
+    }, [api, bitrate, currentTrackIndex.index, items, updateMediaSessionMetadata])
 
     // Preload next page when near end
     useEffect(() => {
@@ -642,5 +648,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         resetSessionCount,
         playlistTitle,
         audioRef,
+        bitrate,
+        setBitrate,
     }
 }

@@ -15,7 +15,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
     const [lastLogin, setLastLogin] = useState<string | null>(null)
     const [clientIp, setClientIp] = useState<string | null>(null)
     const [latency, setLatency] = useState<number | null>(null)
-    const { sessionPlayCount, resetSessionCount } = usePlaybackContext()
+    const { sessionPlayCount, resetSessionCount, bitrate, setBitrate } = usePlaybackContext()
 
     useEffect(() => {
         const fetchData = async () => {
@@ -100,7 +100,10 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                             </div>
                         </div>
                         <div className="options noSelect">
-                            <div className="option source active">
+                            <div
+                                className={'option source' + (!bitrate ? ' active' : '')}
+                                onClick={() => setBitrate(0)}
+                            >
                                 <div className="status">
                                     <CheckCircleFillIcon size={16} />
                                 </div>
@@ -111,7 +114,10 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="option high">
+                            <div
+                                className={'option high' + (bitrate === 140000000 ? ' active' : '')}
+                                onClick={() => setBitrate(140000000)}
+                            >
                                 <div className="status">
                                     <CheckCircleFillIcon size={16} />
                                 </div>
@@ -124,7 +130,10 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="option medium">
+                            <div
+                                className={'option medium' + (bitrate === 130000000 ? ' active' : '')}
+                                onClick={() => setBitrate(130000000)}
+                            >
                                 <div className="status">
                                     <CheckCircleFillIcon size={16} />
                                 </div>
@@ -137,7 +146,10 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="option low">
+                            <div
+                                className={'option low' + (bitrate === 120000000 ? ' active' : '')}
+                                onClick={() => setBitrate(120000000)}
+                            >
                                 <div className="status">
                                     <CheckCircleFillIcon size={16} />
                                 </div>
@@ -150,7 +162,10 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="option minimal">
+                            <div
+                                className={'option minimal' + (bitrate === 110000000 ? ' active' : '')}
+                                onClick={() => setBitrate(110000000)}
+                            >
                                 <div className="status">
                                     <CheckCircleFillIcon size={16} />
                                 </div>
