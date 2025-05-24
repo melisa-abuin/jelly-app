@@ -181,7 +181,7 @@
 .settings-page > .section.playback > .inner > .container > .options > .option > .status {
     color: var(--brand-color);
     margin-top: 2px;
-    margin-right: 12px;
+    margin-right: 10px;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease-out, visibility 0.2s ease-out;

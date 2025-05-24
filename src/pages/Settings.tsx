@@ -115,8 +115,8 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                                 </div>
                             </div>
                             <div
-                                className={'option high' + (bitrate === 140000000 ? ' active' : '')}
-                                onClick={() => setBitrate(140000000)}
+                                className={'option high' + (bitrate === 320000 ? ' active' : '')}
+                                onClick={() => setBitrate(320000)}
                             >
                                 <div className="status">
                                     <CheckCircleFillIcon size={16} />
@@ -131,8 +131,8 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                                 </div>
                             </div>
                             <div
-                                className={'option medium' + (bitrate === 130000000 ? ' active' : '')}
-                                onClick={() => setBitrate(130000000)}
+                                className={'option medium' + (bitrate === 256000 ? ' active' : '')}
+                                onClick={() => setBitrate(256000)}
                             >
                                 <div className="status">
                                     <CheckCircleFillIcon size={16} />
@@ -147,8 +147,8 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                                 </div>
                             </div>
                             <div
-                                className={'option low' + (bitrate === 120000000 ? ' active' : '')}
-                                onClick={() => setBitrate(120000000)}
+                                className={'option low' + (bitrate === 192000 ? ' active' : '')}
+                                onClick={() => setBitrate(192000)}
                             >
                                 <div className="status">
                                     <CheckCircleFillIcon size={16} />
@@ -163,8 +163,8 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                                 </div>
                             </div>
                             <div
-                                className={'option minimal' + (bitrate === 110000000 ? ' active' : '')}
-                                onClick={() => setBitrate(110000000)}
+                                className={'option minimal' + (bitrate === 128000 ? ' active' : '')}
+                                onClick={() => setBitrate(128000)}
                             >
                                 <div className="status">
                                     <CheckCircleFillIcon size={16} />

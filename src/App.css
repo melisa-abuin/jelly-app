@@ -183,8 +183,8 @@ html.light {
     --bg-color-dimmer: rgba(22, 11, 37, 0.4);
     --volume-dot-color: #bbbbbb;
     --volume-dot-color-active: #a1a1a1;
-    --scrollbar-color: #cecece;
-    --scrollbar-color-hover: #bbbbbb;
+    --scrollbar-color: #a8a8a8;
+    --scrollbar-color-hover: #8a8a8a;
     --dropdown-shadow: 0 0 4px rgba(0, 0, 0, 0.04);
 }
 
@@ -218,7 +218,7 @@ html.dark {
     --volume-dot-color: #87868a;
     --volume-dot-color-active: #c4c1c7;
     --scrollbar-color: #78767c;
-    --scrollbar-color-hover: #a8a6ac;
+    --scrollbar-color-hover: #aba9af;
     --dropdown-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -541,6 +541,7 @@ body.lockscroll {
 }
 
 .main > .main_footer > .playback > .progress > input {
+    position: relative;
     cursor: pointer;
     width: 100%;
     height: 8px;
@@ -551,8 +552,50 @@ body.lockscroll {
     --transition-duration: 0s;
 }
 
-/* WebKit */
+/* Progress loading */
+.main > .main_footer > .playback > .progress > input.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    pointer-events: none;
+    opacity: 0;
+    transform: scaleY(0.6);
+    transition: transform 0.1s linear;
+    background-image: linear-gradient(
+        90deg,
+        var(--bg-color-secondary) 0%,
+        var(--bg-color-quaternary) 20%,
+        var(--bg-color-secondary) 40%
+    );
+    background-size: 200%;
+    animation: loading-shimmer 1.6s infinite linear;
+    animation-delay: 0.4s;
+}
+
+@keyframes loading-shimmer {
+    0% {
+        opacity: 0.4;
+        background-position: 100%;
+    }
+    60%,
+    100% {
+        opacity: 0.4;
+        background-position: -100%;
+    }
+}
+
+.main > .main_footer > .playback > .progress:hover > input.loading::after,
+.main > .main_footer > .playback > .progress:active > input.loading::after {
+    transform: scaleY(1);
+}
+
+/* WebKit progress visuals */
 .main > .main_footer > .playback > .progress > input::-webkit-slider-runnable-track {
+    position: relative;
     width: 100%;
     height: 8px;
     transform: scaleY(0.6);
@@ -568,7 +611,7 @@ body.lockscroll {
     transform: scaleY(1);
 }
 
-/* Firefox */
+/* Firefox progress visuals */
 .main > .main_footer > .playback > .progress > input::-moz-range-track {
     width: 100%;
     height: 8px;
@@ -955,6 +998,10 @@ body.lockscroll {
 }
 
 @media only screen and (pointer: coarse) {
+    .main > .main_footer > .playback > .progress > input {
+        height: 14px;
+    }
+
     .main > .main_footer > .playback > .progress > input::-webkit-slider-runnable-track {
         height: 14px;
     }
