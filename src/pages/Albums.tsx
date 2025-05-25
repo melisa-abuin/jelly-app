@@ -13,6 +13,7 @@ export const Albums = () => {
                 title={'Albums'}
                 reviver={reviver}
                 loadMore={loadMore}
+                hidden={{ view_album: true }}
             />
             {error && <div className="error">{error}</div>}
         </div>

@@ -1,7 +1,6 @@
 import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
 import { JSX, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
 import { FilterContextProvider } from '../context/FilterContext/FilterContextProvider'
 import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
@@ -22,11 +21,9 @@ export const Main = (props: Parameters<typeof MainContent>[0]) => {
 export const MainContent = ({
     content: Content,
     filterType,
-    dropdownType,
 }: {
     content: () => JSX.Element
     filterType?: 'mediaItems' | 'favorites'
-    dropdownType?: 'default' | 'album' | 'artist'
 }) => {
     const playback = usePlaybackContext()
     const { pageTitle } = usePageTitle()
@@ -34,21 +31,10 @@ export const MainContent = ({
     const location = useLocation()
     const { toggleSidenav } = useSidenavContext()
     const { sort, setSort } = useFilterContext()
-    const { setHidden } = useDropdownContext()
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
     }, [location.pathname])
-
-    useEffect(() => {
-        setHidden(
-            dropdownType === 'album'
-                ? { view_album: true }
-                : dropdownType === 'artist'
-                ? { view_artist: true, view_artists: true }
-                : {}
-        )
-    }, [dropdownType, setHidden])
 
     const memoHeader = useMemo(() => {
         return (

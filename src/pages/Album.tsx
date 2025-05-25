@@ -1,5 +1,5 @@
 import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import { JellyImg } from '../components/JellyImg'
@@ -20,8 +20,7 @@ export const Album = () => {
     const { albumId } = useParams<{ albumId: string }>()
     const { album, tracks, discCount, loading, error } = useJellyfinAlbumData(albumId!)
     const { setPageTitle } = usePageTitle()
-    const { isOpen, selectedItem } = useDropdownContext()
-    const moreRef = useRef<HTMLDivElement>(null)
+    const { isOpen, selectedItem, onContextMenu } = useDropdownContext()
     const { addToFavorites, removeFromFavorites } = useFavorites()
 
     useEffect(() => {
@@ -63,6 +62,7 @@ export const Album = () => {
 
     const handleMoreClick = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation()
+        onContextMenu(e, { item: album }, true, { add_to_favorite: true, remove_from_favorite: true })
     }
 
     return (
@@ -133,7 +133,6 @@ export const Album = () => {
                         <div
                             className={`more ${isOpen && selectedItem?.Id === album?.Id ? 'active' : ''}`}
                             onClick={handleMoreClick}
-                            ref={moreRef}
                             title="More"
                         >
                             <MoreIcon width={14} height={14} />
@@ -151,6 +150,7 @@ export const Album = () => {
                             tracks={tracksByDisc[Number(discNumber)]}
                             playlist={sortedTracks}
                             title={album.Name}
+                            hidden={{ view_album: true }}
                         />
                     </div>
                 ))}

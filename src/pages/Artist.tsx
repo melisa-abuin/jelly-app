@@ -1,5 +1,5 @@
 import { HeartFillIcon, HeartIcon } from '@primer/octicons-react'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
 import { Loader } from '../components/Loader'
@@ -26,8 +26,7 @@ export const Artist = () => {
         error: playlistsError,
     } = useJellyfinPlaylistsFeaturingArtist(artistId!)
     const { setPageTitle } = usePageTitle()
-    const { isOpen, selectedItem } = useDropdownContext()
-    const moreRef = useRef<HTMLDivElement>(null)
+    const { isOpen, selectedItem, onContextMenu } = useDropdownContext()
     const { addToFavorites, removeFromFavorites } = useFavorites()
 
     useEffect(() => {
@@ -52,6 +51,7 @@ export const Artist = () => {
 
     const handleMoreClick = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation()
+        onContextMenu(e, { item: artist }, true, { add_to_favorite: true, remove_from_favorite: true })
     }
 
     return (
@@ -130,7 +130,6 @@ export const Artist = () => {
                         <div
                             className={`more ${isOpen && selectedItem?.Id === artist?.Id ? 'active' : ''}`}
                             onClick={handleMoreClick}
-                            ref={moreRef}
                             title="More"
                         >
                             <MoreIcon width={14} height={14} />
@@ -142,7 +141,12 @@ export const Artist = () => {
             <div className="artist-content">
                 {topSongs.length > 0 && (
                     <div className="section top-songs">
-                        <TrackList tracks={topSongs} showAlbum={true} title={artist.Name} />
+                        <TrackList
+                            tracks={topSongs}
+                            showAlbum={true}
+                            title={artist.Name}
+                            hidden={{ view_artist: true, view_artists: true }}
+                        />
                         {(totalTrackCount || 0) > 5 && (
                             <div className="all-tracks">
                                 <Link to={`/artist/${artistId}/tracks`} className="textlink">

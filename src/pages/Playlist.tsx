@@ -5,6 +5,7 @@ import { JellyImg } from '../components/JellyImg'
 import { Loader } from '../components/Loader'
 import { PlaylistTrackList } from '../components/PlaylistTrackList'
 import { MoreIcon } from '../components/SvgIcons'
+import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinPlaylistData } from '../hooks/Jellyfin/Infinite/useJellyfinPlaylistData'
@@ -31,6 +32,7 @@ export const Playlist = () => {
     } = useJellyfinPlaylistData(playlistId!)
 
     const { setPageTitle } = usePageTitle()
+    const { isOpen, selectedItem, onContextMenu } = useDropdownContext()
 
     useEffect(() => {
         if (playlist) {
@@ -47,6 +49,11 @@ export const Playlist = () => {
 
     if (error || !playlist) {
         return <div className="error">{error || 'Playlist not found'}</div>
+    }
+
+    const handleMoreClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation()
+        onContextMenu(e, { item: playlist }, true, { add_to_favorite: true, remove_from_favorite: true })
     }
 
     return (
@@ -107,7 +114,11 @@ export const Playlist = () => {
                                 {playlist.UserData?.IsFavorite ? <HeartFillIcon size={16} /> : <HeartIcon size={16} />}
                             </div>
                         </div>
-                        <div className="more" title="More">
+                        <div
+                            className={`more ${isOpen && selectedItem?.Id === playlist?.Id ? 'active' : ''}`}
+                            onClick={handleMoreClick}
+                            title="More"
+                        >
                             <MoreIcon width={14} height={14} />
                         </div>
                     </div>

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
+import { IMenuItems } from '../context/DropdownContext/DropdownContextProvider'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useDisplayItems } from '../hooks/useDisplayItems'
 import { JellyImg } from './JellyImg'
@@ -18,6 +19,7 @@ export const MediaList = ({
     title,
     reviver,
     loadMore,
+    hidden = {},
 }: {
     items: MediaItem[] | undefined
     isLoading: boolean
@@ -25,6 +27,7 @@ export const MediaList = ({
     title: string
     reviver?: IReviver
     loadMore?: () => void
+    hidden?: IMenuItems
 }) => {
     const playback = usePlaybackContext()
     const navigate = useNavigate()
@@ -136,8 +139,8 @@ export const MediaList = ({
                     onClick={() => handleSongClick(item, index)}
                     key={item.Id}
                     ref={el => setRowRefs(index, el)}
-                    onContextMenu={e => dropdown.onContextMenu(e, { item })}
-                    onTouchStart={e => dropdown.onTouchStart(e, { item })}
+                    onContextMenu={e => dropdown.onContextMenu(e, { item }, false, hidden)}
+                    onTouchStart={e => dropdown.onTouchStart(e, { item }, false, hidden)}
                     onTouchMove={dropdown.onTouchClear}
                     onTouchEnd={dropdown.onTouchClear}
                 >

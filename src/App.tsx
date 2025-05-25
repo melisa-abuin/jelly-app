@@ -174,16 +174,10 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
             <Routes>
                 <Route path="/" element={<Main content={Home}></Main>} />
                 <Route path="/tracks" element={<Main content={Tracks} filterType={'mediaItems'} />} />
-                <Route
-                    path="/albums"
-                    element={<Main content={Albums} filterType={'mediaItems'} dropdownType={'album'} />}
-                />
-                <Route path="/album/:albumId" element={<Main content={Album} dropdownType={'album'} />} />
-                <Route path="/artist/:artistId" element={<Main content={Artist} dropdownType={'artist'} />} />
-                <Route
-                    path="/artist/:artistId/tracks"
-                    element={<Main content={ArtistTracks} dropdownType={'artist'} />}
-                />
+                <Route path="/albums" element={<Main content={Albums} filterType={'mediaItems'} />} />
+                <Route path="/album/:albumId" element={<Main content={Album} />} />
+                <Route path="/artist/:artistId" element={<Main content={Artist} />} />
+                <Route path="/artist/:artistId/tracks" element={<Main content={ArtistTracks} />} />
                 <Route path="/genre/:genre" element={<Main content={Genre} filterType={'mediaItems'} />} />
                 <Route path="/playlist/:playlistId" element={<Main content={Playlist} />} />
                 <Route path="/queue" element={<Main content={Queue} />} />

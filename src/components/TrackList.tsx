@@ -1,6 +1,7 @@
 import { HeartFillIcon } from '@primer/octicons-react'
 import { MediaItem } from '../api/jellyfin'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
+import { IMenuItems } from '../context/DropdownContext/DropdownContextProvider'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { formatDuration } from '../utils/formatDuration'
 import { IReviver } from './PlaybackManager'
@@ -13,12 +14,14 @@ export const TrackList = ({
     showAlbum = false,
     title,
     reviver,
+    hidden = {},
 }: {
     tracks: MediaItem[]
     playlist?: MediaItem[]
     showAlbum?: boolean
     title: string
     reviver?: IReviver
+    hidden?: IMenuItems
 }) => {
     const playback = usePlaybackContext()
 
@@ -63,8 +66,8 @@ export const TrackList = ({
                                 playback.playTrack(playIndex)
                             }
                         }}
-                        onContextMenu={e => dropdown.onContextMenu(e, { item: track })}
-                        onTouchStart={e => dropdown.onTouchStart(e, { item: track })}
+                        onContextMenu={e => dropdown.onContextMenu(e, { item: track }, false, hidden)}
+                        onTouchStart={e => dropdown.onTouchStart(e, { item: track }, false, hidden)}
                         onTouchMove={dropdown.onTouchClear}
                         onTouchEnd={dropdown.onTouchClear}
                     >

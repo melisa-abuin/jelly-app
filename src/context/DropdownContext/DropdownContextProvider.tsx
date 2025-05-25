@@ -11,6 +11,7 @@ import { usePlaybackContext } from '../PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../ScrollContext/ScrollContext'
 import { DropdownContext } from './DropdownContext'
 
+export type IMenuItems = { [x in keyof IDropdownContext['menuItems']]?: boolean }
 export type IDropdownContext = ReturnType<typeof useInitialState>
 
 type IContext = { item: MediaItem; playlistId?: string }
@@ -43,7 +44,8 @@ const useInitialState = () => {
     const [isTouchDevice, setIsTouchDevice] = useState(false)
     const [ignoreMargin, setIgnoreMargin] = useState(false)
     const scrollContext = useScrollContext()
-    const [hidden, setHidden] = useState<{ [x in keyof typeof menuItems]?: boolean }>()
+    type IMenuItems = { [x in keyof typeof menuItems]?: boolean }
+    const [hidden, setHidden] = useState<IMenuItems>()
     const navigate = useNavigate()
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
@@ -232,7 +234,7 @@ const useInitialState = () => {
     }, [isOpen, isTouchDevice, scrollContext])
 
     const openDropdown = useCallback(
-        (context: IContext, x: number, y: number, ignoreMargin = false) => {
+        (context: IContext, x: number, y: number, ignoreMargin: boolean) => {
             let adjustedX = x
             let adjustedY = y
             if (isTouchDevice) {
@@ -681,7 +683,7 @@ const useInitialState = () => {
 
         return (
             <div
-                className={'dropdown noSelect' + (isOpen ? ' active' : '')}
+                className={'dropdown noSelect' + (isOpen ? ' active' : '') + (ignoreMargin ? ' reset' : '')}
                 style={{
                     top: `${position.y}px`,
                     left: `${position.x}px`,
@@ -695,37 +697,57 @@ const useInitialState = () => {
             </div>
         )
     }, [
-        isOpen,
-        position.y,
-        position.x,
-        hidden,
-        menuItems,
-        context,
-        isTouchDevice,
-        subDropdown,
+        api,
+        closeDropdown,
         closeSubDropdown,
-        handleViewArtist,
-        playlistName,
+        context,
+        handleCreateClick,
         handleInputChange,
         handleInputKeyDown,
-        handleCreateClick,
+        handleViewArtist,
+        hidden?.add_to_favorite,
+        hidden?.add_to_playlist,
+        hidden?.add_to_queue,
+        hidden?.instant_mix,
+        hidden?.next,
+        hidden?.remove_from_favorite,
+        hidden?.remove_from_playlist,
+        hidden?.view_album,
+        hidden?.view_artist,
+        hidden?.view_artists,
+        ignoreMargin,
+        isOpen,
+        isTouchDevice,
+        menuItems.add_to_favorite,
+        menuItems.add_to_playlist,
+        menuItems.add_to_queue,
+        menuItems.instant_mix,
+        menuItems.next,
+        menuItems.remove_from_favorite,
+        menuItems.remove_from_playlist,
+        menuItems.view_album,
+        menuItems.view_artist,
+        menuItems.view_artists,
+        playlistName,
         playlists,
-        api,
+        position.x,
+        position.y,
         prependItemToQueryData,
-        closeDropdown,
-        // Ensure all dependencies from useInitialState used in renderMobileSubMenuItems or main items are listed
+        subDropdown.isOpen,
+        subDropdown.type,
     ])
 
     const touchTimeoutRef = useRef<number | null>(null)
 
     const handleTouchStart = useCallback(
-        (e: React.TouchEvent<HTMLElement>, context: IContext) => {
+        (e: React.TouchEvent<HTMLElement>, context: IContext, ignoreMargin = false, hidden: IMenuItems = {}) => {
             e.preventDefault()
             touchTimeoutRef.current = window.setTimeout(() => {
                 const touch = e.touches[0]
                 const x = touch.clientX
                 const y = touch.clientY + window.pageYOffset
-                openDropdown(context, x, y)
+                openDropdown(context, x, y, ignoreMargin)
+                setHidden(hidden)
             }, 400)
         },
         [openDropdown]
@@ -749,17 +771,21 @@ const useInitialState = () => {
         closeDropdown,
         openSubDropdown,
         closeSubDropdown,
-        ignoreMargin,
-        onContextMenu: (e: React.MouseEvent<HTMLElement, MouseEvent>, context: IContext) => {
+        onContextMenu: (
+            e: React.MouseEvent<HTMLElement, MouseEvent>,
+            context: IContext,
+            ignoreMargin = false,
+            hidden: IMenuItems = {}
+        ) => {
             e.preventDefault()
             const x = e.clientX
             const y = e.clientY + window.pageYOffset
-            openDropdown(context, x, y)
+            openDropdown(context, x, y, ignoreMargin)
+            setHidden(hidden)
         },
         onTouchStart: handleTouchStart,
         onTouchClear: clearTouchTimer,
         dropdownNode,
-        setHidden,
     }
 }
 
