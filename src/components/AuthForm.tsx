@@ -6,8 +6,13 @@ export const AuthForm = ({
 }: {
     onLogin: (authData: { serverUrl: string; token: string; userId: string; username: string }) => void
 }) => {
-    const [serverUrl, setServerUrl] = useState(localStorage.getItem('lastServerUrl') || '')
-    const [username, setUsername] = useState('')
+    const queryParams = new URLSearchParams(window.location.search)
+    const isDemo = queryParams.get('demo') === '1'
+
+    const [serverUrl, setServerUrl] = useState(
+        isDemo ? 'https://demo.jellyfin.org/stable' : localStorage.getItem('lastServerUrl') || ''
+    )
+    const [username, setUsername] = useState(isDemo ? 'demo' : '')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
