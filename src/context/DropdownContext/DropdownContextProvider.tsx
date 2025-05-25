@@ -1,4 +1,4 @@
-import { ChevronLeftIcon, ChevronRightIcon } from '@primer/octicons-react'
+import { ArrowLeftIcon, ChevronRightIcon } from '@primer/octicons-react'
 import { ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BaseItemKind } from '../../../node_modules/@jellyfin/sdk/lib/generated-client/models/base-item-kind'
@@ -568,8 +568,8 @@ const useInitialState = () => {
     const dropdownNode = useMemo(() => {
         const renderMobileSubMenuItems = () => {
             const backButton = (
-                <div key="back-button" className="dropdown-item" onClick={closeSubDropdown}>
-                    <ChevronLeftIcon size={16} className="icon" />
+                <div key="back-button" className="dropdown-item return-item" onClick={closeSubDropdown}>
+                    <ArrowLeftIcon size={16} className="return-icon" />
                     <span>Back</span>
                 </div>
             )

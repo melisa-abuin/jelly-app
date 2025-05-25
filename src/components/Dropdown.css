@@ -217,6 +217,27 @@
         transition: opacity 0.2s ease-out;
     }
 
+    .dropdown > .dropdown-menu > .dropdown-item.return-item {
+        justify-content: unset;
+        gap: 10px;
+        margin-bottom: 9px;
+    }
+
+    .dropdown > .dropdown-menu > .dropdown-item.return-item::after {
+        content: '';
+        position: absolute;
+        left: 10px;
+        bottom: -7px;
+        height: 1px;
+        width: calc(100% - 20px);
+        background-color: var(--border-color);
+        pointer-events: none;
+    }
+
+    .dropdown > .dropdown-menu > .dropdown-item.return-item > .return-icon {
+        margin-left: -2px;
+    }
+
     .dropdown > .dropdown-menu > .dropdown-item:has(.playlist-input.has-text) ~ .dropdown-item {
         opacity: 0.3;
         pointer-events: none;
