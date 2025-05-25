@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, ChevronRightIcon } from '@primer/octicons-react'
-import { ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BaseItemKind } from '../../../node_modules/@jellyfin/sdk/lib/generated-client/models/base-item-kind'
 import { MediaItem } from '../../api/jellyfin'
@@ -42,7 +42,6 @@ const useInitialState = () => {
         triggerRect: null,
     })
     const [isTouchDevice, setIsTouchDevice] = useState(false)
-    const [ignoreMargin, setIgnoreMargin] = useState(false)
     const scrollContext = useScrollContext()
     type IMenuItems = { [x in keyof typeof menuItems]?: boolean }
     const [hidden, setHidden] = useState<IMenuItems>()
@@ -90,7 +89,6 @@ const useInitialState = () => {
             measured: false,
             triggerRect: null,
         })
-        setIgnoreMargin(false)
     }, [])
 
     const handleInputChange = useCallback(
@@ -280,7 +278,6 @@ const useInitialState = () => {
                 measured: false,
                 triggerRect: null,
             })
-            setIgnoreMargin(ignoreMargin)
         },
         [isTouchDevice]
     )
@@ -635,63 +632,65 @@ const useInitialState = () => {
         }
 
         const renderDropdownItems = () => {
-            let sepLast = false
+            const menuItemz: { isVisible: boolean; node: ReactNode }[][] = [
+                [
+                    {
+                        isVisible: !hidden?.next && context?.item.Type === BaseItemKind.Audio,
+                        node: menuItems.next,
+                    },
+                    {
+                        isVisible: !hidden?.add_to_queue && context?.item.Type === BaseItemKind.Audio,
+                        node: menuItems.add_to_queue,
+                    },
+                    {
+                        isVisible: !hidden?.instant_mix,
+                        node: menuItems.instant_mix,
+                    },
+                ],
+                [
+                    {
+                        isVisible: !hidden?.view_artists && (context?.item?.ArtistItems?.length || 0) > 1,
+                        node: menuItems.view_artists,
+                    },
+                    {
+                        isVisible: !hidden?.view_artist && context?.item?.ArtistItems?.length === 1,
+                        node: menuItems.view_artist,
+                    },
+                    {
+                        isVisible: !!(
+                            !hidden?.view_album &&
+                            context?.item.Type !== BaseItemKind.MusicAlbum &&
+                            context?.item.AlbumId
+                        ),
+                        node: menuItems.view_album,
+                    },
+                ],
+                [
+                    {
+                        isVisible: !hidden?.add_to_favorite && !context?.item?.UserData?.IsFavorite,
+                        node: menuItems.add_to_favorite,
+                    },
+                    {
+                        isVisible: !!(!hidden?.remove_from_favorite && context?.item.UserData?.IsFavorite),
+                        node: menuItems.remove_from_favorite,
+                    },
+                    {
+                        isVisible: !hidden?.add_to_playlist && context?.item.Type === BaseItemKind.Audio,
+                        node: menuItems.add_to_playlist,
+                    },
+                    {
+                        isVisible: !!(!hidden?.remove_from_playlist && context?.item.Type === BaseItemKind.Audio),
+                        node: menuItems.remove_from_playlist,
+                    },
+                ],
+            ]
 
-            const setSepLast = (value: boolean) => {
-                sepLast = value
-                return true
-            }
-
-            return (
-                <>
-                    {!hidden?.next && context?.item.Type === BaseItemKind.Audio && setSepLast(false) && menuItems.next}
-
-                    {!hidden?.add_to_queue &&
-                        context?.item.Type === BaseItemKind.Audio &&
-                        setSepLast(false) &&
-                        menuItems.add_to_queue}
-
-                    {!hidden?.instant_mix && setSepLast(false) && menuItems.instant_mix}
-
-                    {!sepLast && setSepLast(true) && <div className="dropdown-separator" />}
-
-                    {(context?.item?.ArtistItems?.length || 0) > 1 && (
-                        <>{!hidden?.view_artists && setSepLast(false) && menuItems.view_artists}</>
-                    )}
-
-                    {(context?.item?.ArtistItems?.length || 0) === 1 && (
-                        <>{!hidden?.view_artist && setSepLast(false) && menuItems.view_artist}</>
-                    )}
-
-                    {!hidden?.view_album &&
-                        context?.item.Type !== BaseItemKind.MusicAlbum &&
-                        context?.item.AlbumId &&
-                        setSepLast(false) &&
-                        menuItems.view_album}
-
-                    {!sepLast && setSepLast(true) && <div className="dropdown-separator" />}
-
-                    {!context?.item?.UserData?.IsFavorite && (
-                        <>{!hidden?.add_to_favorite && setSepLast(false) && menuItems.add_to_favorite}</>
-                    )}
-
-                    {!sepLast && setSepLast(true) && <div className="dropdown-separator" />}
-
-                    {context?.item?.UserData?.IsFavorite && (
-                        <>{!hidden?.remove_from_favorite && setSepLast(false) && menuItems.remove_from_favorite}</>
-                    )}
-
-                    {!hidden?.add_to_playlist &&
-                        context?.item.Type === BaseItemKind.Audio &&
-                        setSepLast(false) &&
-                        menuItems.add_to_playlist}
-
-                    {!hidden?.remove_from_playlist &&
-                        context?.item.Type === BaseItemKind.Audio &&
-                        setSepLast(false) &&
-                        menuItems.remove_from_playlist}
-                </>
-            )
+            return menuItemz.map((group, index) => (
+                <Fragment key={index}>
+                    {group.map((item, idx) => (item.isVisible ? <Fragment key={idx}>{item.node}</Fragment> : null))}
+                    {index !== menuItemz.length - 1 && <div className="dropdown-separator" />}
+                </Fragment>
+            ))
         }
 
         return (
@@ -728,7 +727,6 @@ const useInitialState = () => {
         hidden?.view_album,
         hidden?.view_artist,
         hidden?.view_artists,
-        ignoreMargin,
         isOpen,
         isTouchDevice,
         menuItems.add_to_favorite,
