@@ -1,4 +1,5 @@
 import { InfiniteData, useQueryClient } from '@tanstack/react-query'
+import Hls from 'hls.js'
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
@@ -39,6 +40,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return savedRepeat === 'all' || savedRepeat === 'one' ? savedRepeat : 'off'
     })
     const audioRef = useRef<HTMLAudioElement>(new Audio())
+    const hlsRef = useRef<Hls | null>(null)
     const shuffledPlaylist = useRef<number[]>([])
     const [currentShuffledIndex, setCurrentShuffledIndex] = useState({ index: -1 })
     const playedIndices = useRef<Set<number>>(new Set())
@@ -187,9 +189,47 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 audio.pause()
                 audio.currentTime = 0
 
+                // Clean up hls.js if active
+                if (hlsRef.current) {
+                    hlsRef.current.destroy()
+                    hlsRef.current = null
+                }
+
                 try {
                     const streamUrl = api.getStreamUrl(track.Id, bitrate)
-                    audio.src = streamUrl
+                    const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
+                    if (isTranscoded && Hls.isSupported()) {
+                        // Use hls.js for transcoded streams
+                        const hls = new Hls({
+                            enableWorker: false,
+                            maxBufferLength: 10,
+                            maxMaxBufferLength: 20,
+                        })
+                        hlsRef.current = hls
+                        hls.loadSource(streamUrl)
+                        hls.attachMedia(audio)
+                        hls.on(Hls.Events.ERROR, (event, data) => {
+                            console.error('HLS error:', data.type, data.details, data)
+                            if (data.fatal) {
+                                if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                                    console.warn('Retrying network error...')
+                                    hls.startLoad()
+                                } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                                    console.warn('Recovering media error...')
+                                    hls.recoverMediaError()
+                                } else {
+                                    console.error('Fatal HLS error, stopping playback')
+                                    audio.pause()
+                                    audio.src = ''
+                                    hls.destroy()
+                                    hlsRef.current = null
+                                }
+                            }
+                        })
+                    } else {
+                        // Native playback for default bitrate (140000000)
+                        audio.src = streamUrl
+                    }
                     audio.load()
 
                     await new Promise<void>((resolve, reject) => {
@@ -242,9 +282,39 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 audio.pause()
                 await api.reportPlaybackProgress(currentTrack.Id, audio.currentTime, true)
             } else {
-                if (!audio.src) {
+                if (!audio.src && !hlsRef.current) {
                     const streamUrl = api.getStreamUrl(currentTrack.Id, bitrate)
-                    audio.src = streamUrl
+                    const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
+                    if (isTranscoded && Hls.isSupported()) {
+                        const hls = new Hls({
+                            enableWorker: false,
+                            maxBufferLength: 10,
+                            maxMaxBufferLength: 20,
+                        })
+                        hlsRef.current = hls
+                        hls.loadSource(streamUrl)
+                        hls.attachMedia(audio)
+                        hls.on(Hls.Events.ERROR, (event, data) => {
+                            console.error('HLS error:', data.type, data.details, data)
+                            if (data.fatal) {
+                                if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                                    console.warn('Retrying network error...')
+                                    hls.startLoad()
+                                } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                                    console.warn('Recovering media error...')
+                                    hls.recoverMediaError()
+                                } else {
+                                    console.error('Fatal HLS error, stopping playback')
+                                    audio.pause()
+                                    audio.src = ''
+                                    hls.destroy()
+                                    hlsRef.current = null
+                                }
+                            }
+                        })
+                    } else {
+                        audio.src = streamUrl
+                    }
                     audio.load()
                 }
 
@@ -259,6 +329,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                     if (audioRef.current) {
                         audioRef.current.pause()
                         audioRef.current.src = ''
+                        if (hlsRef.current) {
+                            hlsRef.current.destroy()
+                            hlsRef.current = null
+                        }
                     }
                 }
             }
@@ -271,6 +345,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         } else {
             if (audioRef.current) {
                 audioRef.current.pause()
+                if (hlsRef.current) {
+                    hlsRef.current.destroy()
+                    hlsRef.current = null
+                }
             }
         }
     }, [currentTrackIndex]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -286,6 +364,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             } else {
                 if (audioRef.current) {
                     audioRef.current.pause()
+                    if (hlsRef.current) {
+                        hlsRef.current.destroy()
+                        hlsRef.current = null
+                    }
                 }
             }
         }
@@ -297,6 +379,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         if (!items || items.length === 0 || currentTrackIndex.index === -1 || !currentTrack) {
             if (audioRef.current) {
                 audioRef.current.pause()
+                if (hlsRef.current) {
+                    hlsRef.current.destroy()
+                    hlsRef.current = null
+                }
             }
 
             return
@@ -325,6 +411,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 } else {
                     if (audioRef.current) {
                         audioRef.current.pause()
+                        if (hlsRef.current) {
+                            hlsRef.current.destroy()
+                            hlsRef.current = null
+                        }
                     }
 
                     return
@@ -343,6 +433,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                     } else {
                         if (audioRef.current) {
                             audioRef.current.pause()
+                            if (hlsRef.current) {
+                                hlsRef.current.destroy()
+                                hlsRef.current = null
+                            }
                         }
 
                         return
@@ -360,6 +454,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         if (!items || items.length === 0 || currentTrackIndex.index === -1 || !currentTrack) {
             if (audioRef.current) {
                 audioRef.current.pause()
+                if (hlsRef.current) {
+                    hlsRef.current.destroy()
+                    hlsRef.current = null
+                }
             }
 
             return
@@ -383,6 +481,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 } else {
                     if (audioRef.current) {
                         audioRef.current.pause()
+                        if (hlsRef.current) {
+                            hlsRef.current.destroy()
+                            hlsRef.current = null
+                        }
                     }
 
                     return
@@ -398,6 +500,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 } else {
                     if (audioRef.current) {
                         audioRef.current.pause()
+                        if (hlsRef.current) {
+                            hlsRef.current.destroy()
+                            hlsRef.current = null
+                        }
                     }
 
                     return
@@ -496,6 +602,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             if (audioRef.current) {
                 audioRef.current.pause()
                 audioRef.current.src = ''
+                if (hlsRef.current) {
+                    hlsRef.current.destroy()
+                    hlsRef.current = null
+                }
             }
         }
 
@@ -558,7 +668,37 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             if (lastPlayedTrack) {
                 if (audioRef.current) {
                     const streamUrl = api.getStreamUrl(lastPlayedTrack.Id, bitrate)
-                    audioRef.current.src = streamUrl
+                    const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
+                    if (isTranscoded && Hls.isSupported()) {
+                        const hls = new Hls({
+                            enableWorker: false,
+                            maxBufferLength: 10,
+                            maxMaxBufferLength: 20,
+                        })
+                        hlsRef.current = hls
+                        hls.loadSource(streamUrl)
+                        hls.attachMedia(audioRef.current)
+                        hls.on(Hls.Events.ERROR, (event, data) => {
+                            console.error('HLS error:', data.type, data.details, data)
+                            if (data.fatal) {
+                                if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                                    console.warn('Retrying network error...')
+                                    hls.startLoad()
+                                } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                                    console.warn('Recovering media error...')
+                                    hls.recoverMediaError()
+                                } else {
+                                    console.error('Fatal HLS error, stopping playback')
+                                    audioRef.current.pause()
+                                    audioRef.current.src = ''
+                                    hls.destroy()
+                                    hlsRef.current = null
+                                }
+                            }
+                        })
+                    } else {
+                        audioRef.current.src = streamUrl
+                    }
                     audioRef.current.load()
                 }
                 updateMediaSessionMetadata(lastPlayedTrack)
@@ -616,6 +756,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             if (audioRef.current) {
                 audioRef.current.pause()
                 audioRef.current.src = ''
+                if (hlsRef.current) {
+                    hlsRef.current.destroy()
+                    hlsRef.current = null
+                }
             }
         }
     }, [api, clearOnLogout, currentTrack])
