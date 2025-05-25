@@ -24,7 +24,7 @@ export const AuthForm = ({
             return
         }
 
-        let trimmedServerUrl = serverUrl.replace(new RegExp('/+$'), '')
+        let trimmedServerUrl = serverUrl.toLowerCase().replace(new RegExp('/+$'), '')
 
         // Basic URL format check
         const urlPattern = /^https?:\/\/.+/
