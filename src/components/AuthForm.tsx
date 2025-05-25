@@ -24,25 +24,37 @@ export const AuthForm = ({
             return
         }
 
-        const formattedServerUrl = serverUrl.split('/').slice(0, 3).join('/')
+        let trimmedServerUrl = serverUrl.replace(new RegExp('/+$'), '')
 
         // Basic URL format check
         const urlPattern = /^https?:\/\/.+/
-        if (!urlPattern.test(formattedServerUrl)) {
+        if (!urlPattern.test(trimmedServerUrl)) {
             setError('Invalid URL format. Use http:// or https:// followed by a valid address.')
             setLoading(false)
             return
         }
 
         try {
-            const {
-                token,
-                userId,
-                username: fetchedUsername,
-            } = await loginToJellyfin(formattedServerUrl, username, password)
+            let result
+
+            try {
+                result = await loginToJellyfin(trimmedServerUrl, username, password)
+            } catch (firstErr) {
+                const formattedServerUrl = trimmedServerUrl.split('/').slice(0, 3).join('/')
+
+                if (trimmedServerUrl !== formattedServerUrl) {
+                    trimmedServerUrl = formattedServerUrl
+                    result = await loginToJellyfin(trimmedServerUrl, username, password)
+                } else {
+                    throw firstErr
+                }
+            }
+
+            const { token, userId, username: fetchedUsername } = result!
+
             // Save the serverUrl to localStorage on successful login
-            localStorage.setItem('lastServerUrl', formattedServerUrl)
-            onLogin({ serverUrl: formattedServerUrl, token, userId, username: fetchedUsername })
+            localStorage.setItem('lastServerUrl', trimmedServerUrl)
+            onLogin({ serverUrl: trimmedServerUrl, token, userId, username: fetchedUsername })
         } catch (err) {
             if (err instanceof ApiError) {
                 if (err.response) {
