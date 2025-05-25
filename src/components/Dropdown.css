@@ -9,6 +9,7 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease-out, visibility 0.2s ease-out, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
 }
 
 .dropdown.active {
@@ -181,7 +182,7 @@
         z-index: 3;
         opacity: 1;
         visibility: visible;
-        transform: scale(1) translateY(100%);
+        transform: scale(1) translateY(calc(100% + 16px));
         transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 

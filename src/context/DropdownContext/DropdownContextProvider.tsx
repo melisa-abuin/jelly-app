@@ -252,6 +252,19 @@ const useInitialState = () => {
                 adjustedY = y + menuHeight + margin > viewportHeight ? viewportHeight - menuHeight - margin : y
                 adjustedY = y < margin ? margin : adjustedY // Prevent top overflow
                 adjustedX = x < margin ? margin : adjustedX // Prevent left overflow
+            } else {
+                // Position dropdown below the toggle, aligned left with offsets
+                let triggerElement = document.elementFromPoint(x, y)
+                if (triggerElement) {
+                    while (triggerElement && !triggerElement.classList.contains('more')) {
+                        triggerElement = triggerElement.parentElement
+                    }
+                    if (triggerElement) {
+                        const rect = triggerElement.getBoundingClientRect()
+                        adjustedX = rect.left - window.pageXOffset - 142
+                        adjustedY = rect.bottom + window.pageYOffset + 8
+                    }
+                }
             }
             setIsOpen(true)
             setPosition({ x: adjustedX, y: adjustedY })
@@ -683,7 +696,7 @@ const useInitialState = () => {
 
         return (
             <div
-                className={'dropdown noSelect' + (isOpen ? ' active' : '') + (ignoreMargin ? ' reset' : '')}
+                className={'dropdown noSelect' + (isOpen ? ' active' : '')}
                 style={{
                     top: `${position.y}px`,
                     left: `${position.x}px`,
