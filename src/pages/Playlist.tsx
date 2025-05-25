@@ -130,7 +130,7 @@ export const Playlist = () => {
                 isLoading={isLoading}
                 showType="artist"
                 playlistId={playlistId}
-                title={''}
+                title={playlist ? playlist.Name : 'Playlist'}
                 reviver={reviver}
                 loadMore={loadMore}
             />

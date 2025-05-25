@@ -25,7 +25,7 @@ export const Genre = () => {
                 items={items}
                 isLoading={isLoading}
                 type="song"
-                title={'Genres'}
+                title={genre ? `Genre: ${decodeURIComponent(genre)}` : 'Genres'}
                 reviver={reviver}
                 loadMore={loadMore}
             />

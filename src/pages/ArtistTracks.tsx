@@ -32,7 +32,7 @@ export const ArtistTracks = () => {
                 tracks={allTracks}
                 isLoading={isLoading}
                 showType="album"
-                title={''}
+                title={artist ? `${artist.Name}'s Tracks` : 'Artist Tracks'}
                 reviver={reviver}
                 loadMore={loadMore}
             />
