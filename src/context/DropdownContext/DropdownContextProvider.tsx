@@ -1,4 +1,4 @@
-import { ChevronRightIcon } from '@primer/octicons-react'
+import { ChevronLeftIcon, ChevronRightIcon } from '@primer/octicons-react'
 import { ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BaseItemKind } from '../../../node_modules/@jellyfin/sdk/lib/generated-client/models/base-item-kind'
@@ -91,7 +91,11 @@ const useInitialState = () => {
         setIgnoreMargin(false)
     }, [])
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setPlaylistName(e.target.value)
+    const handleInputChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => setPlaylistName(e.target.value),
+        []
+    )
+
     const handleInputKeyDown = useCallback(
         async (e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === 'Enter' && playlistName.trim() && context) {
@@ -359,11 +363,12 @@ const useInitialState = () => {
                     className={`dropdown-item view-artists has-sub-menu${
                         subDropdown.isOpen && subDropdown.type === 'view-artists' ? ' active' : ''
                     }`}
-                    onMouseEnter={e => openSubDropdown('view-artists', e)}
+                    onMouseEnter={!isTouchDevice ? e => openSubDropdown('view-artists', e) : undefined}
+                    onClick={isTouchDevice ? e => openSubDropdown('view-artists', e) : undefined}
                 >
                     <span>View artists</span>
                     <ChevronRightIcon size={12} className="icon" />
-                    {subDropdown.isOpen && subDropdown.type === 'view-artists' && (
+                    {!isTouchDevice && subDropdown.isOpen && subDropdown.type === 'view-artists' && (
                         <div
                             ref={subMenuRef}
                             className={
@@ -456,11 +461,12 @@ const useInitialState = () => {
                     className={`dropdown-item add-playlist has-sub-menu${
                         subDropdown.isOpen && subDropdown.type === 'add-playlist' ? ' active' : ''
                     }`}
-                    onMouseEnter={e => openSubDropdown('add-playlist', e)}
+                    onMouseEnter={!isTouchDevice ? e => openSubDropdown('add-playlist', e) : undefined}
+                    onClick={isTouchDevice ? e => openSubDropdown('add-playlist', e) : undefined}
                 >
                     <span>Add to playlist</span>
                     <ChevronRightIcon size={12} className="icon" />
-                    {subDropdown.isOpen && subDropdown.type === 'add-playlist' && (
+                    {!isTouchDevice && subDropdown.isOpen && subDropdown.type === 'add-playlist' && (
                         <div
                             ref={subMenuRef}
                             className={`sub-dropdown${subDropdown.flipX ? ' flip-x' : ''}${
@@ -529,35 +535,98 @@ const useInitialState = () => {
             ) : null,
         }
     }, [
-        closeSubDropdown,
-        subDropdown.isOpen,
-        subDropdown.type,
-        subDropdown.flipX,
-        subDropdown.flipY,
-        subDropdown.measured,
-        subDropdown.triggerRect,
-        subDropdown.top,
-        context,
-        playlistName,
-        handleInputKeyDown,
-        handleCreateClick,
-        playlists,
-        handlePlayNext,
-        handleAddToQueue,
-        closeDropdown,
+        addToFavorites,
         api,
-        playback,
+        closeDropdown,
+        closeSubDropdown,
+        context,
+        handleAddToQueue,
+        handleCreateClick,
+        handleInputChange,
+        handleInputKeyDown,
+        handlePlayNext,
+        handleViewAlbum,
+        handleViewArtist,
+        isTouchDevice,
         navigate,
         openSubDropdown,
-        handleViewArtist,
-        handleViewAlbum,
-        addToFavorites,
-        removeFromFavorites,
+        playback,
+        playlistName,
+        playlists,
         prependItemToQueryData,
+        removeFromFavorites,
         removeItemFromQueryData,
+        subDropdown.flipX,
+        subDropdown.flipY,
+        subDropdown.isOpen,
+        subDropdown.measured,
+        subDropdown.top,
+        subDropdown.triggerRect,
+        subDropdown.type,
     ])
 
     const dropdownNode = useMemo(() => {
+        const renderMobileSubMenuItems = () => {
+            const backButton = (
+                <div key="back-button" className="dropdown-item" onClick={closeSubDropdown}>
+                    <ChevronLeftIcon size={16} className="icon" />
+                    <span>Back</span>
+                </div>
+            )
+
+            let items: ReactNode[] = []
+
+            if (subDropdown.type === 'view-artists') {
+                items =
+                    context?.item?.ArtistItems?.map(artist => (
+                        <div
+                            key={artist.Id}
+                            className="dropdown-item"
+                            onClick={() => {
+                                handleViewArtist(artist.Id)
+                                // handleViewArtist already calls closeDropdown
+                            }}
+                        >
+                            {artist.Name || 'Unknown Artist'}
+                        </div>
+                    )) || []
+            } else if (subDropdown.type === 'add-playlist') {
+                items = [
+                    <div key="playlist-input-item" className="dropdown-item">
+                        <div className="playlist-input-container">
+                            <input
+                                value={playlistName}
+                                onChange={handleInputChange}
+                                onKeyDown={handleInputKeyDown} // Calls closeDropdown on Enter
+                                onClick={e => e.stopPropagation()}
+                                placeholder="New..."
+                                className={`playlist-input${playlistName.trim() ? ' has-text' : ''}`}
+                            />
+                            <button className="create-btn" onClick={handleCreateClick}>
+                                {' '}
+                                {/* Calls closeDropdown */}
+                                Create
+                            </button>
+                        </div>
+                    </div>,
+                    <div key="playlist-separator" className="dropdown-separator" />,
+                    ...playlists.map(playlist => (
+                        <div
+                            key={playlist.Id}
+                            className="dropdown-item"
+                            onClick={async () => {
+                                await api.addToPlaylist(playlist.Id!, context!.item.Id)
+                                prependItemToQueryData(['playlistTracks', playlist.Id!], context!.item)
+                                closeDropdown() // Close main dropdown after action
+                            }}
+                        >
+                            {playlist.Name}
+                        </div>
+                    )),
+                ]
+            }
+            return [backButton, <div key="back-separator" className="dropdown-separator" />, ...items]
+        }
         return (
             <div
                 className={'dropdown noSelect' + (isOpen ? ' active' : '')}
@@ -569,31 +638,39 @@ const useInitialState = () => {
                 ref={menuRef}
             >
                 <div className="dropdown-menu">
-                    {!hidden?.next && menuItems.next}
-                    {!hidden?.add_to_queue && menuItems.add_to_queue}
-                    {!hidden?.instant_mix && menuItems.instant_mix}
+                    {isTouchDevice && subDropdown.isOpen ? (
+                        renderMobileSubMenuItems()
+                    ) : (
+                        <>
+                            {!hidden?.next && menuItems.next}
+                            {!hidden?.add_to_queue && menuItems.add_to_queue}
+                            {!hidden?.instant_mix && menuItems.instant_mix}
 
-                    {(context?.item?.ArtistItems?.length || 0) > 1 && (
-                        <>{!hidden?.view_artists && menuItems.view_artists}</>
+                            {(context?.item?.ArtistItems?.length || 0) > 1 && (
+                                <>{!hidden?.view_artists && menuItems.view_artists}</>
+                            )}
+
+                            {(context?.item?.ArtistItems?.length || 0) === 1 && (
+                                <>{!hidden?.view_artist && menuItems.view_artist}</>
+                            )}
+
+                            {!hidden?.view_album &&
+                                context?.item.Type !== BaseItemKind.MusicAlbum &&
+                                menuItems.view_album}
+
+                            {!context?.item?.UserData?.IsFavorite && (
+                                <>{!hidden?.add_to_favorite && menuItems.add_to_favorite}</>
+                            )}
+
+                            {context?.item?.UserData?.IsFavorite && (
+                                <>{!hidden?.remove_from_favorite && menuItems.remove_from_favorite}</>
+                            )}
+
+                            {!hidden?.add_to_playlist && menuItems.add_to_playlist}
+
+                            {!hidden?.remove_from_playlist && menuItems.remove_from_playlist}
+                        </>
                     )}
-
-                    {(context?.item?.ArtistItems?.length || 0) === 1 && (
-                        <>{!hidden?.view_artist && menuItems.view_artist}</>
-                    )}
-
-                    {!hidden?.view_album && context?.item.Type !== BaseItemKind.MusicAlbum && menuItems.view_album}
-
-                    {!context?.item?.UserData?.IsFavorite && (
-                        <>{!hidden?.add_to_favorite && menuItems.add_to_favorite}</>
-                    )}
-
-                    {context?.item?.UserData?.IsFavorite && (
-                        <>{!hidden?.remove_from_favorite && menuItems.remove_from_favorite}</>
-                    )}
-
-                    {!hidden?.add_to_playlist && menuItems.add_to_playlist}
-
-                    {!hidden?.remove_from_playlist && menuItems.remove_from_playlist}
                 </div>
             </div>
         )
@@ -601,27 +678,22 @@ const useInitialState = () => {
         isOpen,
         position.y,
         position.x,
-        hidden?.next,
-        hidden?.add_to_queue,
-        hidden?.instant_mix,
-        hidden?.view_artists,
-        hidden?.view_artist,
-        hidden?.view_album,
-        hidden?.add_to_favorite,
-        hidden?.remove_from_favorite,
-        hidden?.add_to_playlist,
-        hidden?.remove_from_playlist,
-        menuItems.next,
-        menuItems.add_to_queue,
-        menuItems.instant_mix,
-        menuItems.view_artists,
-        menuItems.view_artist,
-        menuItems.view_album,
-        menuItems.add_to_favorite,
-        menuItems.remove_from_favorite,
-        menuItems.add_to_playlist,
-        menuItems.remove_from_playlist,
+        hidden,
+        menuItems,
         context,
+        isTouchDevice,
+        subDropdown,
+        closeSubDropdown,
+        handleViewArtist,
+        playlistName,
+        handleInputChange,
+        handleInputKeyDown,
+        handleCreateClick,
+        playlists,
+        api,
+        prependItemToQueryData,
+        closeDropdown,
+        // Ensure all dependencies from useInitialState used in renderMobileSubMenuItems or main items are listed
     ])
 
     const touchTimeoutRef = useRef<number | null>(null)
