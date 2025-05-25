@@ -1,6 +1,6 @@
 import '@fontsource-variable/inter'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { useCallback, useEffect, useState } from 'react'
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
@@ -49,11 +49,28 @@ const persister = createSyncStoragePersister({
 })
 
 export const App = () => {
+    return (
+        <>
+            {window.__NPM_LIFECYCLE_EVENT__ === 'dev:nocache' ? (
+                <QueryClientProvider client={queryClient}>
+                    <RoutedApp />
+                </QueryClientProvider>
+            ) : (
+                <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+                    <RoutedApp />
+                </PersistQueryClientProvider>
+            )}
+        </>
+    )
+}
+
+const RoutedApp = () => {
     const [auth, setAuth] = useState<AuthData | null>(() => {
         const savedAuth = localStorage.getItem('auth')
         return savedAuth ? JSON.parse(savedAuth) : null
     })
     const [isLoggingOut, setIsLoggingOut] = useState(false)
+    const queryClient = useQueryClient()
 
     const handleLogin = (authData: AuthData) => {
         setAuth(authData)
@@ -66,6 +83,7 @@ export const App = () => {
         setAuth(null)
         localStorage.removeItem('auth')
         setIsLoggingOut(false)
+        queryClient.clear()
     }
 
     useEffect(() => {
@@ -112,7 +130,7 @@ export const App = () => {
         </div>
     )
 
-    const routedApp = (
+    return (
         <Router basename={import.meta.env.BASE_URL}>
             <HistoryContextProvider>
                 <PageTitleProvider>
@@ -122,18 +140,6 @@ export const App = () => {
                 </PageTitleProvider>
             </HistoryContextProvider>
         </Router>
-    )
-
-    return (
-        <>
-            {window.__NPM_LIFECYCLE_EVENT__ === 'dev:nocache' ? (
-                <QueryClientProvider client={queryClient}>{routedApp}</QueryClientProvider>
-            ) : (
-                <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-                    {routedApp}
-                </PersistQueryClientProvider>
-            )}
-        </>
     )
 }
 
