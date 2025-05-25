@@ -336,27 +336,24 @@ const useInitialState = () => {
                 </div>
             ),
             instant_mix: (
-                <>
-                    <div
-                        className="dropdown-item instant-mix"
-                        onClick={async () => {
-                            if (!context) return
+                <div
+                    className="dropdown-item instant-mix"
+                    onClick={async () => {
+                        if (!context) return
 
-                            closeDropdown()
+                        closeDropdown()
 
-                            const r = await api.getInstantMixFromSong(context.item.Id)
+                        const r = await api.getInstantMixFromSong(context.item.Id)
 
-                            if (r) {
-                                playback.setCurrentPlaylist({ playlist: r, title: '' })
-                                navigate('/queue')
-                            }
-                        }}
-                        onMouseEnter={closeSubDropdown}
-                    >
-                        <span>Play instant mix</span>
-                    </div>
-                    <div className="dropdown-separator" />
-                </>
+                        if (r) {
+                            playback.setCurrentPlaylist({ playlist: r, title: '' })
+                            navigate('/queue')
+                        }
+                    }}
+                    onMouseEnter={closeSubDropdown}
+                >
+                    <span>Play instant mix</span>
+                </div>
             ),
             view_artists: (
                 <div
@@ -421,40 +418,34 @@ const useInitialState = () => {
                 </div>
             ),
             add_to_favorite: (
-                <>
-                    <div className="dropdown-separator" />
-                    <div
-                        className="dropdown-item add-favorite"
-                        onClick={async () => {
-                            closeDropdown()
+                <div
+                    className="dropdown-item add-favorite"
+                    onClick={async () => {
+                        closeDropdown()
 
-                            if (context) {
-                                await addToFavorites(context.item)
-                            }
-                        }}
-                        onMouseEnter={closeSubDropdown}
-                    >
-                        <span>Add to favorites</span>
-                    </div>
-                </>
+                        if (context) {
+                            await addToFavorites(context.item)
+                        }
+                    }}
+                    onMouseEnter={closeSubDropdown}
+                >
+                    <span>Add to favorites</span>
+                </div>
             ),
             remove_from_favorite: (
-                <>
-                    <div className="dropdown-separator" />
-                    <div
-                        className="dropdown-item remove-favorite has-removable"
-                        onClick={async () => {
-                            closeDropdown()
+                <div
+                    className="dropdown-item remove-favorite has-removable"
+                    onClick={async () => {
+                        closeDropdown()
 
-                            if (context) {
-                                await removeFromFavorites(context.item)
-                            }
-                        }}
-                        onMouseEnter={closeSubDropdown}
-                    >
-                        <span>Remove from favorites</span>
-                    </div>
-                </>
+                        if (context) {
+                            await removeFromFavorites(context.item)
+                        }
+                    }}
+                    onMouseEnter={closeSubDropdown}
+                >
+                    <span>Remove from favorites</span>
+                </div>
             ),
             add_to_playlist: (
                 <div
@@ -627,6 +618,67 @@ const useInitialState = () => {
             }
             return [backButton, <div key="back-separator" className="dropdown-separator" />, ...items]
         }
+
+        const renderDropdownItems = () => {
+            let sepLast = false
+
+            const setSepLast = (value: boolean) => {
+                sepLast = value
+                return true
+            }
+
+            return (
+                <>
+                    {!hidden?.next && context?.item.Type === BaseItemKind.Audio && setSepLast(false) && menuItems.next}
+
+                    {!hidden?.add_to_queue &&
+                        context?.item.Type === BaseItemKind.Audio &&
+                        setSepLast(false) &&
+                        menuItems.add_to_queue}
+
+                    {!hidden?.instant_mix && setSepLast(false) && menuItems.instant_mix}
+
+                    {!sepLast && setSepLast(true) && <div className="dropdown-separator" />}
+
+                    {(context?.item?.ArtistItems?.length || 0) > 1 && (
+                        <>{!hidden?.view_artists && setSepLast(false) && menuItems.view_artists}</>
+                    )}
+
+                    {(context?.item?.ArtistItems?.length || 0) === 1 && (
+                        <>{!hidden?.view_artist && setSepLast(false) && menuItems.view_artist}</>
+                    )}
+
+                    {!hidden?.view_album &&
+                        context?.item.Type !== BaseItemKind.MusicAlbum &&
+                        context?.item.AlbumId &&
+                        setSepLast(false) &&
+                        menuItems.view_album}
+
+                    {!sepLast && setSepLast(true) && <div className="dropdown-separator" />}
+
+                    {!context?.item?.UserData?.IsFavorite && (
+                        <>{!hidden?.add_to_favorite && setSepLast(false) && menuItems.add_to_favorite}</>
+                    )}
+
+                    {!sepLast && setSepLast(true) && <div className="dropdown-separator" />}
+
+                    {context?.item?.UserData?.IsFavorite && (
+                        <>{!hidden?.remove_from_favorite && setSepLast(false) && menuItems.remove_from_favorite}</>
+                    )}
+
+                    {!hidden?.add_to_playlist &&
+                        context?.item.Type === BaseItemKind.Audio &&
+                        setSepLast(false) &&
+                        menuItems.add_to_playlist}
+
+                    {!hidden?.remove_from_playlist &&
+                        context?.item.Type === BaseItemKind.Audio &&
+                        setSepLast(false) &&
+                        menuItems.remove_from_playlist}
+                </>
+            )
+        }
+
         return (
             <div
                 className={'dropdown noSelect' + (isOpen ? ' active' : '')}
@@ -638,39 +690,7 @@ const useInitialState = () => {
                 ref={menuRef}
             >
                 <div className="dropdown-menu">
-                    {isTouchDevice && subDropdown.isOpen ? (
-                        renderMobileSubMenuItems()
-                    ) : (
-                        <>
-                            {!hidden?.next && menuItems.next}
-                            {!hidden?.add_to_queue && menuItems.add_to_queue}
-                            {!hidden?.instant_mix && menuItems.instant_mix}
-
-                            {(context?.item?.ArtistItems?.length || 0) > 1 && (
-                                <>{!hidden?.view_artists && menuItems.view_artists}</>
-                            )}
-
-                            {(context?.item?.ArtistItems?.length || 0) === 1 && (
-                                <>{!hidden?.view_artist && menuItems.view_artist}</>
-                            )}
-
-                            {!hidden?.view_album &&
-                                context?.item.Type !== BaseItemKind.MusicAlbum &&
-                                menuItems.view_album}
-
-                            {!context?.item?.UserData?.IsFavorite && (
-                                <>{!hidden?.add_to_favorite && menuItems.add_to_favorite}</>
-                            )}
-
-                            {context?.item?.UserData?.IsFavorite && (
-                                <>{!hidden?.remove_from_favorite && menuItems.remove_from_favorite}</>
-                            )}
-
-                            {!hidden?.add_to_playlist && menuItems.add_to_playlist}
-
-                            {!hidden?.remove_from_playlist && menuItems.remove_from_playlist}
-                        </>
-                    )}
+                    {isTouchDevice && subDropdown.isOpen ? renderMobileSubMenuItems() : renderDropdownItems()}
                 </div>
             </div>
         )
