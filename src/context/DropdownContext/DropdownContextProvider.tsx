@@ -685,10 +685,14 @@ const useInitialState = () => {
                 ],
             ]
 
-            return menuItemz.map((group, index) => (
+            const visibleGroups = menuItemz
+                .map(group => group.filter(item => item.isVisible))
+                .filter(group => group.length > 0)
+
+            return visibleGroups.map((group, index) => (
                 <Fragment key={index}>
                     {group.map((item, idx) => (item.isVisible ? <Fragment key={idx}>{item.node}</Fragment> : null))}
-                    {index !== menuItemz.length - 1 && <div className="dropdown-separator" />}
+                    {index !== visibleGroups.length - 1 && <div className="dropdown-separator" />}
                 </Fragment>
             ))
         }
