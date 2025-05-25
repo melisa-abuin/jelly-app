@@ -47,7 +47,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const hasRestored = useRef(false)
     const queryClient = useQueryClient()
 
-    const [playlistTitle, setPlaylistTitle] = useState('')
+    const [playlistTitle, setPlaylistTitle] = useState(localStorage.getItem('playlistTitle') || '')
     const [reviver, setReviver] = useState<IReviver>(JSON.parse(localStorage.getItem('reviver') || '{}') || {})
 
     const [bitrate, setBitrate] = useState(Number(localStorage.getItem('bitrate')))
@@ -97,6 +97,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
             setReviver(props.reviver || ({} as IReviver))
 
+            localStorage.setItem('playlistTitle', props.title)
             setPlaylistTitle(props.title)
         },
         [queryClient, shuffle]
