@@ -208,7 +208,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                         hlsRef.current = hls
                         hls.loadSource(streamUrl)
                         hls.attachMedia(audio)
-                        hls.on(Hls.Events.ERROR, (event, data) => {
+                        hls.on(Hls.Events.ERROR, (_event, data) => {
                             console.error('HLS error:', data.type, data.details, data)
                             if (data.fatal) {
                                 if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
@@ -294,7 +294,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                         hlsRef.current = hls
                         hls.loadSource(streamUrl)
                         hls.attachMedia(audio)
-                        hls.on(Hls.Events.ERROR, (event, data) => {
+                        hls.on(Hls.Events.ERROR, (_event, data) => {
                             console.error('HLS error:', data.type, data.details, data)
                             if (data.fatal) {
                                 if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
@@ -678,7 +678,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                         hlsRef.current = hls
                         hls.loadSource(streamUrl)
                         hls.attachMedia(audioRef.current)
-                        hls.on(Hls.Events.ERROR, (event, data) => {
+                        hls.on(Hls.Events.ERROR, (_event, data) => {
                             console.error('HLS error:', data.type, data.details, data)
                             if (data.fatal) {
                                 if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
