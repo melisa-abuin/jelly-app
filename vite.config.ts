@@ -42,8 +42,16 @@ export default defineConfig({
                 ],
             },
         }),
+        {
+            name: 'html-version-injector',
+            transformIndexHtml(html) {
+                const version = process.env.npm_package_version || 'unknown'
+                return html.replace('__VERSION__', version)
+            },
+        },
     ],
     define: {
         __NPM_LIFECYCLE_EVENT__: JSON.stringify(process.env.npm_lifecycle_event),
+        __VERSION__: JSON.stringify(process.env.npm_package_version),
     },
 })

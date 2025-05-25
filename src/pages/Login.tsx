@@ -11,7 +11,7 @@ export const Login = ({
                 <div className="logo"></div>
             </div>
             <AuthForm onLogin={onLogin} />
-            <div className="disclaimer">Jelly Music App - Version 0.1</div>
+            <div className="disclaimer">Jelly Music App - Version {window.__VERSION__}</div>
         </div>
     )
 }
