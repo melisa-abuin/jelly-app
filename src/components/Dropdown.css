@@ -22,7 +22,7 @@
     left: 100% !important;
 }
 
-.sub-dropdown.flip {
+.sub-dropdown.flip-x {
     left: auto !important;
     right: 100% !important;
 }

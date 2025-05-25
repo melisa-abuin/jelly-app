@@ -1,5 +1,5 @@
 import { ChevronRightIcon } from '@primer/octicons-react'
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BaseItemKind } from '../../../node_modules/@jellyfin/sdk/lib/generated-client/models/base-item-kind'
 import { MediaItem } from '../../api/jellyfin'
@@ -22,17 +22,23 @@ const useInitialState = () => {
     const [subDropdown, setSubDropdown] = useState<{
         isOpen: boolean
         type: 'view-artists' | 'add-playlist' | ''
+        flipX: boolean
         flipY: boolean
         width: number
         height: number
         top: number
+        measured: boolean
+        triggerRect: DOMRect | null
     }>({
         isOpen: false,
         type: '',
+        flipX: false,
         flipY: false,
         width: 0,
         height: 0,
         top: 0,
+        measured: false,
+        triggerRect: null,
     })
     const [isTouchDevice, setIsTouchDevice] = useState(false)
     const [ignoreMargin, setIgnoreMargin] = useState(false)
@@ -52,7 +58,7 @@ const useInitialState = () => {
     const [playlistName, setPlaylistName] = useState<string>('')
 
     const closeSubDropdown = useCallback(() => {
-        setSubDropdown(prev => ({ ...prev, isOpen: false, type: '' }))
+        setSubDropdown(prev => ({ ...prev, isOpen: false, type: '', measured: false, triggerRect: null }))
     }, [])
 
     useEffect(() => {
@@ -74,10 +80,13 @@ const useInitialState = () => {
         setSubDropdown({
             isOpen: false,
             type: '',
+            flipX: false,
             flipY: false,
             width: 0,
             height: 0,
             top: 0,
+            measured: false,
+            triggerRect: null,
         })
         setIgnoreMargin(false)
     }, [])
@@ -144,24 +153,68 @@ const useInitialState = () => {
 
     const openSubDropdown = useCallback(
         (type: 'view-artists' | 'add-playlist', e: React.MouseEvent<HTMLDivElement>) => {
-            const el = e.currentTarget
-            const rect = el.getBoundingClientRect()
-            const menuHeight = (subMenuRef.current?.querySelector('.dropdown-menu') as HTMLElement)?.offsetHeight || 0
-            const margin = 40
-            const viewportBottom = window.innerHeight
-            const flipY = rect.top + menuHeight + margin > viewportBottom
-            const top = flipY ? -menuHeight + rect.height : 0
+            const rect = e.currentTarget.getBoundingClientRect()
             setSubDropdown({
                 isOpen: true,
                 type,
-                top,
-                width: rect.width,
-                height: rect.height,
-                flipY,
+                flipX: false,
+                flipY: false,
+                width: 0,
+                height: 0,
+                top: 0,
+                measured: false,
+                triggerRect: rect,
             })
         },
         []
     )
+
+    useLayoutEffect(() => {
+        if (!subDropdown.isOpen || subDropdown.measured || !subDropdown.triggerRect) return
+
+        const menuEl = subMenuRef.current?.querySelector('.dropdown-menu') as HTMLElement
+        if (!menuEl) return
+
+        const { width, height } = menuEl.getBoundingClientRect()
+        const triggerRect = subDropdown.triggerRect
+        const margin = 20 // Small margin for sub-menus
+        const viewportW = window.innerWidth
+        const viewportH = window.innerHeight
+
+        // Determine if sub-menu should flip horizontally
+        const newFlipX =
+            triggerRect.left + triggerRect.width + width + margin > viewportW && // Overflows right
+            triggerRect.left - width - margin < 0
+                ? false // If it also overflows left, don't flip (or pick a side)
+                : triggerRect.left + triggerRect.width + width + margin > viewportW // Default flip if overflows right
+
+        // Determine if sub-menu should flip vertically (i.e., align bottom with parent's bottom)
+        const newFlipY = triggerRect.top + height + margin > viewportH
+
+        // Calculate CSS top position relative to the parent item
+        // If newFlipY is true, align sub-menu bottom with parent item bottom
+        // Otherwise, align sub-menu top with parent item top
+        let newTop = newFlipY ? -height + triggerRect.height : 0
+
+        // Ensure the sub-menu stays within vertical viewport bounds
+        if (triggerRect.top + newTop < margin) {
+            // Sub-menu is too high
+            newTop = -triggerRect.top + margin
+        } else if (triggerRect.top + newTop + height + margin > viewportH) {
+            // Sub-menu is too low
+            newTop = viewportH - height - triggerRect.top - margin
+        }
+
+        setSubDropdown(sd => ({
+            ...sd,
+            width,
+            height,
+            flipX: newFlipX,
+            flipY: newFlipY,
+            top: newTop,
+            measured: true,
+        }))
+    }, [subDropdown.isOpen, subDropdown.measured, subDropdown.triggerRect])
 
     useEffect(() => {
         const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 480
@@ -200,10 +253,13 @@ const useInitialState = () => {
             setSubDropdown({
                 isOpen: false,
                 type: '',
+                flipX: false,
                 flipY: false,
                 top: 0,
                 width: 0,
                 height: 0,
+                measured: false,
+                triggerRect: null,
             })
             setIgnoreMargin(ignoreMargin)
         },
@@ -310,12 +366,21 @@ const useInitialState = () => {
                     {subDropdown.isOpen && subDropdown.type === 'view-artists' && (
                         <div
                             ref={subMenuRef}
-                            className={`sub-dropdown${subDropdown.flipY ? ' flip-y' : ''}`}
-                            style={{
-                                top: subDropdown.flipY ? 'auto' : `${subDropdown.top}px`,
-                                bottom: subDropdown.flipY ? `${subDropdown.height - subDropdown.top}px` : 'auto',
-                                left: `${subDropdown.width}px`,
-                            }}
+                            className={
+                                'sub-dropdown' +
+                                (subDropdown.flipX ? ' flip-x' : '') +
+                                (subDropdown.flipY ? ' flip-y' : '')
+                            }
+                            style={
+                                !subDropdown.measured || !subDropdown.triggerRect
+                                    ? { visibility: 'hidden', position: 'absolute', left: '-9999px', top: '-9999px' }
+                                    : {
+                                          position: 'absolute',
+                                          top: `${subDropdown.top}px`,
+                                          left: subDropdown.flipX ? 'auto' : '100%',
+                                          right: subDropdown.flipX ? '100%' : 'auto',
+                                      }
+                            }
                         >
                             <div className="dropdown-menu">
                                 {context?.item?.ArtistItems?.map(artist => (
@@ -398,12 +463,19 @@ const useInitialState = () => {
                     {subDropdown.isOpen && subDropdown.type === 'add-playlist' && (
                         <div
                             ref={subMenuRef}
-                            className={`sub-dropdown${subDropdown.flipY ? ' flip-y' : ''}`}
-                            style={{
-                                top: subDropdown.flipY ? 'auto' : `${subDropdown.top}px`,
-                                bottom: subDropdown.flipY ? `${subDropdown.height - subDropdown.top}px` : 'auto',
-                                left: `${subDropdown.width}px`,
-                            }}
+                            className={`sub-dropdown${subDropdown.flipX ? ' flip-x' : ''}${
+                                subDropdown.flipY ? ' flip-y' : ''
+                            }`}
+                            style={
+                                !subDropdown.measured || !subDropdown.triggerRect
+                                    ? { visibility: 'hidden', position: 'absolute', left: '-9999px', top: '-9999px' }
+                                    : {
+                                          position: 'absolute',
+                                          top: `${subDropdown.top}px`,
+                                          left: subDropdown.flipX ? 'auto' : '100%',
+                                          right: subDropdown.flipX ? '100%' : 'auto',
+                                      }
+                            }
                         >
                             <div className="dropdown-menu">
                                 <div className="dropdown-item">
@@ -460,10 +532,11 @@ const useInitialState = () => {
         closeSubDropdown,
         subDropdown.isOpen,
         subDropdown.type,
+        subDropdown.flipX,
         subDropdown.flipY,
+        subDropdown.measured,
+        subDropdown.triggerRect,
         subDropdown.top,
-        subDropdown.height,
-        subDropdown.width,
         context,
         playlistName,
         handleInputKeyDown,
