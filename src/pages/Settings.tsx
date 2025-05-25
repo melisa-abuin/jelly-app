@@ -16,6 +16,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
     const [clientIp, setClientIp] = useState<string | null>(null)
     const [latency, setLatency] = useState<number | null>(null)
     const { sessionPlayCount, resetSessionCount, bitrate, setBitrate } = usePlaybackContext()
+    const playback = usePlaybackContext()
 
     useEffect(() => {
         const fetchData = async () => {
@@ -55,6 +56,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
     }, [api])
 
     const handleLogout = () => {
+        playback.audioRef.current?.pause()
         resetSessionCount()
         onLogout()
         navigate('/login')
