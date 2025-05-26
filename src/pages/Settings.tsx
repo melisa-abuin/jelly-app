@@ -296,7 +296,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
             <div className="section about">
                 <div className="title">About</div>
                 <div className="desc">
-                    <p className="subtitle">Jelly Music App - Version {window.__VERSION__}</p>
+                    <p className="subtitle">Jelly Music App - Version {__VERSION__}</p>
                     <p>An open source music player for Jellyfin</p>
                     <p>
                         Carefully crafted with great attention to detail, aiming to reduce noise and distractions with a
