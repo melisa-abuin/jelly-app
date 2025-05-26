@@ -289,7 +289,7 @@ const useInitialState = () => {
             const insertIndex = currentIndex >= 0 ? currentIndex + 1 : playlist.length
             const newPlaylist = [...playlist]
             newPlaylist.splice(insertIndex, 0, context.item)
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Queue' })
+            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
         }
         closeDropdown()
     }, [closeDropdown, playback, context])
@@ -298,7 +298,7 @@ const useInitialState = () => {
         (item: MediaItem) => {
             const playlist = playback.currentPlaylist
             const newPlaylist = [...playlist, item]
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Queue' })
+            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
             closeDropdown()
         },
         [closeDropdown, playback]
