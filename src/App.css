@@ -506,6 +506,10 @@ body.lockscroll {
     pointer-events: none;
 }
 
+.filter > select > option {
+    color: var(--font-color);
+}
+
 .main > .main_header > .secondary > .sidenav_toggle {
     display: none;
 }
@@ -522,13 +526,13 @@ body.lockscroll {
 
 .main > .main_footer {
     position: sticky;
-    /* Content was bleeding through below with bottom: 0 */
-    bottom: -1px;
-    padding-bottom: 1px;
+    bottom: 0;
     z-index: 1;
     width: 100%;
     margin-top: auto;
     background-color: var(--bg-color);
+    /* Attempted fix to subpixel rendering that causes 1px content bleed at bottom */
+    will-change: transform;
 }
 
 /* Playback area */
