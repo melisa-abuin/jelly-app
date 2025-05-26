@@ -5,7 +5,7 @@ import { BaseItemKind } from '../../../node_modules/@jellyfin/sdk/lib/generated-
 import { MediaItem } from '../../api/jellyfin'
 import { useJellyfinPlaylistsList } from '../../hooks/Jellyfin/useJellyfinPlaylistsList'
 import { useFavorites } from '../../hooks/useFavorites'
-import { usePatchQueries } from '../../hooks/usePatchQueries'
+import { usePlaylists } from '../../hooks/usePlaylists'
 import { useJellyfinContext } from '../JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../ScrollContext/ScrollContext'
@@ -50,7 +50,7 @@ const useInitialState = () => {
     const playback = usePlaybackContext()
     const { playlists } = useJellyfinPlaylistsList()
     const { addToFavorites, removeFromFavorites } = useFavorites()
-    const { prependItemToQueryData, removeItemFromQueryData } = usePatchQueries()
+    const { addToPlaylist, removeFromPlaylist, createPlaylist } = usePlaylists()
 
     const subMenuRef = useRef<HTMLDivElement>(null)
 
@@ -99,28 +99,28 @@ const useInitialState = () => {
     const handleInputKeyDown = useCallback(
         async (e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === 'Enter' && playlistName.trim() && context) {
-                const playlist = await api.createPlaylist(playlistName.trim())
-                await api.addToPlaylist(playlist.Id!, context.item.Id)
+                const playlist = await createPlaylist(playlistName.trim())
+                await addToPlaylist(context.item, playlist.Id!)
                 setPlaylistName('')
                 closeDropdown()
             } else if (e.key === 'Escape') {
                 setPlaylistName('')
             }
         },
-        [playlistName, context, api, closeDropdown]
+        [addToPlaylist, closeDropdown, context, createPlaylist, playlistName]
     )
 
     const handleCreateClick = useCallback(
         async (e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation()
             if (playlistName.trim() && context) {
-                const playlist = await api.createPlaylist(playlistName.trim())
-                await api.addToPlaylist(playlist.Id!, context.item.Id)
+                const playlist = await createPlaylist(playlistName.trim())
+                await addToPlaylist(context.item, playlist.Id!)
                 setPlaylistName('')
                 closeDropdown()
             }
         },
-        [playlistName, context, api, closeDropdown]
+        [addToPlaylist, closeDropdown, context, createPlaylist, playlistName]
     )
 
     useEffect(() => {
@@ -512,8 +512,10 @@ const useInitialState = () => {
                                         className="dropdown-item"
                                         onClick={async () => {
                                             closeDropdown()
-                                            await api.addToPlaylist(playlist.Id, context!.item.Id)
-                                            prependItemToQueryData(['playlistTracks', playlist.Id], context!.item)
+
+                                            if (context) {
+                                                await addToPlaylist(context.item, playlist.Id)
+                                            }
                                         }}
                                     >
                                         {playlist.Name}
@@ -529,8 +531,8 @@ const useInitialState = () => {
                     className="dropdown-item remove-playlist has-removable"
                     onClick={async () => {
                         closeDropdown()
-                        await api.removeFromPlaylist(context.playlistId!, context.item.Id)
-                        removeItemFromQueryData(['playlistTracks', context.playlistId!], context.item.Id)
+
+                        await removeFromPlaylist(context.item, context.playlistId!)
                     }}
                     onMouseEnter={closeSubDropdown}
                 >
@@ -540,6 +542,7 @@ const useInitialState = () => {
         }
     }, [
         addToFavorites,
+        addToPlaylist,
         api,
         closeDropdown,
         closeSubDropdown,
@@ -557,9 +560,8 @@ const useInitialState = () => {
         playback,
         playlistName,
         playlists,
-        prependItemToQueryData,
         removeFromFavorites,
-        removeItemFromQueryData,
+        removeFromPlaylist,
         subDropdown.flipX,
         subDropdown.flipY,
         subDropdown.isOpen,
@@ -619,9 +621,11 @@ const useInitialState = () => {
                             key={playlist.Id}
                             className="dropdown-item"
                             onClick={async () => {
-                                await api.addToPlaylist(playlist.Id!, context!.item.Id)
-                                prependItemToQueryData(['playlistTracks', playlist.Id!], context!.item)
-                                closeDropdown() // Close main dropdown after action
+                                closeDropdown()
+
+                                if (context) {
+                                    await addToPlaylist(context.item, playlist.Id)
+                                }
                             }}
                         >
                             {playlist.Name}
@@ -714,7 +718,7 @@ const useInitialState = () => {
             </div>
         )
     }, [
-        api,
+        addToPlaylist,
         closeDropdown,
         closeSubDropdown,
         context,
@@ -748,7 +752,6 @@ const useInitialState = () => {
         playlists,
         position.x,
         position.y,
-        prependItemToQueryData,
         subDropdown.isOpen,
         subDropdown.type,
     ])
