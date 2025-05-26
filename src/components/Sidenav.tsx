@@ -217,7 +217,7 @@ export const Sidenav = (props: { username: string }) => {
                                         searchResults.length === 0 && (
                                             <div className="empty">
                                                 Search for <span className="keyword">'{searchQuery}'</span> yields no
-                                                results.
+                                                results
                                             </div>
                                         )}
                                     {!searchLoading && !searchError && searchResults.length > 0 && (

@@ -986,9 +986,14 @@ body.lockscroll {
 .tracks-page > .empty,
 .recently-page > .empty,
 .frequently-page > .empty,
-.genre-page > .empty {
+.genre-page > .empty,
+.playlist-page > .empty {
     font-size: 0.85rem;
     margin: 4px 0;
+}
+
+.main > .main_content > .empty-queue {
+    font-size: 0.85rem;
 }
 
 /* Responsive */

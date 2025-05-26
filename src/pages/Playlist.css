@@ -2,11 +2,6 @@
     margin-top: 4px;
 }
 
-.playlist-page > .empty {
-    font-size: 0.85rem;
-    margin: 4px 0;
-}
-
 .playlist-page > .playlist-header {
     display: flex;
     align-items: center;

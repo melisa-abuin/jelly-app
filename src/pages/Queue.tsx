@@ -14,7 +14,7 @@ export const Queue = () => {
     }, [setPageTitle])
 
     if (!currentTrack || currentPlaylist.length === 0) {
-        return <div className="empty">Queue is empty</div>
+        return <div className="empty-queue">Queue is currently empty</div>
     }
 
     const queueTracks = currentPlaylist.slice(currentTrackIndex + 1)
