@@ -8,6 +8,7 @@ A lightweight & elegant music interface for Jellyfin. Made to be intuitive and m
   <img src="public/dark-variant.webp" alt="Dark variant" width="49%">
 </div>
 <br/>
+
 <details>
   <summary>Additional screenshots</summary>
   <br/>
@@ -34,3 +35,25 @@ A lightweight & elegant music interface for Jellyfin. Made to be intuitive and m
   <img src="public/playlist-light-variant.webp" alt="Playlist light variant" width="49%">
   <img src="public/playlist-dark-variant.webp" alt="Playlist dark variant" width="49%">
 </details>
+
+### Installation
+Jelly Music App is available as a production build, ready to deploy on an existing web server. Download the latest release from our project's [GitHub release page](https://github.com/Stannnnn/jelly-app/releases) and place the contents of the `dist` folder in a web-accessible directory.
+<br/>
+<br/>
+
+[Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (```npm i -g yarn```) is required if you wish to build the project or to run the development server on your own accord.
+
+#### Build from Source
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/your-username/jelly-music-app.git
+2. Install dependencies:
+    ```bash
+    yarn
+3. Build the production files:
+    ```bash
+    yarn build
+4. Deploy the contents of the `dist` folder to a web-accessible directory.
+<br/>
+
+Alternatively, you can run the production server directly: ```yarn dev``` or ```yarn dev:nocache```
