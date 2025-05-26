@@ -54,7 +54,7 @@ export const SearchResults = () => {
 
             try {
                 const [artistItems, albumItems, playlistItems, songs, genreItems] = await Promise.all([
-                    api.searchArtistsDetailed(query, 10),
+                    api.searchArtists(query, 10),
                     api.searchAlbumsDetailed(query, 10),
                     api.searchPlaylistsDetailed(query, 10),
                     api.fetchSongs(query),

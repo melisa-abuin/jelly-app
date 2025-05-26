@@ -111,19 +111,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return (response.data.Items as MediaItem[]) || []
     }
 
-    const searchArtistsDetailed = async (searchTerm: string, limit = 50): Promise<MediaItem[]> => {
-        const artistsApi = new ArtistsApi(api.configuration)
-        const response = await artistsApi.getArtists(
-            {
-                userId,
-                searchTerm,
-                limit,
-            },
-            { signal: AbortSignal.timeout(20000) }
-        )
-        return response.data.Items as MediaItem[]
-    }
-
     const searchAlbumsDetailed = async (searchTerm: string, limit = 50): Promise<MediaItem[]> => {
         const itemsApi = new ItemsApi(api.configuration)
         const response = await itemsApi.getItems(
@@ -893,7 +880,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         loginToJellyfin,
         searchItems,
         searchArtists,
-        searchArtistsDetailed,
         searchAlbumsDetailed,
         searchPlaylistsDetailed,
         searchGenres,
