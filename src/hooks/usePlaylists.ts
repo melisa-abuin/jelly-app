@@ -21,5 +21,9 @@ export const usePlaylists = () => {
             prependItemToQueryData(['playlists'], playlist)
             return playlist
         },
+        deletePlaylist: async (playlistId: string) => {
+            await api.deletePlaylist(playlistId)
+            removeItemFromQueryData(['playlists'], playlistId)
+        },
     }
 }

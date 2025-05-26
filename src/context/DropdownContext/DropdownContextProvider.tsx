@@ -50,7 +50,7 @@ const useInitialState = () => {
     const playback = usePlaybackContext()
     const { playlists } = useJellyfinPlaylistsList()
     const { addToFavorites, removeFromFavorites } = useFavorites()
-    const { addToPlaylist, removeFromPlaylist, createPlaylist } = usePlaylists()
+    const { addToPlaylist, removeFromPlaylist, createPlaylist, deletePlaylist } = usePlaylists()
 
     const subMenuRef = useRef<HTMLDivElement>(null)
 
@@ -368,6 +368,21 @@ const useInitialState = () => {
                     <span>Play instant mix</span>
                 </div>
             ),
+            delete_playlist: (
+                <div
+                    className="dropdown-item delete-playlist has-removable"
+                    onClick={async () => {
+                        closeDropdown()
+
+                        if (context?.item.Id) {
+                            await deletePlaylist(context.item.Id)
+                        }
+                    }}
+                    onMouseEnter={closeSubDropdown}
+                >
+                    <span>Delete playlist</span>
+                </div>
+            ),
             view_artists: (
                 <div
                     className={`dropdown-item view-artists has-sub-menu${
@@ -547,6 +562,7 @@ const useInitialState = () => {
         closeDropdown,
         closeSubDropdown,
         context,
+        deletePlaylist,
         handleAddToQueue,
         handleCreateClick,
         handleInputChange,
@@ -687,6 +703,10 @@ const useInitialState = () => {
                         isVisible: !!(!hidden?.remove_from_playlist && context?.item.Type === BaseItemKind.Audio),
                         node: menuItems.remove_from_playlist,
                     },
+                    {
+                        isVisible: !hidden?.delete_playlist && context?.item.Type === BaseItemKind.Playlist,
+                        node: menuItems.delete_playlist,
+                    },
                 ],
             ]
 
@@ -729,6 +749,7 @@ const useInitialState = () => {
         hidden?.add_to_favorite,
         hidden?.add_to_playlist,
         hidden?.add_to_queue,
+        hidden?.delete_playlist,
         hidden?.instant_mix,
         hidden?.next,
         hidden?.remove_from_favorite,
@@ -741,6 +762,7 @@ const useInitialState = () => {
         menuItems.add_to_favorite,
         menuItems.add_to_playlist,
         menuItems.add_to_queue,
+        menuItems.delete_playlist,
         menuItems.instant_mix,
         menuItems.next,
         menuItems.remove_from_favorite,

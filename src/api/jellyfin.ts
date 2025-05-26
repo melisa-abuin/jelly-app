@@ -876,6 +876,24 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return response.data
     }
 
+    const deletePlaylist = async (playlistId: string) => {
+        const response = await fetch(`${serverUrl}/Items/${playlistId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-Emby-Authorization': `MediaBrowser Client="Jelly Music App", Device="Web", DeviceId="${deviceId}", Version="${window.__VERSION__}"`,
+                'Content-Type': 'application/json',
+                'X-Emby-Token': token,
+            },
+            signal: AbortSignal.timeout(20000),
+        })
+
+        if (!response.ok) {
+            throw new ApiError(`HTTP error! status: ${response.status}`, response)
+        }
+
+        return response.ok
+    }
+
     return {
         loginToJellyfin,
         searchItems,
@@ -918,5 +936,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         addToPlaylist,
         removeFromPlaylist,
         createPlaylist,
+        deletePlaylist,
     }
 }
