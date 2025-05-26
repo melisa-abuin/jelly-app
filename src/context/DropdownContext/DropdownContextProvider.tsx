@@ -289,7 +289,7 @@ const useInitialState = () => {
             const insertIndex = currentIndex >= 0 ? currentIndex + 1 : playlist.length
             const newPlaylist = [...playlist]
             newPlaylist.splice(insertIndex, 0, context.item)
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: '' })
+            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Queue' })
         }
         closeDropdown()
     }, [closeDropdown, playback, context])
@@ -298,7 +298,7 @@ const useInitialState = () => {
         (item: MediaItem) => {
             const playlist = playback.currentPlaylist
             const newPlaylist = [...playlist, item]
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: '' })
+            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Queue' })
             closeDropdown()
         },
         [closeDropdown, playback]
@@ -358,7 +358,7 @@ const useInitialState = () => {
                         const r = await api.getInstantMixFromSong(context.item.Id)
 
                         if (r) {
-                            playback.setCurrentPlaylist({ playlist: r, title: '' })
+                            playback.setCurrentPlaylist({ playlist: r, title: 'Instant Mix' })
                             playback.playTrack(0)
                             navigate('/queue')
                         }

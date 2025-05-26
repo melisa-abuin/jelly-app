@@ -28,7 +28,9 @@ export const Queue = () => {
                 <>
                     <div className="queue-title">Playing Next</div>
                     <div className="queue-desc">
-                        <span className="text">From {playlistTitle}</span>
+                        <span className="text">
+                            From <span className="highlight">{playlistTitle}</span>
+                        </span>
                     </div>
                     <MediaList items={queueTracks} isLoading={false} type="song" title={'Next Up - Queue'} />
                 </>

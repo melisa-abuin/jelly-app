@@ -19,6 +19,6 @@
     margin-bottom: 6px;
 }
 
-.queue-page > .queue-desc > a {
+.queue-page > .queue-desc > .text > .highlight {
     font-weight: 600;
 }
