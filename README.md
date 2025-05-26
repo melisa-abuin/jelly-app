@@ -46,13 +46,12 @@ A lightweight & elegant music interface for Jellyfin. Made to be intuitive and m
     -   **Playlist Page:** Displays playlists with a numbered tracklist.
 -   **Theme Support:** Switch between light and dark modes to suit your preference.
 -   **Modern Tech Stack:** Built with React, Vite, and TypeScript for a fast and reliable experience.
--   **Client-Side Routing:** Smooth navigation powered by React Router.
 -   **Efficient Data Fetching:** Utilizes Tanstack Query (React Query) for optimized data handling and caching.
 -   **Progressive Web App (PWA):** Installable for an app-like experience.
 
 ### Installation
 
-Jelly Music App is available as a production build, ready to deploy on an existing web server. Download the latest release from our project's [GitHub release page](https://github.com/Stannnnn/jelly-app/releases) and place the contents of the `dist` folder in a web-accessible directory.
+Jelly Music App is available as a production build, ready to deploy on an existing web server. Download the latest release from our project's [GitHub release page](https://github.com/Stannnnn/jelly-app/releases) and place the contents of the archived folder in a web-accessible directory.
 <br/>
 <br/>
 
