@@ -197,7 +197,6 @@
         padding: 7px;
         gap: 4px;
         box-shadow: none;
-        border: none;
         background-color: var(--bg-color-secondary);
         max-height: 60dvh;
         overflow: auto;

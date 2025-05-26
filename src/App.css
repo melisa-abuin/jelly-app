@@ -522,7 +522,9 @@ body.lockscroll {
 
 .main > .main_footer {
     position: sticky;
-    bottom: 0;
+    /* Content was bleeding through below with bottom: 0 */
+    bottom: -1px;
+    padding-bottom: 1px;
     z-index: 1;
     width: 100%;
     margin-top: auto;
