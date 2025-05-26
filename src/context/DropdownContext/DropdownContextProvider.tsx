@@ -359,6 +359,7 @@ const useInitialState = () => {
 
                         if (r) {
                             playback.setCurrentPlaylist({ playlist: r, title: '' })
+                            playback.playTrack(0)
                             navigate('/queue')
                         }
                     }}
