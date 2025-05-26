@@ -36,24 +36,43 @@ A lightweight & elegant music interface for Jellyfin. Made to be intuitive and m
   <img src="public/playlist-dark-variant.webp" alt="Playlist dark variant" width="49%">
 </details>
 
+### Key Features
+
+-   **Lightweight and Elegant Interface:** A minimal and intuitive design focused on a seamless music playback experience.
+-   **Jellyfin Integration:** Connects to your Jellyfin server to access your personal music library.
+-   **Comprehensive Search:** Easily find tracks, artists, albums, playlists, and genres with a quick sidenav search and a dedicated results page.
+-   **Detailed Views:**
+    -   **Artist Page:** Shows most played songs, albums, and collaborations.
+    -   **Playlist Page:** Displays playlists with a numbered tracklist.
+-   **Theme Support:** Switch between light and dark modes to suit your preference.
+-   **Modern Tech Stack:** Built with React, Vite, and TypeScript for a fast and reliable experience.
+-   **Client-Side Routing:** Smooth navigation powered by React Router.
+-   **Efficient Data Fetching:** Utilizes Tanstack Query (React Query) for optimized data handling and caching.
+-   **Progressive Web App (PWA):** Installable for an app-like experience.
+
 ### Installation
+
 Jelly Music App is available as a production build, ready to deploy on an existing web server. Download the latest release from our project's [GitHub release page](https://github.com/Stannnnn/jelly-app/releases) and place the contents of the `dist` folder in a web-accessible directory.
 <br/>
 <br/>
 
-[Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (```npm i -g yarn```) is required if you wish to build the project or to run the development server on your own accord.
+[Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (`npm i -g yarn`) is required if you wish to build the project or to run the development server on your own accord.
 
 #### Build from Source
+
 1. Clone the repository:
     ```bash
     git clone https://github.com/Stannnnn/jelly-app.git
+    ```
 2. Install dependencies:
     ```bash
     yarn
+    ```
 3. Build the production files:
     ```bash
     yarn build
+    ```
 4. Deploy the contents of the `dist` folder to a web-accessible directory.
-<br/>
+   <br/>
 
-Alternatively, you can run the production server directly: ```yarn dev``` or ```yarn dev:nocache```
+Alternatively, you can run the production server directly: `yarn dev` or `yarn dev:nocache`
