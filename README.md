@@ -46,7 +46,7 @@ Jelly Music App is available as a production build, ready to deploy on an existi
 #### Build from Source
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your-username/jelly-music-app.git
+    git clone https://github.com/Stannnnn/jelly-app.git
 2. Install dependencies:
     ```bash
     yarn
