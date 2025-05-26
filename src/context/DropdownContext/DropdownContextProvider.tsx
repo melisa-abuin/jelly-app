@@ -375,7 +375,9 @@ const useInitialState = () => {
                         closeDropdown()
 
                         if (context?.item.Id) {
-                            await deletePlaylist(context.item.Id)
+                            if (confirm('Are you sure you want to delete this playlist?')) {
+                                await deletePlaylist(context.item.Id)
+                            }
                         }
                     }}
                     onMouseEnter={closeSubDropdown}
