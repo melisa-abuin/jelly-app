@@ -380,19 +380,61 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
     ): Promise<{
         artist: MediaItem
         tracks: MediaItem[]
-        albums: MediaItem[]
-        appearsInAlbums: MediaItem[]
-        totalTrackCount: number
     }> => {
         const userLibraryApi = new UserLibraryApi(api.configuration)
         const itemsApi = new ItemsApi(api.configuration)
 
-        const [artistResponse, tracksResponse, totalTracksResponse, artistAlbumsResponse, contributingAlbumsResponse] =
+        const [artistResponse, tracksResponse] = await Promise.all([
+            userLibraryApi.getItem(
+                {
+                    userId,
+                    itemId: artistId,
+                },
+                { signal: AbortSignal.timeout(20000) }
+            ),
+            itemsApi.getItems(
+                {
+                    userId,
+                    artistIds: [artistId],
+                    includeItemTypes: [BaseItemKind.Audio],
+                    recursive: true,
+                    sortBy: [ItemSortBy.PlayCount, ItemSortBy.SortName],
+                    sortOrder: [SortOrder.Descending, SortOrder.Ascending],
+                    limit: trackLimit,
+                },
+                { signal: AbortSignal.timeout(20000) }
+            ),
+        ])
+
+        const artist = artistResponse.data as MediaItem
+        const tracks = tracksResponse.data.Items as MediaItem[]
+
+        return { artist, tracks }
+    }
+
+    const getArtistStats = async (
+        artistId: string,
+        artistName: string
+    ): Promise<{
+        albums: MediaItem[]
+        appearsInAlbums: MediaItem[]
+        totalTrackCount: number
+        totalPlaytime: number
+        totalAlbumCount: number
+    }> => {
+        const itemsApi = new ItemsApi(api.configuration)
+
+        // Fetch total track count and playtime
+        const [totalTracksResponse, fullTracksResponse, artistAlbumsResponse, contributingAlbumsResponse] =
             await Promise.all([
-                userLibraryApi.getItem(
+                itemsApi.getItems(
                     {
                         userId,
-                        itemId: artistId,
+                        artistIds: [artistId],
+                        includeItemTypes: [BaseItemKind.Audio],
+                        recursive: true,
+                        limit: 0, // No items, just metadata
+                        fields: ['MediaSources'],
                     },
                     { signal: AbortSignal.timeout(20000) }
                 ),
@@ -402,19 +444,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                         artistIds: [artistId],
                         includeItemTypes: [BaseItemKind.Audio],
                         recursive: true,
-                        sortBy: [ItemSortBy.PlayCount, ItemSortBy.SortName],
-                        sortOrder: [SortOrder.Descending, SortOrder.Ascending],
-                        limit: trackLimit,
-                    },
-                    { signal: AbortSignal.timeout(20000) }
-                ),
-                itemsApi.getItems(
-                    {
-                        userId,
-                        artistIds: [artistId],
-                        includeItemTypes: [BaseItemKind.Audio],
-                        recursive: true,
-                        limit: 0,
+                        fields: ['MediaSources'],
                     },
                     { signal: AbortSignal.timeout(20000) }
                 ),
@@ -442,30 +472,36 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 ),
             ])
 
-        const artist = artistResponse.data as MediaItem
-        const tracks = tracksResponse.data.Items as MediaItem[]
         const totalTrackCount = totalTracksResponse.data.TotalRecordCount || 0
+        const totalPlaytime = (fullTracksResponse.data.Items as MediaItem[]).reduce(
+            (sum, track) => sum + (track.RunTimeTicks || 0),
+            0
+        )
+
         const artistAlbums = artistAlbumsResponse.data.Items as MediaItem[]
         const contributingAlbums = contributingAlbumsResponse.data.Items as MediaItem[]
 
+        // Deduplicate albums
         const allAlbumsMap = new Map<string, MediaItem>()
         artistAlbums.forEach(album => allAlbumsMap.set(album.Id, album))
         contributingAlbums.forEach(album => allAlbumsMap.set(album.Id, album))
         const allAlbums = Array.from(allAlbumsMap.values())
 
+        // Split into albums and appearsInAlbums
         const albums: MediaItem[] = []
         const appearsInAlbums: MediaItem[] = []
-
         allAlbums.forEach(album => {
             const primaryAlbumArtist = album.AlbumArtists?.[0]?.Name || album.AlbumArtist || 'Unknown Artist'
-            if (primaryAlbumArtist === artist.Name) {
+            if (primaryAlbumArtist === artistName) {
                 albums.push(album)
             } else {
                 appearsInAlbums.push(album)
             }
         })
 
-        return { artist, tracks, albums, appearsInAlbums, totalTrackCount }
+        const totalAlbumCount = albums.length + appearsInAlbums.length
+
+        return { albums, appearsInAlbums, totalTrackCount, totalPlaytime, totalAlbumCount }
     }
 
     const getArtistTracks = async (
@@ -909,6 +945,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         getFavoriteTracks,
         getAlbumDetails,
         getArtistDetails,
+        getArtistStats,
         getArtistTracks,
         getPlaylistsFeaturingArtist,
         getGenreTracks,

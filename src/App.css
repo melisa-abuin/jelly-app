@@ -507,6 +507,7 @@ body.lockscroll {
 }
 
 .filter > select > option {
+    font-weight: 500;
     color: var(--font-color);
 }
 
