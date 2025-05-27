@@ -829,14 +829,14 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return await userLibraryApi.unmarkFavoriteItem({ itemId, userId }, { signal: AbortSignal.timeout(20000) })
     }
 
-    const addToPlaylist = async (playlistId: string, itemId: string) => {
+    const addToPlaylist = async (playlistId: string, itemIds: string[]) => {
         const playlistApi = new PlaylistsApi(api.configuration)
 
         const response = await playlistApi.addItemToPlaylist(
             {
                 userId,
                 playlistId,
-                ids: [itemId],
+                ids: itemIds,
             },
             { signal: AbortSignal.timeout(20000) }
         )

@@ -62,7 +62,7 @@ export const usePatchQueries = () => {
                 queryClient.setQueryData(query.queryKey, patchData(data, mediaItemId, patch))
             }
         },
-        prependItemToQueryData: (queryKey: string[], item: MediaItem) => {
+        prependItemsToQueryData: (queryKey: string[], items: MediaItem[]) => {
             const allQueries = queryClient.getQueryCache().findAll()
 
             for (const query of allQueries) {
@@ -78,10 +78,10 @@ export const usePatchQueries = () => {
 
                     query.setData({
                         ...data,
-                        pages: [[item, ...first], ...pages],
+                        pages: [[...items, ...first], ...pages],
                     })
                 } else {
-                    query.setData([item, ...(data as MediaItem[])])
+                    query.setData([...items, ...(data as MediaItem[])])
                 }
             }
         },

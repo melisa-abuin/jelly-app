@@ -50,7 +50,7 @@ const useInitialState = () => {
     const playback = usePlaybackContext()
     const { playlists } = useJellyfinPlaylistsList()
     const { addToFavorites, removeFromFavorites } = useFavorites()
-    const { addToPlaylist, removeFromPlaylist, createPlaylist, deletePlaylist } = usePlaylists()
+    const { addToPlaylist, addItemsToPlaylist, removeFromPlaylist, createPlaylist, deletePlaylist } = usePlaylists()
 
     const subMenuRef = useRef<HTMLDivElement>(null)
 
@@ -294,14 +294,29 @@ const useInitialState = () => {
         closeDropdown()
     }, [closeDropdown, playback, context])
 
+    const expandItems = useCallback(
+        async (item: MediaItem) => {
+            if (item.Type === BaseItemKind.MusicAlbum) {
+                const tracks = await api.getAlbumDetails(item.Id)
+                return tracks.tracks
+            } else if (item.Type === BaseItemKind.MusicArtist) {
+                const tracks = await api.getArtistDetails(item.Id)
+                return tracks.tracks
+            } else {
+                return [item]
+            }
+        },
+        [api]
+    )
+
     const handleAddToQueue = useCallback(
-        (item: MediaItem) => {
+        async (item: MediaItem) => {
             const playlist = playback.currentPlaylist
-            const newPlaylist = [...playlist, item]
+            const newPlaylist = [...playlist, ...(await expandItems(item))]
             playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
             closeDropdown()
         },
-        [closeDropdown, playback]
+        [closeDropdown, expandItems, playback]
     )
 
     // Actually working
@@ -341,7 +356,7 @@ const useInitialState = () => {
             add_to_queue: (
                 <div
                     className="dropdown-item add-queue"
-                    onClick={() => handleAddToQueue(context!.item)}
+                    onClick={async () => await handleAddToQueue(context!.item)}
                     onMouseEnter={closeSubDropdown}
                 >
                     <span>Add to queue</span>
@@ -531,7 +546,7 @@ const useInitialState = () => {
                                             closeDropdown()
 
                                             if (context) {
-                                                await addToPlaylist(context.item, playlist.Id)
+                                                await addItemsToPlaylist(await expandItems(context.item), playlist.Id)
                                             }
                                         }}
                                     >
@@ -558,13 +573,14 @@ const useInitialState = () => {
             ) : null,
         }
     }, [
+        addItemsToPlaylist,
         addToFavorites,
-        addToPlaylist,
         api,
         closeDropdown,
         closeSubDropdown,
         context,
         deletePlaylist,
+        expandItems,
         handleAddToQueue,
         handleCreateClick,
         handleInputChange,
@@ -662,7 +678,11 @@ const useInitialState = () => {
                         node: menuItems.next,
                     },
                     {
-                        isVisible: !hidden?.add_to_queue && context?.item.Type === BaseItemKind.Audio,
+                        isVisible:
+                            !hidden?.add_to_queue &&
+                            (context?.item.Type === BaseItemKind.Audio ||
+                                context?.item.Type === BaseItemKind.MusicAlbum ||
+                                context?.item.Type === BaseItemKind.MusicArtist),
                         node: menuItems.add_to_queue,
                     },
                     {
@@ -698,7 +718,11 @@ const useInitialState = () => {
                         node: menuItems.remove_from_favorite,
                     },
                     {
-                        isVisible: !hidden?.add_to_playlist && context?.item.Type === BaseItemKind.Audio,
+                        isVisible:
+                            !hidden?.add_to_playlist &&
+                            (context?.item.Type === BaseItemKind.Audio ||
+                                context?.item.Type === BaseItemKind.MusicAlbum ||
+                                context?.item.Type === BaseItemKind.MusicArtist),
                         node: menuItems.add_to_playlist,
                     },
                     {
