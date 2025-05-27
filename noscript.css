@@ -54,7 +54,6 @@ body {
     height: 100%;
     max-width: 1020px;
     margin: 0 auto;
-    padding: 0 20px;
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -99,7 +98,7 @@ body {
     height: 80px;
     background-size: contain;
     background-repeat: no-repeat;
-    background-image: url(/logo.webp);
+    background-image: url(./logo.webp);
 }
 
 .drawback_interface > .container > .drawback > .drawback_content {
@@ -163,6 +162,8 @@ body {
 }
 
 .drawback_interface > .container > .drawback > .drawback_content > .description > .conclusion > p {
+    margin: 0;
+    margin-top: 10px;
     margin-left: 10px;
 }
 
@@ -190,9 +191,9 @@ body {
 }
 
 /* Responsive */
-@media only screen and (max-width: 940px) {
+@media only screen and (max-width: 980px) {
     .drawback_interface {
-        max-width: calc(100% - 20px);
+        max-width: calc(100% - 40px);
     }
 
     .drawback_interface > .container {
@@ -205,7 +206,11 @@ body {
     }
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 480px) {
+    .drawback_interface {
+        max-width: calc(100% - 20px);
+    }
+
     .drawback_interface > .container > .preview {
         width: 100%;
     }
