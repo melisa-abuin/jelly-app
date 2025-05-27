@@ -36,18 +36,19 @@ A lightweight & elegant music interface for Jellyfin. Made to be intuitive and m
   <img src="public/playlist-dark-variant.webp" alt="Playlist dark variant" width="49%">
 </details>
 
-### Key Features
+### Features
 
--   **Lightweight and Elegant Interface:** A minimal and intuitive design focused on a seamless music playback experience.
--   **Jellyfin Integration:** Connects to your Jellyfin server to access your personal music library.
--   **Comprehensive Search:** Easily find tracks, artists, albums, playlists, and genres with a quick sidenav search and a dedicated results page.
--   **Detailed Views:**
-    -   **Artist Page:** Shows most played songs, albums, and collaborations.
-    -   **Playlist Page:** Displays playlists with a numbered tracklist.
--   **Theme Support:** Switch between light and dark modes to suit your preference.
--   **Modern Tech Stack:** Built with React, Vite, and TypeScript for a fast and reliable experience.
--   **Efficient Data Fetching:** Utilizes Tanstack Query (React Query) for optimized data handling and caching.
--   **Progressive Web App (PWA):** Installable for an app-like experience.
+-   **Elegant & Simple Design:** A clean, clutter-free interface that makes music playback effortless and enjoyable.
+-   **Seamless Library Access:** Connect to your Jellyfin server to explore your personal music collection with ease.
+-   **Discover Your Favorites:**
+    -   **Home:** Jump back in with recently played tracks, your most-played favorites, and newly added media.
+    -   **Artists:** Browse top tracks, albums, and collaborations for any artist in your library.
+    -   **Playlists:** View playlists with a clear, numbered tracklist for quick navigation.
+    -   **Quick Search:** Find tracks, artists, albums, playlists, or genres effortlessly with a sidenav search or dedicated results page.
+-   **Device Friendly:** Enjoy a smooth, app-like experience on mobile and desktop alike, installable as a PWA for instant access.
+-   **Smooth Performance:** Built with modern tools like React for a snappy, reliable experience.
+-   **Smart Fetching:** Caches your music efficiently for instant, smooth playback.
+-   **Personalized Settings:** Easily configure your theme and audio quality for a tailored experience.
 
 ### Installation
 
@@ -55,7 +56,7 @@ Jelly Music App is available as a production build, ready to deploy on an existi
 <br/>
 <br/>
 
-[Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (`npm i -g yarn`) is required if you wish to build the project or to run the development server on your own accord.
+[Yarn](https://classic.yarnpkg.com/lang/en/docs/install) (`npm i -g yarn`) is required if you wish to build the project or run the development server yourself.
 
 #### Build from Source
 
