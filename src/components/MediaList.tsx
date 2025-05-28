@@ -1,4 +1,4 @@
-import { HeartFillIcon } from '@primer/octicons-react'
+import { CheckCircleFillIcon, CloudIcon, HeartFillIcon } from '@primer/octicons-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
@@ -173,11 +173,21 @@ export const MediaList = ({
                             </>
                         </div>
                     </div>
-                    {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
-                        <div className="favorited" title="Favorited">
-                            <HeartFillIcon size={16} />
+                    <div className="media-indicators">
+                        <div className="download-state">
+                            <div className="icon downloading" title="Downloading">
+                                <CloudIcon size={16} />
+                            </div>
+                            <div className="icon downloaded" title="Downloaded">
+                                <CheckCircleFillIcon size={16} />
+                            </div>
                         </div>
-                    )}
+                        {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
+                            <div className="favorited" title="Favorited">
+                                <HeartFillIcon size={16} />
+                            </div>
+                        )}
+                    </div>
                 </li>
             )
         }
