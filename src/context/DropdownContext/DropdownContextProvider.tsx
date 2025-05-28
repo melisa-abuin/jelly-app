@@ -282,18 +282,6 @@ const useInitialState = () => {
         [isTouchDevice]
     )
 
-    const handlePlayNext = useCallback(() => {
-        if (context) {
-            const playlist = playback.currentPlaylist
-            const currentIndex = playback.currentTrackIndex
-            const insertIndex = currentIndex >= 0 ? currentIndex + 1 : playlist.length
-            const newPlaylist = [...playlist]
-            newPlaylist.splice(insertIndex, 0, context.item)
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
-        }
-        closeDropdown()
-    }, [closeDropdown, playback, context])
-
     const expandItems = useCallback(
         async (item: MediaItem) => {
             if (item.Type === BaseItemKind.MusicAlbum) {
@@ -307,6 +295,16 @@ const useInitialState = () => {
             }
         },
         [api]
+    )
+
+    const handlePlayNext = useCallback(
+        async (item: MediaItem) => {
+            const playlist = playback.currentPlaylist
+            const newPlaylist = [...playlist, ...(await expandItems(item))]
+            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
+            closeDropdown()
+        },
+        [closeDropdown, expandItems, playback]
     )
 
     const handleAddToQueue = useCallback(
@@ -347,7 +345,7 @@ const useInitialState = () => {
             next: (
                 <div
                     className="dropdown-item play-next"
-                    onClick={() => handlePlayNext()}
+                    onClick={async () => await handlePlayNext(context!.item)}
                     onMouseEnter={closeSubDropdown}
                 >
                     <span>Play next</span>
@@ -674,7 +672,11 @@ const useInitialState = () => {
             const menuItemz: { isVisible: boolean; node: ReactNode }[][] = [
                 [
                     {
-                        isVisible: !hidden?.next && context?.item.Type === BaseItemKind.Audio,
+                        isVisible:
+                            !hidden?.next &&
+                            (context?.item.Type === BaseItemKind.Audio ||
+                                context?.item.Type === BaseItemKind.MusicAlbum ||
+                                context?.item.Type === BaseItemKind.MusicArtist),
                         node: menuItems.next,
                     },
                     {
