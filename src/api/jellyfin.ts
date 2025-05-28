@@ -84,11 +84,13 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
     })
 
     const parseItemDto = async (item: BaseItemDto) => {
+        const isDownloaded = item.Id ? await window.audioStorage.hasTrack(item.Id) : false
+
         return {
             ...item,
             Id: item.Id || '',
             Name: item.Name || '',
-            isDownloaded: false,
+            isDownloaded: isDownloaded,
             isDownloading: false,
         } as MediaItem
     }

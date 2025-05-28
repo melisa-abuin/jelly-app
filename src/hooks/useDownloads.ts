@@ -1,17 +1,21 @@
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePatchQueries } from './usePatchQueries'
 
 export const useDownloads = () => {
-    const api = useJellyfinContext()
     const { patchMediaItem } = usePatchQueries()
 
     return {
-        addToDownloads: async (itemId: string) => {
+        addToDownloads: (itemId: string, finished: boolean | undefined) => {
             patchMediaItem(itemId, item => {
-                return { ...item, isDownloaded: true }
+                if (finished === true) {
+                    return { ...item, isDownloaded: true, isDownloading: false }
+                } else if (finished === false) {
+                    return { ...item, isDownloaded: false, isDownloading: true }
+                } else {
+                    return { ...item, isDownloaded: false, isDownloading: false }
+                }
             })
         },
-        removeFromDownloads: async (itemId: string) => {
+        removeFromDownloads: (itemId: string) => {
             patchMediaItem(itemId, item => {
                 return { ...item, isDownloaded: false }
             })

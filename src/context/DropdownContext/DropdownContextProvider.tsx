@@ -593,17 +593,19 @@ const useInitialState = () => {
                         closeDropdown()
                         if (!context || !context.item.Id) return
 
+                        addToDownloads(context.item.Id, false)
                         const streamUrl = api.getStreamUrl(context.item.Id, playback.bitrate)
                         const response = await fetch(streamUrl)
 
                         if (!response.ok) {
+                            addToDownloads(context.item.Id, undefined)
                             throw new Error(`Failed to download song: ${response.statusText}`)
                         }
 
                         const blob = await response.blob()
 
                         await audioStorage.saveTrack(context.item.Id, blob)
-                        addToDownloads(context.item.Id)
+                        addToDownloads(context.item.Id, true)
                     }}
                 >
                     <span>Download song</span>

@@ -84,7 +84,12 @@ const useInitialState = () => {
         [getTrack]
     )
 
-    return { saveTrack, removeTrack, getTrack, hasTrack, getPlayableUrl }
+    const audioStorage = { saveTrack, removeTrack, getTrack, hasTrack, getPlayableUrl }
+
+    // We need the audioStorage in jellyfin API but we don't want to cause unnecessary re-renders since opening the IndexedDB shouldn't take long
+    window.audioStorage = audioStorage
+
+    return audioStorage
 }
 
 export const AudioStorageContextProvider = ({ children }: { children: ReactNode }) => {

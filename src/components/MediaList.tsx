@@ -175,12 +175,17 @@ export const MediaList = ({
                     </div>
                     <div className="media-indicators">
                         <div className="download-state">
-                            <div className="icon downloading" title="Downloading">
-                                <CloudIcon size={16} />
-                            </div>
-                            <div className="icon downloaded" title="Downloaded">
-                                <CheckCircleFillIcon size={16} />
-                            </div>
+                            {item.isDownloading && (
+                                <div className="icon downloading" title="Downloading">
+                                    <CloudIcon size={16} />
+                                </div>
+                            )}
+
+                            {item.isDownloaded && (
+                                <div className="icon downloaded" title="Downloaded">
+                                    <CheckCircleFillIcon size={16} />
+                                </div>
+                            )}
                         </div>
                         {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
                             <div className="favorited" title="Favorited">
