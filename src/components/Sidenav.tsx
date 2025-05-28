@@ -70,11 +70,10 @@ export const Sidenav = (props: { username: string }) => {
                     ])
 
                     // Fetch songs, albums, and playlists from /Items endpoint
-                    const items = itemsResponse || []
                     const artists = artistResponse.slice(0, 4)
-                    const songs = items.filter(item => item.Type === 'Audio').slice(0, 6)
-                    const albums = items.filter(item => item.Type === 'MusicAlbum').slice(0, 4)
-                    const playlists = items.filter(item => item.Type === 'Playlist').slice(0, 4)
+                    const songs = itemsResponse.filter(item => item.Type === 'Audio').slice(0, 6)
+                    const albums = itemsResponse.filter(item => item.Type === 'MusicAlbum').slice(0, 4)
+                    const playlists = itemsResponse.filter(item => item.Type === 'Playlist').slice(0, 4)
                     const genres = genreResponse.slice(0, 4)
 
                     const limitedResults = [...songs, ...artists, ...albums, ...playlists, ...genres]

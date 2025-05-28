@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { BaseItemKind } from '../../../node_modules/@jellyfin/sdk/lib/generated-client/models/base-item-kind'
 import { MediaItem } from '../../api/jellyfin'
 import { useJellyfinPlaylistsList } from '../../hooks/Jellyfin/useJellyfinPlaylistsList'
+import { useDownloads } from '../../hooks/useDownloads'
 import { useFavorites } from '../../hooks/useFavorites'
 import { usePlaylists } from '../../hooks/usePlaylists'
+import { useAudioStorageContext } from '../AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../ScrollContext/ScrollContext'
@@ -50,7 +52,9 @@ const useInitialState = () => {
     const playback = usePlaybackContext()
     const { playlists } = useJellyfinPlaylistsList()
     const { addToFavorites, removeFromFavorites } = useFavorites()
+    const { addToDownloads, removeFromDownloads } = useDownloads()
     const { addToPlaylist, addItemsToPlaylist, removeFromPlaylist, createPlaylist, deletePlaylist } = usePlaylists()
+    const audioStorage = useAudioStorageContext()
 
     const subMenuRef = useRef<HTMLDivElement>(null)
 
@@ -569,11 +573,49 @@ const useInitialState = () => {
                     <span>Remove from playlist</span>
                 </div>
             ) : null,
+            download_song: context?.item.isDownloaded ? (
+                <div
+                    className="dropdown-item"
+                    onClick={async () => {
+                        closeDropdown()
+                        if (!context || !context.item.Id) return
+
+                        await audioStorage.removeTrack(context.item.Id)
+                        removeFromDownloads(context.item.Id)
+                    }}
+                >
+                    <span>Remove song</span>
+                </div>
+            ) : (
+                <div
+                    className="dropdown-item"
+                    onClick={async () => {
+                        closeDropdown()
+                        if (!context || !context.item.Id) return
+
+                        const streamUrl = api.getStreamUrl(context.item.Id, playback.bitrate)
+                        const response = await fetch(streamUrl)
+
+                        if (!response.ok) {
+                            throw new Error(`Failed to download song: ${response.statusText}`)
+                        }
+
+                        const blob = await response.blob()
+
+                        await audioStorage.saveTrack(context.item.Id, blob)
+                        addToDownloads(context.item.Id)
+                    }}
+                >
+                    <span>Download song</span>
+                </div>
+            ),
         }
     }, [
         addItemsToPlaylist,
+        addToDownloads,
         addToFavorites,
         api,
+        audioStorage,
         closeDropdown,
         closeSubDropdown,
         context,
@@ -592,6 +634,7 @@ const useInitialState = () => {
         playback,
         playlistName,
         playlists,
+        removeFromDownloads,
         removeFromFavorites,
         removeFromPlaylist,
         subDropdown.flipX,
@@ -735,6 +778,10 @@ const useInitialState = () => {
                         isVisible: !hidden?.delete_playlist && context?.item.Type === BaseItemKind.Playlist,
                         node: menuItems.delete_playlist,
                     },
+                    {
+                        isVisible: !hidden?.download_song && context?.item.Type === BaseItemKind.Audio,
+                        node: menuItems.download_song,
+                    },
                 ],
             ]
 
@@ -778,6 +825,7 @@ const useInitialState = () => {
         hidden?.add_to_playlist,
         hidden?.add_to_queue,
         hidden?.delete_playlist,
+        hidden?.download_song,
         hidden?.instant_mix,
         hidden?.next,
         hidden?.remove_from_favorite,
@@ -791,6 +839,7 @@ const useInitialState = () => {
         menuItems.add_to_playlist,
         menuItems.add_to_queue,
         menuItems.delete_playlist,
+        menuItems.download_song,
         menuItems.instant_mix,
         menuItems.next,
         menuItems.remove_from_favorite,

@@ -2,6 +2,7 @@ import { InfiniteData, useQueryClient } from '@tanstack/react-query'
 import Hls from 'hls.js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
+import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { IJellyfinInfiniteProps, useJellyfinInfiniteData } from '../hooks/Jellyfin/Infinite/useJellyfinInfiniteData'
 
@@ -52,6 +53,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const [bitrate, setBitrate] = useState(Number(localStorage.getItem('bitrate')))
     const needsReloadRef = useRef(false)
+
+    const audioStorage = useAudioStorageContext()
 
     useEffect(() => {
         localStorage.setItem('bitrate', bitrate.toString())
@@ -216,13 +219,15 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             if (audioRef.current) {
                 const audio = audioRef.current
                 if (currentTrack && isPlaying) {
-                    await api.reportPlaybackStopped(currentTrack.Id, audio.currentTime, signal)
+                    // If the playback stopped request fails, we can still continue playing the new track
+                    api.reportPlaybackStopped(currentTrack.Id, audio.currentTime, signal)
                 }
                 audio.pause()
                 audio.currentTime = 0
 
                 try {
-                    const streamUrl = api.getStreamUrl(track.Id, bitrate)
+                    const offlineUrl = await audioStorage.getPlayableUrl(track.Id)
+                    const streamUrl = offlineUrl || api.getStreamUrl(track.Id, bitrate)
                     const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
                     if (isTranscoded && Hls.isSupported()) {
                         handleHls(streamUrl)
@@ -264,13 +269,23 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                     updateMediaSessionMetadata(track)
 
                     // Report playback start to Jellyfin
-                    await api.reportPlaybackStart(track.Id, signal)
+                    api.reportPlaybackStart(track.Id, signal)
                 } catch (error) {
                     console.error('Error playing track:', error)
                 }
             }
         },
-        [api, bitrate, currentTrack, handleHls, isPlaying, items, updateMediaSessionMetadata, userInteracted]
+        [
+            api,
+            audioStorage,
+            bitrate,
+            currentTrack,
+            handleHls,
+            isPlaying,
+            items,
+            updateMediaSessionMetadata,
+            userInteracted,
+        ]
     )
 
     const togglePlayPause = useCallback(async () => {
@@ -280,13 +295,16 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             const audio = audioRef.current
             if (isPlaying) {
                 audio.pause()
-                await api.reportPlaybackProgress(currentTrack.Id, audio.currentTime, true)
+
+                // If progress fails to report, we can still continue playback
+                api.reportPlaybackProgress(currentTrack.Id, audio.currentTime, true)
             } else {
                 if (needsReloadRef.current || (!audio.src && !hlsRef.current && currentTrack)) {
                     const restoreTime = needsReloadRef.current ? audio.currentTime : 0
                     needsReloadRef.current = false
 
-                    const streamUrl = api.getStreamUrl(currentTrack.Id, bitrate)
+                    const offlineUrl = await audioStorage.getPlayableUrl(currentTrack.Id)
+                    const streamUrl = offlineUrl || api.getStreamUrl(currentTrack.Id, bitrate)
                     const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
                     if (isTranscoded && Hls.isSupported()) {
                         handleHls(streamUrl)
@@ -302,7 +320,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
                 try {
                     await audio.play()
-                    await api.reportPlaybackProgress(currentTrack.Id, audio.currentTime, false)
+                    api.reportPlaybackProgress(currentTrack.Id, audio.currentTime, false)
                     updateMediaSessionMetadata(currentTrack)
                 } catch (error) {
                     console.error('Error resuming playback:', error)
@@ -310,7 +328,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 }
             }
         }
-    }, [api, bitrate, currentTrack, handleHls, isPlaying, updateMediaSessionMetadata])
+    }, [api, audioStorage, bitrate, currentTrack, handleHls, isPlaying, updateMediaSessionMetadata])
 
     useEffect(() => {
         if (currentTrackIndex.index >= 0 && currentTrackIndex.index < items.length && items[currentTrackIndex.index]) {
@@ -579,36 +597,41 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         if (hasRestored.current) return
         hasRestored.current = true
 
-        const savedIndex = localStorage.getItem('currentTrackIndex')
-        if (api.auth.token) {
-            const indexInPlaylist = Number(savedIndex)
-            if (indexInPlaylist !== -1) {
-                setCurrentTrackIndex({ index: currentTrackIndex.index })
-            } else if (savedIndex) {
-                setCurrentTrackIndex({ index: Number(savedIndex) })
-            } else {
+        const restoreAudio = async () => {
+            const savedIndex = localStorage.getItem('currentTrackIndex')
+            if (api.auth.token) {
+                const indexInPlaylist = Number(savedIndex)
+                if (indexInPlaylist !== -1) {
+                    setCurrentTrackIndex({ index: currentTrackIndex.index })
+                } else if (savedIndex) {
+                    setCurrentTrackIndex({ index: Number(savedIndex) })
+                } else {
+                    setCurrentTrackIndex({ index: -1 })
+                }
+
+                const lastPlayedTrack = items[currentTrackIndex.index]
+
+                if (lastPlayedTrack) {
+                    if (audioRef.current) {
+                        const offlineUrl = await audioStorage.getPlayableUrl(lastPlayedTrack.Id)
+                        const streamUrl = offlineUrl || api.getStreamUrl(lastPlayedTrack.Id, bitrate)
+                        const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
+                        if (isTranscoded && Hls.isSupported()) {
+                            handleHls(streamUrl)
+                        } else {
+                            audioRef.current.src = streamUrl
+                        }
+                        audioRef.current.load()
+                    }
+                    updateMediaSessionMetadata(lastPlayedTrack)
+                }
+            } else if (!api.auth.token) {
                 setCurrentTrackIndex({ index: -1 })
             }
-
-            const lastPlayedTrack = items[currentTrackIndex.index]
-
-            if (lastPlayedTrack) {
-                if (audioRef.current) {
-                    const streamUrl = api.getStreamUrl(lastPlayedTrack.Id, bitrate)
-                    const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
-                    if (isTranscoded && Hls.isSupported()) {
-                        handleHls(streamUrl)
-                    } else {
-                        audioRef.current.src = streamUrl
-                    }
-                    audioRef.current.load()
-                }
-                updateMediaSessionMetadata(lastPlayedTrack)
-            }
-        } else if (!api.auth.token) {
-            setCurrentTrackIndex({ index: -1 })
         }
-    }, [api, bitrate, currentTrackIndex.index, handleHls, items, updateMediaSessionMetadata])
+
+        restoreAudio()
+    }, [api, audioStorage, bitrate, currentTrackIndex.index, handleHls, items, updateMediaSessionMetadata])
 
     // Preload next page when near end
     useEffect(() => {
