@@ -3,6 +3,7 @@ import { ChangeEvent, useEffect, useRef, useState, WheelEvent } from 'react'
 import { NavLink } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import '../App.css'
+import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../context/ScrollContext/ScrollContext'
@@ -20,14 +21,6 @@ import {
     TrackIcon,
 } from './SvgIcons'
 
-interface SearchResult {
-    type: 'Artist' | 'Album' | 'Playlist' | 'Song' | 'Genre'
-    id: string
-    name: string
-    artistName?: string
-    mediaItem?: MediaItem
-}
-
 export const Sidenav = (props: { username: string }) => {
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
@@ -37,10 +30,11 @@ export const Sidenav = (props: { username: string }) => {
     const { playlists, loading, error } = useJellyfinPlaylistsList()
     const { disabled, setDisabled } = useScrollContext()
     const [searchQuery, setSearchQuery] = useState(new URLSearchParams(location.search).get('search') || '')
-    const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+    const [searchResults, setSearchResults] = useState<MediaItem[]>([])
     const [searchLoading, setSearchLoading] = useState(false)
     const [searchError, setSearchError] = useState<string | null>(null)
     const [searchAttempted, setSearchAttempted] = useState(false)
+    const dropdown = useDropdownContext()
 
     const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(e.target.value)
@@ -77,30 +71,11 @@ export const Sidenav = (props: { username: string }) => {
 
                     // Fetch songs, albums, and playlists from /Items endpoint
                     const items = itemsResponse || []
-                    const artists = artistResponse
-                        .map(item => ({ type: 'Artist' as const, id: item.Id, name: item.Name }))
-                        .slice(0, 4)
-                    const songs = items
-                        .filter(item => item.Type === 'Audio')
-                        .map(item => ({
-                            type: 'Song' as const,
-                            id: item.Id,
-                            name: item.Name,
-                            artistName: item.ArtistItems?.[0]?.Name || item.Artists?.[0] || 'Unknown Artist',
-                            mediaItem: item,
-                        }))
-                        .slice(0, 6)
-                    const albums = items
-                        .filter(item => item.Type === 'MusicAlbum')
-                        .map(item => ({ type: 'Album' as const, id: item.Id, name: item.Name }))
-                        .slice(0, 4)
-                    const playlists = items
-                        .filter(item => item.Type === 'Playlist')
-                        .map(item => ({ type: 'Playlist' as const, id: item.Id, name: item.Name }))
-                        .slice(0, 4)
-                    const genres = genreResponse
-                        .map(item => ({ type: 'Genre' as const, id: item.Name, name: item.Name }))
-                        .slice(0, 4)
+                    const artists = artistResponse.slice(0, 4)
+                    const songs = items.filter(item => item.Type === 'Audio').slice(0, 6)
+                    const albums = items.filter(item => item.Type === 'MusicAlbum').slice(0, 4)
+                    const playlists = items.filter(item => item.Type === 'Playlist').slice(0, 4)
+                    const genres = genreResponse.slice(0, 4)
 
                     const limitedResults = [...songs, ...artists, ...albums, ...playlists, ...genres]
                     setSearchResults(limitedResults)
@@ -128,12 +103,12 @@ export const Sidenav = (props: { username: string }) => {
         setSearchAttempted(false)
     }
 
-    const handleSongClick = (song: SearchResult) => {
-        if (song.mediaItem) {
-            if (song.id === playback.currentTrack?.Id) {
+    const handleSongClick = (song: MediaItem) => {
+        if (song) {
+            if (song.Id === playback.currentTrack?.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ playlist: [song.mediaItem], title: 'Sidenav Track' })
+                playback.setCurrentPlaylist({ playlist: [song], title: 'Sidenav Track' })
                 playback.playTrack(0)
             }
 
@@ -222,19 +197,30 @@ export const Sidenav = (props: { username: string }) => {
                                         )}
                                     {!searchLoading && !searchError && searchResults.length > 0 && (
                                         <div className="results noSelect">
-                                            {searchResults.map(result =>
-                                                result.type === 'Song' ? (
+                                            {searchResults.map(item => {
+                                                const isActive =
+                                                    dropdown.selectedItem?.Id === item.Id && dropdown.isOpen
+
+                                                const itemClass = [
+                                                    item.Type === 'Audio' && playback.currentTrack?.Id === item.Id
+                                                        ? playback.isPlaying
+                                                            ? 'playing'
+                                                            : 'paused'
+                                                        : '',
+                                                    isActive ? 'active' : '',
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(' ')
+
+                                                return item.Type === 'Audio' ? (
                                                     <div
-                                                        key={`${result.type}-${result.id}`}
-                                                        onClick={() => handleSongClick(result)}
-                                                        className={`result ${
-                                                            result.type === 'Song' &&
-                                                            result.id === playback.currentTrack?.Id
-                                                                ? playback.isPlaying
-                                                                    ? 'playing'
-                                                                    : 'paused'
-                                                                : ''
-                                                        }`}
+                                                        key={`${item.Type}-${item.Id}`}
+                                                        onClick={() => handleSongClick(item)}
+                                                        className={`result ${itemClass}`}
+                                                        onContextMenu={e => dropdown.onContextMenu(e, { item })}
+                                                        onTouchStart={e => dropdown.onTouchStart(e, { item })}
+                                                        onTouchMove={dropdown.onTouchClear}
+                                                        onTouchEnd={dropdown.onTouchClear}
                                                     >
                                                         <div className="type song">
                                                             <div className="icon" title="Track">
@@ -252,53 +238,66 @@ export const Sidenav = (props: { username: string }) => {
                                                                 </div>
                                                             </div>
                                                             <div className="text">
-                                                                {result.name}{' '}
-                                                                <span className="artist">({result.artistName})</span>
+                                                                {item.Name}{' '}
+                                                                <span className="artist">
+                                                                    (
+                                                                    {item.ArtistItems?.[0]?.Name ||
+                                                                        item.Artists?.[0] ||
+                                                                        'Unknown Artist'}
+                                                                    )
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 ) : (
                                                     <NavLink
-                                                        key={`${result.type}-${result.id}`}
-                                                        to={`/${result.type.toLowerCase()}/${result.id}`}
+                                                        key={`${item.Type}-${item.Id}`}
+                                                        to={`/${item.Type?.toLowerCase()}/${item.Id}`}
                                                         onClick={closeSidenav}
-                                                        className="result"
+                                                        className={`result ${itemClass}`}
+                                                        onContextMenu={e => dropdown.onContextMenu(e, { item: item })}
+                                                        onTouchStart={e => dropdown.onTouchStart(e, { item })}
+                                                        onTouchMove={dropdown.onTouchClear}
+                                                        onTouchEnd={dropdown.onTouchClear}
                                                     >
-                                                        {result.type === 'Artist' && (
+                                                        {item.Type === 'MusicArtist' && (
                                                             <div className="type artist">
                                                                 <div className="icon" title="Artist">
                                                                     <ArtistsIcon width={14} height={14} />
                                                                 </div>
-                                                                <div className="text">{result.name}</div>
+                                                                <div className="text">{item.Name}</div>
                                                             </div>
                                                         )}
-                                                        {result.type === 'Album' && (
+
+                                                        {item.Type === 'MusicAlbum' && (
                                                             <div className="type album">
                                                                 <div className="icon" title="Album">
                                                                     <AlbumIcon width={14} height={14} />
                                                                 </div>
-                                                                <div className="text">{result.name}</div>
+                                                                <div className="text">{item.Name}</div>
                                                             </div>
                                                         )}
-                                                        {result.type === 'Playlist' && (
+
+                                                        {item.Type === 'Playlist' && (
                                                             <div className="type playlist">
                                                                 <div className="icon" title="Playlist">
                                                                     <PlaylistIcon width={14} height={14} />
                                                                 </div>
-                                                                <div className="text">{result.name}</div>
+                                                                <div className="text">{item.Name}</div>
                                                             </div>
                                                         )}
-                                                        {result.type === 'Genre' && (
+
+                                                        {item.Type === 'Genre' && (
                                                             <div className="type genre">
                                                                 <div className="icon" title="Genre">
                                                                     <BookmarkFillIcon size={14} />
                                                                 </div>
-                                                                <div className="text">{result.name}</div>
+                                                                <div className="text">{item.Name}</div>
                                                             </div>
                                                         )}
                                                     </NavLink>
                                                 )
-                                            )}
+                                            })}
                                             <div className="additional">
                                                 <NavLink
                                                     to={`/search/${encodeURIComponent(searchQuery)}`}
