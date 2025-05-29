@@ -579,8 +579,6 @@ const useInitialState = () => {
                     onClick={async () => {
                         closeDropdown()
                         if (!context || !context.item.Id) return
-
-                        await audioStorage.removeTrack(context.item.Id)
                         removeFromDownloads(context.item.Id)
                     }}
                     onMouseEnter={closeSubDropdown}
@@ -593,20 +591,7 @@ const useInitialState = () => {
                     onClick={async () => {
                         closeDropdown()
                         if (!context || !context.item.Id) return
-
-                        addToDownloads(context.item.Id, false)
-                        const streamUrl = api.getStreamUrl(context.item.Id, playback.bitrate)
-                        const response = await fetch(streamUrl)
-
-                        if (!response.ok) {
-                            addToDownloads(context.item.Id, undefined)
-                            throw new Error(`Failed to download song: ${response.statusText}`)
-                        }
-
-                        const blob = await response.blob()
-
-                        await audioStorage.saveTrack(context.item.Id, blob)
-                        addToDownloads(context.item.Id, true)
+                        addToDownloads(context.item.Id)
                     }}
                     onMouseEnter={closeSubDropdown}
                 >
@@ -619,7 +604,6 @@ const useInitialState = () => {
         addToDownloads,
         addToFavorites,
         api,
-        audioStorage,
         closeDropdown,
         closeSubDropdown,
         context,
