@@ -24,6 +24,7 @@ import { useDocumentTitle } from './hooks/useDocumentTitle'
 import { Album } from './pages/Album'
 import { Albums } from './pages/Albums'
 import { Artist } from './pages/Artist'
+import { Artists } from './pages/Artists'
 import { ArtistTracks } from './pages/ArtistTracks'
 import { Favorites } from './pages/Favorites'
 import { FrequentlyPlayed } from './pages/FrequentlyPlayed'
@@ -179,6 +180,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                 <Route path="/tracks" element={<Main content={Tracks} filterType={'mediaItems'} />} />
                 <Route path="/albums" element={<Main content={Albums} filterType={'mediaItems'} />} />
                 <Route path="/album/:albumId" element={<Main content={Album} />} />
+                <Route path="/artists" element={<Main content={Artists} filterType={'mediaItems'} />} />
                 <Route path="/artist/:artistId" element={<Main content={Artist} />} />
                 <Route path="/artist/:artistId/tracks" element={<Main content={ArtistTracks} />} />
                 <Route path="/genre/:genre" element={<Main content={Genre} filterType={'mediaItems'} />} />

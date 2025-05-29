@@ -150,6 +150,11 @@ export const Sidenav = (props: { username: string }) => {
                             </NavLink>
                         </li>
                         <li>
+                            <NavLink to="/artists" onClick={closeSidenav}>
+                                Artists
+                            </NavLink>
+                        </li>
+                        <li>
                             <NavLink to="/favorites" onClick={closeSidenav}>
                                 Favorites
                             </NavLink>
