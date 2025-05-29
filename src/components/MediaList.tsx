@@ -1,4 +1,4 @@
-import { CheckCircleFillIcon, CloudIcon, HeartFillIcon } from '@primer/octicons-react'
+import { HeartFillIcon } from '@primer/octicons-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
@@ -10,7 +10,7 @@ import { JellyImg } from './JellyImg'
 import { Loader } from './Loader'
 import { IReviver } from './PlaybackManager'
 import { Skeleton } from './Skeleton'
-import { PlaystateAnimationMedalist } from './SvgIcons'
+import { DownloadedIcon, DownloadingIcon, PlaystateAnimationMedalist } from './SvgIcons'
 
 export const MediaList = ({
     items = [],
@@ -174,19 +174,21 @@ export const MediaList = ({
                         </div>
                     </div>
                     <div className="media-indicators">
-                        <div className="download-state">
-                            {item.isDownloading && (
-                                <div className="icon downloading" title="Downloading">
-                                    <CloudIcon size={16} />
-                                </div>
-                            )}
+                        {(item.isDownloading || item.isDownloaded) && (
+                            <div className="download-state">
+                                {item.isDownloading && (
+                                    <div className="icon downloading" title="Downloading">
+                                        <DownloadingIcon width={16} height={16} />
+                                    </div>
+                                )}
 
-                            {item.isDownloaded && (
-                                <div className="icon downloaded" title="Downloaded">
-                                    <CheckCircleFillIcon size={16} />
-                                </div>
-                            )}
-                        </div>
+                                {item.isDownloaded && (
+                                    <div className="icon downloaded" title="Downloaded">
+                                        <DownloadedIcon width={16} height={16} />
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
                             <div className="favorited" title="Favorited">
                                 <HeartFillIcon size={16} />

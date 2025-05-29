@@ -301,6 +301,9 @@
 .media-list .media-item > .media-indicators {
     display: flex;
     align-items: center;
+}
+
+.media-list .media-item > .media-indicators:has(.favorited, .download-state) {
     margin-left: 8px;
 }
 
