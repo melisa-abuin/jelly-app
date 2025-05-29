@@ -575,7 +575,7 @@ const useInitialState = () => {
             ) : null,
             download_song: context?.item.isDownloaded ? (
                 <div
-                    className="dropdown-item"
+                    className="dropdown-item remove-song has-removable"
                     onClick={async () => {
                         closeDropdown()
                         if (!context || !context.item.Id) return
@@ -583,6 +583,7 @@ const useInitialState = () => {
                         await audioStorage.removeTrack(context.item.Id)
                         removeFromDownloads(context.item.Id)
                     }}
+                    onMouseEnter={closeSubDropdown}
                 >
                     <span>Remove song</span>
                 </div>
@@ -607,6 +608,7 @@ const useInitialState = () => {
                         await audioStorage.saveTrack(context.item.Id, blob)
                         addToDownloads(context.item.Id, true)
                     }}
+                    onMouseEnter={closeSubDropdown}
                 >
                     <span>Download song</span>
                 </div>
