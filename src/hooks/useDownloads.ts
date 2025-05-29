@@ -6,7 +6,8 @@ import { usePatchQueries } from './usePatchQueries'
 
 const STORAGE_KEY = 'mediaTaskQueue'
 
-type Task = { id: string; action: 'download' | 'remove' }
+type IMediaType = 'song' | 'container'
+type Task = { id: string; action: 'download' | 'remove'; mediaType: IMediaType }
 
 export const useDownloads = () => {
     const api = useJellyfinContext()
@@ -36,26 +37,42 @@ export const useDownloads = () => {
     }, [queue])
 
     // Enqueue download
-    const addToDownloads = (itemIds: string[]) => {
+    const addToDownloads = (itemIds: string[], containerId: string | undefined) => {
         patchMediaItems(itemIds, item => ({ ...item, offlineState: 'downloading' }))
+
+        if (containerId) {
+            patchMediaItem(containerId, item => ({ ...item, offlineState: 'downloading' }))
+        }
 
         setQueue(prev => {
             const newTasks = itemIds
                 .filter(id => !prev.some(task => task.id === id && task.action === 'download'))
-                .map(id => ({ id, action: 'download' as const }))
+                .map(id => ({ id, action: 'download' as const, mediaType: 'song' as IMediaType }))
+
+            if (containerId) {
+                newTasks.push({ id: containerId, action: 'download', mediaType: 'container' as IMediaType })
+            }
 
             return newTasks.length ? [...prev, ...newTasks] : prev
         })
     }
 
     // Enqueue removal
-    const removeFromDownloads = (itemIds: string[]) => {
+    const removeFromDownloads = (itemIds: string[], containerId: string | undefined) => {
         patchMediaItems(itemIds, item => ({ ...item, offlineState: 'deleting' }))
+
+        if (containerId) {
+            patchMediaItem(containerId, item => ({ ...item, offlineState: 'deleting' }))
+        }
 
         setQueue(prev => {
             const newTasks = itemIds
                 .filter(id => !prev.some(task => task.id === id && task.action === 'remove'))
-                .map(id => ({ id, action: 'remove' as const }))
+                .map(id => ({ id, action: 'remove' as const, mediaType: 'song' as IMediaType }))
+
+            if (containerId) {
+                newTasks.push({ id: containerId, action: 'remove', mediaType: 'container' as IMediaType })
+            }
 
             return newTasks.length ? [...prev, ...newTasks] : prev
         })
@@ -69,7 +86,7 @@ export const useDownloads = () => {
             if (!next) return
 
             processingRef.current = true
-            const { id, action } = next
+            const { id, action, mediaType } = next
 
             try {
                 if (action === 'download') {
@@ -77,11 +94,16 @@ export const useDownloads = () => {
                     if (already) {
                         patchMediaItem(id, item => ({ ...item, offlineState: 'downloaded' }))
                     } else {
-                        const streamUrl = api.getStreamUrl(id, playback.bitrate)
-                        const response = await fetch(streamUrl)
-                        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-                        const blob = await response.blob()
-                        await audioStorage.saveTrack(id, blob)
+                        if (mediaType === 'song') {
+                            const streamUrl = api.getStreamUrl(id, playback.bitrate)
+                            const response = await fetch(streamUrl)
+                            if (!response.ok) throw new Error(`HTTP ${response.status}`)
+                            const blob = await response.blob()
+                            await audioStorage.saveTrack(id, blob)
+                        } else {
+                            await audioStorage.saveTrack(id, true)
+                        }
+
                         patchMediaItem(id, item => ({ ...item, offlineState: 'downloaded' }))
                     }
                 } else if (action === 'remove') {

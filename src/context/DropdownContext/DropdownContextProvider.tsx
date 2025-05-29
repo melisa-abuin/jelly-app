@@ -579,7 +579,10 @@ const useInitialState = () => {
                             closeDropdown()
 
                             if (context) {
-                                removeFromDownloads((await expandItems(context.item)).map(i => i.Id))
+                                removeFromDownloads(
+                                    (await expandItems(context.item)).map(i => i.Id),
+                                    context.item.Type === BaseItemKind.Audio ? undefined : context.item.Id
+                                )
                             }
                         }}
                         onMouseEnter={closeSubDropdown}
@@ -602,7 +605,10 @@ const useInitialState = () => {
                             closeDropdown()
 
                             if (context) {
-                                addToDownloads((await expandItems(context.item)).map(i => i.Id))
+                                addToDownloads(
+                                    (await expandItems(context.item)).map(i => i.Id),
+                                    context.item.Type === BaseItemKind.Audio ? undefined : context.item.Id
+                                )
                             }
                         }}
                         onMouseEnter={closeSubDropdown}

@@ -2,6 +2,7 @@ import { ReactNode, useCallback, useEffect, useRef } from 'react'
 import { AudioStorageContext } from './AudioStorageContext'
 
 export type IAudioStorageContext = ReturnType<typeof useInitialState>
+type IStorageTrack = true | Blob // Blob is the audio file for songs, true is for the album/artist item itself
 
 const useInitialState = () => {
     const dbRef = useRef<Promise<IDBDatabase> | null>(null)
@@ -46,7 +47,7 @@ const useInitialState = () => {
         }
     }, [])
 
-    const saveTrack = useCallback(async (id: string, blob: Blob) => {
+    const saveTrack = useCallback(async (id: string, blob: IStorageTrack) => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
         const tx = db.transaction('tracks', 'readwrite')
@@ -54,6 +55,7 @@ const useInitialState = () => {
         return new Promise<void>((resolve, reject) => {
             tx.oncomplete = () => resolve()
             tx.onerror = () => reject(tx.error)
+            tx.onabort = () => reject(tx.error)
         })
     }, [])
 
@@ -65,10 +67,11 @@ const useInitialState = () => {
         return new Promise<void>((resolve, reject) => {
             tx.oncomplete = () => resolve()
             tx.onerror = () => reject(tx.error)
+            tx.onabort = () => reject(tx.error)
         })
     }, [])
 
-    const getTrack = useCallback(async (id: string): Promise<Blob | null> => {
+    const getTrack = useCallback(async (id: string): Promise<IStorageTrack | null> => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
         const tx = db.transaction('tracks', 'readonly')
@@ -90,7 +93,7 @@ const useInitialState = () => {
     const getPlayableUrl = useCallback(
         async (id: string) => {
             const blob = await getTrack(id)
-            return blob ? URL.createObjectURL(blob) : undefined
+            return blob && blob !== true ? URL.createObjectURL(blob) : undefined
         },
         [getTrack]
     )
