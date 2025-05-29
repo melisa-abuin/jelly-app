@@ -174,16 +174,22 @@ export const MediaList = ({
                         </div>
                     </div>
                     <div className="media-indicators">
-                        {(item.isDownloading || item.isDownloaded) && (
+                        {item.offlineState && (
                             <div className="download-state">
-                                {item.isDownloading && (
+                                {item.offlineState === 'downloading' && (
                                     <div className="icon downloading" title="Downloading">
                                         <DownloadingIcon width={16} height={16} />
                                     </div>
                                 )}
 
-                                {item.isDownloaded && (
+                                {item.offlineState === 'downloaded' && (
                                     <div className="icon downloaded" title="Downloaded">
+                                        <DownloadedIcon width={16} height={16} />
+                                    </div>
+                                )}
+
+                                {item.offlineState === 'deleting' && (
+                                    <div className="icon downloaded" title="Deleting">
                                         <DownloadedIcon width={16} height={16} />
                                     </div>
                                 )}

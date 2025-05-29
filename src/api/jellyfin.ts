@@ -40,8 +40,7 @@ export type MediaItem = BaseItemDto & {
     Id: string
     Name: string
     pageIndex?: number
-    isDownloaded?: boolean
-    isDownloading?: boolean
+    offlineState?: 'downloading' | 'downloaded' | 'deleting'
 }
 
 export type IJellyfinAuth = Parameters<typeof initJellyfinApi>[0]
@@ -90,8 +89,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             ...item,
             Id: item.Id || '',
             Name: item.Name || '',
-            isDownloaded: isDownloaded,
-            isDownloading: false,
+            offlineState: isDownloaded ? 'downloaded' : undefined,
         } as MediaItem
     }
 

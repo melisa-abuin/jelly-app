@@ -12,7 +12,7 @@ export const useDownloads = () => {
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
     const audioStorage = useAudioStorageContext()
-    const { patchMediaItem } = usePatchQueries()
+    const { patchMediaItem, patchMediaItems } = usePatchQueries()
 
     const [queue, setQueue] = useState<Task[]>(() => {
         try {
@@ -36,20 +36,28 @@ export const useDownloads = () => {
     }, [queue])
 
     // Enqueue download
-    const addToDownloads = (itemId: string) => {
-        patchMediaItem(itemId, item => ({ ...item, isDownloaded: false, isDownloading: true }))
+    const addToDownloads = (itemIds: string[]) => {
+        patchMediaItems(itemIds, item => ({ ...item, offlineState: 'downloading' }))
+
         setQueue(prev => {
-            if (prev.some(task => task.id === itemId && task.action === 'download')) return prev
-            return [...prev, { id: itemId, action: 'download' }]
+            const newTasks = itemIds
+                .filter(id => !prev.some(task => task.id === id && task.action === 'download'))
+                .map(id => ({ id, action: 'download' as const }))
+
+            return newTasks.length ? [...prev, ...newTasks] : prev
         })
     }
 
     // Enqueue removal
-    const removeFromDownloads = (itemId: string) => {
-        patchMediaItem(itemId, item => ({ ...item, isDownloading: false, isDownloaded: true })) // Should be isDeleting
+    const removeFromDownloads = (itemIds: string[]) => {
+        patchMediaItems(itemIds, item => ({ ...item, offlineState: 'deleting' }))
+
         setQueue(prev => {
-            if (prev.some(task => task.id === itemId && task.action === 'remove')) return prev
-            return [...prev, { id: itemId, action: 'remove' }]
+            const newTasks = itemIds
+                .filter(id => !prev.some(task => task.id === id && task.action === 'remove'))
+                .map(id => ({ id, action: 'remove' as const }))
+
+            return newTasks.length ? [...prev, ...newTasks] : prev
         })
     }
 
@@ -65,21 +73,26 @@ export const useDownloads = () => {
 
             try {
                 if (action === 'download') {
-                    const streamUrl = api.getStreamUrl(id, playback.bitrate)
-                    const response = await fetch(streamUrl)
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-                    const blob = await response.blob()
-                    await audioStorage.saveTrack(id, blob)
-                    patchMediaItem(id, item => ({ ...item, isDownloaded: true, isDownloading: false }))
+                    const already = await audioStorage.hasTrack(id)
+                    if (already) {
+                        patchMediaItem(id, item => ({ ...item, offlineState: 'downloaded' }))
+                    } else {
+                        const streamUrl = api.getStreamUrl(id, playback.bitrate)
+                        const response = await fetch(streamUrl)
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+                        const blob = await response.blob()
+                        await audioStorage.saveTrack(id, blob)
+                        patchMediaItem(id, item => ({ ...item, offlineState: 'downloaded' }))
+                    }
                 } else if (action === 'remove') {
                     await audioStorage.removeTrack(id)
-                    patchMediaItem(id, item => ({ ...item, isDownloaded: false, isDownloading: false }))
+                    patchMediaItem(id, item => ({ ...item, offlineState: undefined }))
                 }
             } catch (error) {
                 console.error(`Task failed for ${action} id=${id}`, error)
-                // Reset flags if needed
+
                 if (action === 'download') {
-                    patchMediaItem(id, item => ({ ...item, isDownloading: false }))
+                    patchMediaItem(id, item => ({ ...item, offlineState: undefined }))
                 }
             } finally {
                 setQueue(prev => prev.slice(1))

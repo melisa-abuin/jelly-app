@@ -7,7 +7,6 @@ import { useJellyfinPlaylistsList } from '../../hooks/Jellyfin/useJellyfinPlayli
 import { useDownloads } from '../../hooks/useDownloads'
 import { useFavorites } from '../../hooks/useFavorites'
 import { usePlaylists } from '../../hooks/usePlaylists'
-import { useAudioStorageContext } from '../AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../ScrollContext/ScrollContext'
@@ -54,7 +53,6 @@ const useInitialState = () => {
     const { addToFavorites, removeFromFavorites } = useFavorites()
     const { addToDownloads, removeFromDownloads } = useDownloads()
     const { addToPlaylist, addItemsToPlaylist, removeFromPlaylist, createPlaylist, deletePlaylist } = usePlaylists()
-    const audioStorage = useAudioStorageContext()
 
     const subMenuRef = useRef<HTMLDivElement>(null)
 
@@ -573,31 +571,54 @@ const useInitialState = () => {
                     <span>Remove from playlist</span>
                 </div>
             ) : null,
-            download_song: context?.item.isDownloaded ? (
-                <div
-                    className="dropdown-item remove-song has-removable"
-                    onClick={async () => {
-                        closeDropdown()
-                        if (!context || !context.item.Id) return
-                        removeFromDownloads(context.item.Id)
-                    }}
-                    onMouseEnter={closeSubDropdown}
-                >
-                    <span>Remove song</span>
-                </div>
-            ) : (
-                <div
-                    className="dropdown-item"
-                    onClick={async () => {
-                        closeDropdown()
-                        if (!context || !context.item.Id) return
-                        addToDownloads(context.item.Id)
-                    }}
-                    onMouseEnter={closeSubDropdown}
-                >
-                    <span>Download song</span>
-                </div>
-            ),
+            download_song:
+                context?.item.offlineState === 'downloaded' ? (
+                    <div
+                        className="dropdown-item remove-song has-removable"
+                        onClick={async () => {
+                            closeDropdown()
+
+                            if (context) {
+                                removeFromDownloads((await expandItems(context.item)).map(i => i.Id))
+                            }
+                        }}
+                        onMouseEnter={closeSubDropdown}
+                    >
+                        <span>
+                            Remove{' '}
+                            {context?.item.Type === BaseItemKind.Audio
+                                ? 'song'
+                                : context?.item.Type === BaseItemKind.MusicAlbum
+                                ? 'album'
+                                : context?.item.Type === BaseItemKind.MusicArtist
+                                ? 'artist'
+                                : ''}
+                        </span>
+                    </div>
+                ) : !context?.item.offlineState ? (
+                    <div
+                        className="dropdown-item"
+                        onClick={async () => {
+                            closeDropdown()
+
+                            if (context) {
+                                addToDownloads((await expandItems(context.item)).map(i => i.Id))
+                            }
+                        }}
+                        onMouseEnter={closeSubDropdown}
+                    >
+                        <span>
+                            Download{' '}
+                            {context?.item.Type === BaseItemKind.Audio
+                                ? 'song'
+                                : context?.item.Type === BaseItemKind.MusicAlbum
+                                ? 'album'
+                                : context?.item.Type === BaseItemKind.MusicArtist
+                                ? 'artist'
+                                : ''}
+                        </span>
+                    </div>
+                ) : null,
         }
     }, [
         addItemsToPlaylist,
@@ -767,7 +788,11 @@ const useInitialState = () => {
                         node: menuItems.delete_playlist,
                     },
                     {
-                        isVisible: !hidden?.download_song && context?.item.Type === BaseItemKind.Audio,
+                        isVisible:
+                            !hidden?.download_song &&
+                            (context?.item.Type === BaseItemKind.Audio ||
+                                context?.item.Type === BaseItemKind.MusicAlbum ||
+                                context?.item.Type === BaseItemKind.MusicArtist),
                         node: menuItems.download_song,
                     },
                 ],
