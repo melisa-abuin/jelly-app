@@ -83,7 +83,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         } satisfies IJellyfinInfiniteProps
     }, [api, reviver.queryFn, reviver.queryKey])
 
-    const { items, hasNextPage, loadMore } = useJellyfinInfiniteData(reviverFn)
+    const { items, hasNextPage, loadMore, isLoading } = useJellyfinInfiniteData(reviverFn)
 
     const setCurrentPlaylist = useCallback(
         (props: { playlist: MediaItem[]; title: string; reviver?: IReviver }) => {
@@ -714,5 +714,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         audioRef,
         bitrate,
         setBitrate,
+        isLoading,
     }
 }
