@@ -271,7 +271,7 @@ export const Sidenav = (props: { username: string }) => {
                                                         onTouchMove={dropdown.onTouchClear}
                                                         onTouchEnd={dropdown.onTouchClear}
                                                     >
-                                                        {item.Type === 'MusicArtist' && (
+                                                        {item.Type === BaseItemKind.MusicArtist && (
                                                             <div className="type artist">
                                                                 <div className="icon" title="Artist">
                                                                     <ArtistsIcon width={14} height={14} />
@@ -280,7 +280,7 @@ export const Sidenav = (props: { username: string }) => {
                                                             </div>
                                                         )}
 
-                                                        {item.Type === 'MusicAlbum' && (
+                                                        {item.Type === BaseItemKind.MusicAlbum && (
                                                             <div className="type album">
                                                                 <div className="icon" title="Album">
                                                                     <AlbumIcon width={14} height={14} />
@@ -289,7 +289,7 @@ export const Sidenav = (props: { username: string }) => {
                                                             </div>
                                                         )}
 
-                                                        {item.Type === 'Playlist' && (
+                                                        {item.Type === BaseItemKind.Playlist && (
                                                             <div className="type playlist">
                                                                 <div className="icon" title="Playlist">
                                                                     <PlaylistIcon width={14} height={14} />
@@ -298,7 +298,7 @@ export const Sidenav = (props: { username: string }) => {
                                                             </div>
                                                         )}
 
-                                                        {item.Type === 'Genre' && (
+                                                        {item.Type === BaseItemKind.Genre && (
                                                             <div className="type genre">
                                                                 <div className="icon" title="Genre">
                                                                     <BookmarkFillIcon size={14} />
