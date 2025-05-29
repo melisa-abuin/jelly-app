@@ -1,3 +1,4 @@
+import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client'
 import { BookmarkFillIcon, GearIcon } from '@primer/octicons-react'
 import { ChangeEvent, useEffect, useRef, useState, WheelEvent } from 'react'
 import { NavLink } from 'react-router-dom'
@@ -256,7 +257,13 @@ export const Sidenav = (props: { username: string }) => {
                                                 ) : (
                                                     <NavLink
                                                         key={`${item.Type}-${item.Id}`}
-                                                        to={`/${item.Type?.toLowerCase()}/${item.Id}`}
+                                                        to={`/${
+                                                            item.Type === BaseItemKind.MusicArtist
+                                                                ? 'artist'
+                                                                : item.Type === BaseItemKind.MusicAlbum
+                                                                ? 'album'
+                                                                : item.Type?.toLowerCase()
+                                                        }/${item.Id}`}
                                                         onClick={closeSidenav}
                                                         className={`result ${itemClass}`}
                                                         onContextMenu={e => dropdown.onContextMenu(e, { item: item })}
