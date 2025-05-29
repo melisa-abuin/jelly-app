@@ -263,7 +263,11 @@ export const Sidenav = (props: { username: string }) => {
                                                                 : item.Type === BaseItemKind.MusicAlbum
                                                                 ? 'album'
                                                                 : item.Type?.toLowerCase()
-                                                        }/${item.Id}`}
+                                                        }/${
+                                                            item.Type === BaseItemKind.Genre
+                                                                ? encodeURIComponent(item.Name)
+                                                                : item.Id
+                                                        }`}
                                                         onClick={closeSidenav}
                                                         className={`result ${itemClass}`}
                                                         onContextMenu={e => dropdown.onContextMenu(e, { item: item })}
