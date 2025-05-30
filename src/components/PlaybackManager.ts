@@ -170,18 +170,12 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const handleHls = useCallback(
         async (offlineUrl: string | undefined, streamUrl: string, trackId: string) => {
-            // 1) Tear down any previous Hls instance
-            hlsRef.current?.destroy()
-            hlsRef.current = null
-
-            // 2) Base config
             const hlsConfig: Partial<HlsConfig> = {
                 enableWorker: false,
                 maxBufferLength: 10,
                 maxMaxBufferLength: 20,
             }
 
-            // 3) If we have offline content, pull it out of IndexedDB now
             if (offlineUrl) {
                 const stored = await audioStorage.getTrack(trackId)
                 if (stored?.type === 'm3u8') {
@@ -228,15 +222,12 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 }
             }
 
-            // 4) Spin up Hls with or without your custom loader
             const hls = new Hls(hlsConfig)
             hlsRef.current = hls
 
-            // 5) Load either the blob: URL or the normal stream URL
-            hls.loadSource(offlineUrl ?? streamUrl)
+            hls.loadSource(offlineUrl || streamUrl)
             hls.attachMedia(audioRef.current)
 
-            // 6) Error handling
             hls.on(Hls.Events.ERROR, (_evt, data) => {
                 console.error('HLS error:', data.type, data.details, data)
                 if (data.fatal) {
@@ -262,6 +253,9 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         async (track: MediaItem) => {
             if (!audioRef.current) return
 
+            audioRef.current.pause()
+            audioRef.current.currentTime = 0
+
             hlsRef.current?.destroy()
             hlsRef.current = null
 
@@ -280,13 +274,15 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         [api, audioStorage, bitrate, handleHls]
     )
 
-    const generateShuffledPlaylist = useCallback((currentIdx: number, totalItems: number): number[] => {
+    const generateShuffledPlaylist = useCallback((currentIdx: number, totalItems: number) => {
         const newShuffledPlaylist = [...Array(totalItems).keys()]
             .filter(i => i !== currentIdx)
             .sort(() => Math.random() - 0.5)
+
         if (currentIdx !== -1) {
             newShuffledPlaylist.unshift(currentIdx)
         }
+
         return newShuffledPlaylist
     }, [])
 
@@ -314,8 +310,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                     // If the playback stopped request fails, we can still continue playing the new track
                     api.reportPlaybackStopped(currentTrack.Id, audio.currentTime, signal)
                 }
-                audio.pause()
-                audio.currentTime = 0
 
                 try {
                     await setAudioSourceAndLoad(track)

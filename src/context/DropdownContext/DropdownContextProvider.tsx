@@ -292,6 +292,9 @@ const useInitialState = () => {
             } else if (item.Type === BaseItemKind.MusicArtist) {
                 const tracks = await api.getArtistDetails(item.Id)
                 return tracks.tracks
+            } else if (item.Type === BaseItemKind.Playlist) {
+                const tracks = await api.getPlaylistAllTracks(item.Id)
+                return tracks
             } else {
                 return [item]
             }
@@ -595,6 +598,8 @@ const useInitialState = () => {
                                 ? 'album'
                                 : context?.item.Type === BaseItemKind.MusicArtist
                                 ? 'artist'
+                                : context?.item.Type === BaseItemKind.Playlist
+                                ? 'playlist'
                                 : ''}
                         </span>
                     </div>
@@ -621,6 +626,8 @@ const useInitialState = () => {
                                 ? 'album'
                                 : context?.item.Type === BaseItemKind.MusicArtist
                                 ? 'artist'
+                                : context?.item.Type === BaseItemKind.Playlist
+                                ? 'playlist'
                                 : ''}
                         </span>
                     </div>
@@ -798,7 +805,8 @@ const useInitialState = () => {
                             !hidden?.download_song &&
                             (context?.item.Type === BaseItemKind.Audio ||
                                 context?.item.Type === BaseItemKind.MusicAlbum ||
-                                context?.item.Type === BaseItemKind.MusicArtist),
+                                context?.item.Type === BaseItemKind.MusicArtist ||
+                                context?.item.Type === BaseItemKind.Playlist),
                         node: menuItems.download_song,
                     },
                 ],

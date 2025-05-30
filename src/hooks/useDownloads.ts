@@ -1,5 +1,6 @@
 import { Parser } from 'm3u8-parser'
 import { useEffect, useRef, useState } from 'react'
+import { MediaItem } from '../api/jellyfin'
 import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
@@ -134,6 +135,9 @@ export const useDownloads = () => {
         runNext()
     }, [api, audioStorage, patchMediaItem, playback.bitrate, queue])
 
+    // We need the addToDownloads in jellyfin API but we don't want to cause unnecessary re-renders
+    window.addToDownloads = addToDownloads
+
     return { queue, addToDownloads, removeFromDownloads }
 }
 
@@ -151,7 +155,8 @@ const downloadTranscodedTrack = async (manifestUrl: string): Promise<{ playlist:
 
     // 3a. If it's a master playlist, recurse into the first variant
     if (parser.manifest.playlists && parser.manifest.playlists.length > 0) {
-        const variantUri = parser.manifest.playlists[0].uri
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const variantUri = (parser as any).manifest.playlists[0].uri
         const variantUrl = new URL(variantUri, baseUrl).toString()
         // The current playlistBlob is the master playlist.
         // The recursive call will fetch the media playlist and its segments.
@@ -175,4 +180,36 @@ const downloadTranscodedTrack = async (manifestUrl: string): Promise<{ playlist:
 
     // 5. Return the media playlist and its TS segments
     return { playlist: playlistBlob, ts: tsBlobs }
+}
+
+export const syncDownloads = (container: MediaItem, items: MediaItem[]) => {
+    if (container.offlineState === 'downloaded') {
+        const toDownload = items.filter(track => track.offlineState !== 'downloaded')
+
+        if (toDownload.length) {
+            // Explicitly set offlineState to 'downloading' since addToDownloads happens before they are stored in react-query, so that patch will fail
+            for (const track of toDownload) {
+                track.offlineState = 'downloading'
+            }
+
+            window.addToDownloads(toDownload.map(track => track.Id))
+        }
+    }
+}
+
+export const syncDownloadsById = async (containerId: string, items: MediaItem[]) => {
+    const isDownloaded = containerId ? await window.audioStorage.hasTrack(containerId) : false
+
+    if (isDownloaded) {
+        const toDownload = items.filter(track => track.offlineState !== 'downloaded')
+
+        if (toDownload.length) {
+            // Explicitly set offlineState to 'downloading' since addToDownloads happens before they are stored in react-query, so that patch will fail
+            for (const track of toDownload) {
+                track.offlineState = 'downloading'
+            }
+
+            window.addToDownloads(toDownload.map(track => track.Id))
+        }
+    }
 }
