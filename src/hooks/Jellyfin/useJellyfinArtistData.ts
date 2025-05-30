@@ -36,10 +36,7 @@ export const useJellyfinArtistData = (artistId: string, trackLimit = 5) => {
                 (sum: number, track: MediaItem) => sum + (track.UserData?.PlayCount || 0),
                 0
             )
-            // Filter albums where artistId is the main artist
-            const totalAlbumCount = stats.albums.filter(album =>
-                album.AlbumArtists?.some(artist => artist.Id === artistId)
-            ).length
+            const totalAlbumCount = stats.albums.length
             return { ...stats, totalPlays, totalAlbumCount }
         },
         enabled: !!artistData?.artist,
