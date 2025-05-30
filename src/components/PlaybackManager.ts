@@ -1,5 +1,5 @@
 import { InfiniteData, useQueryClient } from '@tanstack/react-query'
-import Hls from 'hls.js'
+import Hls, { FragmentLoaderContext, HlsConfig, LoaderCallbacks, LoaderConfiguration } from 'hls.js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
 import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
@@ -168,34 +168,126 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         localStorage.removeItem('sessionPlayCount')
     }
 
-    const handleHls = useCallback((streamUrl: string) => {
-        // Use hls.js for transcoded streams
-        const hls = new Hls({
-            enableWorker: false,
-            maxBufferLength: 10,
-            maxMaxBufferLength: 20,
-        })
-        hlsRef.current?.destroy()
-        hlsRef.current = hls
-        hls.loadSource(streamUrl)
-        hls.attachMedia(audioRef.current)
-        hls.on(Hls.Events.ERROR, async (_event, data) => {
-            console.error('HLS error:', data.type, data.details, data)
-            if (data.fatal) {
-                if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                    console.warn('Network error, stopping playback')
-                    needsReloadRef.current = true
-                    audioRef.current.pause()
-                } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-                    console.warn('Recovering media error...')
-                    hls.recoverMediaError()
-                } else {
-                    console.error('Fatal HLS error, stopping playback')
-                    needsReloadRef.current = true
-                    audioRef.current.pause()
+    const handleHls = useCallback(
+        async (offlineUrl: string | undefined, streamUrl: string, trackId: string) => {
+            // 1) Tear down any previous Hls instance
+            hlsRef.current?.destroy()
+            hlsRef.current = null
+
+            // 2) Base config
+            const hlsConfig: Partial<HlsConfig> = {
+                enableWorker: false,
+                maxBufferLength: 10,
+                maxMaxBufferLength: 20,
+            }
+
+            // 3) If we have offline content, pull it out of IndexedDB now
+            if (offlineUrl) {
+                const stored = await audioStorage.getTrack(trackId)
+                if (stored?.type === 'm3u8') {
+                    const playlistText = await stored.playlist.text()
+                    const segmentBuffers = await Promise.all(stored.ts.map(tsBlob => tsBlob.arrayBuffer()))
+                    const m = playlistText.match(/#EXT-X-MEDIA-SEQUENCE:(\d+)/)
+                    const sequenceOffset = m ? parseInt(m[1], 10) : 1
+
+                    class CustomLoader extends Hls.DefaultConfig.loader {
+                        load(
+                            context: FragmentLoaderContext,
+                            _config: LoaderConfiguration,
+                            callbacks: LoaderCallbacks<FragmentLoaderContext>
+                        ) {
+                            if (context.frag) {
+                                const sn = context.frag.sn as number
+                                const idx = sn - sequenceOffset
+                                const buf = segmentBuffers[idx]
+
+                                if (buf) {
+                                    callbacks.onSuccess(
+                                        { data: buf, url: context.url },
+                                        {
+                                            aborted: false,
+                                            loaded: buf.byteLength,
+                                            total: buf.byteLength,
+                                            retry: 0,
+                                            chunkCount: 0,
+                                            bwEstimate: 0,
+                                            loading: { start: 0, first: 0, end: 0 },
+                                            parsing: { start: 0, end: 0 },
+                                            buffering: { start: 0, first: 0, end: 0 },
+                                        },
+                                        context,
+                                        null
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    hlsConfig.fLoader = CustomLoader as any
                 }
             }
-        })
+
+            // 4) Spin up Hls with or without your custom loader
+            const hls = new Hls(hlsConfig)
+            hlsRef.current = hls
+
+            // 5) Load either the blob: URL or the normal stream URL
+            hls.loadSource(offlineUrl ?? streamUrl)
+            hls.attachMedia(audioRef.current)
+
+            // 6) Error handling
+            hls.on(Hls.Events.ERROR, (_evt, data) => {
+                console.error('HLS error:', data.type, data.details, data)
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            needsReloadRef.current = true
+                            audioRef.current.pause()
+                            break
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            hls.recoverMediaError()
+                            break
+                        default:
+                            needsReloadRef.current = true
+                            audioRef.current.pause()
+                    }
+                }
+            })
+        },
+        [audioStorage]
+    )
+
+    const setAudioSourceAndLoad = useCallback(
+        async (track: MediaItem) => {
+            if (!audioRef.current) return
+
+            hlsRef.current?.destroy()
+            hlsRef.current = null
+
+            const offlineUrl = await audioStorage.getPlayableUrl(track.Id)
+            const streamUrl = api.getStreamUrl(track.Id, bitrate)
+            const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
+
+            if (isTranscoded && Hls.isSupported()) {
+                await handleHls(offlineUrl, streamUrl, track.Id)
+            } else {
+                audioRef.current.src = offlineUrl || streamUrl
+            }
+
+            audioRef.current.load()
+        },
+        [api, audioStorage, bitrate, handleHls]
+    )
+
+    const generateShuffledPlaylist = useCallback((currentIdx: number, totalItems: number): number[] => {
+        const newShuffledPlaylist = [...Array(totalItems).keys()]
+            .filter(i => i !== currentIdx)
+            .sort(() => Math.random() - 0.5)
+        if (currentIdx !== -1) {
+            newShuffledPlaylist.unshift(currentIdx)
+        }
+        return newShuffledPlaylist
     }, [])
 
     const playTrack = useCallback(
@@ -226,16 +318,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 audio.currentTime = 0
 
                 try {
-                    const offlineUrl = await audioStorage.getPlayableUrl(track.Id)
-                    const streamUrl = offlineUrl || api.getStreamUrl(track.Id, bitrate)
-                    const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
-                    if (isTranscoded && Hls.isSupported()) {
-                        handleHls(streamUrl)
-                    } else {
-                        // Native playback for default bitrate (140000000)
-                        audio.src = streamUrl
-                    }
-                    audio.load()
+                    await setAudioSourceAndLoad(track)
 
                     await new Promise<void>((resolve, reject) => {
                         const onLoadedMetadata = async () => {
@@ -275,17 +358,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 }
             }
         },
-        [
-            api,
-            audioStorage,
-            bitrate,
-            currentTrack,
-            handleHls,
-            isPlaying,
-            items,
-            updateMediaSessionMetadata,
-            userInteracted,
-        ]
+        [setAudioSourceAndLoad, api, currentTrack, isPlaying, items, updateMediaSessionMetadata, userInteracted]
     )
 
     const togglePlayPause = useCallback(async () => {
@@ -303,15 +376,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                     const restoreTime = needsReloadRef.current ? audio.currentTime : 0
                     needsReloadRef.current = false
 
-                    const offlineUrl = await audioStorage.getPlayableUrl(currentTrack.Id)
-                    const streamUrl = offlineUrl || api.getStreamUrl(currentTrack.Id, bitrate)
-                    const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
-                    if (isTranscoded && Hls.isSupported()) {
-                        handleHls(streamUrl)
-                    } else {
-                        audio.src = streamUrl
-                    }
-                    audio.load()
+                    await setAudioSourceAndLoad(currentTrack)
 
                     if (restoreTime) {
                         audio.currentTime = restoreTime
@@ -328,7 +393,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 }
             }
         }
-    }, [api, audioStorage, bitrate, currentTrack, handleHls, isPlaying, updateMediaSessionMetadata])
+    }, [setAudioSourceAndLoad, api, currentTrack, isPlaying, updateMediaSessionMetadata])
 
     useEffect(() => {
         if (currentTrackIndex.index >= 0 && currentTrackIndex.index < items.length && items[currentTrackIndex.index]) {
@@ -379,13 +444,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                     return
                 } else if (repeat === 'all') {
                     playedIndices.current.clear()
-                    shuffledPlaylist.current = [...Array(items.length).keys()]
-                        .filter(i => i !== currentTrackIndex.index)
-                        .sort(() => Math.random() - 0.5)
-                    if (currentTrackIndex.index !== -1) {
-                        shuffledPlaylist.current.unshift(currentTrackIndex.index)
-                    }
-
+                    shuffledPlaylist.current = generateShuffledPlaylist(currentTrackIndex.index, items.length)
                     setCurrentShuffledIndex({ index: 0 })
                 } else {
                     if (audioRef.current) {
@@ -417,7 +476,16 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 setCurrentTrackIndex({ index: nextIndex })
             }
         }
-    }, [currentShuffledIndex.index, currentTrack, currentTrackIndex.index, items, loadMore, repeat, shuffle])
+    }, [
+        generateShuffledPlaylist,
+        currentShuffledIndex.index,
+        currentTrack,
+        currentTrackIndex.index,
+        items,
+        loadMore,
+        repeat,
+        shuffle,
+    ])
 
     const previousTrack = useCallback(async () => {
         setUserInteracted(true)
@@ -437,13 +505,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             if (prevIndex < 0) {
                 if (repeat === 'all') {
                     playedIndices.current.clear()
-                    shuffledPlaylist.current = [...Array(items.length).keys()]
-                        .filter(i => i !== currentTrackIndex.index)
-                        .sort(() => Math.random() - 0.5)
-                    if (currentTrackIndex.index !== -1) {
-                        shuffledPlaylist.current.unshift(currentTrackIndex.index)
-                    }
-
+                    shuffledPlaylist.current = generateShuffledPlaylist(currentTrackIndex.index, items.length)
                     setCurrentShuffledIndex({ index: shuffledPlaylist.current.length - 1 })
                 } else {
                     if (audioRef.current) {
@@ -471,20 +533,22 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 setCurrentTrackIndex({ index: prevIndex })
             }
         }
-    }, [currentShuffledIndex.index, currentTrack, currentTrackIndex.index, items, repeat, shuffle])
+    }, [
+        generateShuffledPlaylist,
+        currentShuffledIndex.index,
+        currentTrack,
+        currentTrackIndex.index,
+        items,
+        repeat,
+        shuffle,
+    ])
 
-    const toggleShuffle = () => {
-        setShuffle(prev => {
-            const newShuffle = !prev
+    const toggleShuffle = useCallback(() => {
+        setShuffle(prevShuffleState => {
+            const newShuffle = !prevShuffleState
             if (newShuffle) {
                 playedIndices.current.clear()
-                shuffledPlaylist.current = [...Array(items.length).keys()]
-                    .filter(i => i !== currentTrackIndex.index)
-                    .sort(() => Math.random() - 0.5)
-                if (currentTrackIndex.index !== -1) {
-                    shuffledPlaylist.current.unshift(currentTrackIndex.index)
-                }
-
+                shuffledPlaylist.current = generateShuffledPlaylist(currentTrackIndex.index, items.length)
                 setCurrentShuffledIndex({ index: 0 })
 
                 if (currentTrack && currentTrackIndex.index !== -1) {
@@ -497,7 +561,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             }
             return newShuffle
         })
-    }
+    }, [generateShuffledPlaylist, currentTrack, currentTrackIndex.index, items.length])
 
     const toggleRepeat = () => {
         setRepeat(prev => {
@@ -613,15 +677,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
                 if (lastPlayedTrack) {
                     if (audioRef.current) {
-                        const offlineUrl = await audioStorage.getPlayableUrl(lastPlayedTrack.Id)
-                        const streamUrl = offlineUrl || api.getStreamUrl(lastPlayedTrack.Id, bitrate)
-                        const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
-                        if (isTranscoded && Hls.isSupported()) {
-                            handleHls(streamUrl)
-                        } else {
-                            audioRef.current.src = streamUrl
-                        }
-                        audioRef.current.load()
+                        await setAudioSourceAndLoad(lastPlayedTrack)
                     }
                     updateMediaSessionMetadata(lastPlayedTrack)
                 }
@@ -631,7 +687,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         }
 
         restoreAudio()
-    }, [api, audioStorage, bitrate, currentTrackIndex.index, handleHls, items, updateMediaSessionMetadata])
+    }, [setAudioSourceAndLoad, api.auth.token, currentTrackIndex.index, items, updateMediaSessionMetadata])
 
     // Preload next page when near end
     useEffect(() => {
@@ -651,13 +707,13 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         const handleEnded = async () => {
             if (!currentTrack || currentTrackIndex.index === -1 || !items || items.length === 0) {
                 if (currentTrack) {
-                    await api.reportPlaybackStopped(currentTrack.Id, audio.currentTime)
+                    api.reportPlaybackStopped(currentTrack.Id, audio.currentTime)
                 }
 
                 return
             }
 
-            await api.reportPlaybackStopped(currentTrack.Id, audio.currentTime)
+            api.reportPlaybackStopped(currentTrack.Id, audio.currentTime)
 
             if (repeat === 'one') {
                 setCurrentTrackIndex({ index: currentTrackIndex.index })

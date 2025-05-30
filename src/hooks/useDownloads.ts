@@ -1,3 +1,4 @@
+import { Parser } from 'm3u8-parser'
 import { useEffect, useRef, useState } from 'react'
 import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
@@ -95,13 +96,21 @@ export const useDownloads = () => {
                         patchMediaItem(id, item => ({ ...item, offlineState: 'downloaded' }))
                     } else {
                         if (mediaType === 'song') {
-                            const streamUrl = api.getStreamUrl(id, playback.bitrate)
-                            const response = await fetch(streamUrl)
-                            if (!response.ok) throw new Error(`HTTP ${response.status}`)
-                            const blob = await response.blob()
-                            await audioStorage.saveTrack(id, blob)
+                            const isTranscoded = [128000, 192000, 256000, 320000].includes(playback.bitrate)
+
+                            if (isTranscoded) {
+                                const streamUrl = api.getStreamUrl(id, playback.bitrate)
+                                const { playlist, ts } = await downloadTranscodedTrack(streamUrl)
+                                await audioStorage.saveTrack(id, { type: 'm3u8', playlist, ts })
+                            } else {
+                                const streamUrl = api.getStreamUrl(id, playback.bitrate)
+                                const response = await fetch(streamUrl)
+                                if (!response.ok) throw new Error(`HTTP ${response.status}`)
+                                const blob = await response.blob()
+                                await audioStorage.saveTrack(id, { type: 'song', blob })
+                            }
                         } else {
-                            await audioStorage.saveTrack(id, true)
+                            await audioStorage.saveTrack(id, { type: 'container' })
                         }
 
                         patchMediaItem(id, item => ({ ...item, offlineState: 'downloaded' }))
@@ -126,4 +135,44 @@ export const useDownloads = () => {
     }, [api, audioStorage, patchMediaItem, playback.bitrate, queue])
 
     return { queue, addToDownloads, removeFromDownloads }
+}
+
+const downloadTranscodedTrack = async (manifestUrl: string): Promise<{ playlist: Blob; ts: Blob[] }> => {
+    // 1. Fetch the playlist (master or media)
+    const manifestText = await (await fetch(manifestUrl)).text()
+
+    // 2. Parse it
+    const parser = new Parser()
+    parser.push(manifestText)
+    parser.end()
+
+    const baseUrl = manifestUrl.replace(/\/[^/]+$/, '/')
+    const playlistBlob = new Blob([manifestText], { type: 'application/vnd.apple.mpegurl' })
+
+    // 3a. If it's a master playlist, recurse into the first variant
+    if (parser.manifest.playlists && parser.manifest.playlists.length > 0) {
+        const variantUri = parser.manifest.playlists[0].uri
+        const variantUrl = new URL(variantUri, baseUrl).toString()
+        // The current playlistBlob is the master playlist.
+        // The recursive call will fetch the media playlist and its segments.
+        return await downloadTranscodedTrack(variantUrl)
+    }
+
+    // 3b. Otherwise it’s a media playlist: grab its segments
+    const segments = parser.manifest.segments
+    if (!segments || segments.length === 0) {
+        throw new Error('No segments found in media playlist')
+    }
+
+    // 4. Download each TS segment
+    const tsBlobs: Blob[] = []
+    for (const { uri } of segments) {
+        const segUrl = new URL(uri, baseUrl).toString()
+        const res = await fetch(segUrl)
+        if (!res.ok) throw new Error(`Segment error ${res.status}`)
+        tsBlobs.push(await res.blob())
+    }
+
+    // 5. Return the media playlist and its TS segments
+    return { playlist: playlistBlob, ts: tsBlobs }
 }

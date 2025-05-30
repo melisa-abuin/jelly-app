@@ -1,7 +1,7 @@
+import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models'
 import { ArrowLeftIcon, ChevronRightIcon } from '@primer/octicons-react'
 import { Fragment, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BaseItemKind } from '../../../node_modules/@jellyfin/sdk/lib/generated-client/models/base-item-kind'
 import { MediaItem } from '../../api/jellyfin'
 import { useJellyfinPlaylistsList } from '../../hooks/Jellyfin/useJellyfinPlaylistsList'
 import { useDownloads } from '../../hooks/useDownloads'

@@ -2,7 +2,20 @@ import { ReactNode, useCallback, useEffect, useRef } from 'react'
 import { AudioStorageContext } from './AudioStorageContext'
 
 export type IAudioStorageContext = ReturnType<typeof useInitialState>
-type IStorageTrack = true | Blob // Blob is the audio file for songs, true is for the album/artist item itself
+
+export type IStorageTrack =
+    | {
+          type: 'container'
+      }
+    | {
+          type: 'song'
+          blob: Blob
+      }
+    | {
+          type: 'm3u8'
+          playlist: Blob
+          ts: Blob[]
+      }
 
 const useInitialState = () => {
     const dbRef = useRef<Promise<IDBDatabase> | null>(null)
@@ -47,11 +60,11 @@ const useInitialState = () => {
         }
     }, [])
 
-    const saveTrack = useCallback(async (id: string, blob: IStorageTrack) => {
+    const saveTrack = useCallback(async (id: string, data: IStorageTrack) => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
         const tx = db.transaction('tracks', 'readwrite')
-        tx.objectStore('tracks').put(blob, id)
+        tx.objectStore('tracks').put(data, id)
         return new Promise<void>((resolve, reject) => {
             tx.oncomplete = () => resolve()
             tx.onerror = () => reject(tx.error)
@@ -92,8 +105,13 @@ const useInitialState = () => {
 
     const getPlayableUrl = useCallback(
         async (id: string) => {
-            const blob = await getTrack(id)
-            return blob && blob !== true ? URL.createObjectURL(blob) : undefined
+            const track = await getTrack(id)
+
+            return track?.type === 'song'
+                ? URL.createObjectURL(track.blob)
+                : track?.type === 'm3u8'
+                ? URL.createObjectURL(track.playlist)
+                : undefined
         },
         [getTrack]
     )
