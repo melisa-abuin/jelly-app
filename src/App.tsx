@@ -98,10 +98,16 @@ const RoutedApp = () => {
         const isWindows = /Win/.test(navigator.userAgent)
         const isChromium = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
         const isEdge = /Edg/.test(navigator.userAgent) && /Microsoft Corporation/.test(navigator.vendor)
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
+
         if (isWindows && (isChromium || isEdge)) {
             document.getElementsByTagName('html')[0].classList.add('winOS')
         } else {
             document.getElementsByTagName('html')[0].classList.add('otherOS')
+        }
+
+        if (isIOS) {
+            document.getElementsByTagName('html')[0].classList.add('iOS')
         }
     }, [])
 

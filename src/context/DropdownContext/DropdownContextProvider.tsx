@@ -778,16 +778,16 @@ const useInitialState = () => {
                         node: menuItems.remove_from_favorite,
                     },
                     {
+                        isVisible: !!(!hidden?.remove_from_playlist && context?.item.Type === BaseItemKind.Audio),
+                        node: menuItems.remove_from_playlist,
+                    },
+                    {
                         isVisible:
                             !hidden?.add_to_playlist &&
                             (context?.item.Type === BaseItemKind.Audio ||
                                 context?.item.Type === BaseItemKind.MusicAlbum ||
                                 context?.item.Type === BaseItemKind.MusicArtist),
                         node: menuItems.add_to_playlist,
-                    },
-                    {
-                        isVisible: !!(!hidden?.remove_from_playlist && context?.item.Type === BaseItemKind.Audio),
-                        node: menuItems.remove_from_playlist,
                     },
                     {
                         isVisible: !hidden?.delete_playlist && context?.item.Type === BaseItemKind.Playlist,
