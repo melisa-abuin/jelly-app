@@ -800,6 +800,8 @@ const useInitialState = () => {
                         isVisible: !hidden?.delete_playlist && context?.item.Type === BaseItemKind.Playlist,
                         node: menuItems.delete_playlist,
                     },
+                ],
+                [
                     {
                         isVisible:
                             !hidden?.download_song &&
