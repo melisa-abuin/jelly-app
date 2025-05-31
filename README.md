@@ -76,7 +76,7 @@ Jelly Music App is available as a production build, ready to deploy on an existi
 4. Deploy the contents of the `dist` folder to a web-accessible directory.
    <br/>
 
-Alternatively, you can run the production server directly: `yarn dev` or `yarn dev:nocache`
+Alternatively, you can run the development server directly: `yarn dev` or `yarn dev:nocache`
 
 #### Docker Deployment
 
