@@ -26,6 +26,7 @@ import { Albums } from './pages/Albums'
 import { Artist } from './pages/Artist'
 import { Artists } from './pages/Artists'
 import { ArtistTracks } from './pages/ArtistTracks'
+import { Downloads } from './pages/Downloads'
 import { Favorites } from './pages/Favorites'
 import { FrequentlyPlayed } from './pages/FrequentlyPlayed'
 import { Genre } from './pages/Genre'
@@ -195,6 +196,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                 <Route path="/favorites" element={<Main content={Favorites} filterType={'favorites'} />} />
                 <Route path="/recently" element={<Main content={RecentlyPlayed} />} />
                 <Route path="/frequently" element={<Main content={FrequentlyPlayed} />} />
+                <Route path="/downloads" element={<Main content={Downloads} />} />
                 <Route path="/settings" element={<Main content={memoSettings} />} />
                 <Route path="/search/:query" element={<Main content={SearchResults} />} />
                 <Route path="*" element={<Navigate to="/" />} />

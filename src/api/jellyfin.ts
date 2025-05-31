@@ -953,6 +953,18 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return response.ok
     }
 
+    const fetchMediaItem = async (itemId: string) => {
+        const userLibraryApi = new UserLibraryApi(api.configuration)
+        const response = await userLibraryApi.getItem(
+            {
+                userId,
+                itemId,
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+        return await parseItemDto(response.data)
+    }
+
     return {
         loginToJellyfin,
         searchItems,
@@ -981,6 +993,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         fetchAllTracks,
         fetchRecentlyPlayed,
         fetchFrequentlyPlayed,
+        fetchMediaItem,
         fetchUserInfo,
         fetchClientIp,
         measureLatency,
