@@ -6,31 +6,19 @@ import { Loader } from '../components/Loader'
 import { TrackList } from '../components/TrackList'
 import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
-import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { formatFileSize } from '../utils/formatFileSize'
 import './Downloads.css'
-
-interface StorageStats {
-    totalSize: number
-    trackCount: number
-    quota?: number
-    usage?: number
-}
 
 export const Downloads = () => {
     const api = useJellyfinContext()
     const audioStorage = useAudioStorageContext()
-    const { setPageTitle } = usePageTitle()
 
     const [downloadedTracks, setDownloadedTracks] = useState<MediaItem[]>([])
-    const [storageStats, setStorageStats] = useState<StorageStats | null>(null)
+    const [trackCount, setTrackCount] = useState(0)
+    const [storageStats, setStorageStats] = useState<{ usage: number; indexedDB: number }>({ usage: 0, indexedDB: 0 })
     const [loading, setLoading] = useState(true)
     const [clearing, setClearing] = useState(false)
     const [error, setError] = useState<string | null>(null)
-
-    useEffect(() => {
-        setPageTitle('Downloads')
-    }, [setPageTitle])
 
     const loadDownloads = useCallback(async () => {
         try {
@@ -38,8 +26,11 @@ export const Downloads = () => {
             setError(null)
 
             // Get storage statistics
-            const stats = await audioStorage.getStorageStats()
-            setStorageStats(stats)
+            setTrackCount(await audioStorage.getTrackCount())
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const storageStats: any = await navigator.storage.estimate()
+            setStorageStats({ usage: storageStats?.usage || 0, indexedDB: storageStats?.usageDetails?.indexedDB || 0 })
 
             // Get all downloaded tracks
             const allTracks = await audioStorage.getAllTracks()
@@ -84,19 +75,13 @@ export const Downloads = () => {
             setClearing(true)
             await audioStorage.clearAllDownloads()
             setDownloadedTracks([])
-            setStorageStats({
-                totalSize: 0,
-                trackCount: 0,
-                quota: storageStats?.quota,
-                usage: storageStats?.usage,
-            })
         } catch (error) {
             console.error('Failed to clear downloads:', error)
             setError('Failed to clear downloads. Please try again.')
         } finally {
             setClearing(false)
         }
-    }, [audioStorage, storageStats?.quota, storageStats?.usage])
+    }, [audioStorage])
 
     useEffect(() => {
         loadDownloads()
@@ -106,61 +91,19 @@ export const Downloads = () => {
         return <Loader />
     }
 
-    const usagePercentage = storageStats?.quota
-        ? Math.round(((storageStats.usage || 0) / storageStats.quota) * 100)
-        : null
-
-    const downloadsPercentage = storageStats?.quota
-        ? Math.round((storageStats.totalSize / storageStats.quota) * 100)
-        : null
-
     return (
         <div className="downloads-page">
             <div className="storage-overview">
                 <div className="storage-stats">
                     <div className="stat-item">
-                        <div className="stat-value">{storageStats?.trackCount || 0}</div>
+                        <div className="stat-value">{trackCount}</div>
                         <div className="stat-label">Downloaded Tracks</div>
                     </div>
                     <div className="stat-item">
-                        <div className="stat-value">{formatFileSize(storageStats?.totalSize || 0)}</div>
+                        <div className="stat-value">{formatFileSize(storageStats?.indexedDB || 0)}</div>
                         <div className="stat-label">Storage Used</div>
                     </div>
-                    {storageStats?.quota && (
-                        <div className="stat-item">
-                            <div className="stat-value">{formatFileSize(storageStats.quota)}</div>
-                            <div className="stat-label">Total Available</div>
-                        </div>
-                    )}
                 </div>
-
-                {storageStats?.quota && (
-                    <div className="storage-bar">
-                        <div className="storage-bar-container">
-                            <div
-                                className="storage-bar-used"
-                                style={{ width: `${Math.min(usagePercentage || 0, 100)}%` }}
-                            />
-                            <div
-                                className="storage-bar-downloads"
-                                style={{
-                                    width: `${Math.min(downloadsPercentage || 0, 100)}%`,
-                                    left: `${Math.max(0, (usagePercentage || 0) - (downloadsPercentage || 0))}%`,
-                                }}
-                            />
-                        </div>
-                        <div className="storage-legend">
-                            <div className="legend-item">
-                                <div className="legend-color used" />
-                                <span>Total Storage Used ({usagePercentage}%)</span>
-                            </div>
-                            <div className="legend-item">
-                                <div className="legend-color downloads" />
-                                <span>Downloads ({downloadsPercentage}%)</span>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
 
             <div className="downloads-content">

@@ -69,12 +69,12 @@ const useInitialState = () => {
         })
     }, [])
 
-    const getTrack = useCallback(async (id: string): Promise<IStorageTrack | null> => {
+    const getTrack = useCallback(async (id: string) => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
         const tx = db.transaction('tracks', 'readonly')
         const request = tx.objectStore('tracks').get(id)
-        return new Promise((resolve, reject) => {
+        return new Promise<IStorageTrack | null>((resolve, reject) => {
             request.onsuccess = () => resolve(request.result || null)
             request.onerror = () => reject(request.error)
         })
@@ -101,14 +101,14 @@ const useInitialState = () => {
         [getTrack]
     )
 
-    const getAllTracks = useCallback(async (): Promise<{ id: string; data: IStorageTrack }[]> => {
+    const getAllTracks = useCallback(async () => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
         const tx = db.transaction('tracks', 'readonly')
         const request = tx.objectStore('tracks').getAll()
         const keysRequest = tx.objectStore('tracks').getAllKeys()
 
-        return new Promise((resolve, reject) => {
+        return new Promise<{ id: string; data: IStorageTrack }[]>((resolve, reject) => {
             let keys: IDBValidKey[]
             let values: IStorageTrack[]
 
@@ -132,48 +132,26 @@ const useInitialState = () => {
         })
     }, [])
 
-    const getStorageStats = useCallback(async (): Promise<{
-        totalSize: number
-        trackCount: number
-        quota?: number
-        usage?: number
-    }> => {
+    const getTrackCount = useCallback(async () => {
         try {
-            const tracks = await getAllTracks()
-            let totalSize = 0
+            if (!dbRef.current) throw new Error('Database not initialized')
+            const db = await dbRef.current
+            const tx = db.transaction('tracks', 'readonly')
+            const request = tx.objectStore('tracks').count()
 
-            for (const { data } of tracks) {
-                if (data.type === 'song') {
-                    totalSize += data.blob.size
-                } else if (data.type === 'm3u8') {
-                    totalSize += data.playlist.size
-                    totalSize += data.ts.reduce((sum, ts) => sum + ts.size, 0)
-                }
-            }
+            const trackCount = await new Promise<number>((resolve, reject) => {
+                request.onsuccess = () => resolve(request.result)
+                request.onerror = () => reject(request.error)
+            })
 
-            // Get storage quota if available
-            let quota: number | undefined
-            let usage: number | undefined
-
-            if ('storage' in navigator && 'estimate' in navigator.storage) {
-                const estimate = await navigator.storage.estimate()
-                quota = estimate.quota
-                usage = estimate.usage
-            }
-
-            return {
-                totalSize,
-                trackCount: tracks.filter(t => t.data.type !== 'container').length,
-                quota,
-                usage,
-            }
+            return trackCount
         } catch (error) {
             console.error('Failed to get storage stats:', error)
             throw error
         }
-    }, [getAllTracks])
+    }, [])
 
-    const clearAllDownloads = useCallback(async (): Promise<void> => {
+    const clearAllDownloads = useCallback(async () => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
         const tx = db.transaction('tracks', 'readwrite')
@@ -193,7 +171,7 @@ const useInitialState = () => {
         hasTrack,
         getPlayableUrl,
         getAllTracks,
-        getStorageStats,
+        getTrackCount,
         clearAllDownloads,
     }
 
