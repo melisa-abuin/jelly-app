@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useEffect, useRef } from 'react'
+import { ReactNode, useCallback, useRef } from 'react'
 import { AudioStorageContext } from './AudioStorageContext'
 
 export type IAudioStorageContext = ReturnType<typeof useInitialState>
@@ -18,31 +18,23 @@ export type IStorageTrack =
       }
 
 const useInitialState = () => {
-    const dbRef = useRef<Promise<IDBDatabase> | null>(null)
+    const dbRef = useRef(
+        new Promise<IDBDatabase>((resolve, reject) => {
+            const DB_NAME = 'OfflineAudioDB'
+            const STORE_NAME = 'tracks'
+            const DB_VERSION = 1
 
-    useEffect(() => {
-        const DB_NAME = 'OfflineAudioDB'
-        const STORE_NAME = 'tracks'
-        const DB_VERSION = 1
-
-        let cancelled = false
-
-        const openDB = new Promise<IDBDatabase>((resolve, reject) => {
             const request = indexedDB.open(DB_NAME, DB_VERSION)
 
             request.onupgradeneeded = () => {
-                const upgradeDb = request.result
-                if (!upgradeDb.objectStoreNames.contains(STORE_NAME)) {
-                    upgradeDb.createObjectStore(STORE_NAME)
+                const db = request.result
+
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME)
                 }
             }
 
             request.onsuccess = () => {
-                if (cancelled) {
-                    request.result.close()
-                    return
-                }
-
                 resolve(request.result)
             }
 
@@ -51,14 +43,7 @@ const useInitialState = () => {
                 reject(request.error)
             }
         })
-
-        dbRef.current = openDB
-
-        return () => {
-            cancelled = true
-            dbRef.current?.then(db => db.close())
-        }
-    }, [])
+    )
 
     const saveTrack = useCallback(async (id: string, data: IStorageTrack) => {
         if (!dbRef.current) throw new Error('Database not initialized')
@@ -117,6 +102,7 @@ const useInitialState = () => {
     )
 
     const getAllTracks = useCallback(async (): Promise<{ id: string; data: IStorageTrack }[]> => {
+        console.log('@@', dbRef.current, !!dbRef.current)
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
         const tx = db.transaction('tracks', 'readonly')
@@ -153,8 +139,6 @@ const useInitialState = () => {
         quota?: number
         usage?: number
     }> => {
-        if (!dbRef.current) throw new Error('Database not initialized')
-
         try {
             const tracks = await getAllTracks()
             let totalSize = 0
