@@ -50,6 +50,10 @@ A lightweight & elegant music interface for Jellyfin. Made to be intuitive and m
 -   **Smart Fetching:** Caches your music efficiently for instant, smooth playback.
 -   **Personalized Settings:** Easily configure your theme and audio quality for a tailored experience.
 -   **Docker Support:** Build and deploy the app with a pre-configured Jellyfin server URL for seamless self-hosting.
+-   **Offline Sync:** Download individual songs, full albums, playlists, or artists for offline playback.
+    -   **Auto-Sync:** Automatically downloads newly added tracks to any previously saved playlist, album, or artist.
+    -   **Persistent Queue:** Downloads are managed with a local queue that resumes seamlessly across sessions.
+    -   **Transcoded or Direct Streams:** Supports both original quality and transcoded downloads based on your selected bitrate.
 
 ### Installation
 
