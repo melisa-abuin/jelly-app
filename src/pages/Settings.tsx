@@ -95,10 +95,11 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 <div className="inner">
                     <div className="container">
                         <div className="info">
-                            <div className="subtitle">Streaming Quality</div>
+                            <div className="subtitle">Streaming & Offline Sync</div>
                             <div className="subdesc">
                                 Adjusting audio quality enables server-side transcoding, converting to a compatible
-                                format with a lower bitrate for potentially smoother playback and reduced bandwidth
+                                format with a lower bitrate for smoother streaming or efficient offline syncing with
+                                reduced bandwidth and storage
                             </div>
                         </div>
                         <div className="options noSelect">
@@ -293,16 +294,18 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 </div>
                 */}
             </div>
-            <div className="section downloads-management">
-                <div className="title">Downloads</div>
+            <div className="section offline-sync">
+                <div className="title">Offline Sync</div>
                 <div className="desc">
-                    <p className="subtitle">Offline Music Management</p>
-                    <p>Manage your downloaded music and monitor storage usage</p>
-                    <div className="actions">
-                        <Link to="/downloads" className="downloads-link">
-                            Manage Downloads
-                        </Link>
-                    </div>
+                    <p className="subtitle">Downloaded Music</p>
+                    <p>
+                        Cache your music library for seamless offline playback, with new tracks auto-syncing to saved
+                        playlists, albums, or artists.{' '}
+                        <Link to="/downloads" className="textlink">
+                            Downloads
+                        </Link>{' '}
+                        - Browse your synced music library with ease
+                    </p>
                 </div>
             </div>
             <div className="section about">

@@ -12,7 +12,7 @@ import { Loader } from './Loader'
 import { IReviver } from './PlaybackManager'
 import './PlaylistTrackList.css'
 import { Skeleton } from './Skeleton'
-import { PlaystateAnimationTracklist } from './SvgIcons'
+import { DeletingIcon, DownloadedIcon, DownloadingIcon, PlaystateAnimationTracklist } from './SvgIcons'
 
 export const PlaylistTrackList = ({
     tracks,
@@ -126,6 +126,27 @@ export const PlaylistTrackList = ({
                     </div>
                 </div>
                 <div className="track-indicators">
+                    {track.offlineState && (
+                        <div className="download-state">
+                            {track.offlineState === 'downloading' && (
+                                <div className="icon downloading" title="Syncing...">
+                                    <DownloadingIcon width={12} height={12} />
+                                </div>
+                            )}
+
+                            {track.offlineState === 'downloaded' && (
+                                <div className="icon downloaded" title="Synced">
+                                    <DownloadedIcon width={12} height={12} />
+                                </div>
+                            )}
+
+                            {track.offlineState === 'deleting' && (
+                                <div className="icon deleting" title="Unsyncing...">
+                                    <DeletingIcon width={12} height={12} />
+                                </div>
+                            )}
+                        </div>
+                    )}
                     {isFavorite && (
                         <div className="favorited" title="Favorited">
                             <HeartFillIcon size={12} />

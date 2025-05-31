@@ -106,19 +106,19 @@ export const TrackList = ({
                                 {track.offlineState && (
                                     <div className="download-state">
                                         {track.offlineState === 'downloading' && (
-                                            <div className="icon downloading" title="Downloading">
+                                            <div className="icon downloading" title="Syncing...">
                                                 <DownloadingIcon width={12} height={12} />
                                             </div>
                                         )}
 
                                         {track.offlineState === 'downloaded' && (
-                                            <div className="icon downloaded" title="Downloaded">
+                                            <div className="icon downloaded" title="Synced">
                                                 <DownloadedIcon width={12} height={12} />
                                             </div>
                                         )}
 
                                         {track.offlineState === 'deleting' && (
-                                            <div className="icon deleting" title="Deleting">
+                                            <div className="icon deleting" title="Unsyncing...">
                                                 <DeletingIcon width={12} height={12} />
                                             </div>
                                         )}

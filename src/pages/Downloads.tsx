@@ -1,4 +1,3 @@
-import { TrashIcon } from '@primer/octicons-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
@@ -7,7 +6,6 @@ import { TrackList } from '../components/TrackList'
 import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { formatFileSize } from '../utils/formatFileSize'
-import './Downloads.css'
 
 export const Downloads = () => {
     const api = useJellyfinContext()
@@ -93,28 +91,17 @@ export const Downloads = () => {
 
     return (
         <div className="downloads-page">
-            <div className="storage-overview">
-                <div className="storage-stats">
-                    <div className="stat-item">
-                        <div className="stat-value">{trackCount}</div>
-                        <div className="stat-label">Downloaded Tracks</div>
-                    </div>
-                    <div className="stat-item">
-                        <div className="stat-value">{formatFileSize(storageStats?.indexedDB || 0)}</div>
-                        <div className="stat-label">Storage Used</div>
-                    </div>
-                </div>
-            </div>
-
             <div className="downloads-content">
                 <div className="downloads-header">
                     <div className="header-info">
-                        <h2>Downloaded Music</h2>
-                        <p>Manage your offline music collection</p>
+                        <div className="title">Downloaded Music</div>
+                        <div className="desc">
+                            Manage your offline music collection - {trackCount} Tracks /{' '}
+                            {formatFileSize(storageStats?.indexedDB || 0)}
+                        </div>
                     </div>
                     {downloadedTracks.length > 0 && (
                         <button className="clear-all-button" onClick={handleClearAll} disabled={clearing}>
-                            <TrashIcon size={14} />
                             {clearing ? 'Clearing...' : 'Clear All'}
                         </button>
                     )}

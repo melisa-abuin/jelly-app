@@ -104,19 +104,19 @@ export const MediaList = ({
                         {item.offlineState && (
                             <div className="download-state">
                                 {item.offlineState === 'downloading' && (
-                                    <div className="icon downloading" title="Downloading">
+                                    <div className="icon downloading" title="Syncing...">
                                         <DownloadingIcon width={16} height={16} />
                                     </div>
                                 )}
 
                                 {item.offlineState === 'downloaded' && (
-                                    <div className="icon downloaded" title="Downloaded">
+                                    <div className="icon downloaded" title="Synced">
                                         <DownloadedIcon width={16} height={16} />
                                     </div>
                                 )}
 
                                 {item.offlineState === 'deleting' && (
-                                    <div className="icon deleting" title="Deleting">
+                                    <div className="icon deleting" title="Unsyncing...">
                                         <DeletingIcon width={16} height={16} />
                                     </div>
                                 )}
@@ -152,19 +152,19 @@ export const MediaList = ({
                         {item.offlineState && (
                             <div className="download-state">
                                 {item.offlineState === 'downloading' && (
-                                    <div className="icon downloading" title="Downloading">
+                                    <div className="icon downloading" title="Syncing...">
                                         <DownloadingIcon width={16} height={16} />
                                     </div>
                                 )}
 
                                 {item.offlineState === 'downloaded' && (
-                                    <div className="icon downloaded" title="Downloaded">
+                                    <div className="icon downloaded" title="Synced">
                                         <DownloadedIcon width={16} height={16} />
                                     </div>
                                 )}
 
                                 {item.offlineState === 'deleting' && (
-                                    <div className="icon deleting" title="Deleting">
+                                    <div className="icon deleting" title="Unsyncing...">
                                         <DeletingIcon width={16} height={16} />
                                     </div>
                                 )}
@@ -223,19 +223,19 @@ export const MediaList = ({
                         {item.offlineState && (
                             <div className="download-state">
                                 {item.offlineState === 'downloading' && (
-                                    <div className="icon downloading" title="Downloading">
+                                    <div className="icon downloading" title="Syncing...">
                                         <DownloadingIcon width={16} height={16} />
                                     </div>
                                 )}
 
                                 {item.offlineState === 'downloaded' && (
-                                    <div className="icon downloaded" title="Downloaded">
+                                    <div className="icon downloaded" title="Synced">
                                         <DownloadedIcon width={16} height={16} />
                                     </div>
                                 )}
 
                                 {item.offlineState === 'deleting' && (
-                                    <div className="icon deleting" title="Deleting">
+                                    <div className="icon deleting" title="Unsyncing...">
                                         <DeletingIcon width={16} height={16} />
                                     </div>
                                 )}

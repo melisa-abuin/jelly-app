@@ -590,18 +590,11 @@ const useInitialState = () => {
                         }}
                         onMouseEnter={closeSubDropdown}
                     >
-                        <span>
-                            Remove{' '}
-                            {context?.item.Type === BaseItemKind.Audio
-                                ? 'song'
-                                : context?.item.Type === BaseItemKind.MusicAlbum
-                                ? 'album'
-                                : context?.item.Type === BaseItemKind.MusicArtist
-                                ? 'artist'
-                                : context?.item.Type === BaseItemKind.Playlist
-                                ? 'playlist'
-                                : ''}
-                        </span>
+                        <span>Unsync from cache</span>
+                    </div>
+                ) : context?.item.offlineState === 'deleting' ? (
+                    <div className="dropdown-item disabled" onMouseEnter={closeSubDropdown}>
+                        <span>Unsyncing...</span>
                     </div>
                 ) : !context?.item.offlineState ? (
                     <div
@@ -618,20 +611,13 @@ const useInitialState = () => {
                         }}
                         onMouseEnter={closeSubDropdown}
                     >
-                        <span>
-                            Download{' '}
-                            {context?.item.Type === BaseItemKind.Audio
-                                ? 'song'
-                                : context?.item.Type === BaseItemKind.MusicAlbum
-                                ? 'album'
-                                : context?.item.Type === BaseItemKind.MusicArtist
-                                ? 'artist'
-                                : context?.item.Type === BaseItemKind.Playlist
-                                ? 'playlist'
-                                : ''}
-                        </span>
+                        <span>Sync to cache</span>
                     </div>
-                ) : null,
+                ) : (
+                    <div className="dropdown-item disabled" onMouseEnter={closeSubDropdown}>
+                        <span>Syncing...</span>
+                    </div>
+                ),
         }
     }, [
         addItemsToPlaylist,

@@ -294,9 +294,19 @@
     margin-left: 14px;
 }
 
+.playlist-tracklist .track-item > .track-indicators > .download-state > .icon {
+    padding: 3px;
+    fill: var(--font-color-tertiary);
+    transition: fill 0.2s ease-out;
+}
+
+.playlist-tracklist .track-item.playing > .track-indicators > .download-state > .icon,
+.playlist-tracklist .track-item.paused > .track-indicators > .download-state > .icon {
+    fill: var(--font-color-secondary);
+}
+
 .playlist-tracklist .track-item > .track-indicators > .favorited {
-    padding: 6px;
-    margin: -6px 0;
+    padding: 3px;
     color: var(--font-color-tertiary);
     transition: color 0.2s ease-out;
 }
@@ -311,6 +321,7 @@
     font-weight: 500;
     color: var(--font-color-tertiary);
     transition: color 0.2s ease-out;
+    margin-left: 3px;
 }
 
 .playlist-tracklist .track-item.playing > .track-indicators > .track-duration,
