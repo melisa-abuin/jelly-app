@@ -255,7 +255,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
             audioRef.current.pause()
             audioRef.current.currentTime = 0
-            audioRef.current.src = ''
 
             hlsRef.current?.destroy()
             hlsRef.current = null
@@ -732,7 +731,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
             if (audioRef.current) {
                 audioRef.current.pause()
-                audioRef.current.src = ''
             }
         }
     }, [api, clearOnLogout, currentTrack])
