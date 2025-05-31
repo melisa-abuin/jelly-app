@@ -255,21 +255,23 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
             audioRef.current.pause()
             audioRef.current.currentTime = 0
+            audioRef.current.src = ''
 
             hlsRef.current?.destroy()
             hlsRef.current = null
 
             const offlineUrl = await audioStorage.getPlayableUrl(track.Id)
             const streamUrl = api.getStreamUrl(track.Id, bitrate)
-            const isTranscoded = [128000, 192000, 256000, 320000].includes(bitrate)
+            const isTranscoded = offlineUrl
+                ? offlineUrl.type === 'm3u8'
+                : [128000, 192000, 256000, 320000].includes(bitrate)
 
             if (isTranscoded && Hls.isSupported()) {
-                await handleHls(offlineUrl, streamUrl, track.Id)
+                await handleHls(offlineUrl?.url, streamUrl, track.Id)
             } else {
-                audioRef.current.src = offlineUrl || streamUrl
+                audioRef.current.src = offlineUrl?.url || streamUrl
+                audioRef.current.load()
             }
-
-            audioRef.current.load()
         },
         [api, audioStorage, bitrate, handleHls]
     )
