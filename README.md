@@ -49,6 +49,7 @@ A lightweight & elegant music interface for Jellyfin. Made to be intuitive and m
 -   **Smooth Performance:** Built with modern tools like React for a snappy, reliable experience.
 -   **Smart Fetching:** Caches your music efficiently for instant, smooth playback.
 -   **Personalized Settings:** Easily configure your theme and audio quality for a tailored experience.
+-   **Docker Support:** Build and deploy the app with a pre-configured Jellyfin server URL for seamless self-hosting.
 
 ### Installation
 
@@ -76,3 +77,27 @@ Jelly Music App is available as a production build, ready to deploy on an existi
    <br/>
 
 Alternatively, you can run the production server directly: `yarn dev` or `yarn dev:nocache`
+
+#### Docker Deployment
+
+You can now deploy Jelly Music App using Docker, with the option to set a default or locked Jellyfin server URL at build time for simplified self-hosting.
+
+1.  Build the Docker image with optional environment variables:
+
+    ```bash
+    docker build . \
+    --build-arg VITE_DEFAULT_JELLYFIN_URL=https://demo.jellyfin.org/stable \
+    --build-arg VITE_LOCK_JELLYFIN_URL=true \
+    --tag jelly-app
+    ```
+
+    -   `VITE_DEFAULT_JELLYFIN_URL`: Sets the default Jellyfin server URL loaded on first app access if no URL is stored in Local Storage.
+    -   `VITE_LOCK_JELLYFIN_URL`: If set to `true`, removes the URL input field and enforces the default URL for all connections, ideal for self-hosted instances tied to a single server.
+
+1.  Run the Docker container:
+
+    ```bash
+    docker run --rm -p 80:80 jelly-app:latest
+    ```
+
+**Note**: Environment variables must be set during the Docker build process, as setting them at runtime (e.g., via -e in `docker run`) will not work.
