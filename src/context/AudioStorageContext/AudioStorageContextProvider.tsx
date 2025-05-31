@@ -102,7 +102,6 @@ const useInitialState = () => {
     )
 
     const getAllTracks = useCallback(async (): Promise<{ id: string; data: IStorageTrack }[]> => {
-        console.log('@@', dbRef.current, !!dbRef.current)
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
         const tx = db.transaction('tracks', 'readonly')
