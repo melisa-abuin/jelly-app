@@ -98,7 +98,7 @@ const RoutedApp = () => {
         const isWindows = /Win/.test(navigator.userAgent)
         const isChromium = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
         const isEdge = /Edg/.test(navigator.userAgent) && /Microsoft Corporation/.test(navigator.vendor)
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream // eslint-disable-line @typescript-eslint/no-explicit-any
 
         if (isWindows && (isChromium || isEdge)) {
             document.getElementsByTagName('html')[0].classList.add('winOS')
