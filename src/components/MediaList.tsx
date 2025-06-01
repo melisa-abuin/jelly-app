@@ -19,7 +19,7 @@ export const MediaList = ({
     title,
     reviver,
     loadMore,
-    hidden = {},
+    hidden: _hidden = {},
     disableActions = false,
 }: {
     items: MediaItem[] | undefined
@@ -35,6 +35,17 @@ export const MediaList = ({
     const navigate = useNavigate()
     const location = useLocation()
     const { displayItems, setRowRefs } = useDisplayItems(items, isLoading)
+
+    const hidden: IMenuItems = disableActions
+        ? {
+              ..._hidden,
+              add_to_favorite: true,
+              remove_from_favorite: true,
+              add_to_playlist: true,
+              remove_from_playlist: true,
+              download_song: true,
+          }
+        : _hidden
 
     const dropdown = useDropdownContext()
 
@@ -88,12 +99,10 @@ export const MediaList = ({
                     key={item.Id}
                     onClick={() => navigate(`/album/${item.Id}`)}
                     ref={el => setRowRefs(index, el)}
-                    {...(!disableActions && {
-                        onContextMenu: e => dropdown.onContextMenu(e, { item }),
-                        onTouchStart: e => dropdown.onTouchStart(e, { item }),
-                        onTouchMove: dropdown.onTouchClear,
-                        onTouchEnd: dropdown.onTouchClear,
-                    })}
+                    onContextMenu={e => dropdown.onContextMenu(e, { item }, false, hidden)}
+                    onTouchStart={e => dropdown.onTouchStart(e, { item }, false, hidden)}
+                    onTouchMove={dropdown.onTouchClear}
+                    onTouchEnd={dropdown.onTouchClear}
                 >
                     <div className="media-state">
                         <JellyImg item={item} type={'Primary'} width={46} height={46} />
@@ -141,12 +150,10 @@ export const MediaList = ({
                     key={item.Id}
                     onClick={() => navigate(`/artist/${item.Id}`)}
                     ref={el => setRowRefs(index, el)}
-                    {...(!disableActions && {
-                        onContextMenu: e => dropdown.onContextMenu(e, { item }),
-                        onTouchStart: e => dropdown.onTouchStart(e, { item }),
-                        onTouchMove: dropdown.onTouchClear,
-                        onTouchEnd: dropdown.onTouchClear,
-                    })}
+                    onContextMenu={e => dropdown.onContextMenu(e, { item }, false, hidden)}
+                    onTouchStart={e => dropdown.onTouchStart(e, { item }, false, hidden)}
+                    onTouchMove={dropdown.onTouchClear}
+                    onTouchEnd={dropdown.onTouchClear}
                 >
                     <div className="media-state">
                         <JellyImg item={item} type={'Primary'} width={36} height={36} />
@@ -191,12 +198,10 @@ export const MediaList = ({
                     onClick={() => handleSongClick(item, index)}
                     key={item.Id}
                     ref={el => setRowRefs(index, el)}
-                    {...(!disableActions && {
-                        onContextMenu: e => dropdown.onContextMenu(e, { item }, false, hidden),
-                        onTouchStart: e => dropdown.onTouchStart(e, { item }, false, hidden),
-                        onTouchMove: dropdown.onTouchClear,
-                        onTouchEnd: dropdown.onTouchClear,
-                    })}
+                    onContextMenu={e => dropdown.onContextMenu(e, { item }, false, hidden)}
+                    onTouchStart={e => dropdown.onTouchStart(e, { item }, false, hidden)}
+                    onTouchMove={dropdown.onTouchClear}
+                    onTouchEnd={dropdown.onTouchClear}
                 >
                     <div className="media-state">
                         <JellyImg item={item} type={'Primary'} width={46} height={46} />
