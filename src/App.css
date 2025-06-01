@@ -550,22 +550,19 @@ body.lockscroll {
 .main > .main_footer > .playback > .progress {
     position: relative;
     display: flex;
+    height: 8px;
+    margin-top: -4px;
+    transform: scaleY(0.6);
+    transition: transform 0.1s linear;
 }
 
-.main > .main_footer > .playback > .progress > input {
-    position: relative;
-    cursor: pointer;
-    width: 100%;
-    height: 8px;
-    background-color: rgba(0, 0, 0, 0);
-    margin-top: -4px;
-    --progress-width: 0%;
-    --buffered-width: 0%;
-    --transition-duration: 0s;
+.main > .main_footer > .playback > .progress:hover,
+.main > .main_footer > .playback > .progress:active {
+    transform: scaleY(1);
 }
 
 /* Progress loading */
-.main > .main_footer > .playback > .progress > input.loading::after {
+.main > .main_footer > .playback > .progress:has(input.loading)::after {
     content: '';
     position: absolute;
     top: 0;
@@ -575,7 +572,6 @@ body.lockscroll {
     user-select: none;
     pointer-events: none;
     opacity: 0;
-    transform: scaleY(0.6);
     transition: transform 0.1s linear;
     background-image: linear-gradient(
         90deg,
@@ -600,44 +596,38 @@ body.lockscroll {
     }
 }
 
-.main > .main_footer > .playback > .progress:hover > input.loading::after,
-.main > .main_footer > .playback > .progress:active > input.loading::after {
-    transform: scaleY(1);
+.main > .main_footer > .playback > .progress > input {
+    position: relative;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    --progress-width: 0%;
+    --buffered-width: 0%;
+    --transition-duration: 0s;
 }
 
 /* WebKit progress visuals */
 .main > .main_footer > .playback > .progress > input::-webkit-slider-runnable-track {
     position: relative;
     width: 100%;
-    height: 8px;
-    transform: scaleY(0.6);
+    height: 100%;
     background: linear-gradient(var(--bg-color-quaternary), var(--bg-color-quaternary)) no-repeat 0 /
             var(--progress-width) 100%,
         linear-gradient(var(--bg-color-tertiary), var(--bg-color-tertiary)) no-repeat 0 / var(--buffered-width) 100%,
         var(--bg-color-secondary);
-    transition: transform 0.1s linear, background-size var(--transition-duration) linear;
-}
-
-.main > .main_footer > .playback > .progress:hover > input::-webkit-slider-runnable-track,
-.main > .main_footer > .playback > .progress:active > input::-webkit-slider-runnable-track {
-    transform: scaleY(1);
+    transition: background-size var(--transition-duration) linear;
 }
 
 /* Firefox progress visuals */
 .main > .main_footer > .playback > .progress > input::-moz-range-track {
     width: 100%;
-    height: 8px;
-    transform: scaleY(0.6);
+    height: 100%;
     background: linear-gradient(var(--bg-color-quaternary), var(--bg-color-quaternary)) no-repeat 0 /
             var(--progress-width) 100%,
         linear-gradient(var(--bg-color-tertiary), var(--bg-color-tertiary)) no-repeat 0 / var(--buffered-width) 100%,
         var(--bg-color-secondary);
-    transition: transform 0.1s linear, background-size var(--transition-duration) linear;
-}
-
-.main > .main_footer > .playback > .progress:hover > input::-moz-range-track,
-.main > .main_footer > .playback > .progress:active > input::-moz-range-track {
-    transform: scaleY(1);
+    transition: background-size var(--transition-duration) linear;
 }
 
 /* Hiding the input slider thumbs for different browsers */
@@ -1015,15 +1005,7 @@ body.lockscroll {
 }
 
 @media only screen and (pointer: coarse) {
-    .main > .main_footer > .playback > .progress > input {
-        height: 14px;
-    }
-
-    .main > .main_footer > .playback > .progress > input::-webkit-slider-runnable-track {
-        height: 14px;
-    }
-
-    .main > .main_footer > .playback > .progress > input::-moz-range-track {
+    .main > .main_footer > .playback > .progress {
         height: 14px;
     }
 }
