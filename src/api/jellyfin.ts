@@ -72,6 +72,8 @@ export const loginToJellyfin = async (serverUrl: string, username: string, passw
 }
 
 export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: string; userId: string; token: string }) => {
+    const maxLimit = 2000 // Safety fallback upper limit for API calls
+
     const jellyfin = new Jellyfin({
         clientInfo: {
             name: 'Jelly Music App',
@@ -108,7 +110,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 searchTerm,
                 includeItemTypes: [BaseItemKind.MusicAlbum, BaseItemKind.Playlist, BaseItemKind.Audio],
                 recursive: true,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -121,7 +123,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             {
                 userId,
                 searchTerm,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -136,7 +138,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 searchTerm,
                 includeItemTypes: [BaseItemKind.MusicAlbum],
                 recursive: true,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -151,7 +153,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 searchTerm,
                 includeItemTypes: [BaseItemKind.Playlist],
                 recursive: true,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -165,7 +167,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 userId,
                 searchTerm,
                 includeItemTypes: [BaseItemKind.Audio],
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -181,7 +183,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 sortOrder: [SortOrder.Descending],
                 includeItemTypes: [BaseItemKind.Audio],
                 recursive: true,
-                limit: 12,
+                limit: Math.min(12, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -197,7 +199,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 sortOrder: [SortOrder.Descending],
                 includeItemTypes: [BaseItemKind.Audio],
                 recursive: true,
-                limit: 12,
+                limit: Math.min(12, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -213,7 +215,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 sortOrder: [SortOrder.Descending],
                 includeItemTypes: [BaseItemKind.MusicAlbum],
                 recursive: true,
-                limit: 12,
+                limit: Math.min(12, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -236,7 +238,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 filters: [ItemFilter.IsPlayed],
                 recursive: true,
                 startIndex,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -259,7 +261,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 filters: [ItemFilter.IsPlayed],
                 recursive: true,
                 startIndex,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -281,7 +283,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 includeItemTypes: [BaseItemKind.MusicAlbum],
                 recursive: true,
                 startIndex,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -301,7 +303,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 sortBy,
                 sortOrder,
                 startIndex,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -323,7 +325,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 includeItemTypes: [BaseItemKind.Audio],
                 recursive: true,
                 startIndex,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -336,6 +338,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             {
                 userId,
                 itemId: songId,
+                limit: maxLimit,
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -356,7 +359,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                     userId,
                     isFavorite: true,
                     startIndex,
-                    limit,
+                    limit: Math.min(limit, maxLimit),
                     sortBy,
                     sortOrder,
                 },
@@ -375,7 +378,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 sortBy,
                 sortOrder,
                 startIndex,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -401,6 +404,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                     includeItemTypes: [BaseItemKind.Audio],
                     sortBy: [ItemSortBy.IndexNumber],
                     sortOrder: [SortOrder.Ascending],
+                    limit: maxLimit,
                 },
                 { signal: AbortSignal.timeout(20000) }
             ),
@@ -434,7 +438,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                     recursive: true,
                     sortBy: [ItemSortBy.PlayCount, ItemSortBy.SortName],
                     sortOrder: [SortOrder.Descending, SortOrder.Ascending],
-                    limit: trackLimit,
+                    limit: Math.min(trackLimit, maxLimit),
                 },
                 { signal: AbortSignal.timeout(20000) }
             ),
@@ -472,6 +476,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                         includeItemTypes: [BaseItemKind.Audio],
                         recursive: true,
                         fields: ['MediaSources'],
+                        limit: maxLimit,
                     },
                     { signal: AbortSignal.timeout(20000) }
                 ),
@@ -483,6 +488,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                         recursive: true,
                         sortBy: [ItemSortBy.PremiereDate, ItemSortBy.ProductionYear, ItemSortBy.SortName],
                         sortOrder: [SortOrder.Descending],
+                        limit: maxLimit,
                     },
                     { signal: AbortSignal.timeout(20000) }
                 ),
@@ -494,6 +500,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                         recursive: true,
                         sortBy: [ItemSortBy.PremiereDate, ItemSortBy.ProductionYear, ItemSortBy.SortName],
                         sortOrder: [SortOrder.Descending],
+                        limit: maxLimit,
                     },
                     { signal: AbortSignal.timeout(20000) }
                 ),
@@ -548,7 +555,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 sortOrder,
                 recursive: true,
                 startIndex,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -565,6 +572,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 userId,
                 includeItemTypes: [BaseItemKind.Playlist],
                 recursive: true,
+                limit: maxLimit,
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -586,7 +594,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                                 parentId: playlist.Id,
                                 includeItemTypes: [BaseItemKind.Audio],
                                 startIndex,
-                                limit,
+                                limit: Math.min(limit, maxLimit),
                             },
                             { signal: AbortSignal.timeout(20000) }
                         )
@@ -627,7 +635,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 recursive: true,
                 genres: [genre],
                 startIndex,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -672,6 +680,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                     includeItemTypes: [BaseItemKind.Audio],
                     recursive: true,
                     fields: ['MediaSources'],
+                    limit: maxLimit,
                 },
                 { signal: AbortSignal.timeout(20000) }
             )
@@ -694,6 +703,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 parentId: playlistId,
                 includeItemTypes: [BaseItemKind.Audio],
                 recursive: true,
+                limit: maxLimit,
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -716,7 +726,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 sortBy,
                 sortOrder,
                 startIndex,
-                limit,
+                limit: Math.min(limit, maxLimit),
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -739,6 +749,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 userId,
                 includeItemTypes: [BaseItemKind.Playlist],
                 recursive: true,
+                limit: maxLimit,
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -753,6 +764,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 artistIds: [artistId],
                 includeItemTypes: [BaseItemKind.Audio],
                 recursive: true,
+                limit: maxLimit,
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -786,6 +798,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             recursive: true,
             includeItemTypes: [BaseItemKind.Audio],
             filters: [ItemFilter.IsPlayed],
+            limit: maxLimit,
         })
         return response.data.TotalRecordCount || null
     }
@@ -797,7 +810,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             searchTerm: query,
             includeItemTypes: [BaseItemKind.Audio],
             recursive: true,
-            limit: 10,
+            limit: Math.min(10, maxLimit),
         })
         return await parseItemDtos(response.data.Items)
     }
