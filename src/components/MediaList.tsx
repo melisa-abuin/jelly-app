@@ -20,6 +20,7 @@ export const MediaList = ({
     reviver,
     loadMore,
     hidden = {},
+    disableActions = false,
 }: {
     items: MediaItem[] | undefined
     isLoading: boolean
@@ -28,6 +29,7 @@ export const MediaList = ({
     reviver?: IReviver
     loadMore?: () => void
     hidden?: IMenuItems
+    disableActions?: boolean
 }) => {
     const playback = usePlaybackContext()
     const navigate = useNavigate()
@@ -86,10 +88,12 @@ export const MediaList = ({
                     key={item.Id}
                     onClick={() => navigate(`/album/${item.Id}`)}
                     ref={el => setRowRefs(index, el)}
-                    onContextMenu={e => dropdown.onContextMenu(e, { item })}
-                    onTouchStart={e => dropdown.onTouchStart(e, { item })}
-                    onTouchMove={dropdown.onTouchClear}
-                    onTouchEnd={dropdown.onTouchClear}
+                    {...(!disableActions && {
+                        onContextMenu: e => dropdown.onContextMenu(e, { item }),
+                        onTouchStart: e => dropdown.onTouchStart(e, { item }),
+                        onTouchMove: dropdown.onTouchClear,
+                        onTouchEnd: dropdown.onTouchClear,
+                    })}
                 >
                     <div className="media-state">
                         <JellyImg item={item} type={'Primary'} width={46} height={46} />
@@ -122,7 +126,7 @@ export const MediaList = ({
                                 )}
                             </div>
                         )}
-                        {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
+                        {!disableActions && item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
                             <div className="favorited" title="Favorited">
                                 <HeartFillIcon size={16} />
                             </div>
@@ -137,10 +141,12 @@ export const MediaList = ({
                     key={item.Id}
                     onClick={() => navigate(`/artist/${item.Id}`)}
                     ref={el => setRowRefs(index, el)}
-                    onContextMenu={e => dropdown.onContextMenu(e, { item })}
-                    onTouchStart={e => dropdown.onTouchStart(e, { item })}
-                    onTouchMove={dropdown.onTouchClear}
-                    onTouchEnd={dropdown.onTouchClear}
+                    {...(!disableActions && {
+                        onContextMenu: e => dropdown.onContextMenu(e, { item }),
+                        onTouchStart: e => dropdown.onTouchStart(e, { item }),
+                        onTouchMove: dropdown.onTouchClear,
+                        onTouchEnd: dropdown.onTouchClear,
+                    })}
                 >
                     <div className="media-state">
                         <JellyImg item={item} type={'Primary'} width={36} height={36} />
@@ -170,7 +176,7 @@ export const MediaList = ({
                                 )}
                             </div>
                         )}
-                        {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
+                        {!disableActions && item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
                             <div className="favorited" title="Favorited">
                                 <HeartFillIcon size={16} />
                             </div>
@@ -185,10 +191,12 @@ export const MediaList = ({
                     onClick={() => handleSongClick(item, index)}
                     key={item.Id}
                     ref={el => setRowRefs(index, el)}
-                    onContextMenu={e => dropdown.onContextMenu(e, { item }, false, hidden)}
-                    onTouchStart={e => dropdown.onTouchStart(e, { item }, false, hidden)}
-                    onTouchMove={dropdown.onTouchClear}
-                    onTouchEnd={dropdown.onTouchClear}
+                    {...(!disableActions && {
+                        onContextMenu: e => dropdown.onContextMenu(e, { item }, false, hidden),
+                        onTouchStart: e => dropdown.onTouchStart(e, { item }, false, hidden),
+                        onTouchMove: dropdown.onTouchClear,
+                        onTouchEnd: dropdown.onTouchClear,
+                    })}
                 >
                     <div className="media-state">
                         <JellyImg item={item} type={'Primary'} width={46} height={46} />
@@ -241,7 +249,7 @@ export const MediaList = ({
                                 )}
                             </div>
                         )}
-                        {item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
+                        {!disableActions && item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
                             <div className="favorited" title="Favorited">
                                 <HeartFillIcon size={16} />
                             </div>

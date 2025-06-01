@@ -1,36 +1,33 @@
+import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models'
 import { ReactNode, useCallback, useRef } from 'react'
+import { MediaItem } from '../../api/jellyfin'
 import { AudioStorageContext } from './AudioStorageContext'
 
 export type IAudioStorageContext = ReturnType<typeof useInitialState>
-
 export type IStorageTrack =
-    | {
-          type: 'container'
-      }
-    | {
-          type: 'song'
-          blob: Blob
-      }
-    | {
-          type: 'm3u8'
-          playlist: Blob
-          ts: Blob[]
-      }
+    | { type: 'container'; mediaItem: MediaItem }
+    | { type: 'song'; mediaItem: MediaItem; blob: Blob }
+    | { type: 'm3u8'; mediaItem: MediaItem; playlist: Blob; ts: Blob[] }
 
 const useInitialState = () => {
+    const DB_NAME = 'OfflineAudioDB'
+    const STORE_NAME = 'tracks'
+    const DB_VERSION = 2
+
     const dbRef = useRef(
         new Promise<IDBDatabase>((resolve, reject) => {
-            const DB_NAME = 'OfflineAudioDB'
-            const STORE_NAME = 'tracks'
-            const DB_VERSION = 1
-
             const request = indexedDB.open(DB_NAME, DB_VERSION)
 
-            request.onupgradeneeded = () => {
+            request.onupgradeneeded = event => {
                 const db = request.result
+                const oldVersion = event.oldVersion
 
                 if (!db.objectStoreNames.contains(STORE_NAME)) {
-                    db.createObjectStore(STORE_NAME)
+                    const store = db.createObjectStore(STORE_NAME)
+                    store.createIndex('by_kind', 'mediaItem.Type', { unique: false })
+                } else if (oldVersion < 2) {
+                    const store = request.transaction!.objectStore(STORE_NAME)
+                    store.createIndex('by_kind', 'mediaItem.Type', { unique: false })
                 }
             }
 
@@ -48,8 +45,8 @@ const useInitialState = () => {
     const saveTrack = useCallback(async (id: string, data: IStorageTrack) => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
-        const tx = db.transaction('tracks', 'readwrite')
-        tx.objectStore('tracks').put(data, id)
+        const tx = db.transaction(STORE_NAME, 'readwrite')
+        tx.objectStore(STORE_NAME).put(data, id)
         return new Promise<void>((resolve, reject) => {
             tx.oncomplete = () => resolve()
             tx.onerror = () => reject(tx.error)
@@ -60,8 +57,8 @@ const useInitialState = () => {
     const removeTrack = useCallback(async (id: string) => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
-        const tx = db.transaction('tracks', 'readwrite')
-        tx.objectStore('tracks').delete(id)
+        const tx = db.transaction(STORE_NAME, 'readwrite')
+        tx.objectStore(STORE_NAME).delete(id)
         return new Promise<void>((resolve, reject) => {
             tx.oncomplete = () => resolve()
             tx.onerror = () => reject(tx.error)
@@ -72,8 +69,8 @@ const useInitialState = () => {
     const getTrack = useCallback(async (id: string) => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
-        const tx = db.transaction('tracks', 'readonly')
-        const request = tx.objectStore('tracks').get(id)
+        const tx = db.transaction(STORE_NAME, 'readonly')
+        const request = tx.objectStore(STORE_NAME).get(id)
         return new Promise<IStorageTrack | null>((resolve, reject) => {
             request.onsuccess = () => resolve(request.result || null)
             request.onerror = () => reject(request.error)
@@ -101,43 +98,12 @@ const useInitialState = () => {
         [getTrack]
     )
 
-    const getAllTracks = useCallback(async () => {
-        if (!dbRef.current) throw new Error('Database not initialized')
-        const db = await dbRef.current
-        const tx = db.transaction('tracks', 'readonly')
-        const request = tx.objectStore('tracks').getAll()
-        const keysRequest = tx.objectStore('tracks').getAllKeys()
-
-        return new Promise<{ id: string; data: IStorageTrack }[]>((resolve, reject) => {
-            let keys: IDBValidKey[]
-            let values: IStorageTrack[]
-
-            request.onsuccess = () => {
-                values = request.result
-            }
-
-            keysRequest.onsuccess = () => {
-                keys = keysRequest.result
-            }
-
-            tx.oncomplete = () => {
-                const tracks = keys.map((key, index) => ({
-                    id: key as string,
-                    data: values[index],
-                }))
-                resolve(tracks)
-            }
-
-            tx.onerror = () => reject(tx.error)
-        })
-    }, [])
-
     const getTrackCount = useCallback(async () => {
         try {
             if (!dbRef.current) throw new Error('Database not initialized')
             const db = await dbRef.current
-            const tx = db.transaction('tracks', 'readonly')
-            const request = tx.objectStore('tracks').count()
+            const tx = db.transaction(STORE_NAME, 'readonly')
+            const request = tx.objectStore(STORE_NAME).count()
 
             const trackCount = await new Promise<number>((resolve, reject) => {
                 request.onsuccess = () => resolve(request.result)
@@ -154,8 +120,8 @@ const useInitialState = () => {
     const clearAllDownloads = useCallback(async () => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
-        const tx = db.transaction('tracks', 'readwrite')
-        tx.objectStore('tracks').clear()
+        const tx = db.transaction(STORE_NAME, 'readwrite')
+        tx.objectStore(STORE_NAME).clear()
 
         return new Promise<void>((resolve, reject) => {
             tx.oncomplete = () => resolve()
@@ -164,15 +130,72 @@ const useInitialState = () => {
         })
     }, [])
 
+    const getPageFromIndexedDb = async (pageIndex: number, itemKind: BaseItemKind, itemsPerPage: number) => {
+        if (!dbRef.current) throw new Error('Database not initialized')
+        const db = await dbRef.current
+        const tx = db.transaction(STORE_NAME, 'readonly')
+        const store = tx.objectStore(STORE_NAME)
+        const index = store.index('by_kind')
+        const keyRange = IDBKeyRange.only(itemKind)
+
+        return new Promise<MediaItem[]>((resolve, reject) => {
+            const items: MediaItem[] = []
+            let skipped = 0
+            const needToSkip = pageIndex * itemsPerPage
+
+            const cursorRequest = index.openCursor(keyRange)
+            cursorRequest.onerror = () => {
+                reject(cursorRequest.error)
+            }
+            cursorRequest.onsuccess = event => {
+                const cursor: IDBCursorWithValue | null = (event.target as IDBRequest).result
+                if (!cursor) {
+                    // No more matching entries
+                    resolve(items)
+                    return
+                }
+
+                if (skipped < needToSkip) {
+                    // Skip ahead
+                    const toSkip = needToSkip - skipped
+                    try {
+                        cursor.advance(toSkip)
+                        skipped += toSkip
+                    } catch (err) {
+                        console.error('Failed to skip ahead in cursor:', err)
+                        // If advance() fails (e.g. too far), continue one by one
+                        skipped++
+                        cursor.continue()
+                    }
+                    return
+                }
+
+                // Collect this record’s mediaItem
+                const record = cursor.value as { mediaItem: MediaItem }
+
+                // Legacy did not have `mediaItem` field, so we check if it exists
+                if (record.mediaItem) {
+                    items.push(record.mediaItem)
+                }
+
+                if (items.length < itemsPerPage) {
+                    cursor.continue()
+                } else {
+                    resolve(items)
+                }
+            }
+        })
+    }
+
     const audioStorage = {
         saveTrack,
         removeTrack,
         getTrack,
         hasTrack,
         getPlayableUrl,
-        getAllTracks,
         getTrackCount,
         clearAllDownloads,
+        getPageFromIndexedDb,
     }
 
     // We need the audioStorage in jellyfin API but we don't want to cause unnecessary re-renders since opening the IndexedDB shouldn't take long

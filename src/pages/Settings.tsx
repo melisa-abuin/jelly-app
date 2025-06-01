@@ -1,14 +1,18 @@
 import { CheckCircleFillIcon } from '@primer/octicons-react'
-import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useThemeContext } from '../context/ThemeContext/ThemeContext'
+import { formatFileSize } from '../utils/formatFileSize'
 import './Settings.css'
 
 export const Settings = ({ onLogout }: { onLogout: () => void }) => {
     const navigate = useNavigate()
     const api = useJellyfinContext()
+    const audioStorage = useAudioStorageContext()
 
     const { theme, toggleTheme } = useThemeContext()
 
@@ -17,6 +21,11 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
     const [latency, setLatency] = useState<number | null>(null)
     const { sessionPlayCount, resetSessionCount, bitrate, setBitrate } = usePlaybackContext()
     const playback = usePlaybackContext()
+    const queryClient = useQueryClient()
+
+    const [trackCount, setTrackCount] = useState(0)
+    const [storageStats, setStorageStats] = useState<{ usage: number; indexedDB: number }>({ usage: 0, indexedDB: 0 })
+    const [clearing, setClearing] = useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -61,6 +70,40 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
         onLogout()
         navigate('/login')
     }
+
+    const loadDownloads = useCallback(async () => {
+        try {
+            // Get storage statistics
+            setTrackCount(await audioStorage.getTrackCount())
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const storageStats: any = await navigator.storage?.estimate()
+            setStorageStats({ usage: storageStats?.usage || 0, indexedDB: storageStats?.usageDetails?.indexedDB || 0 })
+        } catch (error) {
+            console.error('Failed to load downloads:', error)
+        }
+    }, [audioStorage])
+
+    const handleClearAll = useCallback(async () => {
+        if (!confirm('Are you sure you want to clear all downloads? This cannot be undone.')) {
+            return
+        }
+
+        try {
+            setClearing(true)
+            await audioStorage.clearAllDownloads()
+            queryClient.clear()
+            await loadDownloads()
+        } catch (error) {
+            console.error('Failed to clear downloads:', error)
+        } finally {
+            setClearing(false)
+        }
+    }, [audioStorage, loadDownloads, queryClient])
+
+    useEffect(() => {
+        loadDownloads()
+    }, [loadDownloads])
 
     return (
         <div className="settings-page">
@@ -306,6 +349,17 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                         </Link>{' '}
                         - Browse your synced music library with ease
                     </p>
+                    <p>
+                        Manage your offline music collection - {trackCount} Tracks /{' '}
+                        {formatFileSize(storageStats?.indexedDB || 0)}
+                    </p>
+                </div>
+                <div>
+                    {trackCount > 0 && (
+                        <button className="clear-all-button" onClick={handleClearAll} disabled={clearing}>
+                            {clearing ? 'Clearing...' : 'Clear All'}
+                        </button>
+                    )}
                 </div>
             </div>
             <div className="section about">

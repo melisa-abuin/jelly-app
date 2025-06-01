@@ -583,8 +583,8 @@ const useInitialState = () => {
 
                             if (context) {
                                 removeFromDownloads(
-                                    (await expandItems(context.item)).map(i => i.Id),
-                                    context.item.Type === BaseItemKind.Audio ? undefined : context.item.Id
+                                    await expandItems(context.item),
+                                    context.item.Type === BaseItemKind.Audio ? undefined : context.item
                                 )
                             }
                         }}
@@ -604,8 +604,8 @@ const useInitialState = () => {
 
                             if (context) {
                                 addToDownloads(
-                                    (await expandItems(context.item)).map(i => i.Id),
-                                    context.item.Type === BaseItemKind.Audio ? undefined : context.item.Id
+                                    await expandItems(context.item),
+                                    context.item.Type === BaseItemKind.Audio ? undefined : context.item
                                 )
                             }
                         }}

@@ -1,3 +1,4 @@
+import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client'
 import { Parser } from 'm3u8-parser'
 import { useEffect, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
@@ -8,8 +9,7 @@ import { usePatchQueries } from './usePatchQueries'
 
 const STORAGE_KEY = 'mediaTaskQueue'
 
-type IMediaType = 'song' | 'container'
-type Task = { id: string; action: 'download' | 'remove'; mediaType: IMediaType }
+type Task = { mediaItem: MediaItem; action: 'download' | 'remove' }
 
 export const useDownloads = () => {
     const api = useJellyfinContext()
@@ -39,20 +39,25 @@ export const useDownloads = () => {
     }, [queue])
 
     // Enqueue download
-    const addToDownloads = (itemIds: string[], containerId: string | undefined) => {
-        patchMediaItems(itemIds, item => ({ ...item, offlineState: 'downloading' }))
+    const addToDownloads = (items: MediaItem[], container: MediaItem | undefined) => {
+        const containerId = container?.Id
+
+        patchMediaItems(
+            items.map(item => item.Id),
+            item => ({ ...item, offlineState: 'downloading' })
+        )
 
         if (containerId) {
             patchMediaItem(containerId, item => ({ ...item, offlineState: 'downloading' }))
         }
 
         setQueue(prev => {
-            const newTasks = itemIds
-                .filter(id => !prev.some(task => task.id === id && task.action === 'download'))
-                .map(id => ({ id, action: 'download' as const, mediaType: 'song' as IMediaType }))
+            const newTasks = items
+                .filter(item => !prev.some(task => task.mediaItem.Id === item.Id && task.action === 'download'))
+                .map(item => ({ mediaItem: item, action: 'download' as const }))
 
             if (containerId) {
-                newTasks.push({ id: containerId, action: 'download', mediaType: 'container' as IMediaType })
+                newTasks.push({ mediaItem: container, action: 'download' })
             }
 
             return newTasks.length ? [...prev, ...newTasks] : prev
@@ -60,20 +65,25 @@ export const useDownloads = () => {
     }
 
     // Enqueue removal
-    const removeFromDownloads = (itemIds: string[], containerId: string | undefined) => {
-        patchMediaItems(itemIds, item => ({ ...item, offlineState: 'deleting' }))
+    const removeFromDownloads = (items: MediaItem[], container: MediaItem | undefined) => {
+        const containerId = container?.Id
+
+        patchMediaItems(
+            items.map(item => item.Id),
+            item => ({ ...item, offlineState: 'deleting' })
+        )
 
         if (containerId) {
             patchMediaItem(containerId, item => ({ ...item, offlineState: 'deleting' }))
         }
 
         setQueue(prev => {
-            const newTasks = itemIds
-                .filter(id => !prev.some(task => task.id === id && task.action === 'remove'))
-                .map(id => ({ id, action: 'remove' as const, mediaType: 'song' as IMediaType }))
+            const newTasks = items
+                .filter(item => !prev.some(task => task.mediaItem.Id === item.Id && task.action === 'remove'))
+                .map(item => ({ mediaItem: item, action: 'remove' as const }))
 
             if (containerId) {
-                newTasks.push({ id: containerId, action: 'remove', mediaType: 'container' as IMediaType })
+                newTasks.push({ mediaItem: container, action: 'remove' })
             }
 
             return newTasks.length ? [...prev, ...newTasks] : prev
@@ -88,43 +98,43 @@ export const useDownloads = () => {
             if (!next) return
 
             processingRef.current = true
-            const { id, action, mediaType } = next
+            const { mediaItem, action } = next
 
             try {
                 if (action === 'download') {
-                    const already = await audioStorage.hasTrack(id)
+                    const already = await audioStorage.hasTrack(mediaItem.Id)
                     if (already) {
-                        patchMediaItem(id, item => ({ ...item, offlineState: 'downloaded' }))
+                        patchMediaItem(mediaItem.Id, item => ({ ...item, offlineState: 'downloaded' }))
                     } else {
-                        if (mediaType === 'song') {
+                        if (mediaItem.Type === BaseItemKind.Audio) {
                             const isTranscoded = [128000, 192000, 256000, 320000].includes(playback.bitrate)
 
                             if (isTranscoded) {
-                                const streamUrl = api.getStreamUrl(id, playback.bitrate)
+                                const streamUrl = api.getStreamUrl(mediaItem.Id, playback.bitrate)
                                 const { playlist, ts } = await downloadTranscodedTrack(streamUrl)
-                                await audioStorage.saveTrack(id, { type: 'm3u8', playlist, ts })
+                                await audioStorage.saveTrack(mediaItem.Id, { type: 'm3u8', mediaItem, playlist, ts })
                             } else {
-                                const streamUrl = api.getStreamUrl(id, playback.bitrate)
+                                const streamUrl = api.getStreamUrl(mediaItem.Id, playback.bitrate)
                                 const response = await fetch(streamUrl)
                                 if (!response.ok) throw new Error(`HTTP ${response.status}`)
                                 const blob = await response.blob()
-                                await audioStorage.saveTrack(id, { type: 'song', blob })
+                                await audioStorage.saveTrack(mediaItem.Id, { type: 'song', mediaItem, blob })
                             }
                         } else {
-                            await audioStorage.saveTrack(id, { type: 'container' })
+                            await audioStorage.saveTrack(mediaItem.Id, { type: 'container', mediaItem })
                         }
 
-                        patchMediaItem(id, item => ({ ...item, offlineState: 'downloaded' }))
+                        patchMediaItem(mediaItem.Id, item => ({ ...item, offlineState: 'downloaded' }))
                     }
                 } else if (action === 'remove') {
-                    await audioStorage.removeTrack(id)
-                    patchMediaItem(id, item => ({ ...item, offlineState: undefined }))
+                    await audioStorage.removeTrack(mediaItem.Id)
+                    patchMediaItem(mediaItem.Id, item => ({ ...item, offlineState: undefined }))
                 }
             } catch (error) {
-                console.error(`Task failed for ${action} id=${id}`, error)
+                console.error(`Task failed for ${action} id=${mediaItem.Id}`, error)
 
                 if (action === 'download') {
-                    patchMediaItem(id, item => ({ ...item, offlineState: undefined }))
+                    patchMediaItem(mediaItem.Id, item => ({ ...item, offlineState: undefined }))
                 }
             } finally {
                 setQueue(prev => prev.slice(1))
@@ -192,7 +202,7 @@ export const syncDownloads = (container: MediaItem, items: MediaItem[]) => {
                 track.offlineState = 'downloading'
             }
 
-            window.addToDownloads(toDownload.map(track => track.Id))
+            window.addToDownloads(toDownload)
         }
     }
 }
@@ -209,7 +219,7 @@ export const syncDownloadsById = async (containerId: string, items: MediaItem[])
                 track.offlineState = 'downloading'
             }
 
-            window.addToDownloads(toDownload.map(track => track.Id))
+            window.addToDownloads(toDownload)
         }
     }
 }
