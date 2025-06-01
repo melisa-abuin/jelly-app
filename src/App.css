@@ -659,73 +659,37 @@ body.lockscroll {
 }
 
 /* Lyrics Display */
-.main > .main_footer > .lyrics.container * {
-    --lyrics-expand-header-color: var(--bg-color-secondary);
-    --lyrics-collapsed-height: 70px;
-    --lyrics-expanded-height: 400px;
+.main_lyrics * {
     --lyrics-border-margin: 35px;
     --lyrics-horizontal-margin: 20px;
     --lyrics-vertical-margin: 3px;
-    --lyrics-header-height: fit-content;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .lyrics {
     cursor: pointer;
 }
 
-/* Expand header on mobile screens to be easier to access with touch */
-@media only screen and (max-width: 800px) {
-    .main > .main_footer > .lyrics.container * {
-        --lyrics-header-height: 25px;
-    }
-}
-
-.main > .main_footer > .lyrics.container > .header {
-    height: var(--lyrics-header-height);
-    background-color: var(--lyrics-expand-header-color);
-
-    transition: 100ms;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.main > .main_footer > .lyrics.container > .header:hover {
-    filter: brightness(0.9);
-}
-
-.main > .main_footer > .lyrics.container > .header > .icon {
-    transform: rotate(180deg);
-    transition: 0.3s;
-}
-
-.main > .main_footer > .lyrics.container.expanded > .header > .icon {
-    transform: rotate(0deg);
-}
-
-.main > .main_footer > .lyrics.container > .scroll-container {
+.main_lyrics {
     position: relative;
+
+    height: 100%;
+    max-height: 100%;
+}
+
+.main_lyrics > .scroll-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
 
     display: block;
     transition: 0.5s;
 
     overflow-y: auto;
-
-    max-height: 40vh;
-    height: var(--lyrics-collapsed-height);
 }
 
-.main > .main_footer > .lyrics.container.lyrics.container.expanded > .scroll-container {
-    height: var(--lyrics-expanded-height);
-}
-
-.main > .main_footer > .lyrics.container > .scroll-container > .lyrics-display {
+.main_lyrics > .scroll-container > .lyrics-display {
     width: 100%;
 
     min-height: var(--lyrics-collapsed-height);
@@ -737,24 +701,27 @@ body.lockscroll {
     justify-content: center;
 }
 
-.main > .main_footer > .lyrics.container > .scroll-container > .lyrics-display .lyrics-line {
+.main_lyrics > .scroll-container > .lyrics-display .status {
+    margin: 10px;
+    text-align: center;
+}
+
+.main_lyrics > .scroll-container > .lyrics-display .lyrics-line {
     display: flex;
 
     padding-left: 10px;
-
-    font-weight: lighter;
 }
 
-.main > .main_footer > .lyrics.container > .scroll-container > .lyrics-display .lyrics-line > * {
+.main_lyrics > .scroll-container > .lyrics-display .lyrics-line > * {
     align-content: center;
 }
 
-.main > .main_footer > .lyrics.container > .scroll-container > .lyrics-display .lyrics-line > .start {
+.main_lyrics > .scroll-container > .lyrics-display .lyrics-line > .start {
     font-family: monospace;
     font-size: 0.9em;
 }
 
-.main > .main_footer > .lyrics.container > .scroll-container > .lyrics-display .lyrics-line > .text {
+.main_lyrics > .scroll-container > .lyrics-display .lyrics-line > .text {
     margin-left: var(--lyrics-horizontal-margin);
     margin-right: var(--lyrics-horizontal-margin);
 
@@ -765,15 +732,19 @@ body.lockscroll {
     text-align: center;
 }
 
-.main > .main_footer > .lyrics.container > .scroll-container > .lyrics-display.active:first-child {
+.main_lyrics > .scroll-container > .lyrics-display.active:first-child {
     margin-top: var(--lyrics-border-margin);
 }
 
-.main > .main_footer > .lyrics.container > .scroll-container > .lyrics-display.active:last-child {
+.main_lyrics > .scroll-container > .lyrics-display.active:last-child {
     margin-bottom: var(--lyrics-border-margin);
 }
 
-.main > .main_footer > .lyrics.container > .scroll-container > .lyrics-display .lyrics-line.active {
+.main_lyrics > .scroll-container > .lyrics-display.synced .lyrics-line {
+    font-weight: lighter;
+}
+
+.main_lyrics > .scroll-container > .lyrics-display.synced .lyrics-line.active {
     font-weight: bold;
 }
 

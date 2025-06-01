@@ -36,6 +36,11 @@ export const MainContent = ({
         window.scrollTo({ top: 0, behavior: 'instant' })
     }, [location.pathname])
 
+    const [lyricsOpen, setLyricsOpen] = useState(false)
+    useEffect(() => {
+        setLyricsOpen(false)
+    }, [location.pathname])
+
     const memoHeader = useMemo(() => {
         return (
             <div className="main_header">
@@ -114,24 +119,20 @@ export const MainContent = ({
     }, [filterType, location, pageTitle, previousPage, setSort, sort, toggleSidenav])
 
     const memoContent = useMemo(() => {
-        return (
+        return lyricsOpen ? (
+            <div className="main_lyrics">
+                <LyricsDisplay />
+            </div>
+        ) : (
             <div className="main_content">
                 <Content />
             </div>
         )
-    }, [Content])
+    }, [Content, lyricsOpen])
 
     const memoFooter = useMemo(() => {
         return (
             <div className="main_footer">
-                {playback.lyricsOpen && (
-                    <div className={playback.lyricsExpanded ? 'container expanded lyrics' : 'container lyrics'}>
-                        <div className="header" onClick={playback.toggleExpandLyrics}>
-                            <ChevronDownIcon className="icon" size={12} />
-                        </div>
-                        <LyricsDisplay />
-                    </div>
-                )}
                 <div
                     className={
                         playback.isPlaying ? 'playback playing' : playback.currentTrack ? 'playback paused' : 'playback'
@@ -202,13 +203,11 @@ export const MainContent = ({
                             <div className="knobs">
                                 <div
                                     className={`lyrics ${playback.shuffle ? 'active' : ''}`}
-                                    onClick={playback.toggleLyrics}
+                                    onClick={() => setLyricsOpen(!lyricsOpen)}
                                     title="Lyrics"
                                 >
                                     <NoteIcon
-                                        fill={
-                                            playback.lyricsOpen ? 'var(--brand-color)' : 'var(--font-color-secondary)'
-                                        }
+                                        fill={lyricsOpen ? 'var(--brand-color)' : 'var(--font-color-secondary)'}
                                         size={16}
                                     />
                                 </div>
@@ -260,10 +259,7 @@ export const MainContent = ({
         playback.togglePlayPause,
         playback.toggleRepeat,
         playback.toggleShuffle,
-        playback.toggleLyrics,
-        playback.toggleExpandLyrics,
-        playback.lyricsOpen,
-        playback.lyricsExpanded,
+        lyricsOpen,
     ])
 
     return (
@@ -306,6 +302,7 @@ const LyricsDisplay = () => {
     }
 
     const lyrics = playback.currentTrackLyrics?.Lyrics
+    const isSynced = useMemo(() => lyrics && lyrics[0].Start, [lyrics])
     const currentLineIndex = useMemo(() => {
         if (!audio || !lyrics) return -1
 
@@ -375,6 +372,7 @@ const LyricsDisplay = () => {
     const lineRefs = useRef<Array<HTMLDivElement | null>>([])
     const displayedLines = useMemo(() => {
         if (!lyrics) lineRefs.current = []
+
         return (
             lyrics?.map((line, index) => (
                 <div
@@ -384,35 +382,41 @@ const LyricsDisplay = () => {
                         lineRefs.current[index] = el
                     }}
                 >
-                    <div className="start">{line.Start && tickToTimeString(line.Start)}</div>
+                    {isSynced && <div className="start">{line.Start && tickToTimeString(line.Start)}</div>}
                     <div className="text">{line.Text}</div>
                 </div>
             )) || null
         )
-    }, [playback.currentTrack, lyrics, currentLineIndex])
+    }, [playback.currentTrack, lyrics, currentLineIndex, isSynced])
 
     const lyricsContainer = useRef<HTMLDivElement | null>(null)
 
+    const scrollToActiveLine = useCallback(
+        (line: number, behavior: ScrollBehavior = 'smooth') => {
+            if (!lyrics) return
+            const activeEl = lineRefs.current[line]
+            if (lyricsContainer.current)
+                lyricsContainer.current.scrollTo({
+                    top:
+                        (activeEl?.offsetTop || 0) -
+                        lyricsContainer.current.clientHeight / 2 +
+                        (activeEl?.clientHeight || 0) / 2,
+                    behavior,
+                })
+        },
+        [lineRefs, lyrics]
+    )
+
+    // Scroll on line change
     useEffect(() => {
-        if (!lyrics) return
-        const activeEl = lineRefs.current[currentLineIndex]
-        if (lyricsContainer.current)
-            lyricsContainer.current.scrollTo({
-                top:
-                    (activeEl?.offsetTop || 0) -
-                    lyricsContainer.current.clientHeight / 2 +
-                    (activeEl?.clientHeight || 0) / 2,
-                behavior: 'smooth',
-            })
-    }, [playback.currentTrack, lyrics, currentLineIndex])
+        if (isSynced) scrollToActiveLine(currentLineIndex)
+    }, [playback.currentTrack, lyrics, currentLineIndex, scrollToActiveLine, isSynced])
 
     return (
         <div className="scroll-container" ref={lyricsContainer}>
-            <div className={'lyrics-display' + (lyrics ? ' active' : '')}>
+            <div className={'lyrics-display' + (lyrics ? ' active' : '') + (isSynced ? ' synced' : '')}>
                 {(lyrics && displayedLines) || (
-                    <div style={{ textAlign: 'center' }}>
-                        {playback.currentTrackLyricsLoading ? 'Loading...' : 'No Lyrics'}
-                    </div>
+                    <div className="status">{playback.currentTrackLyricsLoading ? 'Loading...' : 'No Lyrics'}</div>
                 )}
             </div>
         </div>
