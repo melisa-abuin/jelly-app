@@ -270,10 +270,13 @@ export const Sidenav = (props: { username: string }) => {
                                                         }`}
                                                         onClick={closeSidenav}
                                                         className={`result ${itemClass}`}
-                                                        onContextMenu={e => dropdown.onContextMenu(e, { item: item })}
-                                                        onTouchStart={e => dropdown.onTouchStart(e, { item })}
-                                                        onTouchMove={dropdown.onTouchClear}
-                                                        onTouchEnd={dropdown.onTouchClear}
+                                                        {...(item.Type !== BaseItemKind.Genre && {
+                                                            onContextMenu: e =>
+                                                                dropdown.onContextMenu(e, { item: item }),
+                                                            onTouchStart: e => dropdown.onTouchStart(e, { item }),
+                                                            onTouchMove: dropdown.onTouchClear,
+                                                            onTouchEnd: dropdown.onTouchClear,
+                                                        })}
                                                     >
                                                         {item.Type === BaseItemKind.MusicArtist && (
                                                             <div className="type artist">
