@@ -29,8 +29,8 @@ export const getPageTitle = (pageTitle: string, location: Location): string => {
             return 'Favorites'
         case '/settings':
             return 'Settings'
-        case '/downloads':
-            return 'Downloads'
+        case '/synced':
+            return 'Synced'
         case '/recently':
             return 'Recently Played'
         case '/frequently':

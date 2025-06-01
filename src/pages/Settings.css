@@ -20,6 +20,21 @@
     margin-bottom: 8px;
 }
 
+.settings-page > .section .btn {
+    font-size: 0.725rem;
+    font-weight: 500;
+    color: var(--font-color-inverted);
+    cursor: pointer;
+    padding: 7px 13px;
+    border-radius: 6px;
+    background-color: var(--btn-brand-color);
+    transition: background-color 0.2s ease-out;
+}
+
+.settings-page > .section .btn:hover {
+    background-color: var(--btn-brand-color-hover);
+}
+
 /* Appearance */
 .settings-page > .section.appearance {
     display: flex;
@@ -264,17 +279,24 @@
     margin-top: 14px;
 }
 
-.settings-page > .section > .actions > .logout-button {
-    font-size: 0.725rem;
-    font-weight: 500;
-    color: var(--font-color-inverted);
-    cursor: pointer;
-    padding: 7px 13px;
-    border-radius: 6px;
-    background-color: var(--btn-brand-color);
-    transition: background-color 0.2s ease-out;
+/* Offline Sync */
+.settings-page > .section.offline-sync {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px;
 }
 
-.settings-page > .section > .actions > .logout-button:hover {
-    background-color: var(--btn-brand-color-hover);
+.settings-page > .section > .container > .title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.settings-page > .section > .container > .desc {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--font-color-secondary);
+    margin-bottom: 4px;
 }

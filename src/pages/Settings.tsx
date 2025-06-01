@@ -338,28 +338,30 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 */}
             </div>
             <div className="section offline-sync">
-                <div className="title">Offline Sync</div>
+                <div className="container">
+                    <div className="title">Offline Sync</div>
+                    <div className="desc">
+                        Synced Music - {trackCount} Tracks / {formatFileSize(storageStats?.indexedDB || 0)} Used
+                    </div>
+                </div>
+                <div className="options noSelect">
+                    <div className="option">
+                        {trackCount > 0 && (
+                            <button className="btn clear" onClick={handleClearAll} disabled={clearing}>
+                                {clearing ? 'Clearing...' : 'Clear All'}
+                            </button>
+                        )}
+                    </div>
+                </div>
                 <div className="desc">
-                    <p className="subtitle">Downloaded Music</p>
                     <p>
                         Cache your music library for seamless offline playback, with new tracks auto-syncing to saved
-                        playlists, albums, or artists.{' '}
-                        <Link to="/downloads" className="textlink">
-                            Downloads
+                        playlists, albums, or artists. Browse your{' '}
+                        <Link to="/synced" className="textlink">
+                            synced music library
                         </Link>{' '}
-                        - Browse your synced music library with ease
+                        with ease
                     </p>
-                    <p>
-                        Manage your offline music collection - {trackCount} Tracks /{' '}
-                        {formatFileSize(storageStats?.indexedDB || 0)}
-                    </p>
-                </div>
-                <div>
-                    {trackCount > 0 && (
-                        <button className="clear-all-button" onClick={handleClearAll} disabled={clearing}>
-                            {clearing ? 'Clearing...' : 'Clear All'}
-                        </button>
-                    )}
                 </div>
             </div>
             <div className="section about">
@@ -414,7 +416,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                     </p>
                 </div>
                 <div className="actions noSelect">
-                    <button onClick={handleLogout} className="logout-button">
+                    <button onClick={handleLogout} className="btn logout">
                         Logout
                     </button>
                 </div>
