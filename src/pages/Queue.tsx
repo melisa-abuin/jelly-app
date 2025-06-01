@@ -23,7 +23,13 @@ export const Queue = () => {
     return (
         <div className="queue-page">
             <div className="queue-header">
-                <MediaList items={[currentTrack]} isLoading={false} type="song" title={'Current Track - Queue'} />
+                <MediaList
+                    items={[currentTrack]}
+                    isLoading={false}
+                    type="song"
+                    title={'Current Track - Queue'}
+                    hidden={{ add_to_queue: true, remove_from_queue: true }}
+                />
             </div>
             {queueTracks.length > 0 && (
                 <>
@@ -39,6 +45,7 @@ export const Queue = () => {
                         type="song"
                         loadMore={loadMore}
                         title={'Next Up - Queue'}
+                        hidden={{ add_to_queue: true }}
                     />
                 </>
             )}

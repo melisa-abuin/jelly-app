@@ -365,6 +365,22 @@ const useInitialState = () => {
                     <span>Add to queue</span>
                 </div>
             ),
+            remove_from_queue: (
+                <div
+                    className="dropdown-item remove-queue has-removable"
+                    onClick={async () => {
+                        closeDropdown()
+
+                        if (context) {
+                            const playlist = playback.currentPlaylist.filter(item => item.Id !== context.item.Id)
+                            playback.setCurrentPlaylist({ playlist, title: 'Direct Queue' })
+                        }
+                    }}
+                    onMouseEnter={closeSubDropdown}
+                >
+                    <span>Remove from queue</span>
+                </div>
+            ),
             instant_mix: (
                 <div
                     className="dropdown-item instant-mix"
@@ -737,6 +753,15 @@ const useInitialState = () => {
                                 context?.item.Type === BaseItemKind.MusicAlbum ||
                                 context?.item.Type === BaseItemKind.MusicArtist),
                         node: menuItems.add_to_queue,
+                    },
+                    {
+                        isVisible:
+                            !!hidden?.add_to_queue &&
+                            !hidden?.remove_from_queue &&
+                            (context?.item.Type === BaseItemKind.Audio ||
+                                context?.item.Type === BaseItemKind.MusicAlbum ||
+                                context?.item.Type === BaseItemKind.MusicArtist),
+                        node: menuItems.remove_from_queue,
                     },
                     {
                         isVisible: !hidden?.instant_mix,
