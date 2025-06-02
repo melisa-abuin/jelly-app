@@ -15,6 +15,7 @@ import './Sidenav.css'
 import {
     AlbumIcon,
     ArtistsIcon,
+    DownloadedIcon,
     PlaylistIcon,
     PlaystateAnimationSearch,
     SearchClearIcon,
@@ -380,9 +381,15 @@ export const Sidenav = (props: { username: string }) => {
                                 {props.username}
                             </div>
                         </div>
-                        <NavLink to="/settings" className="settings" onClick={closeSidenav} title="Settings">
-                            <GearIcon size={16} />
-                        </NavLink>
+                        <div className="actions">
+                            <NavLink to="/synced" className="icon synced" onClick={closeSidenav} title="Synced">
+                                <DownloadedIcon width={16} height={16} />
+                            </NavLink>
+
+                            <NavLink to="/settings" className="icon settings" onClick={closeSidenav} title="Settings">
+                                <GearIcon size={16} />
+                            </NavLink>
+                        </div>
                     </div>
                 </div>
             </div>

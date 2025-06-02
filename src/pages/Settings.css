@@ -285,7 +285,7 @@
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 8px;
 }
 
 .settings-page > .section > .container > .title {
@@ -298,5 +298,4 @@
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--font-color-secondary);
-    margin-bottom: 4px;
 }

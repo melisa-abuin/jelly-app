@@ -704,7 +704,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input {
     cursor: pointer;
-    width: 144px;
+    width: 150px;
     height: 7px;
     border-radius: 20px;
     background-color: var(--bg-color);
@@ -729,13 +729,14 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0 16px;
+    margin: 0 12px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .status {
     font-size: 0.75rem;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .status > .indicator {
@@ -745,20 +746,27 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .status > .username {
     font-weight: 500;
-    max-width: 116px;
     text-overflow: ellipsis;
     overflow: hidden;
 }
 
-.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .settings {
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions {
+    display: flex;
+    align-items: center;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon {
     padding: 6px;
-    margin-right: -6px;
     border-radius: 20px;
     transition: background-color 0.2s ease-out;
 }
 
-.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .settings:hover {
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon:hover {
     background-color: var(--bg-color-tertiary);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon.settings {
+    margin-right: -6px;
 }
 
 /* Responsive */

@@ -8,7 +8,7 @@ import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useSidenavContext } from '../context/SidenavContext/SidenavContext'
 import { getPageTitle } from '../utils/titleUtils'
-import { AlbumIcon, ArtistsIcon, PlaylistIcon, TracksIcon } from './SvgIcons'
+import { AlbumIcon, ArtistsIcon, PlaylistIcon, SortingIcon, TracksIcon } from './SvgIcons'
 
 export const Main = (props: Parameters<typeof MainContent>[0]) => {
     return (
@@ -76,35 +76,59 @@ export const MainContent = ({
                         </div>
                     </div>
                 </div>
-                <div className="secondary">
+                <div className="secondary noSelect">
                     {filterType === 'mediaItems' && (
-                        <div className="filter">
-                            <select onChange={e => setSort(e.target.value)} value={sort}>
-                                <option value="Added">Added</option>
-                                <option value="Released">Released</option>
-                                <option value="Runtime">Runtime</option>
-                                <option value="Random">Random</option>
-                            </select>
-                            <div className="icon">
-                                <ChevronDownIcon size={12} />
+                        <>
+                            <div className="sorting">
+                                <div className="filter">
+                                    <select onChange={e => setSort(e.target.value)} value={sort}>
+                                        <option value="Added">Added</option>
+                                        <option value="Released">Released</option>
+                                        <option value="Runtime">Runtime</option>
+                                        <option value="Random">Random</option>
+                                    </select>
+                                    <div className="icon">
+                                        <ChevronDownIcon size={12} />
+                                    </div>
+                                </div>
+                                <div className="sort">
+                                    <select onChange={e => setSort(e.target.value)} value={sort}>
+                                        <option value="Ascending">Ascending</option>
+                                        <option value="Descending">Descending</option>
+                                    </select>
+                                    <div className="icon">
+                                        <SortingIcon width={12} height={12} />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        </>
                     )}
 
                     {filterType === 'favorites' && (
-                        <div className="filter">
-                            <select onChange={e => setSort(e.target.value)} value={sort}>
-                                <option value="Tracks">Tracks</option>
-                                <option value="Albums">Albums</option>
-                                <option value="Artists">Artists</option>
-                            </select>
-                            <div className="icon">
-                                <ChevronDownIcon size={12} />
+                        <div className="sorting">
+                            <div className="filter">
+                                <select onChange={e => setSort(e.target.value)} value={sort}>
+                                    <option value="Tracks">Tracks</option>
+                                    <option value="Albums">Albums</option>
+                                    <option value="Artists">Artists</option>
+                                </select>
+                                <div className="icon">
+                                    <ChevronDownIcon size={12} />
+                                </div>
+                            </div>
+                            <div className="sort">
+                                <select onChange={e => setSort(e.target.value)} value={sort}>
+                                    <option value="Ascending">Ascending</option>
+                                    <option value="Descending">Descending</option>
+                                </select>
+                                <div className="icon">
+                                    <SortingIcon width={12} height={12} />
+                                </div>
                             </div>
                         </div>
                     )}
 
-                    <div className="sidenav_toggle noSelect" onClick={toggleSidenav}>
+                    <div className="sidenav_toggle" onClick={toggleSidenav}>
                         <div className="bar"></div>
                         <div className="bar"></div>
                     </div>

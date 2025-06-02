@@ -50,6 +50,7 @@ select {
     -moz-appearance: none;
     -webkit-appearance: none;
     -webkit-border-radius: 0;
+    background-color: var(--bg-color);
 }
 
 textarea,
@@ -483,6 +484,84 @@ body.lockscroll {
     gap: 12px;
 }
 
+.main > .main_header > .secondary > .sorting {
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+}
+
+.main > .main_header > .secondary > .sorting > .filter {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.main > .main_header > .secondary > .sorting > .filter > select {
+    font-size: 0.725rem;
+    font-weight: 500;
+    color: var(--brand-color);
+    cursor: pointer;
+    padding: 6px 8px;
+    padding-right: 22px;
+}
+
+.main > .main_header > .secondary > .sorting > .filter > .icon {
+    position: absolute;
+    right: 6px;
+    color: var(--brand-color);
+    user-select: none;
+    pointer-events: none;
+}
+
+.main > .main_header > .secondary > .sorting > .filter > select > option {
+    font-weight: 500;
+    color: var(--font-color);
+}
+
+.main > .main_header > .secondary > .sorting > .sort {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    border-left: 1px solid var(--border-color);
+}
+
+.main > .main_header > .secondary > .sorting > .sort > select {
+    position: absolute;
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    opacity: 0;
+    padding: 6px 8px;
+}
+
+.main > .main_header > .secondary > .sorting > .sort > select > option {
+    font-weight: 500;
+    color: var(--font-color);
+}
+
+.main > .main_header > .secondary > .sorting > .sort > .icon {
+    padding: 7px;
+    pointer-events: none;
+}
+
+.main > .main_header > .secondary > .sorting > .sort > .icon > svg {
+    fill: var(--brand-color);
+}
+
+.main > .main_header > .secondary > .sorting > .sort > .icon > svg > g > .primary {
+    opacity: 1;
+}
+
+.main > .main_header > .secondary > .sorting > .sort > .icon > svg > g > .secondary {
+    opacity: 0.4;
+}
+
+/* Filter styles - not currently used
 .filter {
     position: relative;
     display: flex;
@@ -515,6 +594,8 @@ body.lockscroll {
     font-weight: 500;
     color: var(--font-color);
 }
+
+*/
 
 .main > .main_header > .secondary > .sidenav_toggle {
     display: none;
