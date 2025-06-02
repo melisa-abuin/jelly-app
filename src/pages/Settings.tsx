@@ -6,6 +6,7 @@ import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStor
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useThemeContext } from '../context/ThemeContext/ThemeContext'
+import { useStorageStats } from '../hooks/useStorageStats'
 import { formatFileSize } from '../utils/formatFileSize'
 import './Settings.css'
 
@@ -23,8 +24,8 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
     const playback = usePlaybackContext()
     const queryClient = useQueryClient()
 
-    const [trackCount, setTrackCount] = useState(0)
-    const [storageStats, setStorageStats] = useState<{ usage: number; indexedDB: number }>({ usage: 0, indexedDB: 0 })
+    const { trackCount, storageStats, refreshStorageStats } = useStorageStats()
+
     const [clearing, setClearing] = useState(false)
 
     useEffect(() => {
@@ -71,19 +72,6 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
         navigate('/login')
     }
 
-    const loadDownloads = useCallback(async () => {
-        try {
-            // Get storage statistics
-            setTrackCount(await audioStorage.getTrackCount())
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const storageStats: any = await navigator.storage?.estimate()
-            setStorageStats({ usage: storageStats?.usage || 0, indexedDB: storageStats?.usageDetails?.indexedDB || 0 })
-        } catch (error) {
-            console.error('Failed to load downloads:', error)
-        }
-    }, [audioStorage])
-
     const handleClearAll = useCallback(async () => {
         if (!confirm('Are you sure you want to clear all downloads? This cannot be undone.')) {
             return
@@ -93,17 +81,13 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
             setClearing(true)
             await audioStorage.clearAllDownloads()
             queryClient.clear()
-            await loadDownloads()
+            await refreshStorageStats()
         } catch (error) {
             console.error('Failed to clear downloads:', error)
         } finally {
             setClearing(false)
         }
-    }, [audioStorage, loadDownloads, queryClient])
-
-    useEffect(() => {
-        loadDownloads()
-    }, [loadDownloads])
+    }, [audioStorage, queryClient, refreshStorageStats])
 
     return (
         <div className="settings-page">

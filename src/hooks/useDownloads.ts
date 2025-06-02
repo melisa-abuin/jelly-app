@@ -103,9 +103,13 @@ export const useDownloads = () => {
             try {
                 if (action === 'download') {
                     const already = await audioStorage.hasTrack(mediaItem.Id)
+
                     if (already) {
                         patchMediaItem(mediaItem.Id, item => ({ ...item, offlineState: 'downloaded' }))
                     } else {
+                        // The mediaItem object is saved so we modify it directly
+                        mediaItem.offlineState = 'downloaded'
+
                         if (mediaItem.Type === BaseItemKind.Audio) {
                             const isTranscoded = [128000, 192000, 256000, 320000].includes(playback.bitrate)
 
