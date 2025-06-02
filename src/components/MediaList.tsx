@@ -26,7 +26,7 @@ export const MediaList = ({
     isLoading: boolean
     type: 'song' | 'album' | 'artist'
     title: string
-    reviver?: IReviver
+    reviver?: IReviver | 'persist'
     loadMore?: () => void
     hidden?: IMenuItems
     disableActions?: boolean

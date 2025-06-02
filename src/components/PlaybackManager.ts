@@ -86,19 +86,21 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const { items, hasNextPage, loadMore, isLoading } = useJellyfinInfiniteData(reviverFn)
 
     const setCurrentPlaylist = useCallback(
-        (props: { playlist: MediaItem[]; title: string; reviver?: IReviver }) => {
+        (props: { playlist: MediaItem[]; title: string; reviver?: IReviver | 'persist' }) => {
             if (shuffle) {
                 setShuffle(false)
             }
 
             localStorage.setItem('reviver', JSON.stringify(props.reviver || {}))
 
-            queryClient.setQueryData(['reviver', ...(props.reviver?.queryKey || [])], {
-                pageParams: [1],
-                pages: [props.playlist],
-            } satisfies InfiniteData<MediaItem[], unknown>)
+            if (props.reviver !== 'persist') {
+                queryClient.setQueryData(['reviver', ...(props.reviver?.queryKey || [])], {
+                    pageParams: [1],
+                    pages: [props.playlist],
+                } satisfies InfiniteData<MediaItem[], unknown>)
 
-            setReviver(props.reviver || ({} as IReviver))
+                setReviver(props.reviver || ({} as IReviver))
+            }
 
             localStorage.setItem('playlistTitle', props.title)
             setPlaylistTitle(props.title)
