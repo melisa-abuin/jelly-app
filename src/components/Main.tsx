@@ -37,15 +37,18 @@ export const MainContent = ({
         window.scrollTo({ top: 0, behavior: 'instant' })
     }, [location.pathname])
 
-    const memoHeader = useMemo(() => {
-        const handleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-            const value = event.target.value
-            const params = new URLSearchParams(searchParams)
-            params.set('filter', value)
-            setSearchParams(params, { replace: true })
-            setSort(value)
-        }
+    const handleOnChange = useCallback(
+        (event: React.ChangeEvent<HTMLSelectElement>) => {
+          const value = event.target.value
+          const params = new URLSearchParams(searchParams)
+          params.set('filter', value)
+          setSearchParams(params, { replace: true })
+          setSort(value)
+        },
+        [searchParams, setSearchParams, setSort]
+      )
 
+    const memoHeader = useMemo(() => {
         return (
             <div className="main_header">
                 <div className="primary">
@@ -120,7 +123,7 @@ export const MainContent = ({
                 </div>
             </div>
         )
-    }, [filterType, location, pageTitle, previousPage, sort, toggleSidenav, setSort, setSearchParams, searchParams])
+    }, [filterType, location, pageTitle, previousPage, sort, toggleSidenav, handleOnChange])
 
     const memoContent = useMemo(() => {
         return (
