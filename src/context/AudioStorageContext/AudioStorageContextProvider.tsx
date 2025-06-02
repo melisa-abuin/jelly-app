@@ -5,9 +5,9 @@ import { AudioStorageContext } from './AudioStorageContext'
 
 export type IAudioStorageContext = ReturnType<typeof useInitialState>
 export type IStorageTrack =
-    | { type: 'container'; mediaItem: MediaItem }
-    | { type: 'song'; mediaItem: MediaItem; blob: Blob }
-    | { type: 'm3u8'; mediaItem: MediaItem; playlist: Blob; ts: Blob[] }
+    | { type: 'container'; mediaItem: MediaItem; bitrate: number }
+    | { type: 'song'; mediaItem: MediaItem; bitrate: number; blob: Blob }
+    | { type: 'm3u8'; mediaItem: MediaItem; bitrate: number; playlist: Blob; ts: Blob[] }
 
 const useInitialState = () => {
     const DB_NAME = 'OfflineAudioDB'

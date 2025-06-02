@@ -112,16 +112,31 @@ export const useDownloads = () => {
                             if (isTranscoded) {
                                 const streamUrl = api.getStreamUrl(mediaItem.Id, playback.bitrate)
                                 const { playlist, ts } = await downloadTranscodedTrack(streamUrl)
-                                await audioStorage.saveTrack(mediaItem.Id, { type: 'm3u8', mediaItem, playlist, ts })
+                                await audioStorage.saveTrack(mediaItem.Id, {
+                                    type: 'm3u8',
+                                    mediaItem,
+                                    bitrate: playback.bitrate,
+                                    playlist,
+                                    ts,
+                                })
                             } else {
                                 const streamUrl = api.getStreamUrl(mediaItem.Id, playback.bitrate)
                                 const response = await fetch(streamUrl)
                                 if (!response.ok) throw new Error(`HTTP ${response.status}`)
                                 const blob = await response.blob()
-                                await audioStorage.saveTrack(mediaItem.Id, { type: 'song', mediaItem, blob })
+                                await audioStorage.saveTrack(mediaItem.Id, {
+                                    type: 'song',
+                                    bitrate: playback.bitrate,
+                                    mediaItem,
+                                    blob,
+                                })
                             }
                         } else {
-                            await audioStorage.saveTrack(mediaItem.Id, { type: 'container', mediaItem })
+                            await audioStorage.saveTrack(mediaItem.Id, {
+                                type: 'container',
+                                bitrate: playback.bitrate,
+                                mediaItem,
+                            })
                         }
 
                         patchMediaItem(mediaItem.Id, item => ({ ...item, offlineState: 'downloaded' }))
