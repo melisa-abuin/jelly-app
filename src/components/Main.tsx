@@ -103,7 +103,7 @@ export const MainContent = ({
                                         }))
                                     }}
                                 >
-                                    <div className={'icon' + (filter.sort === 'Ascending' ? ' active' : '')}>
+                                    <div className={'icon' + (filter.order === 'Ascending' ? ' active' : '')}>
                                         <SortingIcon width={12} height={12} />
                                     </div>
                                 </div>
