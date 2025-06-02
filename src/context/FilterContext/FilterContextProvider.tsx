@@ -1,11 +1,11 @@
 import { BaseItemKind, ItemSortBy, SortOrder } from '@jellyfin/sdk/lib/generated-client'
-import { ReactNode, useMemo, useState } from 'react'
-import { FilterContext } from './FilterContext'
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
+import { FilterContext } from './FilterContext'
 
 export type IFilterContext = ReturnType<typeof useInitialState>
 
-enum SortInitialState {
+enum SortState {
     Added = 'Added',
     Tracks = 'Tracks',
     Released = 'Released',
@@ -13,37 +13,57 @@ enum SortInitialState {
     Random = 'Random',
     Artists = 'Artists',
     Albums = 'Albums',
-    None = ''
+    None = '',
 }
 
-const pathToSortMap: Record<string, SortInitialState> = {
-    '/tracks': SortInitialState.Added,
-    '/albums': SortInitialState.Added,
-    '/genre': SortInitialState.Added,
-    '/favorites': SortInitialState.Tracks
+const pathToSortMap: Record<string, SortState> = {
+    '/tracks': SortState.Added,
+    '/albums': SortState.Added,
+    '/genre': SortState.Added,
+    '/favorites': SortState.Tracks,
 }
 
-const isValidSortValue = (val: string): val is SortInitialState => {
-    return Object.values(SortInitialState)
+const isValidSortValue = (val: string): val is SortState => {
+    return Object.values(SortState)
         .map(v => v.toLowerCase())
         .includes(val.toLowerCase())
 }
 
-
 const useInitialState = () => {
     const location = useLocation()
-    const [searchParams] = useSearchParams()
+    const [searchParams, setSearchParams] = useSearchParams()
     const queryFilter = searchParams.get('type')
 
-    const filterFromQuery = queryFilter && isValidSortValue(queryFilter)
-    ? (Object.values(SortInitialState).find(
-        v => v.toLowerCase() === queryFilter.toLowerCase()
-      ) as SortInitialState)
-    : null
+    const filterFromQuery =
+        queryFilter && isValidSortValue(queryFilter)
+            ? (Object.values(SortState).find(v => v.toLowerCase() === queryFilter.toLowerCase()) as SortState)
+            : null
 
-    const pathFallback = pathToSortMap[location.pathname] ?? SortInitialState.None
+    const pathFallback = pathToSortMap[location.pathname] || SortState.None
 
-    const [sort, setSort] = useState<string>(filterFromQuery || pathFallback)
+    const [sort, _setSort] = useState<string>(filterFromQuery || pathFallback)
+
+    const setSort = useCallback(
+        (value: string) => {
+            const params = new URLSearchParams()
+
+            if (pathToSortMap[location.pathname] === value) {
+                _setSort('')
+            } else {
+                params.set('type', value)
+                _setSort(value)
+            }
+
+            setSearchParams(params)
+        },
+        [location.pathname, setSearchParams]
+    )
+
+    useEffect(() => {
+        const currentSort = searchParams.get('type') || pathFallback
+
+        _setSort(isValidSortValue(currentSort) ? currentSort : SortState.None)
+    }, [searchParams, pathFallback, _setSort])
 
     const jellySort = useMemo(() => {
         let newSortBy: ItemSortBy[]

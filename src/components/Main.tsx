@@ -1,6 +1,6 @@
 import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
 import { JSX, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
 import { FilterContextProvider } from '../context/FilterContext/FilterContextProvider'
 import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
@@ -31,22 +31,10 @@ export const MainContent = ({
     const location = useLocation()
     const { toggleSidenav } = useSidenavContext()
     const { sort, setSort } = useFilterContext()
-    const [searchParams, setSearchParams] = useSearchParams()
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
     }, [location.pathname])
-
-    const handleOnChange = useCallback(
-        (event: React.ChangeEvent<HTMLSelectElement>) => {
-          const value = event.target.value
-          const params = new URLSearchParams(searchParams)
-          params.set('type', value)
-          setSearchParams(params, { replace: true })
-          setSort(value)
-        },
-        [searchParams, setSearchParams, setSort]
-      )
 
     const memoHeader = useMemo(() => {
         return (
@@ -91,7 +79,7 @@ export const MainContent = ({
                 <div className="secondary">
                     {filterType === 'mediaItems' && (
                         <div className="filter">
-                            <select onChange={handleOnChange} value={sort}>
+                            <select onChange={e => setSort(e.target.value)} value={sort}>
                                 <option value="Added">Added</option>
                                 <option value="Released">Released</option>
                                 <option value="Runtime">Runtime</option>
@@ -105,7 +93,7 @@ export const MainContent = ({
 
                     {filterType === 'favorites' && (
                         <div className="filter">
-                            <select onChange={handleOnChange} value={sort}>
+                            <select onChange={e => setSort(e.target.value)} value={sort}>
                                 <option value="Tracks">Tracks</option>
                                 <option value="Albums">Albums</option>
                                 <option value="Artists">Artists</option>
@@ -123,7 +111,7 @@ export const MainContent = ({
                 </div>
             </div>
         )
-    }, [filterType, location, pageTitle, previousPage, sort, toggleSidenav, handleOnChange])
+    }, [filterType, location, pageTitle, previousPage, setSort, sort, toggleSidenav])
 
     const memoContent = useMemo(() => {
         return (
