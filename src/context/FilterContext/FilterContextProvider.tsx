@@ -43,7 +43,7 @@ const useInitialState = () => {
 
     const pathFallback = pathToSortMap[location.pathname] ?? SortInitialState.None
 
-    const [sort, setSort] = useState<SortInitialState>(filterFromQuery || pathFallback)
+    const [sort, setSort] = useState<string>(filterFromQuery || pathFallback)
 
     const jellySort = useMemo(() => {
         let newSortBy: ItemSortBy[]
