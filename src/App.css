@@ -530,34 +530,29 @@ body.lockscroll {
     border-left: 1px solid var(--border-color);
 }
 
-.main > .main_header > .secondary > .sorting > .sort > select {
-    position: absolute;
-    cursor: pointer;
-    width: 26px;
-    height: 26px;
-    opacity: 0;
-    padding: 6px 8px;
-}
-
-.main > .main_header > .secondary > .sorting > .sort > select > option {
-    font-weight: 500;
-    color: var(--font-color);
-}
-
 .main > .main_header > .secondary > .sorting > .sort > .icon {
     padding: 7px;
-    pointer-events: none;
+    cursor: pointer;
 }
 
 .main > .main_header > .secondary > .sorting > .sort > .icon > svg {
     fill: var(--brand-color);
 }
 
-.main > .main_header > .secondary > .sorting > .sort > .icon > svg > g > .primary {
+.main > .main_header > .secondary > .sorting > .sort > .icon > svg > g > .arrow {
+    transition: opacity 0.2s ease-out;
+}
+
+.main > .main_header > .secondary > .sorting > .sort > .icon > svg > g > .arrow.down {
+    opacity: 0.4;
+}
+
+/* Ascending */
+.main > .main_header > .secondary > .sorting > .sort > .icon.active > svg > g > .arrow.down {
     opacity: 1;
 }
 
-.main > .main_header > .secondary > .sorting > .sort > .icon > svg > g > .secondary {
+.main > .main_header > .secondary > .sorting > .sort > .icon.active > svg > g > .arrow.up {
     opacity: 0.4;
 }
 
