@@ -41,7 +41,7 @@ export const MainContent = ({
         (event: React.ChangeEvent<HTMLSelectElement>) => {
           const value = event.target.value
           const params = new URLSearchParams(searchParams)
-          params.set('filter', value)
+          params.set('type', value)
           setSearchParams(params, { replace: true })
           setSort(value)
         },

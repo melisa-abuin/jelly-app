@@ -33,7 +33,7 @@ const isValidSortValue = (val: string): val is SortInitialState => {
 const useInitialState = () => {
     const location = useLocation()
     const [searchParams] = useSearchParams()
-    const queryFilter = searchParams.get('filter')
+    const queryFilter = searchParams.get('type')
 
     const filterFromQuery = queryFilter && isValidSortValue(queryFilter)
     ? (Object.values(SortInitialState).find(
