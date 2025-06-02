@@ -30,7 +30,7 @@ export const MainContent = ({
     const { goBack: previousPage } = useHistoryContext()
     const location = useLocation()
     const { toggleSidenav } = useSidenavContext()
-    const { sort, setSort } = useFilterContext()
+    const { filter, setFilter } = useFilterContext()
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
@@ -81,7 +81,10 @@ export const MainContent = ({
                         <>
                             <div className="sorting">
                                 <div className="filter">
-                                    <select onChange={e => setSort(e.target.value)} value={sort}>
+                                    <select
+                                        onChange={e => setFilter(c => ({ ...c, sort: e.target.value }))}
+                                        value={filter.sort}
+                                    >
                                         <option value="Added">Added</option>
                                         <option value="Released">Released</option>
                                         <option value="Runtime">Runtime</option>
@@ -91,12 +94,16 @@ export const MainContent = ({
                                         <ChevronDownIcon size={12} />
                                     </div>
                                 </div>
-                                <div className="sort">
-                                    <select onChange={e => setSort(e.target.value)} value={sort}>
-                                        <option value="Ascending">Ascending</option>
-                                        <option value="Descending">Descending</option>
-                                    </select>
-                                    <div className="icon">
+                                <div
+                                    className="sort"
+                                    onClick={() => {
+                                        setFilter(c => ({
+                                            ...c,
+                                            order: c.order === 'Ascending' ? 'Descending' : 'Ascending',
+                                        }))
+                                    }}
+                                >
+                                    <div className={'icon' + (filter.sort === 'Ascending' ? ' active' : '')}>
                                         <SortingIcon width={12} height={12} />
                                     </div>
                                 </div>
@@ -107,22 +114,16 @@ export const MainContent = ({
                     {filterType === 'favorites' && (
                         <div className="sorting">
                             <div className="filter">
-                                <select onChange={e => setSort(e.target.value)} value={sort}>
+                                <select
+                                    onChange={e => setFilter(c => ({ ...c, sort: e.target.value }))}
+                                    value={filter.sort}
+                                >
                                     <option value="Tracks">Tracks</option>
                                     <option value="Albums">Albums</option>
                                     <option value="Artists">Artists</option>
                                 </select>
                                 <div className="icon">
                                     <ChevronDownIcon size={12} />
-                                </div>
-                            </div>
-                            <div className="sort">
-                                <select onChange={e => setSort(e.target.value)} value={sort}>
-                                    <option value="Ascending">Ascending</option>
-                                    <option value="Descending">Descending</option>
-                                </select>
-                                <div className="icon">
-                                    <SortingIcon width={12} height={12} />
                                 </div>
                             </div>
                         </div>
@@ -135,7 +136,7 @@ export const MainContent = ({
                 </div>
             </div>
         )
-    }, [filterType, location, pageTitle, previousPage, setSort, sort, toggleSidenav])
+    }, [filter.sort, filterType, location, pageTitle, previousPage, setFilter, toggleSidenav])
 
     const memoContent = useMemo(() => {
         return (

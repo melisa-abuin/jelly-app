@@ -16,7 +16,13 @@ enum SortState {
     None = '',
 }
 
-const pathToSortMap: Record<string, SortState> = {
+enum OrderState {
+    Ascending = 'Ascending',
+    Descending = 'Descending',
+    None = '',
+}
+
+const initialSortMap: Record<string, SortState> = {
     '/tracks': SortState.Added,
     '/albums': SortState.Added,
     '/genre': SortState.Added,
@@ -29,82 +35,114 @@ const isValidSortValue = (val: string): val is SortState => {
         .includes(val.toLowerCase())
 }
 
+const isValidOrderValue = (val: string): val is OrderState => {
+    return Object.values(OrderState)
+        .map(v => v.toLowerCase())
+        .includes(val.toLowerCase())
+}
+
+type FilterState = {
+    sort: string
+    order: string
+}
+
 const useInitialState = () => {
     const location = useLocation()
     const [searchParams, setSearchParams] = useSearchParams()
-    const queryFilter = searchParams.get('type')
+    const querySort = searchParams.get('sort')
+    const queryOrder = searchParams.get('order')
 
     const filterFromQuery =
-        queryFilter && isValidSortValue(queryFilter)
-            ? (Object.values(SortState).find(v => v.toLowerCase() === queryFilter.toLowerCase()) as SortState)
+        querySort && isValidSortValue(querySort)
+            ? (Object.values(SortState).find(v => v.toLowerCase() === querySort.toLowerCase()) as SortState)
             : null
 
-    const pathFallback = pathToSortMap[location.pathname] || SortState.None
+    const orderFromQuery =
+        queryOrder && isValidOrderValue(queryOrder)
+            ? (Object.values(OrderState).find(v => v.toLowerCase() === queryOrder.toLowerCase()) as OrderState)
+            : null
 
-    const [sort, _setSort] = useState<string>(filterFromQuery || pathFallback)
+    const pathFallback = initialSortMap[location.pathname] || SortState.None
 
-    const setSort = useCallback(
-        (value: string) => {
+    const orderFallback =
+        pathFallback === SortState.Added || pathFallback === SortState.None
+            ? OrderState.Descending
+            : OrderState.Ascending
+
+    const [filter, _setFilter] = useState<FilterState>({
+        sort: (filterFromQuery || pathFallback) as SortState,
+        order: (orderFromQuery || orderFallback) as OrderState,
+    })
+
+    const setFilter = useCallback(
+        (updater: (prev: FilterState) => FilterState) => {
+            const newState = updater(filter)
+
             const params = new URLSearchParams()
 
-            if (pathToSortMap[location.pathname] === value) {
-                _setSort('')
-            } else {
-                params.set('type', value)
-                _setSort(value)
+            if (initialSortMap[location.pathname] !== newState.sort && newState.sort) {
+                params.set('sort', newState.sort)
+            }
+
+            if (orderFallback !== newState.order && newState.order) {
+                params.set('order', newState.order)
             }
 
             setSearchParams(params)
+            _setFilter(newState)
         },
-        [location.pathname, setSearchParams]
+        [filter, location.pathname, orderFallback, setSearchParams]
     )
 
     useEffect(() => {
-        const currentSort = searchParams.get('type') || pathFallback
+        const currentSort = searchParams.get('sort') || pathFallback
+        const currentOrder = searchParams.get('order') || orderFallback
 
-        _setSort(isValidSortValue(currentSort) ? currentSort : SortState.None)
-    }, [searchParams, pathFallback, _setSort])
+        _setFilter({
+            sort: isValidSortValue(currentSort) ? (currentSort as SortState) : SortState.None,
+            order: isValidOrderValue(currentOrder) ? (currentOrder as OrderState) : OrderState.None,
+        })
+    }, [searchParams, pathFallback, orderFallback])
 
     const jellySort = useMemo(() => {
         let newSortBy: ItemSortBy[]
-        let newSortOrder: SortOrder[] = [SortOrder.Ascending]
 
-        switch (sort) {
-            case 'Added':
+        switch (filter.sort) {
+            case SortState.Added:
                 newSortBy = [ItemSortBy.DateCreated]
-                newSortOrder = [SortOrder.Descending]
                 break
-            case 'Released':
+            case SortState.Released:
                 newSortBy = [ItemSortBy.PremiereDate]
                 break
-            case 'Runtime':
+            case SortState.Runtime:
                 newSortBy = [ItemSortBy.Runtime]
                 break
-            case 'Random':
+            case SortState.Random:
                 newSortBy = [ItemSortBy.Random]
                 break
             default:
                 newSortBy = [ItemSortBy.DateCreated]
-                newSortOrder = [SortOrder.Descending]
         }
 
+        const newSortOrder = filter.order === OrderState.Ascending ? [SortOrder.Ascending] : [SortOrder.Descending]
+
         return { sortBy: newSortBy, sortOrder: newSortOrder }
-    }, [sort])
+    }, [filter])
 
     const jellyItemKind = useMemo(() => {
-        switch (sort) {
-            case 'Artists':
+        switch (filter.sort) {
+            case SortState.Artists:
                 return BaseItemKind.MusicArtist
-            case 'Albums':
+            case SortState.Albums:
                 return BaseItemKind.MusicAlbum
             default:
                 return BaseItemKind.Audio
         }
-    }, [sort])
+    }, [filter.sort])
 
     return {
-        sort,
-        setSort,
+        filter,
+        setFilter,
         jellySort,
         jellyItemKind,
     }
