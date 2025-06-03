@@ -13,7 +13,7 @@ import { ItemFilter } from '@jellyfin/sdk/lib/generated-client/models/item-filte
 import { ItemSortBy } from '@jellyfin/sdk/lib/generated-client/models/item-sort-by'
 import { PlayMethod } from '@jellyfin/sdk/lib/generated-client/models/play-method'
 import { SortOrder } from '@jellyfin/sdk/lib/generated-client/models/sort-order'
-import { syncDownloads, syncDownloadsById } from '../hooks/useDownloads'
+import { syncDownloads, syncDownloadsById } from '../context/DownloadContext/DownloadContext'
 
 export class ApiError extends Error {
     constructor(message: string, public response: Response) {

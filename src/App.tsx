@@ -10,6 +10,7 @@ import { Main } from './components/Main'
 import './components/MediaList.css'
 import { Sidenav } from './components/Sidenav'
 import { AudioStorageContextProvider } from './context/AudioStorageContext/AudioStorageContextProvider'
+import { DownloadContextProvider } from './context/DownloadContext/DownloadContextProvider'
 import { useDropdownContext } from './context/DropdownContext/DropdownContext'
 import { DropdownContextProvider } from './context/DropdownContext/DropdownContextProvider'
 import { HistoryContextProvider } from './context/HistoryContext/HistoryContextProvider'
@@ -124,10 +125,12 @@ const RoutedApp = () => {
                                 <AudioStorageContextProvider>
                                     <SidenavContextProvider>
                                         <PlaybackContextProvider initialVolume={0.5} clearOnLogout={isLoggingOut}>
-                                            <DropdownContextProvider>
-                                                <MainLayout auth={auth} handleLogout={handleLogout} />
-                                                <Dropdown />
-                                            </DropdownContextProvider>
+                                            <DownloadContextProvider>
+                                                <DropdownContextProvider>
+                                                    <MainLayout auth={auth} handleLogout={handleLogout} />
+                                                    <Dropdown />
+                                                </DropdownContextProvider>
+                                            </DownloadContextProvider>
                                         </PlaybackContextProvider>
                                     </SidenavContextProvider>
                                 </AudioStorageContextProvider>

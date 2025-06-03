@@ -47,7 +47,6 @@ export const MediaList = ({
               remove_from_favorite: true,
               add_to_playlist: true,
               remove_from_playlist: true,
-              download_song: true,
           }
         : _hidden
 

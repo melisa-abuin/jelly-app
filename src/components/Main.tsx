@@ -136,7 +136,7 @@ export const MainContent = ({
                 </div>
             </div>
         )
-    }, [filter.sort, filterType, location, pageTitle, previousPage, setFilter, toggleSidenav])
+    }, [filter.order, filter.sort, filterType, location, pageTitle, previousPage, setFilter, toggleSidenav])
 
     const memoContent = useMemo(() => {
         return (

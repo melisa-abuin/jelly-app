@@ -3,10 +3,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
+import { useDownloadContext } from '../context/DownloadContext/DownloadContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useThemeContext } from '../context/ThemeContext/ThemeContext'
-import { useStorageStats } from '../hooks/useStorageStats'
 import { formatFileSize } from '../utils/formatFileSize'
 import './Settings.css'
 
@@ -23,8 +23,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
     const { sessionPlayCount, resetSessionCount, bitrate, setBitrate } = usePlaybackContext()
     const playback = usePlaybackContext()
     const queryClient = useQueryClient()
-
-    const { trackCount, storageStats, refreshStorageStats } = useStorageStats()
+    const { storageStats, refreshStorageStats, queueCount, clearQueue } = useDownloadContext()
 
     const [clearing, setClearing] = useState(false)
 
@@ -81,13 +80,14 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
             setClearing(true)
             await audioStorage.clearAllDownloads()
             queryClient.clear()
+            clearQueue()
             await refreshStorageStats()
         } catch (error) {
             console.error('Failed to clear downloads:', error)
         } finally {
             setClearing(false)
         }
-    }, [audioStorage, queryClient, refreshStorageStats])
+    }, [audioStorage, clearQueue, queryClient, refreshStorageStats])
 
     return (
         <div className="settings-page">
@@ -325,12 +325,21 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 <div className="container">
                     <div className="title">Offline Sync</div>
                     <div className="desc">
-                        Synced Music - {trackCount} Tracks / {formatFileSize(storageStats?.indexedDB || 0)} Used
+                        Synced Music - {storageStats.trackCount} Track{storageStats.trackCount === 1 ? '' : 's'}
+                        {queueCount > 0 ? (
+                            <>
+                                {' '}
+                                ({queueCount} track{queueCount === 1 ? '' : 's'} in queue)
+                            </>
+                        ) : (
+                            ''
+                        )}{' '}
+                        / {formatFileSize(storageStats.trackCount === 0 ? 0 : storageStats?.indexedDB || 0)} Used
                     </div>
                 </div>
                 <div className="options noSelect">
                     <div className="option">
-                        {trackCount > 0 && (
+                        {(storageStats.trackCount > 0 || queueCount > 0) && (
                             <button className="btn clear" onClick={handleClearAll} disabled={clearing}>
                                 {clearing ? 'Clearing...' : 'Clear All'}
                             </button>

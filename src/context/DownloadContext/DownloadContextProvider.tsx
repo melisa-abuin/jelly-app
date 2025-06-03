@@ -1,21 +1,48 @@
 import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client'
+import { useQueryClient } from '@tanstack/react-query'
 import { Parser } from 'm3u8-parser'
-import { useEffect, useRef, useState } from 'react'
-import { MediaItem } from '../api/jellyfin'
-import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
-import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
-import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
-import { usePatchQueries } from './usePatchQueries'
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { MediaItem } from '../../api/jellyfin'
+import { usePatchQueries } from '../../hooks/usePatchQueries'
+import { useAudioStorageContext } from '../AudioStorageContext/AudioStorageContext'
+import { useJellyfinContext } from '../JellyfinContext/JellyfinContext'
+import { usePlaybackContext } from '../PlaybackContext/PlaybackContext'
+import { DownloadContext } from './DownloadContext'
 
 const STORAGE_KEY = 'mediaTaskQueue'
 
 type Task = { mediaItem: MediaItem; action: 'download' | 'remove' }
 
-export const useDownloads = () => {
+export type IDownloadContext = ReturnType<typeof useInitialState>
+
+const useInitialState = () => {
     const api = useJellyfinContext()
     const playback = usePlaybackContext()
     const audioStorage = useAudioStorageContext()
     const { patchMediaItem, patchMediaItems } = usePatchQueries()
+    const queryClient = useQueryClient()
+    const [storageStats, setStorageStats] = useState({ usage: 0, indexedDB: 0, trackCount: 0 })
+
+    const refreshStorageStats = useCallback(async () => {
+        try {
+            const count = await audioStorage.getTrackCount()
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const estimate: any = await navigator.storage?.estimate()
+
+            setStorageStats({
+                usage: estimate?.usage || 0,
+                indexedDB: estimate?.usageDetails?.indexedDB || 0,
+                trackCount: count,
+            })
+        } catch (error) {
+            console.error('Failed to load storage stats:', error)
+        }
+    }, [audioStorage])
+
+    useEffect(() => {
+        refreshStorageStats()
+    }, [refreshStorageStats])
 
     const [queue, setQueue] = useState<Task[]>(() => {
         try {
@@ -28,6 +55,7 @@ export const useDownloads = () => {
     })
 
     const processingRef = useRef(false)
+    const abortControllerRef = useRef<AbortController | null>(null)
 
     // Persist queue
     useEffect(() => {
@@ -90,6 +118,27 @@ export const useDownloads = () => {
         })
     }
 
+    const clearQueue = useCallback(() => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort('clearQueue')
+            abortControllerRef.current = null
+        }
+
+        queue.forEach(({ mediaItem }) => {
+            patchMediaItem(mediaItem.Id, item => ({
+                ...item,
+                offlineState:
+                    item.offlineState === 'downloading'
+                        ? undefined
+                        : item.offlineState === 'deleting'
+                        ? 'downloaded'
+                        : item.offlineState,
+            }))
+        })
+
+        setQueue([])
+    }, [queue, patchMediaItem])
+
     // Process queue tasks one at a time
     useEffect(() => {
         const runNext = async () => {
@@ -98,6 +147,9 @@ export const useDownloads = () => {
             if (!next) return
 
             processingRef.current = true
+            abortControllerRef.current = new AbortController()
+            const signal = abortControllerRef.current.signal
+
             const { mediaItem, action } = next
 
             try {
@@ -112,10 +164,10 @@ export const useDownloads = () => {
 
                         if (mediaItem.Type === BaseItemKind.Audio) {
                             const isTranscoded = [128000, 192000, 256000, 320000].includes(playback.bitrate)
+                            const streamUrl = api.getStreamUrl(mediaItem.Id, playback.bitrate)
 
                             if (isTranscoded) {
-                                const streamUrl = api.getStreamUrl(mediaItem.Id, playback.bitrate)
-                                const { playlist, ts } = await downloadTranscodedTrack(streamUrl)
+                                const { playlist, ts } = await downloadTranscodedTrack(streamUrl, signal)
                                 await audioStorage.saveTrack(mediaItem.Id, {
                                     type: 'm3u8',
                                     mediaItem,
@@ -124,8 +176,7 @@ export const useDownloads = () => {
                                     ts,
                                 })
                             } else {
-                                const streamUrl = api.getStreamUrl(mediaItem.Id, playback.bitrate)
-                                const response = await fetch(streamUrl)
+                                const response = await fetch(streamUrl, { signal })
                                 if (!response.ok) throw new Error(`HTTP ${response.status}`)
                                 const blob = await response.blob()
                                 await audioStorage.saveTrack(mediaItem.Id, {
@@ -149,30 +200,52 @@ export const useDownloads = () => {
                     await audioStorage.removeTrack(mediaItem.Id)
                     patchMediaItem(mediaItem.Id, item => ({ ...item, offlineState: undefined }))
                 }
+
+                queryClient.invalidateQueries({ queryKey: ['downloads'] })
+                refreshStorageStats()
             } catch (error) {
                 console.error(`Task failed for ${action} id=${mediaItem.Id}`, error)
 
                 if (action === 'download') {
                     patchMediaItem(mediaItem.Id, item => ({ ...item, offlineState: undefined }))
+                } else if (action === 'remove') {
+                    patchMediaItem(mediaItem.Id, item => ({ ...item, offlineState: 'downloaded' }))
                 }
             } finally {
+                abortControllerRef.current = null
                 setQueue(prev => prev.slice(1))
                 processingRef.current = false
             }
         }
 
         runNext()
-    }, [api, audioStorage, patchMediaItem, playback.bitrate, queue])
+    }, [api, audioStorage, refreshStorageStats, patchMediaItem, playback, queryClient, queue])
 
     // We need the addToDownloads in jellyfin API but we don't want to cause unnecessary re-renders
     window.addToDownloads = addToDownloads
 
-    return { queue, addToDownloads, removeFromDownloads }
+    return {
+        addToDownloads,
+        removeFromDownloads,
+        storageStats,
+        refreshStorageStats,
+        queueCount: queue.length,
+        clearQueue,
+    }
 }
 
-const downloadTranscodedTrack = async (manifestUrl: string): Promise<{ playlist: Blob; ts: Blob[] }> => {
+export const DownloadContextProvider = ({ children }: { children: ReactNode }) => {
+    const initialState = useInitialState()
+
+    return <DownloadContext.Provider value={initialState}>{children}</DownloadContext.Provider>
+}
+
+const downloadTranscodedTrack = async (
+    manifestUrl: string,
+    signal?: AbortSignal
+): Promise<{ playlist: Blob; ts: Blob[] }> => {
     // 1. Fetch the playlist (master or media)
-    const manifestText = await (await fetch(manifestUrl)).text()
+    const manifestText = await (await fetch(manifestUrl, { signal })).text()
 
     // 2. Parse it
     const parser = new Parser()
@@ -187,9 +260,7 @@ const downloadTranscodedTrack = async (manifestUrl: string): Promise<{ playlist:
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const variantUri = (parser as any).manifest.playlists[0].uri
         const variantUrl = new URL(variantUri, baseUrl).toString()
-        // The current playlistBlob is the master playlist.
-        // The recursive call will fetch the media playlist and its segments.
-        return await downloadTranscodedTrack(variantUrl)
+        return await downloadTranscodedTrack(variantUrl, signal)
     }
 
     // 3b. Otherwise it’s a media playlist: grab its segments
@@ -202,43 +273,11 @@ const downloadTranscodedTrack = async (manifestUrl: string): Promise<{ playlist:
     const tsBlobs: Blob[] = []
     for (const { uri } of segments) {
         const segUrl = new URL(uri, baseUrl).toString()
-        const res = await fetch(segUrl)
+        const res = await fetch(segUrl, { signal })
         if (!res.ok) throw new Error(`Segment error ${res.status}`)
         tsBlobs.push(await res.blob())
     }
 
     // 5. Return the media playlist and its TS segments
     return { playlist: playlistBlob, ts: tsBlobs }
-}
-
-export const syncDownloads = (container: MediaItem, items: MediaItem[]) => {
-    if (container.offlineState === 'downloaded') {
-        const toDownload = items.filter(track => track.offlineState !== 'downloaded')
-
-        if (toDownload.length) {
-            // Explicitly set offlineState to 'downloading' since addToDownloads happens before they are stored in react-query, so that patch will fail
-            for (const track of toDownload) {
-                track.offlineState = 'downloading'
-            }
-
-            window.addToDownloads(toDownload)
-        }
-    }
-}
-
-export const syncDownloadsById = async (containerId: string, items: MediaItem[]) => {
-    const isDownloaded = containerId ? await window.audioStorage.hasTrack(containerId) : false
-
-    if (isDownloaded) {
-        const toDownload = items.filter(track => track.offlineState !== 'downloaded')
-
-        if (toDownload.length) {
-            // Explicitly set offlineState to 'downloading' since addToDownloads happens before they are stored in react-query, so that patch will fail
-            for (const track of toDownload) {
-                track.offlineState = 'downloading'
-            }
-
-            window.addToDownloads(toDownload)
-        }
-    }
 }
