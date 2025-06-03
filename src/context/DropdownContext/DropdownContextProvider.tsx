@@ -304,7 +304,7 @@ const useInitialState = () => {
 
     const handlePlayNext = useCallback(
         async (item: MediaItem) => {
-            const insertionPoint = (playback.currentTrackIndex || -1) + 1
+            const insertionPoint = (playback.currentTrackIndex ?? -1) + 1
             const playlist = playback.currentPlaylist
             const newPlaylist = [
                 ...playlist.slice(0, insertionPoint),
