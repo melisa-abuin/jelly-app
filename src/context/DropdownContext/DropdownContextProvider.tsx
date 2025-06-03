@@ -304,8 +304,14 @@ const useInitialState = () => {
 
     const handlePlayNext = useCallback(
         async (item: MediaItem) => {
+            const insertionPoint = (playback.currentTrackIndex || -1) + 1
             const playlist = playback.currentPlaylist
-            const newPlaylist = [...playlist, ...(await expandItems(item))]
+            const newPlaylist = [
+                ...playlist.slice(0, insertionPoint),
+                ...(await expandItems(item)),
+                ...playlist.slice(insertionPoint),
+            ]
+
             playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
             closeDropdown()
         },
