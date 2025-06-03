@@ -6,13 +6,13 @@ import { AudioStorageContext } from './AudioStorageContext'
 export type IAudioStorageContext = ReturnType<typeof useInitialState>
 export type IStorageTrack =
     | { type: 'container'; mediaItem: MediaItem; bitrate: number }
-    | { type: 'song'; mediaItem: MediaItem; bitrate: number; blob: Blob }
-    | { type: 'm3u8'; mediaItem: MediaItem; bitrate: number; playlist: Blob; ts: Blob[] }
+    | { type: 'song'; mediaItem: MediaItem; bitrate: number; blob: Blob; containerId?: string }
+    | { type: 'm3u8'; mediaItem: MediaItem; bitrate: number; playlist: Blob; ts: Blob[]; containerId?: string }
 
 const useInitialState = () => {
     const DB_NAME = 'OfflineAudioDB'
     const STORE_NAME = 'tracks'
-    const DB_VERSION = 2
+    const DB_VERSION = 3
 
     const dbRef = useRef(
         new Promise<IDBDatabase>((resolve, reject) => {
@@ -25,9 +25,17 @@ const useInitialState = () => {
                 if (!db.objectStoreNames.contains(STORE_NAME)) {
                     const store = db.createObjectStore(STORE_NAME)
                     store.createIndex('by_kind', 'mediaItem.Type', { unique: false })
-                } else if (oldVersion < 2) {
-                    const store = request.transaction!.objectStore(STORE_NAME)
-                    store.createIndex('by_kind', 'mediaItem.Type', { unique: false })
+                    store.createIndex('by_containerId', 'containerId', { unique: false })
+                } else {
+                    if (oldVersion < 2) {
+                        const store = request.transaction!.objectStore(STORE_NAME)
+                        store.createIndex('by_kind', 'mediaItem.Type', { unique: false })
+                    }
+
+                    if (oldVersion < 3) {
+                        const store = request.transaction!.objectStore(STORE_NAME)
+                        store.createIndex('by_containerId', 'containerId', { unique: false })
+                    }
                 }
             }
 
@@ -58,7 +66,30 @@ const useInitialState = () => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
         const tx = db.transaction(STORE_NAME, 'readwrite')
-        tx.objectStore(STORE_NAME).delete(id)
+        const store = tx.objectStore(STORE_NAME)
+
+        const getRequest = store.get(id)
+        getRequest.onsuccess = () => {
+            const record = getRequest.result as IStorageTrack | undefined
+            store.delete(id)
+
+            if (record?.type === 'container' && id) {
+                const index = store.index('by_containerId')
+                const keyRange = IDBKeyRange.only(id)
+                const cursorRequest = index.openCursor(keyRange)
+                cursorRequest.onsuccess = event => {
+                    const cursor: IDBCursorWithValue | null = (event.target as IDBRequest).result
+                    if (cursor) {
+                        store.delete(cursor.primaryKey)
+                        cursor.continue()
+                    }
+                }
+            }
+        }
+        getRequest.onerror = () => {
+            console.error('Error fetching record for deletion:', getRequest.error)
+        }
+
         return new Promise<void>((resolve, reject) => {
             tx.oncomplete = () => resolve()
             tx.onerror = () => reject(tx.error)

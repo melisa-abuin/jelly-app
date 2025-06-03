@@ -11,7 +11,7 @@ import { DownloadContext } from './DownloadContext'
 
 const STORAGE_KEY = 'mediaTaskQueue'
 
-type Task = { mediaItem: MediaItem; action: 'download' | 'remove' }
+type Task = { mediaItem: MediaItem; action: 'download' | 'remove'; containerId?: string }
 
 export type IDownloadContext = ReturnType<typeof useInitialState>
 
@@ -80,9 +80,9 @@ const useInitialState = () => {
         }
 
         setQueue(prev => {
-            const newTasks = items
+            const newTasks: Task[] = items
                 .filter(item => !prev.some(task => task.mediaItem.Id === item.Id && task.action === 'download'))
-                .map(item => ({ mediaItem: item, action: 'download' as const }))
+                .map(item => ({ mediaItem: item, action: 'download' as const, containerId }))
 
             if (containerId) {
                 newTasks.push({ mediaItem: container, action: 'download' })
@@ -106,9 +106,9 @@ const useInitialState = () => {
         }
 
         setQueue(prev => {
-            const newTasks = items
+            const newTasks: Task[] = items
                 .filter(item => !prev.some(task => task.mediaItem.Id === item.Id && task.action === 'remove'))
-                .map(item => ({ mediaItem: item, action: 'remove' as const }))
+                .map(item => ({ mediaItem: item, action: 'remove' as const, containerId }))
 
             if (containerId) {
                 newTasks.push({ mediaItem: container, action: 'remove' })
@@ -174,6 +174,7 @@ const useInitialState = () => {
                                     bitrate: playback.bitrate,
                                     playlist,
                                     ts,
+                                    containerId: next.containerId,
                                 })
                             } else {
                                 const response = await fetch(streamUrl, { signal })
@@ -184,6 +185,7 @@ const useInitialState = () => {
                                     bitrate: playback.bitrate,
                                     mediaItem,
                                     blob,
+                                    containerId: next.containerId,
                                 })
                             }
                         } else {
