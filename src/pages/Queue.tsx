@@ -41,6 +41,8 @@ export const Queue = () => {
                     </div>
                     <MediaList
                         items={queueTracks}
+                        playlistItems={currentPlaylist}
+                        indexOffset={currentTrackIndex + 1}
                         isLoading={isLoading}
                         type="song"
                         loadMore={loadMore}

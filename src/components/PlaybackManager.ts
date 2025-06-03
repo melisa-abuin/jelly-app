@@ -91,9 +91,9 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 setShuffle(false)
             }
 
-            localStorage.setItem('reviver', JSON.stringify(props.reviver || {}))
-
             if (props.reviver !== 'persist') {
+                localStorage.setItem('reviver', JSON.stringify(props.reviver || {}))
+
                 queryClient.setQueryData(['reviver', ...(props.reviver?.queryKey || [])], {
                     pageParams: [1],
                     pages: [props.playlist],

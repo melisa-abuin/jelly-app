@@ -14,6 +14,8 @@ import { DeletingIcon, DownloadedIcon, DownloadingIcon, PlaystateAnimationMedali
 
 export const MediaList = ({
     items = [],
+    playlistItems,
+    indexOffset = 0,
     isLoading,
     type,
     title,
@@ -23,6 +25,8 @@ export const MediaList = ({
     disableActions = false,
 }: {
     items: MediaItem[] | undefined
+    playlistItems?: MediaItem[]
+    indexOffset?: number
     isLoading: boolean
     type: 'song' | 'album' | 'artist'
     title: string
@@ -54,8 +58,8 @@ export const MediaList = ({
             if (playback.currentTrack?.Id === item.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ playlist: items, title, reviver })
-                playback.playTrack(index)
+                playback.setCurrentPlaylist({ playlist: playlistItems || items, title, reviver })
+                playback.playTrack(indexOffset + index)
             }
         }
     }
