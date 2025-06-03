@@ -378,7 +378,7 @@ const useInitialState = () => {
                         closeDropdown()
 
                         if (context) {
-                            const playlist = playback.currentPlaylist.filter(item => item.Id !== context.item.Id)
+                            const playlist = playback.currentPlaylist.filter(item => item !== context.item)
                             playback.setCurrentPlaylist({ playlist, title: 'Direct Queue' })
                         }
                     }}
