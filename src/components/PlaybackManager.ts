@@ -80,6 +80,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             queryFnReviver: undefined,
             // NOTE; The reviverPageIndex is probably wrong but its not really an issue for now
             initialPageParam: Number(localStorage.getItem('reviverPageIndex')) || 0,
+            allowDuplicates: true,
         } satisfies IJellyfinInfiniteProps
     }, [api, reviver.queryFn, reviver.queryKey])
 
