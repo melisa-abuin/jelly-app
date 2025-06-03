@@ -103,8 +103,11 @@ const useInitialState = () => {
             if (!dbRef.current) throw new Error('Database not initialized')
             const db = await dbRef.current
             const tx = db.transaction(STORE_NAME, 'readonly')
-            const request = tx.objectStore(STORE_NAME).count()
+            const store = tx.objectStore(STORE_NAME)
+            const index = store.index('by_kind')
+            const keyRange = IDBKeyRange.only(BaseItemKind.Audio)
 
+            const request = index.count(keyRange)
             const trackCount = await new Promise<number>((resolve, reject) => {
                 request.onsuccess = () => resolve(request.result)
                 request.onerror = () => reject(request.error)
