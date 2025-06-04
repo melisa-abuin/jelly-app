@@ -255,6 +255,10 @@
     color: var(--font-color-active);
 }
 
+.media-list .media-item.playlist-item > .media-details > .song-name {
+    margin-bottom: 6px;
+}
+
 .media-list .media-item > .media-details > .container > .artist {
     display: inline;
     font-size: 0.725rem;
@@ -296,6 +300,23 @@
 .media-list .media-item.playing > .media-details > .container > .album,
 .media-list .media-item.paused > .media-details > .container > .album {
     color: var(--font-color-secondary);
+}
+
+.media-list .media-item > .media-details > .container > .year {
+    display: inline;
+    font-size: 0.725rem;
+    font-weight: 500;
+    color: var(--font-color-tertiary);
+}
+
+.media-list .media-item > .media-details > .container:has(.year ~ .divider ~ .artist) > .artist {
+    font-weight: 500;
+}
+
+.media-list .media-item > .media-details > .container > .track-amount {
+    font-size: 0.725rem;
+    font-weight: 500;
+    color: var(--font-color-tertiary);
 }
 
 .media-list .media-item > .media-indicators {

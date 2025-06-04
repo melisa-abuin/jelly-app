@@ -6,6 +6,7 @@ import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { IMenuItems } from '../context/DropdownContext/DropdownContextProvider'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useDisplayItems } from '../hooks/useDisplayItems'
+import { formatDateYear } from '../utils/formatDate'
 import { JellyImg } from './JellyImg'
 import { Loader } from './Loader'
 import { IReviver } from './PlaybackManager'
@@ -23,17 +24,19 @@ export const MediaList = ({
     loadMore,
     hidden: _hidden = {},
     disableActions = false,
+    albumDisplayMode = 'artist',
 }: {
     items: MediaItem[] | undefined
     playlistItems?: MediaItem[]
     indexOffset?: number
     isLoading: boolean
-    type: 'song' | 'album' | 'artist'
+    type: 'song' | 'album' | 'artist' | 'playlist'
     title: string
     reviver?: IReviver | 'persist'
     loadMore?: () => void
     hidden?: IMenuItems
     disableActions?: boolean
+    albumDisplayMode?: 'artist' | 'year' | 'both'
 }) => {
     const playback = usePlaybackContext()
     const navigate = useNavigate()
@@ -77,6 +80,12 @@ export const MediaList = ({
                         <Skeleton type="artist" />
                     </div>
                 )
+            } else if (type === 'playlist') {
+                return (
+                    <div className="media-item album-item" ref={el => setRowRefs(index, el)}>
+                        <Skeleton type="album" />
+                    </div>
+                )
             } else {
                 return (
                     <li className="media-item song-item" ref={el => setRowRefs(index, el)}>
@@ -113,7 +122,19 @@ export const MediaList = ({
                     <div className="media-details">
                         <span className="song-name">{item.Name}</span>
                         <div className="container">
-                            <div className="artist">{item.AlbumArtist || 'Unknown Artist'}</div>
+                            {albumDisplayMode === 'year' && (
+                                <div className="year">{formatDateYear(item.PremiereDate)}</div>
+                            )}
+                            {albumDisplayMode === 'artist' && (
+                                <div className="artist">{item.AlbumArtist || 'Unknown Artist'}</div>
+                            )}
+                            {albumDisplayMode === 'both' && (
+                                <>
+                                    <div className="year">{formatDateYear(item.PremiereDate)}</div>
+                                    <div className="divider"></div>
+                                    <div className="artist">{item.AlbumArtist || 'Unknown Artist'}</div>
+                                </>
+                            )}
                         </div>
                     </div>
                     <div className="media-indicators">
@@ -172,7 +193,58 @@ export const MediaList = ({
                                         <DownloadingIcon width={16} height={16} />
                                     </div>
                                 )}
-
+                                {item.offlineState === 'downloaded' && (
+                                    <div className="icon downloaded" title="Synced">
+                                        <DownloadedIcon width={16} height={16} />
+                                    </div>
+                                )}
+                                {item.offlineState === 'deleting' && (
+                                    <div className="icon deleting" title="Unsyncing...">
+                                        <DeletingIcon width={16} height={16} />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {!disableActions && item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
+                            <div className="favorited" title="Favorited">
+                                <HeartFillIcon size={16} />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )
+        } else if (type === 'playlist') {
+            return (
+                <div
+                    className={`media-item playlist-item ${itemClass}`}
+                    key={item.Id}
+                    onClick={() => navigate(`/playlist/${item.Id}`)}
+                    ref={el => setRowRefs(index, el)}
+                    onContextMenu={e => dropdown.onContextMenu(e, { item }, false, hidden)}
+                    onTouchStart={e => dropdown.onTouchStart(e, { item }, false, hidden)}
+                    onTouchMove={dropdown.onTouchClear}
+                    onTouchEnd={dropdown.onTouchClear}
+                >
+                    <div className="media-state">
+                        <JellyImg item={item} type={'Primary'} width={46} height={46} />
+                    </div>
+                    <div className="media-details">
+                        <span className="song-name">{item.Name}</span>
+                        <div className="container">
+                            <div className="track-amount">
+                                <span className="number">{item.ChildCount || 0}</span>{' '}
+                                <span>{(item.ChildCount || 0) === 1 ? 'Track' : 'Tracks'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="media-indicators">
+                        {item.offlineState && (
+                            <div className="download-state">
+                                {item.offlineState === 'downloading' && (
+                                    <div className="icon downloading" title="Syncing...">
+                                        <DownloadingIcon width={16} height={16} />
+                                    </div>
+                                )}
                                 {item.offlineState === 'downloaded' && (
                                     <div className="icon downloaded" title="Synced">
                                         <DownloadedIcon width={16} height={16} />
@@ -279,7 +351,9 @@ export const MediaList = ({
                     ? 'No tracks were found'
                     : type === 'album'
                     ? 'No albums were found'
-                    : 'No artists were found'}
+                    : type === 'artist'
+                    ? 'No artists were found'
+                    : 'No playlists were found'}
             </div>
         )
     }
