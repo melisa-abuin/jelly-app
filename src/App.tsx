@@ -179,7 +179,9 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     return (
         <div className="interface">
             <div
-                className={showSidenav || (isDropdownOpen && isTouchDevice) ? 'dimmer active' : 'dimmer'}
+                className={
+                    showSidenav || (isDropdownOpen && isTouchDevice) ? 'dimmer active noSelect' : 'dimmer noSelect'
+                }
                 onClick={showSidenav ? toggleSidenav : dropdownContext?.closeDropdown}
             />
 
