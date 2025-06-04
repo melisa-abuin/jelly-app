@@ -80,15 +80,14 @@ const useInitialState = () => {
         }
 
         setQueue(prev => {
-            const newTasks: Task[] = items
-                .filter(item => !prev.some(task => task.mediaItem.Id === item.Id && task.action === 'download'))
-                .map(item => ({ mediaItem: item, action: 'download' as const, containerId }))
+            const filtered = prev.filter(task => !items.some(i => i.Id === task.mediaItem.Id))
+            const newTasks: Task[] = items.map(item => ({ mediaItem: item, action: 'download' as const, containerId }))
 
             if (containerId) {
                 newTasks.push({ mediaItem: container, action: 'download' })
             }
 
-            return newTasks.length ? [...prev, ...newTasks] : prev
+            return newTasks.length ? [...filtered, ...newTasks] : filtered
         })
     }
 
@@ -106,15 +105,14 @@ const useInitialState = () => {
         }
 
         setQueue(prev => {
-            const newTasks: Task[] = items
-                .filter(item => !prev.some(task => task.mediaItem.Id === item.Id && task.action === 'remove'))
-                .map(item => ({ mediaItem: item, action: 'remove' as const, containerId }))
+            const filtered = prev.filter(task => !items.some(i => i.Id === task.mediaItem.Id))
+            const newTasks: Task[] = items.map(item => ({ mediaItem: item, action: 'remove' as const, containerId }))
 
             if (containerId) {
                 newTasks.push({ mediaItem: container, action: 'remove' })
             }
 
-            return newTasks.length ? [...prev, ...newTasks] : prev
+            return newTasks.length ? [...filtered, ...newTasks] : filtered
         })
     }
 
