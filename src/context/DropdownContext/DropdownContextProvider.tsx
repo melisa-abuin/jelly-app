@@ -313,6 +313,11 @@ const useInitialState = () => {
             ]
 
             playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
+
+            if (playback.currentTrackIndex === -1) {
+                playback.playTrack(0)
+            }
+
             closeDropdown()
         },
         [closeDropdown, expandItems, playback]
@@ -323,6 +328,11 @@ const useInitialState = () => {
             const playlist = playback.currentPlaylist
             const newPlaylist = [...playlist, ...(await expandItems(item))]
             playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
+
+            if (playback.currentTrackIndex === -1) {
+                playback.playTrack(0)
+            }
+
             closeDropdown()
         },
         [closeDropdown, expandItems, playback]
