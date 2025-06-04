@@ -430,6 +430,10 @@ body.lockscroll {
     max-width: calc(100% - 30px);
 }
 
+.main > .main_header:has(.sorting > .sort) > .primary {
+    max-width: calc(100% - 160px);
+}
+
 .main > .main_header > .primary > .container {
     position: relative;
     max-width: calc(100% - 14px);

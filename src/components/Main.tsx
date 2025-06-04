@@ -102,6 +102,7 @@ export const MainContent = ({
                                             order: c.order === 'Ascending' ? 'Descending' : 'Ascending',
                                         }))
                                     }}
+                                    title={filter.order === 'Ascending' ? 'Ascending' : 'Descending'}
                                 >
                                     <div className={'icon' + (filter.order === 'Ascending' ? ' active' : '')}>
                                         <SortingIcon width={12} height={12} />
