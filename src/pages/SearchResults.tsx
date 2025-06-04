@@ -2,8 +2,8 @@ import { BookmarkFillIcon, HeartFillIcon } from '@primer/octicons-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
-import { JellyImg } from '../components/JellyImg'
 import { Loader } from '../components/Loader'
+import { MediaList } from '../components/MediaList'
 import { TrackList } from '../components/TrackList'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
@@ -127,73 +127,40 @@ export const SearchResults = () => {
                 {results.artists.length > 0 && (
                     <div className="section artists">
                         <div className="title">Artists</div>
-                        <div className="section-list noSelect">
-                            {results.artists.map(artist => (
-                                <Link to={`/artist/${artist.id}`} key={artist.id} className="section-item">
-                                    {artist.thumbnailUrl && (
-                                        <JellyImg item={artist._mediaItem} type={'Primary'} width={36} height={36} />
-                                    )}
-                                    <div className="section-info">
-                                        <div className="name">{artist.name}</div>
-                                    </div>
-                                    {artist.isFavorite && (
-                                        <div className="favorited" title="Favorited">
-                                            <HeartFillIcon size={16} />
-                                        </div>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
+                        <MediaList
+                            items={results.artists.map(artist => artist._mediaItem)}
+                            isLoading={loading}
+                            type="artist"
+                            title={`Artists for '${query}'`}
+                            hidden={{ view_artist: true }}
+                        />
                     </div>
                 )}
 
                 {results.albums.length > 0 && (
                     <div className="section albums">
                         <div className="title">Albums</div>
-                        <div className="section-list noSelect">
-                            {results.albums.map(album => (
-                                <Link to={`/album/${album.id}`} key={album.id} className="section-item">
-                                    {album.thumbnailUrl && (
-                                        <JellyImg item={album._mediaItem} type={'Primary'} width={46} height={46} />
-                                    )}
-                                    <div className="section-info">
-                                        <div className="name">{album.name}</div>
-                                        <div className="desc album-artists">
-                                            {album.artists?.[0] || 'Unknown Artist'}
-                                        </div>
-                                    </div>
-                                    {album.isFavorite && (
-                                        <div className="favorited" title="Favorited">
-                                            <HeartFillIcon size={16} />
-                                        </div>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
+                        <MediaList
+                            items={results.albums.map(album => album._mediaItem)}
+                            isLoading={loading}
+                            type="album"
+                            title={`Albums for '${query}'`}
+                            albumDisplayMode="artist"
+                            hidden={{ view_album: true }}
+                        />
                     </div>
                 )}
 
                 {results.playlists.length > 0 && (
                     <div className="section playlists">
                         <div className="title">Playlists</div>
-                        <div className="section-list noSelect">
-                            {results.playlists.map(playlist => (
-                                <Link to={`/playlist/${playlist.id}`} key={playlist.id} className="section-item">
-                                    {playlist.thumbnailUrl && (
-                                        <JellyImg item={playlist._mediaItem} type={'Primary'} width={46} height={46} />
-                                    )}
-                                    <div className="section-info">
-                                        <div className="name">{playlist.name}</div>
-                                        <div className="desc track-amount">{playlist.totalTracks} tracks</div>
-                                    </div>
-                                    {playlist.isFavorite && (
-                                        <div className="favorited" title="Favorited">
-                                            <HeartFillIcon size={16} />
-                                        </div>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
+                        <MediaList
+                            items={results.playlists.map(playlist => playlist._mediaItem)}
+                            isLoading={loading}
+                            type="playlist"
+                            title={`Playlists for '${query}'`}
+                            // hidden={{ view_album: true }}
+                        />
                     </div>
                 )}
 
