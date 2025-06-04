@@ -177,7 +177,7 @@ export const Artist = () => {
                             type="album"
                             albumDisplayMode="year"
                             title={artist.Name ? `${artist.Name} Albums` : 'Albums'}
-                            hidden={{ view_album: true }}
+                            hidden={{ view_album: true, view_artist: true }}
                         />
                     </div>
                 )}
