@@ -163,6 +163,13 @@
     margin-bottom: 2px;
 }
 
+.artist-page > .artist-content > .section > .desc {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--font-color-tertiary);
+    margin-bottom: 6px;
+}
+
 .artist-page > .artist-content > .section.top-songs > .all-tracks {
     font-size: 0.725rem;
     font-weight: 500;
@@ -171,96 +178,6 @@
 }
 
 .all-tracks > a.textlink {
-    color: var(--font-color-tertiary);
-}
-
-.artist-page > .artist-content > .section > .desc {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--font-color-tertiary);
-    margin-bottom: 6px;
-}
-
-.artist-page > .artist-content > .section > .section-list > .section-item {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    margin: 0 -8px;
-    border-radius: 8px;
-    transition: background-color 0.2s ease-out;
-}
-
-.artist-page > .artist-content > .section > .section-list > .section-item:hover {
-    background-color: var(--bg-color-secondary);
-}
-
-.artist-page > .artist-content > .section > .section-list > .section-item > .thumbnail {
-    display: block;
-    width: 46px;
-    height: 46px;
-    object-fit: cover;
-    border-radius: 6px;
-    margin-right: 12px;
-    background-color: var(--bg-color-secondary);
-}
-
-.artist-page > .artist-content > .section > .section-list > .section-item > .section-info {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    /* Help with CJK letter spacing */
-    line-height: 1rem;
-    margin-bottom: 4px;
-}
-
-.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .date,
-.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .track-amount {
-    font-size: 0.725rem;
-    font-weight: 500;
-    color: var(--font-color-tertiary);
-}
-
-.artist-page > .artist-content > .section.appears-in > .section-list > .section-item > .section-info > .name {
-    margin-bottom: 2px;
-}
-
-.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .container {
-    line-height: 1;
-}
-
-.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .container > .year {
-    display: inline;
-    font-size: 0.725rem;
-    font-weight: 500;
-    color: var(--font-color-tertiary);
-}
-
-.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .container > .divider {
-    display: inline-block;
-    vertical-align: middle;
-    width: 2px;
-    height: 2px;
-    margin: 0 4px;
-    margin-top: 2px;
-    border-radius: 50%;
-    background-color: var(--font-color-tertiary);
-}
-
-.artist-page > .artist-content > .section > .section-list > .section-item > .section-info > .container > .artist {
-    display: inline;
-    font-size: 0.725rem;
-    font-weight: 500;
-    color: var(--font-color-tertiary);
-}
-
-.artist-page > .artist-content > .section > .section-list > .section-item > .favorited {
-    padding: 6px;
     color: var(--font-color-tertiary);
 }
 

@@ -16,76 +16,25 @@
     margin-bottom: 6px;
 }
 
-.search-results-page > .search-content > .section > .section-list > .section-item {
+.search-results-page > .search-content > .section.genres > .section-list > .section-item {
     cursor: pointer;
     display: flex;
     align-items: center;
-    padding: 8px;
-    margin: 0 -8px;
+    padding: 10px;
+    margin: 0 -10px;
     border-radius: 8px;
     transition: background-color 0.2s ease-out;
 }
 
-.search-results-page > .search-content > .section > .section-list > .section-item:hover {
+.search-results-page > .search-content > .section.genres > .section-list > .section-item:hover {
     background-color: var(--bg-color-secondary);
-}
-
-.search-results-page > .search-content > .section.genres > .section-list > .section-item {
-    padding: 10px;
-    margin: 0 -10px;
-}
-
-.search-results-page > .search-content > .section > .section-list > .section-item > .thumbnail {
-    display: block;
-    width: 46px;
-    height: 46px;
-    object-fit: cover;
-    border-radius: 6px;
-    margin-right: 12px;
-    background-color: var(--bg-color-secondary);
-}
-
-.search-results-page > .search-content > .section.artists > .section-list > .section-item > .thumbnail {
-    width: 36px;
-    height: 36px;
-    border-radius: 20px;
 }
 
 .search-results-page > .search-content > .section.genres > .section-list > .section-item > .icon {
     margin-right: 8px;
 }
 
-.search-results-page > .search-content > .section > .section-list > .section-item > .section-info {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.search-results-page > .search-content > .section > .section-list > .section-item > .section-info > .name {
+.search-results-page > .search-content > .section.genres > .section-list > .section-item > .section-info > .name {
     font-size: 0.85rem;
     font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.search-results-page > .search-content > .section.artists > .section-list > .section-item > .section-info > .name {
-    margin-bottom: 0;
-}
-
-.search-results-page > .search-content > .section.genres > .section-list > .section-item > .section-info > .name {
-    margin-bottom: 0;
-}
-
-.search-results-page > .search-content > .section > .section-list > .section-item > .section-info > .desc {
-    font-size: 0.725rem;
-    font-weight: 600;
-    color: var(--font-color-tertiary);
-}
-
-.search-results-page > .search-content > .section > .section-list > .section-item > .section-info > .desc.track-amount {
-    font-weight: 500;
-}
-
-.search-results-page > .search-content > .section > .section-list > .section-item > .favorited {
-    padding: 6px;
-    color: var(--font-color-tertiary);
 }

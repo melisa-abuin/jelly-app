@@ -6,7 +6,8 @@ import './Queue.css'
 
 export const Queue = () => {
     const { setPageTitle } = usePageTitle()
-    const { currentTrack, currentPlaylist, currentTrackIndex, playlistTitle } = usePlaybackContext()
+    const { currentTrack, currentPlaylist, currentTrackIndex, playlistTitle, isLoading, loadMore } =
+        usePlaybackContext()
 
     useEffect(() => {
         setPageTitle('Queue')
@@ -22,7 +23,13 @@ export const Queue = () => {
     return (
         <div className="queue-page">
             <div className="queue-header">
-                <MediaList items={[currentTrack]} isLoading={false} type="song" title={'Current Track - Queue'} />
+                <MediaList
+                    items={[currentTrack]}
+                    isLoading={false}
+                    type="song"
+                    title={'Current Track - Queue'}
+                    hidden={{ add_to_queue: true, remove_from_queue: true }}
+                />
             </div>
             {queueTracks.length > 0 && (
                 <>
@@ -32,7 +39,17 @@ export const Queue = () => {
                             From <span className="highlight">{playlistTitle}</span>
                         </span>
                     </div>
-                    <MediaList items={queueTracks} isLoading={false} type="song" title={'Next Up - Queue'} />
+                    <MediaList
+                        items={queueTracks}
+                        playlistItems={currentPlaylist}
+                        indexOffset={currentTrackIndex + 1}
+                        isLoading={isLoading}
+                        type="song"
+                        loadMore={loadMore}
+                        title={'Next Up - Queue'}
+                        hidden={{ add_to_queue: true }}
+                        reviver={'persist'}
+                    />
                 </>
             )}
         </div>

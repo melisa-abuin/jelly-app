@@ -9,6 +9,8 @@ import { Dropdown } from './components/Dropdown'
 import { Main } from './components/Main'
 import './components/MediaList.css'
 import { Sidenav } from './components/Sidenav'
+import { AudioStorageContextProvider } from './context/AudioStorageContext/AudioStorageContextProvider'
+import { DownloadContextProvider } from './context/DownloadContext/DownloadContextProvider'
 import { useDropdownContext } from './context/DropdownContext/DropdownContext'
 import { DropdownContextProvider } from './context/DropdownContext/DropdownContextProvider'
 import { HistoryContextProvider } from './context/HistoryContext/HistoryContextProvider'
@@ -23,7 +25,9 @@ import { useDocumentTitle } from './hooks/useDocumentTitle'
 import { Album } from './pages/Album'
 import { Albums } from './pages/Albums'
 import { Artist } from './pages/Artist'
+import { Artists } from './pages/Artists'
 import { ArtistTracks } from './pages/ArtistTracks'
+import { Downloads } from './pages/Downloads'
 import { Favorites } from './pages/Favorites'
 import { FrequentlyPlayed } from './pages/FrequentlyPlayed'
 import { Genre } from './pages/Genre'
@@ -96,10 +100,16 @@ const RoutedApp = () => {
         const isWindows = /Win/.test(navigator.userAgent)
         const isChromium = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
         const isEdge = /Edg/.test(navigator.userAgent) && /Microsoft Corporation/.test(navigator.vendor)
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream // eslint-disable-line @typescript-eslint/no-explicit-any
+
         if (isWindows && (isChromium || isEdge)) {
             document.getElementsByTagName('html')[0].classList.add('winOS')
         } else {
             document.getElementsByTagName('html')[0].classList.add('otherOS')
+        }
+
+        if (isIOS) {
+            document.getElementsByTagName('html')[0].classList.add('iOS')
         }
     }, [])
 
@@ -112,14 +122,18 @@ const RoutedApp = () => {
                     element={
                         auth ? (
                             <JellyfinContextProvider auth={auth}>
-                                <SidenavContextProvider>
-                                    <PlaybackContextProvider initialVolume={0.5} clearOnLogout={isLoggingOut}>
-                                        <DropdownContextProvider>
-                                            <MainLayout auth={auth} handleLogout={handleLogout} />
-                                            <Dropdown />
-                                        </DropdownContextProvider>
-                                    </PlaybackContextProvider>
-                                </SidenavContextProvider>
+                                <AudioStorageContextProvider>
+                                    <SidenavContextProvider>
+                                        <PlaybackContextProvider initialVolume={0.5} clearOnLogout={isLoggingOut}>
+                                            <DownloadContextProvider>
+                                                <DropdownContextProvider>
+                                                    <MainLayout auth={auth} handleLogout={handleLogout} />
+                                                    <Dropdown />
+                                                </DropdownContextProvider>
+                                            </DownloadContextProvider>
+                                        </PlaybackContextProvider>
+                                    </SidenavContextProvider>
+                                </AudioStorageContextProvider>
                             </JellyfinContextProvider>
                         ) : (
                             <Navigate to="/login" />
@@ -165,7 +179,9 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     return (
         <div className="interface">
             <div
-                className={showSidenav || (isDropdownOpen && isTouchDevice) ? 'dimmer active' : 'dimmer'}
+                className={
+                    showSidenav || (isDropdownOpen && isTouchDevice) ? 'dimmer active noSelect' : 'dimmer noSelect'
+                }
                 onClick={showSidenav ? toggleSidenav : dropdownContext?.closeDropdown}
             />
 
@@ -176,6 +192,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                 <Route path="/tracks" element={<Main content={Tracks} filterType={'mediaItems'} />} />
                 <Route path="/albums" element={<Main content={Albums} filterType={'mediaItems'} />} />
                 <Route path="/album/:albumId" element={<Main content={Album} />} />
+                <Route path="/artists" element={<Main content={Artists} filterType={'mediaItems'} />} />
                 <Route path="/artist/:artistId" element={<Main content={Artist} />} />
                 <Route path="/artist/:artistId/tracks" element={<Main content={ArtistTracks} />} />
                 <Route path="/genre/:genre" element={<Main content={Genre} filterType={'mediaItems'} />} />
@@ -184,6 +201,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                 <Route path="/favorites" element={<Main content={Favorites} filterType={'favorites'} />} />
                 <Route path="/recently" element={<Main content={RecentlyPlayed} />} />
                 <Route path="/frequently" element={<Main content={FrequentlyPlayed} />} />
+                <Route path="/synced" element={<Main content={Downloads} filterType={'favorites'} />} />
                 <Route path="/settings" element={<Main content={memoSettings} />} />
                 <Route path="/search/:query" element={<Main content={SearchResults} />} />
                 <Route path="*" element={<Navigate to="/" />} />

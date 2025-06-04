@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
 import { Loader } from '../components/Loader'
+import { MediaList } from '../components/MediaList'
 import { MoreIcon } from '../components/SvgIcons'
 import { TrackList } from '../components/TrackList'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
@@ -11,15 +12,24 @@ import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinArtistData } from '../hooks/Jellyfin/useJellyfinArtistData'
 import { useJellyfinPlaylistsFeaturingArtist } from '../hooks/Jellyfin/useJellyfinPlaylistsFeaturingArtist'
 import { useFavorites } from '../hooks/useFavorites'
-import { formatDateYear } from '../utils/formatDate'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './Artist.css'
 
 export const Artist = () => {
     const playback = usePlaybackContext()
     const { artistId } = useParams<{ artistId: string }>()
-    const { artist, tracks, albums, appearsInAlbums, totalTrackCount, totalPlaytime, totalPlays, loading, error } =
-        useJellyfinArtistData(artistId!)
+    const {
+        artist,
+        tracks,
+        albums,
+        appearsInAlbums,
+        totalTrackCount,
+        totalPlaytime,
+        totalPlays,
+        totalAlbumCount,
+        loading,
+        error,
+    } = useJellyfinArtistData(artistId!)
     const {
         playlists,
         loading: playlistsLoading,
@@ -79,8 +89,8 @@ export const Artist = () => {
                         </div>
                         <div className="divider"></div>
                         <div className="album-amount">
-                            <span className="number">{albums.length}</span>{' '}
-                            <span>{albums.length === 1 ? 'Album' : 'Albums'}</span>
+                            <span className="number">{totalAlbumCount}</span>{' '}
+                            <span>{totalAlbumCount === 1 ? 'Album' : 'Albums'}</span>
                         </div>
                         <div className="divider"></div>
                         <div className="length">
@@ -161,22 +171,14 @@ export const Artist = () => {
                     <div className="section albums">
                         <div className="title">Albums</div>
                         <div className="desc">Complete discography</div>
-                        <div className="section-list noSelect">
-                            {albums.map(album => (
-                                <Link to={`/album/${album.Id}`} key={album.Id} className="section-item">
-                                    <JellyImg item={album} type={'Primary'} width={46} height={46} />
-                                    <div className="section-info">
-                                        <div className="name">{album.Name}</div>
-                                        <div className="date">{formatDateYear(album.PremiereDate)}</div>
-                                    </div>
-                                    {album.UserData?.IsFavorite && (
-                                        <div className="favorited" title="Favorited">
-                                            <HeartFillIcon size={16} />
-                                        </div>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
+                        <MediaList
+                            items={albums}
+                            isLoading={loading}
+                            type="album"
+                            albumDisplayMode="year"
+                            title={artist.Name ? `${artist.Name} Albums` : 'Albums'}
+                            hidden={{ view_album: true, view_artist: true }}
+                        />
                     </div>
                 )}
 
@@ -184,26 +186,14 @@ export const Artist = () => {
                     <div className="section appears-in">
                         <div className="title">Appears In</div>
                         <div className="desc">Additional recordings</div>
-                        <div className="section-list noSelect">
-                            {appearsInAlbums.map(album => (
-                                <Link to={`/album/${album.Id}`} key={album.Id} className="section-item">
-                                    <JellyImg item={album} type={'Primary'} width={46} height={46} />
-                                    <div className="section-info">
-                                        <div className="name">{album.Name}</div>
-                                        <div className="container">
-                                            <div className="year">{formatDateYear(album.PremiereDate)}</div>
-                                            <div className="divider" />
-                                            <div className="artist">{album.AlbumArtist || 'Various Artists'}</div>
-                                        </div>
-                                    </div>
-                                    {album.UserData?.IsFavorite && (
-                                        <div className="favorited" title="Favorited">
-                                            <HeartFillIcon size={16} />
-                                        </div>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
+                        <MediaList
+                            items={appearsInAlbums}
+                            isLoading={loading}
+                            type="album"
+                            albumDisplayMode="both"
+                            title={artist.Name ? `${artist.Name} Albums` : 'Albums'}
+                            hidden={{ view_album: true }}
+                        />
                     </div>
                 )}
 
@@ -215,29 +205,13 @@ export const Artist = () => {
                             <>
                                 <div className="title">Playlists</div>
                                 <div className="desc">Included in curated collections</div>
-                                <div className="section-list noSelect">
-                                    {playlists.map(playlist => (
-                                        <Link
-                                            to={`/playlist/${playlist.Id}`}
-                                            key={playlist.Id}
-                                            className="section-item"
-                                        >
-                                            <JellyImg item={playlist} type={'Primary'} width={46} height={46} />
-                                            <div className="section-info">
-                                                <div className="name">{playlist.Name}</div>
-                                                <div className="track-amount">
-                                                    <span className="number">{playlist.ChildCount || 0}</span>{' '}
-                                                    <span>{(playlist.ChildCount || 0) === 1 ? 'Track' : 'Tracks'}</span>
-                                                </div>
-                                            </div>
-                                            {playlist.UserData?.IsFavorite && (
-                                                <div className="favorited" title="Favorited">
-                                                    <HeartFillIcon size={16} />
-                                                </div>
-                                            )}
-                                        </Link>
-                                    ))}
-                                </div>
+                                <MediaList
+                                    items={playlists}
+                                    isLoading={playlistsLoading}
+                                    type="playlist"
+                                    title={artist.Name ? `${artist.Name} Playlists` : 'Playlists'}
+                                    // hidden={{ view_album: true }}
+                                />
                             </>
                         )}
                         {playlistsError && !playlistsLoading && <div className="error">{playlistsError}</div>}

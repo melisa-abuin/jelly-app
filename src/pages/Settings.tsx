@@ -1,14 +1,19 @@
 import { CheckCircleFillIcon } from '@primer/octicons-react'
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
+import { useDownloadContext } from '../context/DownloadContext/DownloadContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useThemeContext } from '../context/ThemeContext/ThemeContext'
+import { formatFileSize } from '../utils/formatFileSize'
 import './Settings.css'
 
 export const Settings = ({ onLogout }: { onLogout: () => void }) => {
     const navigate = useNavigate()
     const api = useJellyfinContext()
+    const audioStorage = useAudioStorageContext()
 
     const { theme, toggleTheme } = useThemeContext()
 
@@ -17,6 +22,10 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
     const [latency, setLatency] = useState<number | null>(null)
     const { sessionPlayCount, resetSessionCount, bitrate, setBitrate } = usePlaybackContext()
     const playback = usePlaybackContext()
+    const queryClient = useQueryClient()
+    const { storageStats, refreshStorageStats, queueCount, clearQueue } = useDownloadContext()
+
+    const [clearing, setClearing] = useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -62,6 +71,24 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
         navigate('/login')
     }
 
+    const handleClearAll = useCallback(async () => {
+        if (!confirm('Are you sure you want to clear all downloads? This cannot be undone.')) {
+            return
+        }
+
+        try {
+            setClearing(true)
+            await audioStorage.clearAllDownloads()
+            queryClient.clear()
+            clearQueue()
+            await refreshStorageStats()
+        } catch (error) {
+            console.error('Failed to clear downloads:', error)
+        } finally {
+            setClearing(false)
+        }
+    }, [audioStorage, clearQueue, queryClient, refreshStorageStats])
+
     return (
         <div className="settings-page">
             <div className="section appearance">
@@ -95,10 +122,11 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 <div className="inner">
                     <div className="container">
                         <div className="info">
-                            <div className="subtitle">Streaming Quality</div>
+                            <div className="subtitle">Streaming & Offline Sync</div>
                             <div className="subdesc">
                                 Adjusting audio quality enables server-side transcoding, converting to a compatible
-                                format with a lower bitrate for potentially smoother playback and reduced bandwidth
+                                format with a lower bitrate for smoother streaming or efficient offline syncing with
+                                reduced bandwidth and storage
                             </div>
                         </div>
                         <div className="options noSelect">
@@ -293,6 +321,42 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 </div>
                 */}
             </div>
+            <div className="section offline-sync">
+                <div className="container">
+                    <div className="title">Offline Sync</div>
+                    <div className="desc">
+                        Synced Music - {storageStats.trackCount} Track{storageStats.trackCount === 1 ? '' : 's'}
+                        {queueCount > 0 ? (
+                            <>
+                                {' '}
+                                ({queueCount} track{queueCount === 1 ? '' : 's'} in queue)
+                            </>
+                        ) : (
+                            ''
+                        )}{' '}
+                        / {formatFileSize(storageStats.trackCount === 0 ? 0 : storageStats?.indexedDB || 0)} Used
+                    </div>
+                </div>
+                <div className="options noSelect">
+                    <div className="option">
+                        {(storageStats.trackCount > 0 || queueCount > 0) && (
+                            <button className="btn clear" onClick={handleClearAll} disabled={clearing}>
+                                {clearing ? 'Clearing...' : 'Clear All'}
+                            </button>
+                        )}
+                    </div>
+                </div>
+                <div className="desc">
+                    <p>
+                        Cache your music library for seamless offline playback, with new tracks auto-syncing to saved
+                        playlists, albums, or artists. Browse your{' '}
+                        <Link to="/synced" className="textlink">
+                            synced music library
+                        </Link>{' '}
+                        with ease
+                    </p>
+                </div>
+            </div>
             <div className="section about">
                 <div className="title">About</div>
                 <div className="desc">
@@ -345,7 +409,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                     </p>
                 </div>
                 <div className="actions noSelect">
-                    <button onClick={handleLogout} className="logout-button">
+                    <button onClick={handleLogout} className="btn logout">
                         Logout
                     </button>
                 </div>
