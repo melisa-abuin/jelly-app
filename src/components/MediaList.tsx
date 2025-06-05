@@ -1,5 +1,5 @@
 import { HeartFillIcon } from '@primer/octicons-react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
@@ -40,7 +40,6 @@ export const MediaList = ({
 }) => {
     const playback = usePlaybackContext()
     const navigate = useNavigate()
-    const location = useLocation()
     const { displayItems, setRowRefs } = useDisplayItems(items, isLoading)
 
     const hidden: IMenuItems = disableActions
@@ -137,34 +136,8 @@ export const MediaList = ({
                             )}
                         </div>
                     </div>
-                    <div className="media-indicators">
-                        {item.offlineState && (
-                            <div className="download-state">
-                                {item.offlineState === 'downloading' && (
-                                    <div className="icon downloading" title="Syncing...">
-                                        <DownloadingIcon width={16} height={16} />
-                                    </div>
-                                )}
 
-                                {item.offlineState === 'downloaded' && (
-                                    <div className="icon downloaded" title="Synced">
-                                        <DownloadedIcon width={16} height={16} />
-                                    </div>
-                                )}
-
-                                {item.offlineState === 'deleting' && (
-                                    <div className="icon deleting" title="Unsyncing...">
-                                        <DeletingIcon width={16} height={16} />
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {!disableActions && item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
-                            <div className="favorited" title="Favorited">
-                                <HeartFillIcon size={16} />
-                            </div>
-                        )}
-                    </div>
+                    <MediaIndicators item={item} disableActions={disableActions} />
                 </div>
             )
         } else if (type === 'artist') {
@@ -185,32 +158,8 @@ export const MediaList = ({
                     <div className="media-details">
                         <div className="song-name">{item.Name || 'Unknown Artist'}</div>
                     </div>
-                    <div className="media-indicators">
-                        {item.offlineState && (
-                            <div className="download-state">
-                                {item.offlineState === 'downloading' && (
-                                    <div className="icon downloading" title="Syncing...">
-                                        <DownloadingIcon width={16} height={16} />
-                                    </div>
-                                )}
-                                {item.offlineState === 'downloaded' && (
-                                    <div className="icon downloaded" title="Synced">
-                                        <DownloadedIcon width={16} height={16} />
-                                    </div>
-                                )}
-                                {item.offlineState === 'deleting' && (
-                                    <div className="icon deleting" title="Unsyncing...">
-                                        <DeletingIcon width={16} height={16} />
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {!disableActions && item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
-                            <div className="favorited" title="Favorited">
-                                <HeartFillIcon size={16} />
-                            </div>
-                        )}
-                    </div>
+
+                    <MediaIndicators item={item} disableActions={disableActions} />
                 </div>
             )
         } else if (type === 'playlist') {
@@ -237,38 +186,13 @@ export const MediaList = ({
                             </div>
                         </div>
                     </div>
-                    <div className="media-indicators">
-                        {item.offlineState && (
-                            <div className="download-state">
-                                {item.offlineState === 'downloading' && (
-                                    <div className="icon downloading" title="Syncing...">
-                                        <DownloadingIcon width={16} height={16} />
-                                    </div>
-                                )}
-                                {item.offlineState === 'downloaded' && (
-                                    <div className="icon downloaded" title="Synced">
-                                        <DownloadedIcon width={16} height={16} />
-                                    </div>
-                                )}
 
-                                {item.offlineState === 'deleting' && (
-                                    <div className="icon deleting" title="Unsyncing...">
-                                        <DeletingIcon width={16} height={16} />
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {!disableActions && item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
-                            <div className="favorited" title="Favorited">
-                                <HeartFillIcon size={16} />
-                            </div>
-                        )}
-                    </div>
+                    <MediaIndicators item={item} disableActions={disableActions} />
                 </div>
             )
         } else {
             return (
-                <li
+                <div
                     className={`media-item song-item ${itemClass}`}
                     onClick={() => handleSongClick(item, index)}
                     key={item.Id}
@@ -301,41 +225,13 @@ export const MediaList = ({
                             <div className="artist">
                                 {item.Artists && item.Artists.length > 0 ? item.Artists.join(', ') : 'Unknown Artist'}
                             </div>
-                            <>
-                                <div className="divider"></div>
-                                <div className="album">{item.Album || 'Unknown Album'}</div>
-                            </>
+                            <div className="divider"></div>
+                            <div className="album">{item.Album || 'Unknown Album'}</div>
                         </div>
                     </div>
-                    <div className="media-indicators">
-                        {item.offlineState && (
-                            <div className="download-state">
-                                {item.offlineState === 'downloading' && (
-                                    <div className="icon downloading" title="Syncing...">
-                                        <DownloadingIcon width={16} height={16} />
-                                    </div>
-                                )}
 
-                                {item.offlineState === 'downloaded' && (
-                                    <div className="icon downloaded" title="Synced">
-                                        <DownloadedIcon width={16} height={16} />
-                                    </div>
-                                )}
-
-                                {item.offlineState === 'deleting' && (
-                                    <div className="icon deleting" title="Unsyncing...">
-                                        <DeletingIcon width={16} height={16} />
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {!disableActions && item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
-                            <div className="favorited" title="Favorited">
-                                <HeartFillIcon size={16} />
-                            </div>
-                        )}
-                    </div>
-                </li>
+                    <MediaIndicators item={item} disableActions={disableActions} />
+                </div>
             )
         }
     }
@@ -368,5 +264,39 @@ export const MediaList = ({
                 overscan={800}
             />
         </ul>
+    )
+}
+
+const MediaIndicators = ({ item, disableActions }: { item: MediaItem; disableActions: boolean }) => {
+    return (
+        <div className="media-indicators">
+            {item.offlineState && (
+                <div className="download-state">
+                    {item.offlineState === 'downloading' && (
+                        <div className="icon downloading" title="Syncing...">
+                            <DownloadingIcon width={16} height={16} />
+                        </div>
+                    )}
+
+                    {item.offlineState === 'downloaded' && (
+                        <div className="icon downloaded" title="Synced">
+                            <DownloadedIcon width={16} height={16} />
+                        </div>
+                    )}
+
+                    {item.offlineState === 'deleting' && (
+                        <div className="icon deleting" title="Unsyncing...">
+                            <DeletingIcon width={16} height={16} />
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {!disableActions && item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
+                <div className="favorited" title="Favorited">
+                    <HeartFillIcon size={16} />
+                </div>
+            )}
+        </div>
     )
 }

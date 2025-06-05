@@ -78,39 +78,37 @@ export const MainContent = ({
                 </div>
                 <div className="secondary noSelect">
                     {filterType === 'mediaItems' && (
-                        <>
-                            <div className="sorting">
-                                <div className="filter">
-                                    <select
-                                        onChange={e => setFilter(c => ({ ...c, sort: e.target.value }))}
-                                        value={filter.sort}
-                                    >
-                                        <option value="Added">Added</option>
-                                        <option value="Released">Released</option>
-                                        <option value="Runtime">Runtime</option>
-                                        <option value="Random">Random</option>
-                                        <option value="Name">Name</option>
-                                    </select>
-                                    <div className="icon">
-                                        <ChevronDownIcon size={12} />
-                                    </div>
-                                </div>
-                                <div
-                                    className="sort"
-                                    onClick={() => {
-                                        setFilter(c => ({
-                                            ...c,
-                                            order: c.order === 'Ascending' ? 'Descending' : 'Ascending',
-                                        }))
-                                    }}
-                                    title={filter.order === 'Ascending' ? 'Ascending' : 'Descending'}
+                        <div className="sorting">
+                            <div className="filter">
+                                <select
+                                    onChange={e => setFilter(c => ({ ...c, sort: e.target.value }))}
+                                    value={filter.sort}
                                 >
-                                    <div className={'icon' + (filter.order === 'Ascending' ? ' active' : '')}>
-                                        <SortingIcon width={12} height={12} />
-                                    </div>
+                                    <option value="Added">Added</option>
+                                    <option value="Released">Released</option>
+                                    <option value="Runtime">Runtime</option>
+                                    <option value="Random">Random</option>
+                                    <option value="Name">Name</option>
+                                </select>
+                                <div className="icon">
+                                    <ChevronDownIcon size={12} />
                                 </div>
                             </div>
-                        </>
+                            <div
+                                className="sort"
+                                onClick={() => {
+                                    setFilter(c => ({
+                                        ...c,
+                                        order: c.order === 'Ascending' ? 'Descending' : 'Ascending',
+                                    }))
+                                }}
+                                title={filter.order === 'Ascending' ? 'Ascending' : 'Descending'}
+                            >
+                                <div className={'icon' + (filter.order === 'Ascending' ? ' active' : '')}>
+                                    <SortingIcon width={12} height={12} />
+                                </div>
+                            </div>
+                        </div>
                     )}
 
                     {filterType === 'favorites' && (

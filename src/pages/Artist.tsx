@@ -71,16 +71,14 @@ export const Artist = () => {
                 <div className="artist-details">
                     <div className="artist">{artist.Name}</div>
                     {genres.length > 0 && (
-                        <>
-                            <div className="genres">
-                                {genres.slice(0, 6).map((genre, index) => (
-                                    <span key={genre}>
-                                        <Link to={`/genre/${encodeURIComponent(genre)}`}>{genre}</Link>
-                                        {index < genres.slice(0, 6).length - 1 && ', '}
-                                    </span>
-                                ))}
-                            </div>
-                        </>
+                        <div className="genres">
+                            {genres.slice(0, 6).map((genre, index) => (
+                                <span key={genre}>
+                                    <Link to={`/genre/${encodeURIComponent(genre)}`}>{genre}</Link>
+                                    {index < genres.slice(0, 6).length - 1 && ', '}
+                                </span>
+                            ))}
+                        </div>
                     )}
                     <div className="stats">
                         <div className="track-amount">
