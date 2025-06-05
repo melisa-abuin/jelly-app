@@ -576,7 +576,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             },
             { signal: AbortSignal.timeout(20000) }
         )
-        const playlists = playlistsResponse.data.Items
+        const playlists = await parseItemDtos(playlistsResponse.data.Items)
 
         const playlistsWithArtist: MediaItem[] = []
         const batchSize = 5
