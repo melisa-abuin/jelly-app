@@ -702,6 +702,8 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 userId,
                 parentId: playlistId,
                 includeItemTypes: [BaseItemKind.Audio],
+                sortBy: [ItemSortBy.DateCreated],
+                sortOrder: [SortOrder.Descending],
                 recursive: true,
                 limit: maxLimit,
             },
