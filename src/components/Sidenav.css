@@ -769,6 +769,10 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     margin-right: -6px;
 }
 
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon > svg {
+    fill: var(--font-color);
+}
+
 /* Responsive */
 @media only screen and (max-width: 700px) {
     .sidenav {

@@ -299,3 +299,7 @@
     font-weight: 500;
     color: var(--font-color-secondary);
 }
+
+.settings-page > .section > .container > .desc > .number {
+    font-variant-numeric: tabular-nums;
+}

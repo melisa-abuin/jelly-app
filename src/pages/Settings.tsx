@@ -325,16 +325,22 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 <div className="container">
                     <div className="title">Offline Sync</div>
                     <div className="desc">
-                        Synced Music - {storageStats.trackCount} Track{storageStats.trackCount === 1 ? '' : 's'}
+                        Synced Music - <span className="number">{storageStats.trackCount}</span> Track
+                        {storageStats.trackCount === 1 ? '' : 's'}
                         {queueCount > 0 ? (
                             <>
                                 {' '}
-                                ({queueCount} track{queueCount === 1 ? '' : 's'} in queue)
+                                (<span className="number">{queueCount}</span> track{queueCount === 1 ? '' : 's'} in
+                                queue)
                             </>
                         ) : (
                             ''
                         )}{' '}
-                        / {formatFileSize(storageStats.trackCount === 0 ? 0 : storageStats?.indexedDB || 0)} Used
+                        /{' '}
+                        <span className="number">
+                            {formatFileSize(storageStats.trackCount === 0 ? 0 : storageStats?.indexedDB || 0)}
+                        </span>{' '}
+                        Used
                     </div>
                 </div>
                 <div className="options noSelect">
