@@ -48,7 +48,7 @@ export const Queue = () => {
                         loadMore={loadMore}
                         title={'Next Up - Queue'}
                         hidden={{ add_to_queue: true }}
-                        reviver={'persist'}
+                        reviver={'persistAll'}
                     />
                 </>
             )}

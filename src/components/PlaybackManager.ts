@@ -87,26 +87,32 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const { items, hasNextPage, loadMore, isLoading } = useJellyfinInfiniteData(reviverFn)
 
     const setCurrentPlaylist = useCallback(
-        (props: { playlist: MediaItem[]; title: string; reviver?: IReviver | 'persist' }) => {
+        (props: { playlist: MediaItem[]; title: string; reviver?: IReviver | 'persistAll' | 'persistReviver' }) => {
             if (shuffle) {
                 setShuffle(false)
             }
 
-            if (props.reviver !== 'persist') {
-                localStorage.setItem('reviver', JSON.stringify(props.reviver || {}))
+            if (props.reviver !== 'persistAll') {
+                const queryKey =
+                    props.reviver === 'persistReviver'
+                        ? reviverFn.queryKey
+                        : ['reviver', ...(props.reviver?.queryKey || [])]
 
-                queryClient.setQueryData(['reviver', ...(props.reviver?.queryKey || [])], {
+                queryClient.setQueryData(queryKey, {
                     pageParams: [1],
                     pages: [props.playlist],
                 } satisfies InfiniteData<MediaItem[], unknown>)
 
-                setReviver(props.reviver || ({} as IReviver))
+                if (props.reviver !== 'persistReviver') {
+                    localStorage.setItem('reviver', JSON.stringify(props.reviver || {}))
+                    setReviver(props.reviver || ({} as IReviver))
+                }
             }
 
             localStorage.setItem('playlistTitle', props.title)
             setPlaylistTitle(props.title)
         },
-        [queryClient, shuffle]
+        [queryClient, reviverFn.queryKey, shuffle]
     )
 
     const abortControllerRef = useRef<AbortController | null>(null)

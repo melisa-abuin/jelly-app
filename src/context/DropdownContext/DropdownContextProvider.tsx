@@ -312,7 +312,7 @@ const useInitialState = () => {
                 ...playlist.slice(insertionPoint),
             ]
 
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
+            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue', reviver: 'persistReviver' })
 
             if (playback.currentTrackIndex === -1) {
                 playback.playTrack(0)
@@ -327,7 +327,7 @@ const useInitialState = () => {
         async (item: MediaItem) => {
             const playlist = playback.currentPlaylist
             const newPlaylist = [...playlist, ...(await expandItems(item))]
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
+            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue', reviver: 'persistReviver' })
 
             if (playback.currentTrackIndex === -1) {
                 playback.playTrack(0)

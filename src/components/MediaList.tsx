@@ -32,7 +32,7 @@ export const MediaList = ({
     isLoading: boolean
     type: 'song' | 'album' | 'artist' | 'playlist'
     title: string
-    reviver?: IReviver | 'persist'
+    reviver?: IReviver | 'persistAll'
     loadMore?: () => void
     hidden?: IMenuItems
     disableActions?: boolean
