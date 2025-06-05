@@ -11,6 +11,7 @@ enum SortState {
     Released = 'Released',
     Runtime = 'Runtime',
     Random = 'Random',
+    Name = 'Name',
     Artists = 'Artists',
     Albums = 'Albums',
     None = '',
@@ -119,6 +120,9 @@ const useInitialState = () => {
                 break
             case SortState.Random:
                 newSortBy = [ItemSortBy.Random]
+                break
+            case SortState.Name:
+                newSortBy = [ItemSortBy.Name]
                 break
             default:
                 newSortBy = [ItemSortBy.DateCreated]

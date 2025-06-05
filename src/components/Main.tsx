@@ -89,6 +89,7 @@ export const MainContent = ({
                                         <option value="Released">Released</option>
                                         <option value="Runtime">Runtime</option>
                                         <option value="Random">Random</option>
+                                        <option value="Name">Name</option>
                                     </select>
                                     <div className="icon">
                                         <ChevronDownIcon size={12} />
