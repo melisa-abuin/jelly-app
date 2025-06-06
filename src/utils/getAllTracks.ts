@@ -7,12 +7,18 @@ export const getAllTracks = (data: InfiniteData<MediaItem[], unknown> | undefine
     }
 
     const flattened = data.pages
-        .map((page, pageIndex) =>
-            page.map(track => ({
+        .map((page, pageIndex) => {
+            if (!page) {
+                console.warn('getAllTracks: Page is undefined or null', data)
+                console.trace()
+                return []
+            }
+
+            return page.map(track => ({
                 ...track,
                 pageIndex,
             }))
-        )
+        })
         .flat()
 
     if (allowDuplicates) {
