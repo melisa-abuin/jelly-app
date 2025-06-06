@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import './App.css'
 import { Dropdown } from './components/Dropdown'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { Main } from './components/Main'
 import './components/MediaList.css'
 import { Sidenav } from './components/Sidenav'
@@ -54,7 +55,7 @@ const persister = createSyncStoragePersister({
 
 export const App = () => {
     return (
-        <>
+        <ErrorBoundary>
             {window.__NPM_LIFECYCLE_EVENT__ === 'dev:nocache' ? (
                 <QueryClientProvider client={queryClient}>
                     <RoutedApp />
@@ -64,7 +65,7 @@ export const App = () => {
                     <RoutedApp />
                 </PersistQueryClientProvider>
             )}
-        </>
+        </ErrorBoundary>
     )
 }
 

@@ -1,0 +1,85 @@
+.error-boundary-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    padding: 1rem;
+}
+
+.error-boundary-card {
+    background: #fff;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.error-boundary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.15);
+}
+
+.error-boundary-title {
+    font-size: 1.5rem;
+    color: #dc2626;
+    margin-bottom: 1rem;
+}
+
+.error-boundary-text {
+    color: #374151;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.error-boundary-link {
+    color: #3b82f6;
+    text-decoration: underline;
+}
+
+.error-boundary-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.error-boundary-buttons .btn-details,
+.error-boundary-buttons .btn-reload {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+}
+
+.error-boundary-buttons .btn-details {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.error-boundary-buttons .btn-details:hover {
+    background: #fecaca;
+}
+
+.error-boundary-buttons .btn-reload {
+    background: #2563eb;
+    color: #fff;
+}
+
+.error-boundary-buttons .btn-reload:hover {
+    background: #1e40af;
+}
+
+.error-boundary-details {
+    margin-top: 1.5rem;
+    background: #f3f4f6;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.75rem;
+    color: #1f2937;
+    max-height: 200px;
+    overflow: auto;
+}
