@@ -49,6 +49,7 @@ export const Queue = () => {
                         title={'Next Up - Queue'}
                         hidden={{ add_to_queue: true }}
                         reviver={'persistAll'}
+                        isDraggable={true}
                     />
                 </>
             )}

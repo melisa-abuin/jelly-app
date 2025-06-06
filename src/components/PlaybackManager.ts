@@ -115,6 +115,20 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         [queryClient, reviverFn.queryKey, shuffle]
     )
 
+    const moveItemInPlaylist = useCallback(
+        (oldIndex: number, newIndex: number) => {
+            const newItems = [...items]
+            const [movedItem] = newItems.splice(oldIndex, 1)
+            newItems.splice(newIndex, 0, movedItem)
+            setCurrentPlaylist({
+                playlist: newItems,
+                title: playlistTitle,
+                reviver: 'persistReviver',
+            })
+        },
+        [items, setCurrentPlaylist, playlistTitle]
+    )
+
     const abortControllerRef = useRef<AbortController | null>(null)
 
     const [userInteracted, setUserInteracted] = useState(false)
@@ -766,6 +780,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         toggleRepeat,
         currentPlaylist: items,
         setCurrentPlaylist,
+        moveItemInPlaylist,
         loadMore,
         sessionPlayCount,
         resetSessionCount,

@@ -1,4 +1,18 @@
+import {
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    DragOverlay,
+    DragStartEvent,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { HeartFillIcon } from '@primer/octicons-react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
@@ -25,6 +39,7 @@ export const MediaList = ({
     hidden: _hidden = {},
     disableActions = false,
     albumDisplayMode = 'artist',
+    isDraggable,
 }: {
     items: MediaItem[] | undefined
     playlistItems?: MediaItem[]
@@ -37,6 +52,7 @@ export const MediaList = ({
     hidden?: IMenuItems
     disableActions?: boolean
     albumDisplayMode?: 'artist' | 'year' | 'both'
+    isDraggable?: boolean
 }) => {
     const playback = usePlaybackContext()
     const navigate = useNavigate()
@@ -53,6 +69,36 @@ export const MediaList = ({
         : _hidden
 
     const dropdown = useDropdownContext()
+
+    const [activeId, setActiveId] = useState<string | null>(null)
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event
+
+        if (over && active.id !== over.id) {
+            const oldIndex = items.findIndex(i => i.Id === active.id)
+            const newIndex = items.findIndex(i => i.Id === over.id)
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const globalOldIndex = indexOffset + oldIndex
+                const globalNewIndex = indexOffset + newIndex
+                playback.moveItemInPlaylist(globalOldIndex, globalNewIndex)
+
+                // Force update the display items
+                const updated = Array.from(items)
+                const [moved] = updated.splice(oldIndex, 1)
+                updated.splice(newIndex, 0, moved)
+                displayItems.length = 0
+                displayItems.push(...updated)
+            }
+        }
+
+        setActiveId(null)
+    }
+
+    const handleDragStart = ({ active }: DragStartEvent) => {
+        setActiveId(active.id as string)
+    }
 
     const handleSongClick = (item: MediaItem, index: number) => {
         if (type === 'song') {
@@ -256,14 +302,101 @@ export const MediaList = ({
 
     return (
         <ul className="media-list noSelect">
-            <Virtuoso
-                data={displayItems}
-                useWindowScroll
-                itemContent={renderItem}
-                endReached={loadMore}
-                overscan={800}
-            />
+            {isDraggable && (
+                <DraggableVirtuoso
+                    handleDragStart={handleDragStart}
+                    handleDragEnd={handleDragEnd}
+                    items={items}
+                    renderItem={renderItem}
+                    activeId={activeId}
+                >
+                    <Virtuoso
+                        data={displayItems}
+                        useWindowScroll
+                        itemContent={(index, item) => {
+                            if ('isPlaceholder' in item) {
+                                return renderItem(index, item)
+                            }
+
+                            return (
+                                <SortableItem key={item.Id} id={item.Id}>
+                                    {renderItem(index, item)}
+                                </SortableItem>
+                            )
+                        }}
+                        endReached={loadMore}
+                        overscan={800}
+                    />
+                </DraggableVirtuoso>
+            )}
+
+            {!isDraggable && (
+                <Virtuoso
+                    data={displayItems}
+                    useWindowScroll
+                    itemContent={renderItem}
+                    endReached={loadMore}
+                    overscan={800}
+                />
+            )}
         </ul>
+    )
+}
+
+const DraggableVirtuoso = ({
+    handleDragStart,
+    handleDragEnd,
+    items,
+    renderItem,
+    activeId,
+    children,
+}: {
+    handleDragStart: (event: DragStartEvent) => void
+    handleDragEnd: (event: DragEndEvent) => void
+    items: MediaItem[]
+    renderItem: (index: number, item: MediaItem | { isPlaceholder: true }) => React.ReactNode
+    activeId: string | null
+    children: React.ReactNode
+}) => {
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
+
+    return (
+        <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis]}
+        >
+            <SortableContext items={items.map(i => i.Id)} strategy={verticalListSortingStrategy}>
+                {children}
+            </SortableContext>
+            <DragOverlay>
+                {activeId
+                    ? renderItem(
+                          items.findIndex(i => i.Id === activeId),
+                          items.find(i => i.Id === activeId)!
+                      )
+                    : null}
+            </DragOverlay>
+        </DndContext>
+    )
+}
+
+const SortableItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition: isDragging ? 'none' : transition,
+        zIndex: isDragging ? 999 : undefined,
+        opacity: isDragging ? 0 : 1,
+    }
+
+    return (
+        <li ref={setNodeRef} className={isDragging ? 'active' : ''} style={style} {...attributes} {...listeners}>
+            {children}
+        </li>
     )
 }
 
