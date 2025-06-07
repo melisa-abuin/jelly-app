@@ -65,7 +65,8 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
     }, [api])
 
     const handleLogout = () => {
-        playback.audioRef.current?.pause()
+        playback.audioRef.current.pause()
+        playback.crossfadeRef.current.pause()
         resetSessionCount()
         onLogout()
         navigate('/login')
