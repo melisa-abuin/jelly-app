@@ -14,6 +14,8 @@ const useInitialState = () => {
     const STORE_NAME = 'tracks'
     const DB_VERSION = 3
 
+    const isInitialized = useRef(false)
+
     const dbRef = useRef(
         new Promise<IDBDatabase>((resolve, reject) => {
             const request = indexedDB.open(DB_NAME, DB_VERSION)
@@ -40,6 +42,7 @@ const useInitialState = () => {
             }
 
             request.onsuccess = () => {
+                isInitialized.current = true
                 resolve(request.result)
             }
 
@@ -230,6 +233,7 @@ const useInitialState = () => {
         getTrackCount,
         clearAllDownloads,
         getPageFromIndexedDb,
+        isInitialized: () => isInitialized.current,
     }
 
     // We need the audioStorage in jellyfin API but we don't want to cause unnecessary re-renders since opening the IndexedDB shouldn't take long

@@ -346,7 +346,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 </div>
                 <div className="options noSelect">
                     <div className="option">
-                        {(storageStats.trackCount > 0 || queueCount > 0) && (
+                        {(storageStats.trackCount > 0 || queueCount > 0 || !audioStorage.isInitialized()) && (
                             <button className="btn clear" onClick={handleClearAll} disabled={clearing}>
                                 {clearing ? 'Clearing...' : 'Clear All'}
                             </button>
