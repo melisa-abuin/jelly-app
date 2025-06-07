@@ -38,6 +38,7 @@ import { RecentlyPlayed } from './pages/RecentlyPlayed'
 import { SearchResults } from './pages/SearchResults'
 import { Settings } from './pages/Settings'
 import { Tracks } from './pages/Tracks'
+import { Lyrics } from './pages/Lyrics'
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -185,6 +186,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
             <Routes>
                 <Route path="/" element={<Main content={Home}></Main>} />
                 <Route path="/tracks" element={<Main content={Tracks} filterType={'mediaItems'} />} />
+                <Route path="/lyrics" element={<Main content={Lyrics} />} />
                 <Route path="/albums" element={<Main content={Albums} filterType={'mediaItems'} />} />
                 <Route path="/album/:albumId" element={<Main content={Album} />} />
                 <Route path="/artists" element={<Main content={Artists} filterType={'mediaItems'} />} />
