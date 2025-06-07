@@ -753,6 +753,14 @@ body.lockscroll {
     margin-bottom: var(--lyrics-border-margin);
 }
 
+.main_lyrics > .scroll-container > .lyrics-display .lyrics-line {
+    cursor: default;
+}
+
+.main_lyrics > .scroll-container > .lyrics-display .lyrics-line:hover {
+    background-color: var(--bg-color-secondary);
+}
+
 .main_lyrics > .scroll-container > .lyrics-display.synced .lyrics-line {
     font-weight: lighter;
 }

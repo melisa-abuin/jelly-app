@@ -358,7 +358,7 @@ const LyricsDisplay = () => {
     useEffect(() => {
         if (!audio || !lyrics) return
 
-        const handleTimeUpdate = () => {
+        const updateCurrentTime = () => {
             if (!audio.duration) {
                 setCurrentTime(null)
                 return
@@ -367,16 +367,12 @@ const LyricsDisplay = () => {
             setCurrentTime(audio?.currentTime || 0)
         }
 
-        const handlePlaying = () => {
-            setCurrentTime(0)
-        }
-
-        audio.addEventListener('timeupdate', handleTimeUpdate)
-        audio.addEventListener('playing', handlePlaying)
+        audio.addEventListener('timeupdate', updateCurrentTime)
+        audio.addEventListener('playing', updateCurrentTime)
 
         return () => {
-            audio.removeEventListener('timeupdate', handleTimeUpdate)
-            audio.removeEventListener('playing', handlePlaying)
+            audio.removeEventListener('timeupdate', updateCurrentTime)
+            audio.removeEventListener('playing', updateCurrentTime)
         }
     }, [audio, lyrics, currentLineIndex])
 
@@ -406,7 +402,8 @@ const LyricsDisplay = () => {
 
     const scrollToActiveLine = useCallback(
         (line: number, behavior: ScrollBehavior = 'smooth') => {
-            if (!lyrics) return
+            if (!lyrics || line < 0) return
+
             const activeEl = lineRefs.current[line]
             if (lyricsContainer.current)
                 lyricsContainer.current.scrollTo({
