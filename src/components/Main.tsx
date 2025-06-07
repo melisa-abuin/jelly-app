@@ -376,6 +376,18 @@ const LyricsDisplay = () => {
         }
     }, [audio, lyrics, currentLineIndex])
 
+    const goToLine = useCallback(
+        (index: number) => {
+            const audio = playback.audioRef.current as HTMLAudioElement | undefined
+
+            if (audio && lyrics && lyrics[index]?.Start) {
+                setCurrentTime(lyrics[index].Start / 10000000)
+                audio.currentTime = lyrics[index].Start / 10000000
+            }
+        },
+        [playback.audioRef, lyrics]
+    )
+
     const lineRefs = useRef<Array<HTMLDivElement | null>>([])
     const displayedLines = useMemo(() => {
         if (!lyrics) lineRefs.current = []
@@ -388,6 +400,7 @@ const LyricsDisplay = () => {
                     ref={el => {
                         lineRefs.current[index] = el
                     }}
+                    onClick={() => goToLine(index)}
                 >
                     {isSynced && playback.lyricsTimestamps ? (
                         <div className="start">{line.Start && tickToTimeString(line.Start)}</div>
@@ -396,7 +409,15 @@ const LyricsDisplay = () => {
                 </div>
             )) || null
         )
-    }, [playback.currentTrack, playback.lyricsTimestamps, playback.centeredLyrics, lyrics, currentLineIndex, isSynced])
+    }, [
+        playback.currentTrack,
+        goToLine,
+        playback.lyricsTimestamps,
+        playback.centeredLyrics,
+        lyrics,
+        currentLineIndex,
+        isSynced,
+    ])
 
     const lyricsContainer = useRef<HTMLDivElement | null>(null)
 

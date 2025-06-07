@@ -679,6 +679,9 @@ body.lockscroll {
     position: sticky;
     z-index: 1;
 
+    font-family: var(--system-fonts);
+    font-family: var(--inter-font);
+
     background-color: var(--bg-color);
 
     top: var(--header-height);
@@ -767,6 +770,14 @@ body.lockscroll {
 
 .main_lyrics > .scroll-container > .lyrics-display.synced .lyrics-line.active {
     font-weight: bold;
+}
+
+.main_lyrics > .scroll-container > .lyrics-display.synced .lyrics-line {
+    cursor: pointer;
+}
+
+.main_lyrics > .scroll-container > .lyrics-display.synced .lyrics-line:active {
+    filter: brightness(0.9);
 }
 
 /* Track details */
