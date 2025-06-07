@@ -717,7 +717,7 @@ body.lockscroll {
 }
 
 .main_lyrics > .scroll-container > .lyrics-display .lyrics-line > .start {
-    font-family: monospace;
+    font-variant-numeric: tabular-nums;
     font-size: 0.9em;
 }
 
@@ -729,6 +729,9 @@ body.lockscroll {
     margin-bottom: var(--lyrics-vertical-margin);
 
     flex: 1;
+}
+
+.main_lyrics > .scroll-container > .lyrics-display .lyrics-line > .text.centered {
     text-align: center;
 }
 

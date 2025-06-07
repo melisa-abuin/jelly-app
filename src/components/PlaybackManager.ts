@@ -25,7 +25,14 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         const saved = localStorage.getItem('sessionPlayCount')
         return saved ? Number(saved) : 0
     })
-    // Whether the lyrics display is enabled
+
+    // Lyrics
+    const [lyricsTimestamps, setLyricsTimestamps] = useState(localStorage.getItem('lyricsTimestamps') === 'on')
+    useEffect(() => localStorage.setItem('lyricsTimestamps', lyricsTimestamps ? 'on' : 'off'), [lyricsTimestamps])
+
+    const [centeredLyrics, setCenteredLyrics] = useState(localStorage.getItem('centeredLyrics') === 'on')
+    useEffect(() => localStorage.setItem('centeredLyrics', centeredLyrics ? 'on' : 'off'), [centeredLyrics])
+
     const [currentTrackIndex, setCurrentTrackIndex] = useState({
         index: localStorage.getItem('currentTrackIndex') ? Number(localStorage.getItem('currentTrackIndex')) : -1,
     })
@@ -764,6 +771,12 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         isPlaying,
         togglePlayPause,
         formatTime,
+        // Lyrics
+        lyricsTimestamps,
+        setLyricsTimestamps,
+        centeredLyrics,
+        setCenteredLyrics,
+
         volume,
         setVolume,
         playTrack: (index: number) => {

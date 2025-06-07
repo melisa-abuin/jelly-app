@@ -382,12 +382,14 @@ const LyricsDisplay = () => {
                         lineRefs.current[index] = el
                     }}
                 >
-                    {isSynced && <div className="start">{line.Start && tickToTimeString(line.Start)}</div>}
-                    <div className="text">{line.Text}</div>
+                    {isSynced && playback.lyricsTimestamps ? (
+                        <div className="start">{line.Start && tickToTimeString(line.Start)}</div>
+                    ) : null}
+                    <div className={'text' + (playback.centeredLyrics ? ' centered' : '')}>{line.Text}</div>
                 </div>
             )) || null
         )
-    }, [playback.currentTrack, lyrics, currentLineIndex, isSynced])
+    }, [playback.currentTrack, playback.lyricsTimestamps, playback.centeredLyrics, lyrics, currentLineIndex, isSynced])
 
     const lyricsContainer = useRef<HTMLDivElement | null>(null)
 
