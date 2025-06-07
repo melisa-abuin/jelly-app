@@ -39,32 +39,37 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
         if (hasError) {
             return (
-                <div className="error-boundary-container">
-                    <div className="error-boundary-card">
-                        <h1 className="error-boundary-title">Oops! Something went wrong.</h1>
-                        <p className="error-boundary-text">
-                            Please reveal the error details below, take a screenshot, and then report it here:{' '}
-                            <a
-                                href="https://github.com/Stannnnn/jelly-app/issues"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="error-boundary-link"
-                            >
-                                Report Issue
-                            </a>
-                        </p>
-                        <div className="error-boundary-buttons">
-                            <button onClick={this.toggleDetails} className="btn-details">
-                                {showDetails ? 'Hide Details' : 'Reveal Error'}
-                            </button>
-                            <button onClick={this.reloadPage} className="btn-reload">
-                                Reload Page
-                            </button>
-                        </div>
-                        {showDetails && error && (
-                            <pre className="error-boundary-details">{error.stack || error.toString()}</pre>
-                        )}
+                <div className="error-page">
+                    <div className="error_header">
+                        <div className="logo"></div>
                     </div>
+                    <div className="error-content">
+                        <div className="container">
+                            <div className="title">Something went wrong</div>
+                            <div className="description">
+                                Please reveal the error details below and report them on our{' '}
+                                <a
+                                    href="https://github.com/Stannnnn/jelly-app/issues"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="textlink"
+                                >
+                                    GitHub page.
+                                </a>{' '}
+                                Consider removing sensitive info (like IP or URL) before sharing.
+                            </div>
+                            <div className="error-actions">
+                                <button onClick={this.toggleDetails} className="btn-details">
+                                    {showDetails ? 'Hide Details' : 'Show Error'}
+                                </button>
+                                <button onClick={this.reloadPage} className="btn-reload">
+                                    Reload Page
+                                </button>
+                            </div>
+                        </div>
+                        {showDetails && error && <pre className="error-details">{error.stack || error.toString()}</pre>}
+                    </div>
+                    <div className="disclaimer">Jelly Music App - Version {__VERSION__}</div>
                 </div>
             )
         }
