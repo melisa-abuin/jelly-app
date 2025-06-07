@@ -313,7 +313,10 @@ const LyricsDisplay = () => {
     }
 
     const lyrics = playback.currentTrackLyrics?.Lyrics
-    const isSynced = useMemo(() => lyrics && lyrics[0].Start, [lyrics])
+    const isSynced = useMemo(() => {
+        if (!lyrics || lyrics[0].Start === null || lyrics[0].Start === undefined) return false
+        return true
+    }, [lyrics])
     const currentLineIndex = useMemo(() => {
         if (!audio || !lyrics) return -1
 
