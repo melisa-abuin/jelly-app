@@ -119,16 +119,26 @@ export const MainContent = ({
     }, [filterType, location, pageTitle, previousPage, setSort, sort, toggleSidenav])
 
     const memoContent = useMemo(() => {
-        return lyricsOpen ? (
-            <div className="main_lyrics">
-                <LyricsDisplay />
-            </div>
-        ) : (
+        return (
             <div className="main_content">
                 <Content />
             </div>
         )
-    }, [Content, lyricsOpen])
+    }, [Content])
+
+    const memoLyrics = useMemo(() => {
+        return (
+            lyricsOpen && (
+                <div className={'main_lyrics' + (lyricsOpen ? '' : ' hidden')}>
+                    <LyricsDisplay />
+                </div>
+            )
+        )
+    }, [lyricsOpen])
+
+    useEffect(() => {
+        document.body.style.overflowY = lyricsOpen ? 'hidden' : 'auto'
+    }, [lyricsOpen])
 
     const memoFooter = useMemo(() => {
         return (
@@ -265,6 +275,7 @@ export const MainContent = ({
     return (
         <main className="main">
             {memoHeader}
+            {memoLyrics}
             {memoContent}
             {memoFooter}
         </main>
