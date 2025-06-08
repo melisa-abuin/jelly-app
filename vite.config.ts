@@ -31,9 +31,10 @@ export default defineConfig({
                         purpose: 'maskable',
                     },
                     {
-                        src: './logo.png',
+                        src: './web-app-manifest-256x256.png',
                         sizes: '256x256',
                         type: 'image/png',
+                        purpose: 'maskable',
                     },
                     {
                         src: './web-app-manifest-512x512.png',
