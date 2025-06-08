@@ -13,7 +13,7 @@ import { ItemFilter } from '@jellyfin/sdk/lib/generated-client/models/item-filte
 import { ItemSortBy } from '@jellyfin/sdk/lib/generated-client/models/item-sort-by'
 import { PlayMethod } from '@jellyfin/sdk/lib/generated-client/models/play-method'
 import { SortOrder } from '@jellyfin/sdk/lib/generated-client/models/sort-order'
-import { syncDownloads, syncDownloadsById } from '../hooks/useDownloads'
+import { syncDownloads, syncDownloadsById } from '../context/DownloadContext/DownloadContext'
 
 export class ApiError extends Error {
     constructor(message: string, public response: Response) {
@@ -42,6 +42,7 @@ export type MediaItem = BaseItemDto & {
     Name: string
     pageIndex?: number
     offlineState?: 'downloading' | 'downloaded' | 'deleting'
+    queueId?: string
 }
 
 export type IJellyfinAuth = Parameters<typeof initJellyfinApi>[0]
@@ -576,7 +577,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             },
             { signal: AbortSignal.timeout(20000) }
         )
-        const playlists = playlistsResponse.data.Items
+        const playlists = await parseItemDtos(playlistsResponse.data.Items)
 
         const playlistsWithArtist: MediaItem[] = []
         const batchSize = 5
@@ -702,6 +703,8 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 userId,
                 parentId: playlistId,
                 includeItemTypes: [BaseItemKind.Audio],
+                sortBy: [ItemSortBy.DateCreated],
+                sortOrder: [SortOrder.Descending],
                 recursive: true,
                 limit: maxLimit,
             },

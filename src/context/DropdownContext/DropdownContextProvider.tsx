@@ -4,9 +4,9 @@ import { Fragment, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, 
 import { useNavigate } from 'react-router-dom'
 import { MediaItem } from '../../api/jellyfin'
 import { useJellyfinPlaylistsList } from '../../hooks/Jellyfin/useJellyfinPlaylistsList'
-import { useDownloads } from '../../hooks/useDownloads'
 import { useFavorites } from '../../hooks/useFavorites'
 import { usePlaylists } from '../../hooks/usePlaylists'
+import { useDownloadContext } from '../DownloadContext/DownloadContext'
 import { useJellyfinContext } from '../JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../ScrollContext/ScrollContext'
@@ -51,7 +51,7 @@ const useInitialState = () => {
     const playback = usePlaybackContext()
     const { playlists } = useJellyfinPlaylistsList()
     const { addToFavorites, removeFromFavorites } = useFavorites()
-    const { addToDownloads, removeFromDownloads } = useDownloads()
+    const { addToDownloads, removeFromDownloads } = useDownloadContext()
     const { addToPlaylist, addItemsToPlaylist, removeFromPlaylist, createPlaylist, deletePlaylist } = usePlaylists()
 
     const subMenuRef = useRef<HTMLDivElement>(null)
@@ -304,9 +304,20 @@ const useInitialState = () => {
 
     const handlePlayNext = useCallback(
         async (item: MediaItem) => {
+            const insertionPoint = (playback.currentTrackIndex ?? -1) + 1
             const playlist = playback.currentPlaylist
-            const newPlaylist = [...playlist, ...(await expandItems(item))]
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
+            const newPlaylist = [
+                ...playlist.slice(0, insertionPoint),
+                ...(await expandItems(item)),
+                ...playlist.slice(insertionPoint),
+            ]
+
+            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue', reviver: 'persistReviver' })
+
+            if (playback.currentTrackIndex === -1) {
+                playback.playTrack(0)
+            }
+
             closeDropdown()
         },
         [closeDropdown, expandItems, playback]
@@ -316,7 +327,12 @@ const useInitialState = () => {
         async (item: MediaItem) => {
             const playlist = playback.currentPlaylist
             const newPlaylist = [...playlist, ...(await expandItems(item))]
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
+            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue', reviver: 'persistReviver' })
+
+            if (playback.currentTrackIndex === -1) {
+                playback.playTrack(0)
+            }
+
             closeDropdown()
         },
         [closeDropdown, expandItems, playback]
@@ -363,6 +379,22 @@ const useInitialState = () => {
                     onMouseEnter={closeSubDropdown}
                 >
                     <span>Add to queue</span>
+                </div>
+            ),
+            remove_from_queue: (
+                <div
+                    className="dropdown-item remove-queue has-removable"
+                    onClick={async () => {
+                        closeDropdown()
+
+                        if (context) {
+                            const playlist = playback.currentPlaylist.filter(item => item !== context.item)
+                            playback.setCurrentPlaylist({ playlist, title: 'Direct Queue' })
+                        }
+                    }}
+                    onMouseEnter={closeSubDropdown}
+                >
+                    <span>Remove from queue</span>
                 </div>
             ),
             instant_mix: (
@@ -739,6 +771,15 @@ const useInitialState = () => {
                         node: menuItems.add_to_queue,
                     },
                     {
+                        isVisible:
+                            !!hidden?.add_to_queue &&
+                            !hidden?.remove_from_queue &&
+                            (context?.item.Type === BaseItemKind.Audio ||
+                                context?.item.Type === BaseItemKind.MusicAlbum ||
+                                context?.item.Type === BaseItemKind.MusicArtist),
+                        node: menuItems.remove_from_queue,
+                    },
+                    {
                         isVisible: !hidden?.instant_mix,
                         node: menuItems.instant_mix,
                     },
@@ -845,6 +886,7 @@ const useInitialState = () => {
         hidden?.next,
         hidden?.remove_from_favorite,
         hidden?.remove_from_playlist,
+        hidden?.remove_from_queue,
         hidden?.view_album,
         hidden?.view_artist,
         hidden?.view_artists,
@@ -859,6 +901,7 @@ const useInitialState = () => {
         menuItems.next,
         menuItems.remove_from_favorite,
         menuItems.remove_from_playlist,
+        menuItems.remove_from_queue,
         menuItems.view_album,
         menuItems.view_artist,
         menuItems.view_artists,

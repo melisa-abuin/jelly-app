@@ -11,11 +11,13 @@ export const useJellyfinInfiniteData = ({
     queryFn,
     initialPageParam = 0,
     queryFnReviver,
+    allowDuplicates = false,
 }: {
     queryKey: unknown[]
     queryFn: QueryFunction<MediaItem[], readonly unknown[], unknown>
     initialPageParam?: number
     queryFnReviver: IReviver['queryFn']
+    allowDuplicates?: boolean
 }) => {
     const itemsPerPage = 40
 
@@ -40,8 +42,8 @@ export const useJellyfinInfiniteData = ({
     }, [error])
 
     const allTracks = useMemo(() => {
-        return getAllTracks(data)
-    }, [data])
+        return getAllTracks(data, allowDuplicates)
+    }, [data, allowDuplicates])
 
     const loadMore = useCallback(async () => {
         if (hasNextPage && !isFetchingNextPage) {

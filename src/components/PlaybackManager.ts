@@ -49,8 +49,33 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         const savedRepeat = localStorage.getItem('repeatMode')
         return savedRepeat === 'all' || savedRepeat === 'one' ? savedRepeat : 'off'
     })
-    const audioRef = useRef<HTMLAudioElement>(new Audio())
-    const hlsRef = useRef<Hls | null>(null)
+
+    const crossfade = useRef<'A' | 'B'>('A')
+    const [isCrossfadeActive, setIsCrossfadeActive] = useState(localStorage.getItem('crossfade') === 'true')
+    const [crossfadeDuration, setCrossfadeDuration] = useState(() => {
+        const savedDuration = localStorage.getItem('crossfadeDuration')
+        return savedDuration ? Number(savedDuration) : 1
+    })
+
+    useEffect(() => {
+        localStorage.setItem('crossfade', isCrossfadeActive.toString())
+    }, [isCrossfadeActive])
+
+    useEffect(() => {
+        localStorage.setItem('crossfadeDuration', crossfadeDuration.toString())
+    }, [crossfadeDuration])
+
+    const audioA = useRef(new Audio())
+    const audioB = useRef(new Audio())
+
+    const hlsA = useRef<Hls | null>(null)
+    const hlsB = useRef<Hls | null>(null)
+
+    const audioRef = crossfade.current === 'A' ? audioA : audioB
+    const crossfadeRef = crossfade.current === 'A' ? audioB : audioA
+
+    const hlsRef = crossfade.current === 'A' ? hlsA : hlsB
+
     const shuffledPlaylist = useRef<number[]>([])
     const [currentShuffledIndex, setCurrentShuffledIndex] = useState({ index: -1 })
     const playedIndices = useRef<Set<number>>(new Set())
@@ -89,30 +114,61 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             queryFnReviver: undefined,
             // NOTE; The reviverPageIndex is probably wrong but its not really an issue for now
             initialPageParam: Number(localStorage.getItem('reviverPageIndex')) || 0,
+            allowDuplicates: true,
         } satisfies IJellyfinInfiniteProps
     }, [api, reviver.queryFn, reviver.queryKey])
 
-    const { items, hasNextPage, loadMore, isLoading } = useJellyfinInfiniteData(reviverFn)
+    const queueCounter = useRef(0)
+
+    const addQueueId = useCallback((a: MediaItem) => {
+        a.queueId = `${a.Id}-${Date.now().toString(36)}-${queueCounter.current++}`
+        return a
+    }, [])
+
+    const { items: _items, hasNextPage, loadMore, isLoading } = useJellyfinInfiniteData(reviverFn)
+    const items = useMemo(() => _items.map(addQueueId), [_items, addQueueId])
 
     const setCurrentPlaylist = useCallback(
-        (props: { playlist: MediaItem[]; title: string; reviver?: IReviver }) => {
+        (props: { playlist: MediaItem[]; title: string; reviver?: IReviver | 'persistAll' | 'persistReviver' }) => {
             if (shuffle) {
                 setShuffle(false)
             }
 
-            localStorage.setItem('reviver', JSON.stringify(props.reviver || {}))
+            if (props.reviver !== 'persistAll') {
+                const queryKey =
+                    props.reviver === 'persistReviver'
+                        ? reviverFn.queryKey
+                        : ['reviver', ...(props.reviver?.queryKey || [])]
 
-            queryClient.setQueryData(['reviver', ...(props.reviver?.queryKey || [])], {
-                pageParams: [1],
-                pages: [props.playlist],
-            } satisfies InfiniteData<MediaItem[], unknown>)
+                queryClient.setQueryData(queryKey, {
+                    pageParams: [1],
+                    pages: [props.playlist],
+                } satisfies InfiniteData<MediaItem[], unknown>)
 
-            setReviver(props.reviver || ({} as IReviver))
+                if (props.reviver !== 'persistReviver') {
+                    localStorage.setItem('reviver', JSON.stringify(props.reviver || {}))
+                    setReviver(props.reviver || ({} as IReviver))
+                }
+            }
 
             localStorage.setItem('playlistTitle', props.title)
             setPlaylistTitle(props.title)
         },
-        [queryClient, shuffle]
+        [queryClient, reviverFn.queryKey, shuffle]
+    )
+
+    const moveItemInPlaylist = useCallback(
+        (oldIndex: number, newIndex: number) => {
+            const newItems = [...items]
+            const [movedItem] = newItems.splice(oldIndex, 1)
+            newItems.splice(newIndex, 0, movedItem)
+            setCurrentPlaylist({
+                playlist: newItems,
+                title: playlistTitle,
+                reviver: 'persistReviver',
+            })
+        },
+        [items, setCurrentPlaylist, playlistTitle]
     )
 
     const abortControllerRef = useRef<AbortController | null>(null)
@@ -178,7 +234,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         }, 10000)
 
         return () => clearInterval(interval)
-    }, [api, currentTrack, isPlaying])
+    }, [api, audioRef, currentTrack, isPlaying])
 
     // Handle login/logout and sync to localStorage
     useEffect(() => {
@@ -274,7 +330,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 }
             })
         },
-        [audioStorage]
+        [audioRef, audioStorage, hlsRef]
     )
 
     const setAudioSourceAndLoad = useCallback(
@@ -300,7 +356,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 audioRef.current.load()
             }
         },
-        [api, audioStorage, bitrate, handleHls]
+        [api, audioRef, audioStorage, bitrate, handleHls, hlsRef]
     )
 
     const generateShuffledPlaylist = useCallback((currentIdx: number, totalItems: number) => {
@@ -381,7 +437,16 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 }
             }
         },
-        [setAudioSourceAndLoad, api, currentTrack, isPlaying, items, updateMediaSessionMetadata, userInteracted]
+        [
+            items,
+            audioRef,
+            currentTrack,
+            isPlaying,
+            api,
+            setAudioSourceAndLoad,
+            updateMediaSessionMetadata,
+            userInteracted,
+        ]
     )
 
     const togglePlayPause = useCallback(async () => {
@@ -391,6 +456,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             const audio = audioRef.current
             if (isPlaying) {
                 audio.pause()
+                crossfadeRef.current.pause()
 
                 // If progress fails to report, we can still continue playback
                 api.reportPlaybackProgress(currentTrack.Id, audio.currentTime, true)
@@ -412,11 +478,20 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                     updateMediaSessionMetadata(currentTrack)
                 } catch (error) {
                     console.error('Error resuming playback:', error)
-                    audioRef.current?.pause()
+                    audioRef.current.pause()
                 }
             }
         }
-    }, [setAudioSourceAndLoad, api, currentTrack, isPlaying, updateMediaSessionMetadata])
+    }, [
+        api,
+        audioRef,
+        crossfadeRef,
+        currentTrack,
+        hlsRef,
+        isPlaying,
+        setAudioSourceAndLoad,
+        updateMediaSessionMetadata,
+    ])
 
     useEffect(() => {
         if (currentTrackIndex.index >= 0 && currentTrackIndex.index < items.length && items[currentTrackIndex.index]) {
@@ -443,6 +518,18 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             }
         }
     }, [currentShuffledIndex]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    const hasNextTrack = useCallback(() => {
+        if (!items || items.length === 0 || currentTrackIndex.index === -1) {
+            return false
+        }
+
+        if (shuffle) {
+            return currentShuffledIndex.index + 1 < shuffledPlaylist.current.length
+        } else {
+            return currentTrackIndex.index + 1 < items.length
+        }
+    }, [currentShuffledIndex.index, currentTrackIndex.index, items, shuffle])
 
     const nextTrack = useCallback(async () => {
         setUserInteracted(true)
@@ -500,10 +587,11 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             }
         }
     }, [
-        generateShuffledPlaylist,
+        audioRef,
         currentShuffledIndex.index,
         currentTrack,
         currentTrackIndex.index,
+        generateShuffledPlaylist,
         items,
         loadMore,
         repeat,
@@ -557,14 +645,42 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             }
         }
     }, [
-        generateShuffledPlaylist,
+        audioRef,
         currentShuffledIndex.index,
         currentTrack,
         currentTrackIndex.index,
+        generateShuffledPlaylist,
         items,
         repeat,
         shuffle,
     ])
+
+    const nextTrackCrossfade = useCallback(async () => {
+        if (!audioRef.current) return
+
+        if (isCrossfadeActive && hasNextTrack()) {
+            crossfade.current = crossfade.current === 'A' ? 'B' : 'A'
+            await nextTrack()
+        }
+    }, [audioRef, hasNextTrack, isCrossfadeActive, nextTrack])
+
+    useEffect(() => {
+        if (!audioRef.current) return
+
+        const onTimeUpdate = () => {
+            if (audioRef.current.duration - audioRef.current.currentTime < crossfadeDuration && isPlaying) {
+                nextTrackCrossfade()
+            }
+        }
+
+        const audio = audioRef.current
+
+        audio.addEventListener('timeupdate', onTimeUpdate)
+
+        return () => {
+            audio.removeEventListener('timeupdate', onTimeUpdate)
+        }
+    }, [audioRef, crossfadeDuration, isPlaying, nextTrackCrossfade])
 
     const toggleShuffle = useCallback(() => {
         setShuffle(prevShuffleState => {
@@ -629,7 +745,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             audio.removeEventListener('play', handlePlay)
             audio.removeEventListener('pause', handlePause)
         }
-    }, [])
+    }, [audioRef])
 
     // Attach error event listeners
     useEffect(() => {
@@ -638,7 +754,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         const handleError = (e: Event) => {
             console.error('Audio error during playback:', e)
             needsReloadRef.current = true
-            audioRef.current?.pause()
+            audioRef.current.pause()
         }
 
         audio.addEventListener('error', handleError)
@@ -646,7 +762,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return () => {
             audio.removeEventListener('error', handleError)
         }
-    }, [])
+    }, [audioRef])
 
     // Set up Media Session API for next/previous actions
     useEffect(() => {
@@ -670,7 +786,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         if (audioRef.current) {
             audioRef.current.volume = volume
         }
-    }, [volume])
+    }, [audioRef, volume])
 
     useEffect(() => {
         localStorage.setItem('repeatMode', repeat)
@@ -710,7 +826,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         }
 
         restoreAudio()
-    }, [setAudioSourceAndLoad, api.auth.token, currentTrackIndex.index, items, updateMediaSessionMetadata])
+    }, [api.auth.token, audioRef, currentTrackIndex.index, items, setAudioSourceAndLoad, updateMediaSessionMetadata])
 
     // Preload next page when near end
     useEffect(() => {
@@ -750,7 +866,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return () => {
             audio.removeEventListener('ended', handleEnded)
         }
-    }, [api, currentTrack, currentTrackIndex.index, items, nextTrack, repeat])
+    }, [api, audioRef, currentTrack, currentTrackIndex.index, items, nextTrack, repeat])
 
     useEffect(() => {
         if (clearOnLogout && currentTrack) {
@@ -761,7 +877,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 audioRef.current.pause()
             }
         }
-    }, [api, clearOnLogout, currentTrack])
+    }, [api, audioRef, clearOnLogout, currentTrack])
 
     return {
         currentTrack,
@@ -793,13 +909,19 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         toggleRepeat,
         currentPlaylist: items,
         setCurrentPlaylist,
+        moveItemInPlaylist,
         loadMore,
         sessionPlayCount,
         resetSessionCount,
         playlistTitle,
         audioRef,
+        crossfadeRef,
         bitrate,
         setBitrate,
         isLoading,
+        isCrossfadeActive,
+        setIsCrossfadeActive,
+        crossfadeDuration,
+        setCrossfadeDuration,
     }
 }

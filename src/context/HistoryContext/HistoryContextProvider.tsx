@@ -7,13 +7,14 @@ export type IHistoryContext = ReturnType<typeof useInitialState>
 const useInitialState = () => {
     const [historyStack, setHistoryStack] = useState<string[]>([])
     const navigate = useNavigate()
-    const { pathname } = useLocation()
+    const location = useLocation()
+    const currentLocation = location.pathname + location.search
 
     useEffect(() => {
-        if (historyStack[historyStack.length - 1] === pathname) return
+        if (historyStack[historyStack.length - 1] === currentLocation) return
 
-        setHistoryStack(prev => [...prev, pathname])
-    }, [pathname]) // eslint-disable-line react-hooks/exhaustive-deps
+        setHistoryStack(prev => [...prev, currentLocation])
+    }, [currentLocation]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const goBack = () => {
         if (historyStack.length <= 1) {

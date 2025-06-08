@@ -22,3 +22,12 @@
 .queue-page > .queue-desc > .text > .highlight {
     font-weight: 600;
 }
+
+/* dnd-kit related */
+.queue-page > .media-list {
+    margin: 0 -8px;
+}
+
+.queue-page > .media-list .media-item {
+    margin: unset;
+}

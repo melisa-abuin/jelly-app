@@ -4,6 +4,7 @@ import { ChangeEvent, useEffect, useRef, useState, WheelEvent } from 'react'
 import { NavLink } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import '../App.css'
+import { useDownloadContext } from '../context/DownloadContext/DownloadContext'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
@@ -15,6 +16,7 @@ import './Sidenav.css'
 import {
     AlbumIcon,
     ArtistsIcon,
+    DownloadingIcon,
     PlaylistIcon,
     PlaystateAnimationSearch,
     SearchClearIcon,
@@ -36,6 +38,7 @@ export const Sidenav = (props: { username: string }) => {
     const [searchError, setSearchError] = useState<string | null>(null)
     const [searchAttempted, setSearchAttempted] = useState(false)
     const dropdown = useDropdownContext()
+    const { storageStats } = useDownloadContext()
 
     const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(e.target.value)
@@ -270,10 +273,13 @@ export const Sidenav = (props: { username: string }) => {
                                                         }`}
                                                         onClick={closeSidenav}
                                                         className={`result ${itemClass}`}
-                                                        onContextMenu={e => dropdown.onContextMenu(e, { item: item })}
-                                                        onTouchStart={e => dropdown.onTouchStart(e, { item })}
-                                                        onTouchMove={dropdown.onTouchClear}
-                                                        onTouchEnd={dropdown.onTouchClear}
+                                                        {...(item.Type !== BaseItemKind.Genre && {
+                                                            onContextMenu: e =>
+                                                                dropdown.onContextMenu(e, { item: item }),
+                                                            onTouchStart: e => dropdown.onTouchStart(e, { item }),
+                                                            onTouchMove: dropdown.onTouchClear,
+                                                            onTouchEnd: dropdown.onTouchClear,
+                                                        })}
                                                     >
                                                         {item.Type === BaseItemKind.MusicArtist && (
                                                             <div className="type artist">
@@ -377,9 +383,17 @@ export const Sidenav = (props: { username: string }) => {
                                 {props.username}
                             </div>
                         </div>
-                        <NavLink to="/settings" className="settings" onClick={closeSidenav} title="Settings">
-                            <GearIcon size={16} />
-                        </NavLink>
+                        <div className="actions">
+                            {storageStats.trackCount > 0 && (
+                                <NavLink to="/synced" className="icon synced" onClick={closeSidenav} title="Synced">
+                                    <DownloadingIcon width={16} height={16} />
+                                </NavLink>
+                            )}
+
+                            <NavLink to="/settings" className="icon settings" onClick={closeSidenav} title="Settings">
+                                <GearIcon size={16} />
+                            </NavLink>
+                        </div>
                     </div>
                 </div>
             </div>

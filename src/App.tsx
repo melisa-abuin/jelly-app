@@ -6,10 +6,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import './App.css'
 import { Dropdown } from './components/Dropdown'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { Main } from './components/Main'
 import './components/MediaList.css'
 import { Sidenav } from './components/Sidenav'
 import { AudioStorageContextProvider } from './context/AudioStorageContext/AudioStorageContextProvider'
+import { DownloadContextProvider } from './context/DownloadContext/DownloadContextProvider'
 import { useDropdownContext } from './context/DropdownContext/DropdownContext'
 import { DropdownContextProvider } from './context/DropdownContext/DropdownContextProvider'
 import { HistoryContextProvider } from './context/HistoryContext/HistoryContextProvider'
@@ -54,7 +56,7 @@ const persister = createSyncStoragePersister({
 
 export const App = () => {
     return (
-        <>
+        <ErrorBoundary>
             {window.__NPM_LIFECYCLE_EVENT__ === 'dev:nocache' ? (
                 <QueryClientProvider client={queryClient}>
                     <RoutedApp />
@@ -64,7 +66,7 @@ export const App = () => {
                     <RoutedApp />
                 </PersistQueryClientProvider>
             )}
-        </>
+        </ErrorBoundary>
     )
 }
 
@@ -125,10 +127,12 @@ const RoutedApp = () => {
                                 <AudioStorageContextProvider>
                                     <SidenavContextProvider>
                                         <PlaybackContextProvider initialVolume={0.5} clearOnLogout={isLoggingOut}>
-                                            <DropdownContextProvider>
-                                                <MainLayout auth={auth} handleLogout={handleLogout} />
-                                                <Dropdown />
-                                            </DropdownContextProvider>
+                                            <DownloadContextProvider>
+                                                <DropdownContextProvider>
+                                                    <MainLayout auth={auth} handleLogout={handleLogout} />
+                                                    <Dropdown />
+                                                </DropdownContextProvider>
+                                            </DownloadContextProvider>
                                         </PlaybackContextProvider>
                                     </SidenavContextProvider>
                                 </AudioStorageContextProvider>
@@ -177,7 +181,9 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     return (
         <div className="interface">
             <div
-                className={showSidenav || (isDropdownOpen && isTouchDevice) ? 'dimmer active' : 'dimmer'}
+                className={
+                    showSidenav || (isDropdownOpen && isTouchDevice) ? 'dimmer active noSelect' : 'dimmer noSelect'
+                }
                 onClick={showSidenav ? toggleSidenav : dropdownContext?.closeDropdown}
             />
 
