@@ -256,8 +256,8 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                         <div className="title">Crossfade</div>
                     </div>
                     <div className="options noSelect">
-                        <div className="option adjustable">
-                            <div className="number current">1s</div>
+                        <div className={'option' + (playback.isCrossfadeActive ? '' : ' adjustable')}>
+                            <div className="number current">{playback.crossfadeDuration}s</div>
                             <div className="slider">
                                 <input
                                     type="range"
@@ -266,14 +266,19 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                                     min="1"
                                     max="12"
                                     step="1"
-                                    defaultValue={1}
+                                    value={playback.crossfadeDuration}
+                                    onChange={e => playback.setCrossfadeDuration(Number(e.target.value))}
                                 />
                             </div>
                             <div className="number">12s</div>
                         </div>
                         <div className="option">
                             <label className="switch">
-                                <input type="checkbox"></input>
+                                <input
+                                    type="checkbox"
+                                    checked={playback.isCrossfadeActive}
+                                    onChange={e => playback.setIsCrossfadeActive(e.target.checked)}
+                                ></input>
                                 <span className="slider"></span>
                             </label>
                         </div>

@@ -42,8 +42,19 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     })
 
     const crossfade = useRef<'A' | 'B'>('A')
-    const [isCrossfadeActive] = useState(false)
-    const crossfadeDuration = 5 // In seconds
+    const [isCrossfadeActive, setIsCrossfadeActive] = useState(localStorage.getItem('crossfade') === 'true')
+    const [crossfadeDuration, setCrossfadeDuration] = useState(() => {
+        const savedDuration = localStorage.getItem('crossfadeDuration')
+        return savedDuration ? Number(savedDuration) : 1
+    })
+
+    useEffect(() => {
+        localStorage.setItem('crossfade', isCrossfadeActive.toString())
+    }, [isCrossfadeActive])
+
+    useEffect(() => {
+        localStorage.setItem('crossfadeDuration', crossfadeDuration.toString())
+    }, [crossfadeDuration])
 
     const audioA = useRef(new Audio())
     const audioB = useRef(new Audio())
@@ -641,7 +652,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return () => {
             audio.removeEventListener('timeupdate', onTimeUpdate)
         }
-    }, [audioRef, isPlaying, nextTrackCrossfade])
+    }, [audioRef, crossfadeDuration, isPlaying, nextTrackCrossfade])
 
     const toggleShuffle = useCallback(() => {
         setShuffle(prevShuffleState => {
@@ -872,5 +883,9 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         bitrate,
         setBitrate,
         isLoading,
+        isCrossfadeActive,
+        setIsCrossfadeActive,
+        crossfadeDuration,
+        setCrossfadeDuration,
     }
 }
