@@ -250,13 +250,13 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                     </p>
                 </div>
             </div>
-            <div className="section crossfade disabled">
+            <div className={'section crossfade' + (playback.isCrossfadeActive ? '' : 'section crossfade disabled')}>
                 <div className="primary">
                     <div className="container">
                         <div className="title">Crossfade</div>
                     </div>
                     <div className="options noSelect">
-                        <div className={'option' + (playback.isCrossfadeActive ? '' : ' adjustable')}>
+                        <div className="option adjustable">
                             <div className="number current">{playback.crossfadeDuration}s</div>
                             <div className="slider">
                                 <input
