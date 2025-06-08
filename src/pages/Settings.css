@@ -100,20 +100,12 @@
     color: var(--font-color);
 }
 
-/* Playback */
-.settings-page > .section.playback > .inner {
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-color);
+/* Quality */
+.settings-page > .section.quality {
+    padding-bottom: 10px;
 }
 
-.settings-page > .section.playback > .inner:last-of-type {
-    margin-bottom: 0;
-    padding-bottom: 0;
-    border-bottom: none;
-}
-
-.settings-page > .section.playback > .inner > .container {
+.settings-page > .section.quality > .container {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -121,31 +113,27 @@
     gap: 8px;
 }
 
-.settings-page > .section.playback > .inner.row > .container {
-    flex-direction: row;
-}
-
-.settings-page > .section.playback > .inner > .container > .info > .subtitle {
+.settings-page > .section.quality > .container > .info > .subtitle {
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--font-color-secondary);
     margin-bottom: 4px;
 }
 
-.settings-page > .section.playback > .inner > .container > .info > .subdesc {
+.settings-page > .section.quality > .container > .info > .subdesc {
     font-size: 0.725rem;
     line-height: 1.4;
     color: var(--font-color-tertiary);
 }
 
-.settings-page > .section.playback > .inner > .container > .options {
+.settings-page > .section.quality > .container > .options {
     display: flex;
     flex-direction: column;
     gap: 4px;
     width: 100%;
 }
 
-.settings-page > .section.playback > .inner > .container > .options > .option {
+.settings-page > .section.quality > .container > .options > .option {
     display: flex;
     align-items: flex-start;
     cursor: pointer;
@@ -155,16 +143,16 @@
     transition: background-color 0.2s ease-out;
 }
 
-.settings-page > .section.playback > .inner > .container > .options > .option:hover {
+.settings-page > .section.quality > .container > .options > .option:hover {
     background-color: var(--bg-color-secondary);
 }
 
-.settings-page > .section.playback > .inner > .container > .options > .option.active:hover {
+.settings-page > .section.quality > .container > .options > .option.active:hover {
     cursor: initial;
     background-color: unset;
 }
 
-.settings-page > .section.playback > .inner > .container > .options > .option > .details > .title {
+.settings-page > .section.quality > .container > .options > .option > .details > .title {
     font-size: 0.75rem;
     font-weight: 600;
     margin-bottom: 2px;
@@ -172,28 +160,28 @@
     transition: color 0.2s ease-out;
 }
 
-.settings-page > .section.playback > .inner > .container > .options > .option.active > .details > .title {
+.settings-page > .section.quality > .container > .options > .option.active > .details > .title {
     color: var(--font-color-active);
 }
 
-.settings-page > .section.playback > .inner > .container > .options > .option > .details > .title > .bitrate {
+.settings-page > .section.quality > .container > .options > .option > .details > .title > .bitrate {
     font-size: 0.625rem;
     color: var(--font-color-tertiary);
     margin-left: 2px;
 }
 
-.settings-page > .section.playback > .inner > .container > .options > .option > .details > .desc {
+.settings-page > .section.quality > .container > .options > .option > .details > .desc {
     font-size: 0.725rem;
     line-height: 1.4;
     color: var(--font-color-tertiary);
     transition: color 0.2s ease-out;
 }
 
-.settings-page > .section.playback > .inner > .container > .options > .option.active > .details > .desc {
+.settings-page > .section.quality > .container > .options > .option.active > .details > .desc {
     color: var(--font-color-secondary);
 }
 
-.settings-page > .section.playback > .inner > .container > .options > .option > .status {
+.settings-page > .section.quality > .container > .options > .option > .status {
     color: var(--brand-color);
     margin-top: 2px;
     margin-right: 10px;
@@ -202,17 +190,17 @@
     transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
 }
 
-.settings-page > .section.playback > .inner > .container > .options > .option.active > .status {
+.settings-page > .section.quality > .container > .options > .option.active > .status {
     opacity: 1;
     visibility: visible;
 }
 
-/* Switch - not used */
+/* Switch */
 .switch {
     position: relative;
     display: block;
     width: 28px;
-    height: 15px;
+    height: 17px;
     cursor: pointer;
     flex-shrink: 0;
 }
@@ -228,14 +216,14 @@
     right: 0;
     bottom: 0;
     border-radius: 20px;
-    outline: 1px solid var(--border-color-secondary);
+    border: 1px solid var(--border-color-secondary);
     background-color: var(--bg-color-tertiary);
-    transition: outline-color 0.2s ease-out, background-color 0.2s ease-out;
+    transition: border-color 0.2s ease-out, background-color 0.2s ease-out;
 }
 
 .switch > input:checked + .slider {
     background-color: var(--brand-color);
-    outline-color: var(--brand-color);
+    border-color: var(--brand-color);
 }
 
 .switch > .slider:before {
@@ -251,8 +239,105 @@
 }
 
 .switch > input:checked + .slider:before {
-    transform: translateX(13px);
+    transform: translateX(12px);
     background-color: var(--font-color-inverted);
+}
+
+/* Offline Sync and Crossfade */
+.settings-page > .section > .primary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.settings-page > .section > .primary > .container > .title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.settings-page > .section > .primary > .container > .desc {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--font-color-secondary);
+}
+
+.settings-page > .section > .primary > .container > .desc > .number {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Crossfade */
+.settings-page > .section.crossfade > .primary > .container > .title {
+    margin-bottom: 0;
+}
+
+.settings-page > .section > .primary > .options {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    row-gap: 6px;
+}
+
+.settings-page > .section.crossfade > .primary > .options {
+    flex-wrap: wrap-reverse;
+}
+
+.settings-page > .section > .primary > .options > .option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.settings-page > .section.crossfade > .primary > .options > .option {
+    transition: opacity 0.2s ease-out;
+}
+
+.settings-page > .section.crossfade.disabled > .primary > .options > .option.adjustable {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.settings-page > .section > .primary > .options > .option > .number {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: var(--font-color-tertiary);
+    transition: color 0.2s ease-out;
+}
+
+.settings-page > .section:not(.disabled) > .primary > .options > .option > .number.current {
+    color: var(--brand-color);
+}
+
+.settings-page > .section > .primary > .options > .option > .slider {
+    display: flex;
+}
+
+.settings-page > .section > .primary > .options > .option > .slider > input {
+    cursor: pointer;
+    width: 100%;
+    height: 7px;
+    border-radius: 20px;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+}
+
+.settings-page > .section > .primary > .options > .option > .slider > input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px;
+    height: 13px;
+    border-radius: 100%;
+    background-color: var(--volume-dot-color);
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.2s ease-out;
+}
+
+.settings-page > .section > .primary > .options > .option > .slider > input::-webkit-slider-thumb:active {
+    background-color: var(--volume-dot-color-active);
 }
 
 /* About and Session */
@@ -277,29 +362,4 @@
 
 .settings-page > .section > .actions {
     margin-top: 14px;
-}
-
-/* Offline Sync */
-.settings-page > .section.offline-sync {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.settings-page > .section > .container > .title {
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.settings-page > .section > .container > .desc {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--font-color-secondary);
-}
-
-.settings-page > .section > .container > .desc > .number {
-    font-variant-numeric: tabular-nums;
 }

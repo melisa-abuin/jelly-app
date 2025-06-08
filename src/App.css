@@ -1132,7 +1132,8 @@ body.lockscroll {
         filter: none;
     }
 
-    body.lockscroll {
+    body.lockscroll,
+    body:has(.sidenav_wrapper.active) {
         overflow: hidden !important;
     }
 
