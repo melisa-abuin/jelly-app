@@ -257,7 +257,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                     </div>
                     <div className="options noSelect">
                         <div className="option adjustable">
-                            <div className="number current">4s</div>
+                            <div className="number current">1s</div>
                             <div className="slider">
                                 <input
                                     type="range"
@@ -266,7 +266,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                                     min="1"
                                     max="12"
                                     step="1"
-                                    defaultValue={4}
+                                    defaultValue={1}
                                 />
                             </div>
                             <div className="number">12s</div>
