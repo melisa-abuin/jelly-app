@@ -42,6 +42,7 @@ export type MediaItem = BaseItemDto & {
     Name: string
     pageIndex?: number
     offlineState?: 'downloading' | 'downloaded' | 'deleting'
+    queueId?: string
 }
 
 export type IJellyfinAuth = Parameters<typeof initJellyfinApi>[0]

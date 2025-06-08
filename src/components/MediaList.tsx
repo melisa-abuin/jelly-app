@@ -76,8 +76,8 @@ export const MediaList = ({
         const { active, over } = event
 
         if (over && active.id !== over.id) {
-            const oldIndex = items.findIndex(i => i.Id === active.id)
-            const newIndex = items.findIndex(i => i.Id === over.id)
+            const oldIndex = items.findIndex(i => (i.queueId || i.Id) === active.id)
+            const newIndex = items.findIndex(i => (i.queueId || i.Id) === over.id)
 
             if (oldIndex !== -1 && newIndex !== -1) {
                 const globalOldIndex = indexOffset + oldIndex
@@ -100,9 +100,15 @@ export const MediaList = ({
         setActiveId(active.id as string)
     }
 
+    const isEqual = (a?: MediaItem, b?: MediaItem) => {
+        if (!a || !b) return false
+
+        return (a.queueId || a.Id) === (b.queueId || b.Id)
+    }
+
     const handleSongClick = (item: MediaItem, index: number) => {
         if (type === 'song') {
-            if (playback.currentTrack?.Id === item.Id) {
+            if (isEqual(playback.currentTrack, item)) {
                 playback.togglePlayPause()
             } else {
                 playback.setCurrentPlaylist({ playlist: playlistItems || items, title, reviver })
@@ -140,10 +146,10 @@ export const MediaList = ({
             }
         }
 
-        const isActive = dropdown.selectedItem?.Id === item.Id && dropdown.isOpen
+        const isActive = isEqual(dropdown.selectedItem, item) && dropdown.isOpen
 
         const itemClass = [
-            type === 'song' && playback.currentTrack?.Id === item.Id ? (playback.isPlaying ? 'playing' : 'paused') : '',
+            type === 'song' && isEqual(playback.currentTrack, item) ? (playback.isPlaying ? 'playing' : 'paused') : '',
             isActive ? 'active' : '',
         ]
             .filter(Boolean)
@@ -153,7 +159,6 @@ export const MediaList = ({
             return (
                 <div
                     className={`media-item album-item ${itemClass}`}
-                    key={item.Id}
                     onClick={() => navigate(`/album/${item.Id}`)}
                     ref={el => setRowRefs(index, el)}
                     onContextMenu={e => dropdown.onContextMenu(e, { item }, false, hidden)}
@@ -190,7 +195,6 @@ export const MediaList = ({
             return (
                 <div
                     className={`media-item artist-item ${itemClass}`}
-                    key={item.Id}
                     onClick={() => navigate(`/artist/${item.Id}`)}
                     ref={el => setRowRefs(index, el)}
                     onContextMenu={e => dropdown.onContextMenu(e, { item }, false, hidden)}
@@ -212,7 +216,6 @@ export const MediaList = ({
             return (
                 <div
                     className={`media-item playlist-item ${itemClass}`}
-                    key={item.Id}
                     onClick={() => navigate(`/playlist/${item.Id}`)}
                     ref={el => setRowRefs(index, el)}
                     onContextMenu={e => dropdown.onContextMenu(e, { item }, false, hidden)}
@@ -241,7 +244,6 @@ export const MediaList = ({
                 <div
                     className={`media-item song-item ${itemClass}`}
                     onClick={() => handleSongClick(item, index)}
-                    key={item.Id}
                     ref={el => setRowRefs(index, el)}
                     onContextMenu={e => dropdown.onContextMenu(e, { item }, false, hidden)}
                     onTouchStart={e => dropdown.onTouchStart(e, { item }, false, hidden)}
@@ -319,7 +321,7 @@ export const MediaList = ({
                             }
 
                             return (
-                                <SortableItem key={item.Id} id={item.Id}>
+                                <SortableItem key={item.queueId || item.Id} id={item.queueId || item.Id}>
                                     {renderItem(index, item)}
                                 </SortableItem>
                             )
@@ -368,14 +370,14 @@ const DraggableVirtuoso = ({
             onDragEnd={handleDragEnd}
             modifiers={[restrictToVerticalAxis]}
         >
-            <SortableContext items={items.map(i => i.Id)} strategy={verticalListSortingStrategy}>
+            <SortableContext items={items.map(i => i.queueId || i.Id)} strategy={verticalListSortingStrategy}>
                 {children}
             </SortableContext>
             <DragOverlay>
                 {activeId
                     ? renderItem(
-                          items.findIndex(i => i.Id === activeId),
-                          items.find(i => i.Id === activeId)!
+                          items.findIndex(i => (i.queueId || i.Id) === activeId),
+                          items.find(i => (i.queueId || i.Id) === activeId) || { isPlaceholder: true }
                       )
                     : null}
             </DragOverlay>

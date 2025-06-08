@@ -98,7 +98,15 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         } satisfies IJellyfinInfiniteProps
     }, [api, reviver.queryFn, reviver.queryKey])
 
-    const { items, hasNextPage, loadMore, isLoading } = useJellyfinInfiniteData(reviverFn)
+    const queueCounter = useRef(0)
+
+    const addQueueId = useCallback((a: MediaItem) => {
+        a.queueId = `${a.Id}-${Date.now().toString(36)}-${queueCounter.current++}`
+        return a
+    }, [])
+
+    const { items: _items, hasNextPage, loadMore, isLoading } = useJellyfinInfiniteData(reviverFn)
+    const items = useMemo(() => _items.map(addQueueId), [_items, addQueueId])
 
     const setCurrentPlaylist = useCallback(
         (props: { playlist: MediaItem[]; title: string; reviver?: IReviver | 'persistAll' | 'persistReviver' }) => {
