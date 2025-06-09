@@ -100,6 +100,23 @@
     color: var(--font-color);
 }
 
+/* Lyrics */
+.settings-page > .section.lyrics > .inner:not(:last-child) {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+}
+
+.settings-page > .section.lyrics > .inner > .container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.settings-page > .section.lyrics > .inner > .container > .switch {
+    align-self: center;
+}
+
 /* Quality */
 .settings-page > .section.quality {
     padding-bottom: 10px;
@@ -341,22 +358,22 @@
 }
 
 /* About and Session */
-.settings-page > .section > .desc {
+.settings-page > .section .desc {
     font-size: 0.75rem;
     line-height: 1.5;
     color: var(--font-color-secondary);
 }
 
-.settings-page > .section > .desc > .subtitle {
+.settings-page > .section .desc > .subtitle {
     font-weight: 500;
     margin-bottom: 4px;
 }
 
-.settings-page > .section > .desc > .subfooter {
+.settings-page > .section .desc > .subfooter {
     margin-top: 14px;
 }
 
-.settings-page > .section > .desc > p > .mantra {
+.settings-page > .section .desc > p > .mantra {
     font-style: italic;
 }
 

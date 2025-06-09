@@ -23,7 +23,17 @@ const useInitialState = () => {
         }
 
         setHistoryStack(prev => {
-            const newStack = prev.slice(0, -1)
+            let newStack = prev.slice(0, -1)
+
+            while (newStack[newStack.length - 1].startsWith('/lyrics') && newStack.length >= 1) {
+                newStack = newStack.slice(0, -1)
+            }
+
+            if (newStack.length <= 0) {
+                navigate('/')
+                return []
+            }
+
             navigate(newStack[newStack.length - 1])
             return newStack
         })

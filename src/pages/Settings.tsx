@@ -250,7 +250,44 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                     </p>
                 </div>
             </div>
-            <div className={'section crossfade' + (playback.isCrossfadeActive ? '' : 'section crossfade disabled')}>
+            <div className="section lyrics">
+                <div className="title">Lyrics</div>
+                <div className="inner row">
+                    <div className="container">
+                        <div className="desc">
+                            <div className="subtitle">Timestamps</div>
+                            <div className="subdesc">Display Timestamps for synchronized lyrics</div>
+                        </div>
+                        <label className="switch">
+                            <input
+                                type="checkbox"
+                                checked={playback.lyricsTimestamps}
+                                onChange={e => playback.setLyricsTimestamps(e.target.checked)}
+                            ></input>
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div className="inner row">
+                    <div className="container">
+                        <div className="desc">
+                            <div className="subtitle">Center Lyrics</div>
+                            <div className="subdesc">
+                                Aligns lyrics to the center of the line instead of the device default
+                            </div>
+                        </div>
+                        <label className="switch">
+                            <input
+                                type="checkbox"
+                                checked={playback.centeredLyrics}
+                                onChange={e => playback.setCenteredLyrics(e.target.checked)}
+                            ></input>
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div className={'section crossfade' + (playback.isCrossfadeActive ? '' : ' disabled')}>
                 <div className="primary">
                     <div className="container">
                         <div className="title">Crossfade</div>

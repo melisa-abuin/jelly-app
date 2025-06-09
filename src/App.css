@@ -405,6 +405,12 @@ body.lockscroll {
 
 /* Main */
 .main {
+    --header-height: 53px;
+    --progress-bar-height: 4px;
+    --footer-height: 80px;
+}
+
+.main {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -420,7 +426,7 @@ body.lockscroll {
     align-items: center;
     justify-content: space-between;
     padding: 12px;
-    max-height: 53px;
+    max-height: var(--header-height);
     background-color: var(--bg-color);
     border-bottom: 1px solid var(--border-color);
 }
@@ -633,7 +639,7 @@ body.lockscroll {
     position: relative;
     display: flex;
     height: 8px;
-    margin-top: -4px;
+    margin-top: calc(0 - var(--progress-bar-height));
     transform: scaleY(0.6);
     transition: transform 0.1s linear;
 }
@@ -737,7 +743,7 @@ body.lockscroll {
     justify-content: space-between;
     padding: 14px 20px;
     /* Help with CJK letter spacing */
-    max-height: 76px;
+    max-height: calc(var(--footer-height) - var(--progress-bar-height));
 }
 
 /* Track details */
@@ -813,6 +819,10 @@ body.lockscroll {
     align-items: center;
     gap: 10px;
     margin-right: 8px;
+}
+
+.main > .main_footer > .playback > .container > .controls > .knobs > .lyrics {
+    cursor: pointer;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle {

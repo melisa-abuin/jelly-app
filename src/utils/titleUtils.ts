@@ -21,6 +21,8 @@ export const getPageTitle = (pageTitle: string, location: Location): string => {
             return 'Home'
         case '/tracks':
             return 'Tracks'
+        case '/lyrics':
+            return 'Lyrics'
         case '/albums':
             return 'Albums'
         case '/artists':
