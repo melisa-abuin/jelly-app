@@ -280,6 +280,7 @@ export const MainContent = ({
     }, [
         location.pathname,
         playback.currentTrack,
+        playback.currentTrackLyrics?.Lyrics?.length,
         playback.isPlaying,
         playback.nextTrack,
         playback.previousTrack,
