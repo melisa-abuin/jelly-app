@@ -223,20 +223,22 @@ export const MainContent = ({
                         </div>
                         <div className="controls">
                             <div className="knobs">
-                                <div
-                                    className={`lyrics ${playback.shuffle ? 'active' : ''}`}
-                                    onClick={toggleLyrics}
-                                    title="Lyrics"
-                                >
-                                    <NoteIcon
-                                        fill={
-                                            location.pathname.startsWith('/lyrics')
-                                                ? 'var(--brand-color)'
-                                                : 'var(--font-color-secondary)'
-                                        }
-                                        size={16}
-                                    />
-                                </div>
+                                {(playback.currentTrackLyrics?.Lyrics?.length || 0) > 0 && (
+                                    <div
+                                        className={`lyrics ${playback.shuffle ? 'active' : ''}`}
+                                        onClick={toggleLyrics}
+                                        title="Lyrics"
+                                    >
+                                        <NoteIcon
+                                            fill={
+                                                location.pathname.startsWith('/lyrics')
+                                                    ? 'var(--brand-color)'
+                                                    : 'var(--font-color-secondary)'
+                                            }
+                                            size={16}
+                                        />
+                                    </div>
+                                )}
                                 <div
                                     className={`shuffle ${playback.shuffle ? 'active' : ''}`}
                                     onClick={playback.toggleShuffle}
