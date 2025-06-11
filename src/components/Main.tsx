@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon, NoteIcon } from '@primer/octicons-react'
+import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
 import { JSX, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
@@ -223,22 +223,6 @@ export const MainContent = ({
                         </div>
                         <div className="controls">
                             <div className="knobs">
-                                {(playback.currentTrackLyrics?.Lyrics?.length || 0) > 0 && (
-                                    <div
-                                        className={`lyrics ${playback.shuffle ? 'active' : ''}`}
-                                        onClick={toggleLyrics}
-                                        title="Lyrics"
-                                    >
-                                        <NoteIcon
-                                            fill={
-                                                location.pathname.startsWith('/lyrics')
-                                                    ? 'var(--brand-color)'
-                                                    : 'var(--font-color-secondary)'
-                                            }
-                                            size={16}
-                                        />
-                                    </div>
-                                )}
                                 <div
                                     className={`shuffle ${playback.shuffle ? 'active' : ''}`}
                                     onClick={playback.toggleShuffle}

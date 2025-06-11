@@ -17,6 +17,7 @@ import {
     AlbumIcon,
     ArtistsIcon,
     DownloadingIcon,
+    LyricsIcon,
     PlaylistIcon,
     PlaystateAnimationSearch,
     SearchClearIcon,
@@ -384,6 +385,12 @@ export const Sidenav = (props: { username: string }) => {
                             </div>
                         </div>
                         <div className="actions">
+                            {(playback.currentTrackLyrics?.Lyrics?.length || 0) > 0 && (
+                                <NavLink to="/lyrics" className="icon lyrics" onClick={closeSidenav} title="Lyrics">
+                                    <LyricsIcon width={16} height={16} />
+                                </NavLink>
+                            )}
+
                             {storageStats.trackCount > 0 && (
                                 <NavLink to="/synced" className="icon synced" onClick={closeSidenav} title="Synced">
                                     <DownloadingIcon width={16} height={16} />

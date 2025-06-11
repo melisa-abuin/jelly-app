@@ -100,23 +100,6 @@
     color: var(--font-color);
 }
 
-/* Lyrics */
-.settings-page > .section.lyrics > .inner:not(:last-child) {
-    margin-bottom: 8px;
-    padding-bottom: 8px;
-}
-
-.settings-page > .section.lyrics > .inner > .container {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 8px;
-}
-
-.settings-page > .section.lyrics > .inner > .container > .switch {
-    align-self: center;
-}
-
 /* Quality */
 .settings-page > .section.quality {
     padding-bottom: 10px;
@@ -256,7 +239,7 @@
 }
 
 .switch > input:checked + .slider:before {
-    transform: translateX(12px);
+    transform: translateX(11px);
     background-color: var(--font-color-inverted);
 }
 
@@ -355,6 +338,22 @@
 
 .settings-page > .section.crossfade > .primary > .options > .option > .slider > input::-webkit-slider-thumb:active {
     background-color: var(--volume-dot-color-active);
+}
+
+/* Lyrics */
+.settings-page > .section.lyrics > .inner:not(:last-child) {
+    margin-bottom: 8px;
+}
+
+.settings-page > .section.lyrics .desc > .subtitle {
+    margin-bottom: 0;
+}
+
+.settings-page > .section.lyrics > .inner > .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
 
 /* About and Session */

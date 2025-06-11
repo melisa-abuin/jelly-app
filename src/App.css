@@ -405,12 +405,6 @@ body.lockscroll {
 
 /* Main */
 .main {
-    --header-height: 53px;
-    --progress-bar-height: 4px;
-    --footer-height: 80px;
-}
-
-.main {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -426,7 +420,7 @@ body.lockscroll {
     align-items: center;
     justify-content: space-between;
     padding: 12px;
-    max-height: var(--header-height);
+    max-height: 53px;
     background-color: var(--bg-color);
     border-bottom: 1px solid var(--border-color);
 }
@@ -639,7 +633,7 @@ body.lockscroll {
     position: relative;
     display: flex;
     height: 8px;
-    margin-top: calc(0 - var(--progress-bar-height));
+    margin-top: -4px;
     transform: scaleY(0.6);
     transition: transform 0.1s linear;
 }
@@ -743,7 +737,7 @@ body.lockscroll {
     justify-content: space-between;
     padding: 14px 20px;
     /* Help with CJK letter spacing */
-    max-height: calc(var(--footer-height) - var(--progress-bar-height));
+    max-height: 76px;
 }
 
 /* Track details */
@@ -821,10 +815,6 @@ body.lockscroll {
     margin-right: 8px;
 }
 
-.main > .main_footer > .playback > .container > .controls > .knobs > .lyrics {
-    cursor: pointer;
-}
-
 .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle {
     cursor: pointer;
 }
@@ -856,6 +846,7 @@ body.lockscroll {
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous {
     cursor: pointer;
+    padding: 2px 0;
     transform: rotate(180deg);
 }
 
@@ -947,6 +938,7 @@ body.lockscroll {
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next {
     cursor: pointer;
+    padding: 2px 0;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next > .next-icon {
@@ -1066,7 +1058,8 @@ body.lockscroll {
 .frequently-page,
 .genre-page,
 .artist-tracks-page,
-.artists-page {
+.artists-page,
+.lyrics-page {
     margin-top: -4px;
 }
 
@@ -1076,7 +1069,8 @@ body.lockscroll {
 .recently-page > .empty,
 .frequently-page > .empty,
 .genre-page > .empty,
-.playlist-page > .empty {
+.playlist-page > .empty,
+.lyrics-page > .empty {
     font-size: 0.85rem;
     margin: 4px 0;
 }

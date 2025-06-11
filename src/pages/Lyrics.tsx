@@ -126,7 +126,7 @@ export const Lyrics = () => {
                     onClick={() => goToLine(index)}
                 >
                     {isSynced && playback.lyricsTimestamps ? (
-                        <div className="start">{line.Start && tickToTimeString(line.Start)}</div>
+                        <div className="numbers">{line.Start && tickToTimeString(line.Start)}</div>
                     ) : null}
                     <div className={'text' + (playback.centeredLyrics ? ' centered' : '')}>{line.Text}</div>
                 </div>
@@ -158,9 +158,9 @@ export const Lyrics = () => {
     }, [playback.currentTrack, lyrics, currentLineIndex, scrollToActiveLine, isSynced])
 
     return (
-        <div className={'lyrics-page' + (lyrics ? ' active' : '') + (isSynced ? ' synced' : '')}>
+        <div className={'lyrics-page' + (lyrics ? ' active' : '') + (isSynced ? ' synced noSelect' : '')}>
             {(lyrics && displayedLines) || (
-                <div className="status">{playback.currentTrackLyricsLoading ? 'Loading...' : 'No Lyrics'}</div>
+                <div className="empty">{playback.currentTrackLyricsLoading ? 'Loading...' : 'No Lyrics'}</div>
             )}
         </div>
     )

@@ -1,87 +1,133 @@
-/* Lyrics Display */
-.lyrics-page * {
-    --lyrics-border-margin: 35px;
-    --lyrics-horizontal-margin: 20px;
-    --lyrics-vertical-margin: 3px;
-}
-
 .lyrics-page {
     width: 100%;
-
-    min-height: var(--lyrics-collapsed-height);
-
     display: flex;
     flex-direction: column;
-
-    align-items: stretch;
     justify-content: center;
 }
 
-.lyrics-page .status {
-    margin: 10px;
-    text-align: center;
-}
-
-.lyrics-page .lyrics-line {
+.lyrics-page > .lyrics-line {
+    font-size: 1rem;
+    font-weight: 500;
     display: flex;
-
-    border-radius: 5px;
-    padding-left: 10px;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 -8px;
+    padding: 8px 12px;
+    padding-left: 38px;
 }
 
-.lyrics-page .lyrics-line > * {
-    align-content: center;
+.lyrics-page:not(.lyrics-page.synced) > .lyrics-line:has(.text.centered) {
+    padding-left: 12px;
 }
 
-.lyrics-page .lyrics-line > .start {
-    font-variant-numeric: tabular-nums;
-    font-size: 0.9em;
+.lyrics-page.synced > .lyrics-line {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--font-color-tertiary);
+    cursor: pointer;
+    opacity: 0.5;
+    border-radius: 8px;
+    transition: font 0.1s ease-in, color 0.4s ease-in, opacity 0.4s ease-in, background-color 0.2s ease-out;
 }
 
-.lyrics-page .lyrics-line > .text {
-    margin-left: var(--lyrics-horizontal-margin);
-    margin-right: var(--lyrics-horizontal-margin);
-
-    flex: 1;
-
-    height: 26px;
+.lyrics-page.synced > .lyrics-line.active {
+    font-weight: 800;
+    color: var(--brand-color);
+    opacity: 1;
 }
 
-.lyrics-page .lyrics-line > .text.centered {
-    text-align: center;
-}
-
-.lyrics-page.active:first-child {
-    margin-top: var(--lyrics-border-margin);
-}
-
-.lyrics-page.active:last-child {
-    margin-bottom: var(--lyrics-border-margin);
-}
-
-.lyrics-page .lyrics-line {
-    cursor: default;
-
-    padding-top: var(--lyrics-vertical-margin);
-    padding-bottom: var(--lyrics-vertical-margin);
-}
-
-.lyrics-page .lyrics-line:hover {
+.lyrics-page.synced > .lyrics-line:hover {
     background-color: var(--bg-color-secondary);
 }
 
-.lyrics-page.synced .lyrics-line {
-    font-weight: lighter;
+.lyrics-page.synced:has(.lyrics-line > .numbers) > .lyrics-line {
+    padding-left: 12px;
+    margin: 0 -12px;
 }
 
-.lyrics-page.synced .lyrics-line.active {
-    font-weight: bold;
+/* Empty line without timestamps */
+.lyrics-page > .lyrics-line:has(.text:empty)::before {
+    content: '...';
+    margin-top: -5px;
 }
 
-.lyrics-page.synced .lyrics-line {
-    cursor: pointer;
+/* Empty line with centered text */
+.lyrics-page > .lyrics-line:has(.text.centered:empty)::before {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
-.lyrics-page.synced .lyrics-line:active {
-    filter: brightness(0.9);
+/* Empty line with timestamps */
+.lyrics-page > .lyrics-line:has(.numbers ~ .text:empty)::before {
+    display: none !important;
+}
+
+.lyrics-page > .lyrics-line:has(.numbers ~ .text:empty)::after {
+    content: '...';
+    margin-top: -7px;
+}
+
+/* Empty line with timestamps and centered text */
+.lyrics-page > .lyrics-line:has(.numbers ~ .text.centered:empty)::after {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.lyrics-page > .lyrics-line:has(.numbers ~ .text:empty) > .text {
+    display: none;
+}
+
+/* Empty line with unsynced lyrics and centered text */
+.lyrics-page:not(.lyrics-page.synced) > .lyrics-line:has(.text.centered:empty) {
+    gap: 0;
+}
+
+/*
+.lyrics-page .lyrics-line > * {
+    align-content: center;
+}
+*/
+
+.lyrics-page > .lyrics-line > .numbers {
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    margin-top: 1px;
+}
+
+/* Align numbers and empty line when text is empty */
+.lyrics-page > .lyrics-line:has(.numbers ~ .text:empty) > .numbers {
+    margin-top: 0;
+}
+
+.lyrics-page > .lyrics-line > .text {
+    flex: 1;
+    min-height: 21px;
+}
+
+.lyrics-page > .lyrics-line > .text.centered {
+    text-align: center;
+}
+
+@media only screen and (max-width: 500px) {
+    .lyrics-page > .lyrics-line {
+        padding-left: 12px;
+        margin: 0 -12px;
+    }
+}
+
+@media only screen and (max-width: 320px) {
+    .lyrics-page.synced:has(.lyrics-line > .numbers) {
+        gap: 8px;
+    }
+
+    .lyrics-page.synced:has(.lyrics-line > .numbers) > .lyrics-line {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .lyrics-page.synced:has(.lyrics-line > .text.centered) > .lyrics-line {
+        align-items: center;
+    }
 }
