@@ -8,7 +8,7 @@ export const Lyrics = () => {
 
     const [currentTime, setCurrentTime] = useState<number | null>(null)
 
-    function tickToTimeString(raw: number): string {
+    const tickToTimeString = (raw: number) => {
         const ms = raw / 10000
 
         const totalCs = Math.round(ms / 10)
@@ -33,10 +33,12 @@ export const Lyrics = () => {
     }
 
     const lyrics = playback.currentTrackLyrics?.Lyrics
+
     const isSynced = useMemo(() => {
         if (!lyrics || lyrics[0].Start === null || lyrics[0].Start === undefined) return false
         return true
     }, [lyrics])
+
     const currentLineIndex = useMemo(() => {
         if (!audio || !lyrics) return -1
 
@@ -44,6 +46,7 @@ export const Lyrics = () => {
 
         return lyrics ? (index >= 0 ? index - 1 : lyrics.length - 1) : -1
     }, [audio, lyrics, currentTime])
+
     const nextLineStart = useMemo(() => {
         if (!audio || !lyrics) return -1
 
@@ -63,6 +66,7 @@ export const Lyrics = () => {
 
     useEffect(() => {
         const millis = timeDiff(nextLineStart, currentTime)
+
         if (millis > 0) {
             // Sets timeout to diff from next line and last currentTime update
             nextLineTimeout.current = setTimeout(() => {
@@ -112,6 +116,7 @@ export const Lyrics = () => {
     )
 
     const lineRefs = useRef<Array<HTMLDivElement | null>>([])
+
     const displayedLines = useMemo(() => {
         if (!lyrics) lineRefs.current = []
 
@@ -147,7 +152,18 @@ export const Lyrics = () => {
             if (!lyrics || line < 0) return
 
             const activeEl = lineRefs.current[line]
-            activeEl?.scrollIntoView({ behavior, block: 'center' })
+            if (!activeEl) return
+
+            const rect = activeEl.getBoundingClientRect()
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+
+            const headerHeight = document.querySelector<HTMLDivElement>('.main_header')?.offsetHeight || 0
+            const footerHeight = document.querySelector<HTMLDivElement>('.main_footer')?.offsetHeight || 0
+            const usableHeight = window.innerHeight - headerHeight - footerHeight
+
+            const targetY = scrollTop + rect.top - (usableHeight / 2 - rect.height / 2) - headerHeight
+
+            window.scrollTo({ top: targetY, behavior })
         },
         [lineRefs, lyrics]
     )
