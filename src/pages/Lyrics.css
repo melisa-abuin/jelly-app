@@ -38,6 +38,7 @@
 
 .lyrics-page.synced > .lyrics-line:hover {
     background-color: var(--bg-color-secondary);
+    transition: opacity 0.2s ease-out;
 }
 
 .lyrics-page.synced:has(.lyrics-line > .numbers) > .lyrics-line {
