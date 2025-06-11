@@ -173,6 +173,13 @@ export const Lyrics = () => {
         if (isSynced) scrollToActiveLine(currentLineIndex)
     }, [playback.currentTrack, lyrics, currentLineIndex, scrollToActiveLine, isSynced])
 
+    // Scroll to top when audio source changes (new track)
+    useEffect(() => {
+        if (audio?.src) {
+            window.scrollTo({ top: 0, behavior: 'auto' })
+        }
+    }, [audio?.src])
+
     return (
         <div className={'lyrics-page' + (lyrics ? ' active' : '') + (isSynced ? ' synced noSelect' : '')}>
             {(lyrics && displayedLines) || (
