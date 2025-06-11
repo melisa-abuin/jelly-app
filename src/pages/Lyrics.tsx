@@ -7,6 +7,7 @@ export const Lyrics = () => {
     const audio = playback.audioRef.current as HTMLAudioElement | undefined
 
     const [currentTime, setCurrentTime] = useState<number | null>(null)
+    const lineRefs = useRef<Array<HTMLDivElement | null>>([])
 
     const tickToTimeString = (raw: number) => {
         const ms = raw / 10000
@@ -103,6 +104,27 @@ export const Lyrics = () => {
         }
     }, [audio, lyrics, currentLineIndex])
 
+    const scrollToActiveLine = useCallback(
+        (line: number, behavior: ScrollBehavior = 'smooth') => {
+            if (!lyrics || line < 0) return
+
+            const activeEl = lineRefs.current[line]
+            if (!activeEl) return
+
+            const rect = activeEl.getBoundingClientRect()
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+
+            const headerHeight = document.querySelector<HTMLDivElement>('.main_header')?.offsetHeight || 0
+            const footerHeight = document.querySelector<HTMLDivElement>('.main_footer')?.offsetHeight || 0
+            const usableHeight = window.innerHeight - headerHeight - footerHeight
+
+            const targetY = scrollTop + rect.top - (usableHeight / 2 - rect.height / 2) - headerHeight
+
+            window.scrollTo({ top: targetY, behavior })
+        },
+        [lineRefs, lyrics]
+    )
+
     const goToLine = useCallback(
         (index: number) => {
             const audio = playback.audioRef.current as HTMLAudioElement | undefined
@@ -110,12 +132,11 @@ export const Lyrics = () => {
             if (audio && lyrics && lyrics[index]?.Start) {
                 setCurrentTime(lyrics[index].Start / 10000000)
                 audio.currentTime = lyrics[index].Start / 10000000
+                if (isSynced) scrollToActiveLine(index)
             }
         },
-        [playback.audioRef, lyrics]
+        [isSynced, lyrics, playback.audioRef, scrollToActiveLine]
     )
-
-    const lineRefs = useRef<Array<HTMLDivElement | null>>([])
 
     const displayedLines = useMemo(() => {
         if (!lyrics) lineRefs.current = []
@@ -146,27 +167,6 @@ export const Lyrics = () => {
         currentLineIndex,
         isSynced,
     ])
-
-    const scrollToActiveLine = useCallback(
-        (line: number, behavior: ScrollBehavior = 'smooth') => {
-            if (!lyrics || line < 0) return
-
-            const activeEl = lineRefs.current[line]
-            if (!activeEl) return
-
-            const rect = activeEl.getBoundingClientRect()
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-
-            const headerHeight = document.querySelector<HTMLDivElement>('.main_header')?.offsetHeight || 0
-            const footerHeight = document.querySelector<HTMLDivElement>('.main_footer')?.offsetHeight || 0
-            const usableHeight = window.innerHeight - headerHeight - footerHeight
-
-            const targetY = scrollTop + rect.top - (usableHeight / 2 - rect.height / 2) - headerHeight
-
-            window.scrollTo({ top: targetY, behavior })
-        },
-        [lineRefs, lyrics]
-    )
 
     // Scroll on line change
     useEffect(() => {
