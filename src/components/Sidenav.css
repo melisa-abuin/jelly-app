@@ -753,6 +753,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions {
     display: flex;
     align-items: center;
+    margin-right: -6px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon {
@@ -763,10 +764,6 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon:hover {
     background-color: var(--bg-color-tertiary);
-}
-
-.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon.settings {
-    margin-right: -6px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon > svg {

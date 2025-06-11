@@ -11,6 +11,7 @@ const useInitialState = () => {
     const currentLocation = location.pathname + location.search
 
     useEffect(() => {
+        if (currentLocation.toLowerCase().startsWith('/lyrics')) return
         if (historyStack[historyStack.length - 1] === currentLocation) return
 
         setHistoryStack(prev => [...prev, currentLocation])

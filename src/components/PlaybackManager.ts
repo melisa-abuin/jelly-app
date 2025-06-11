@@ -1,10 +1,11 @@
-import { InfiniteData, useQueryClient } from '@tanstack/react-query'
+import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query'
 import Hls, { FragmentLoaderContext, HlsConfig, LoaderCallbacks, LoaderConfiguration } from 'hls.js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
 import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { IJellyfinInfiniteProps, useJellyfinInfiniteData } from '../hooks/Jellyfin/Infinite/useJellyfinInfiniteData'
+import { AxiosError } from 'axios'
 
 export type IReviver = {
     queryKey: unknown[]
@@ -25,6 +26,14 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         const saved = localStorage.getItem('sessionPlayCount')
         return saved ? Number(saved) : 0
     })
+
+    // Lyrics
+    const [lyricsTimestamps, setLyricsTimestamps] = useState(localStorage.getItem('lyricsTimestamps') === 'on')
+    useEffect(() => localStorage.setItem('lyricsTimestamps', lyricsTimestamps ? 'on' : 'off'), [lyricsTimestamps])
+
+    const [centeredLyrics, setCenteredLyrics] = useState(localStorage.getItem('centeredLyrics') === 'on')
+    useEffect(() => localStorage.setItem('centeredLyrics', centeredLyrics ? 'on' : 'off'), [centeredLyrics])
+
     const [currentTrackIndex, setCurrentTrackIndex] = useState({
         index: localStorage.getItem('currentTrackIndex') ? Number(localStorage.getItem('currentTrackIndex')) : -1,
     })
@@ -172,6 +181,25 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             null
         )
     }, [currentShuffledIndex.index, currentTrackIndex.index, items, shuffle])
+
+    const { data: currentTrackLyrics, isLoading: currentTrackLyricsLoading } = useQuery({
+        queryKey: ['lyrics', currentTrack?.Id],
+        queryFn: async () => {
+            const id = currentTrack?.Id
+
+            if (id) {
+                try {
+                    return await api.getTrackLyrics(id)
+                } catch (e) {
+                    if (!(e instanceof AxiosError && e.response?.status === 404))
+                        console.error(e)
+                    return null
+                }
+            }
+
+            return null
+        },
+    })
 
     // Update Media Session metadata
     const updateMediaSessionMetadata = useCallback(
@@ -856,9 +884,17 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         currentTrackIndex: shuffle
             ? shuffledPlaylist.current.indexOf(currentShuffledIndex.index)
             : currentTrackIndex.index,
+        currentTrackLyricsLoading,
+        currentTrackLyrics,
         isPlaying,
         togglePlayPause,
         formatTime,
+        // Lyrics
+        lyricsTimestamps,
+        setLyricsTimestamps,
+        centeredLyrics,
+        setCenteredLyrics,
+
         volume,
         setVolume,
         playTrack: (index: number) => {

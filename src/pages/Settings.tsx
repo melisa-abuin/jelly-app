@@ -250,7 +250,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                     </p>
                 </div>
             </div>
-            <div className={'section crossfade' + (playback.isCrossfadeActive ? '' : 'section crossfade disabled')}>
+            <div className={'section crossfade' + (playback.isCrossfadeActive ? '' : ' disabled')}>
                 <div className="primary">
                     <div className="container">
                         <div className="title">Crossfade</div>
@@ -287,8 +287,45 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 <div className="desc">
                     <p>
                         Smoothly transition between tracks by gradually fading out the current song while simultaneously
-                        fading in the next, creating a seamless and immersive listening experience.
+                        fading in the next, creating a seamless and immersive listening experience
                     </p>
+                </div>
+            </div>
+            <div className="section lyrics">
+                <div className="title">Lyrics</div>
+                <div className="inner row">
+                    <div className="container">
+                        <div className="desc">
+                            <div className="subtitle">Timestamps</div>
+                            <div className="subdesc">Show timestamps with the synchronized lyrics</div>
+                        </div>
+                        <label className="switch">
+                            <input
+                                type="checkbox"
+                                checked={playback.lyricsTimestamps}
+                                onChange={e => playback.setLyricsTimestamps(e.target.checked)}
+                            ></input>
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div className="inner row">
+                    <div className="container">
+                        <div className="desc">
+                            <div className="subtitle">Alignment</div>
+                            <div className="subdesc">
+                                Center lyrics for a different look, overriding the default left alignment
+                            </div>
+                        </div>
+                        <label className="switch">
+                            <input
+                                type="checkbox"
+                                checked={playback.centeredLyrics}
+                                onChange={e => playback.setCenteredLyrics(e.target.checked)}
+                            ></input>
+                            <span className="slider"></span>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div className="section about">
