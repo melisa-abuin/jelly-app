@@ -240,14 +240,14 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                     </div>
                 </div>
                 <div className="desc">
-                    <p>
+                    <div className="info">
                         Cache your music library for seamless offline playback, with new tracks auto-syncing to saved
                         playlists, albums, or artists. Browse your{' '}
                         <Link to="/synced" className="textlink">
                             synced music library
                         </Link>{' '}
                         with ease
-                    </p>
+                    </div>
                 </div>
             </div>
             <div className={'section crossfade' + (playback.isCrossfadeActive ? '' : ' disabled')}>
@@ -285,10 +285,10 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                     </div>
                 </div>
                 <div className="desc">
-                    <p>
+                    <div className="info">
                         Smoothly transition between tracks by gradually fading out the current song while simultaneously
                         fading in the next, creating a seamless and immersive listening experience
-                    </p>
+                    </div>
                 </div>
             </div>
             <div className="section lyrics">
