@@ -78,7 +78,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
     const jellyfin = new Jellyfin({
         clientInfo: {
             name: 'Jelly Music App',
-            version: '0.1',
+            version: __VERSION__,
         },
         deviceInfo: {
             name: 'Web',
