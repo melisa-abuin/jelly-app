@@ -27,7 +27,7 @@
     cursor: pointer;
     opacity: 0.5;
     border-radius: 8px;
-    transition: font 0.1s ease-in, color 0.4s ease-in, opacity 0.4s ease-in, background-color 0.2s ease-out;
+    transition: font 0.2s ease-out, color 0.6s ease-out, opacity 0.6s ease-out, background-color 0.2s ease-out;
 }
 
 .lyrics-page.synced > .lyrics-line.active {
