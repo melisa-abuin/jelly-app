@@ -18,6 +18,7 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
         {
             totalTrackCount: number
             totalPlaytime: number
+            totalPlays: number
         },
         ApiError
     >({
@@ -49,7 +50,7 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
 
     const totalPlaytime = totals?.totalPlaytime || 0
     const totalTrackCount = totals?.totalTrackCount || 0
-    const totalPlays = infiniteData.items.reduce((sum, track) => sum + (track.UserData?.PlayCount || 0), 0)
+    const totalPlays = totals?.totalPlays || 0
 
     return {
         ...infiniteData,

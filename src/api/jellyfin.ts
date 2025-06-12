@@ -673,6 +673,8 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
 
         // Fetch total playtime (requires items for RunTimeTicks)
         let totalPlaytime = 0
+        let totalPlays = 0
+
         if (totalTrackCount > 0) {
             const fullResponse = await itemsApi.getItems(
                 {
@@ -686,13 +688,13 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 { signal: AbortSignal.timeout(20000) }
             )
 
-            totalPlaytime = (await parseItemDtos(fullResponse.data.Items)).reduce(
-                (sum, track) => sum + (track.RunTimeTicks || 0),
-                0
-            )
+            const parsedItems = await parseItemDtos(fullResponse.data.Items)
+
+            totalPlaytime = parsedItems.reduce((sum, track) => sum + (track.RunTimeTicks || 0), 0)
+            totalPlays = parsedItems.reduce((sum, track) => sum + (track.UserData?.PlayCount || 0), 0)
         }
 
-        return { totalTrackCount, totalPlaytime }
+        return { totalTrackCount, totalPlaytime, totalPlays }
     }
 
     // Same as getPlaylistTotals but returns all tracks instead of just metadata, yes its not very efficient but it be what it be
