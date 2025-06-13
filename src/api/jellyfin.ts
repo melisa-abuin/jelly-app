@@ -311,6 +311,28 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return await parseItemDtos(response.data.Items)
     }
 
+    const getAllAlbumArtists = async (
+        startIndex = 0,
+        limit = 40,
+        sortBy: ItemSortBy[] = [ItemSortBy.DateCreated],
+        sortOrder: SortOrder[] = [SortOrder.Descending]
+    ) => {
+        const artistsApi = new ArtistsApi(api.configuration)
+
+        const response = await artistsApi.getAlbumArtists(
+            {
+                userId,
+                sortBy,
+                sortOrder,
+                startIndex,
+                limit: Math.min(limit, maxLimit),
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+
+        return await parseItemDtos(response.data.Items)
+    }
+
     const getAllTracks = async (
         startIndex = 0,
         limit = 40,
@@ -992,6 +1014,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         getRecentlyAdded,
         getAllAlbums,
         getAllArtists,
+        getAllAlbumArtists,
         getAllTracks,
         getFavoriteTracks,
         getAlbumDetails,

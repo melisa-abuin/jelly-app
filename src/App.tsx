@@ -24,6 +24,7 @@ import { SidenavContextProvider } from './context/SidenavContext/SidenavContextP
 import { ThemeContextProvider } from './context/ThemeContext/ThemeContextProvider'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
 import { Album } from './pages/Album'
+import { AlbumArtists } from './pages/AlbumArtists'
 import { Albums } from './pages/Albums'
 import { Artist } from './pages/Artist'
 import { Artists } from './pages/Artists'
@@ -34,13 +35,13 @@ import { FrequentlyPlayed } from './pages/FrequentlyPlayed'
 import { Genre } from './pages/Genre'
 import { Home } from './pages/Home'
 import { Login } from './pages/Login'
+import { Lyrics } from './pages/Lyrics'
 import { Playlist } from './pages/Playlist'
 import { Queue } from './pages/Queue'
 import { RecentlyPlayed } from './pages/RecentlyPlayed'
 import { SearchResults } from './pages/SearchResults'
 import { Settings } from './pages/Settings'
 import { Tracks } from './pages/Tracks'
-import { Lyrics } from './pages/Lyrics'
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -198,6 +199,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                 <Route path="/artists" element={<Main content={Artists} filterType={'mediaItems'} />} />
                 <Route path="/artist/:artistId" element={<Main content={Artist} />} />
                 <Route path="/artist/:artistId/tracks" element={<Main content={ArtistTracks} />} />
+                <Route path="/albumartists" element={<Main content={AlbumArtists} filterType={'mediaItems'} />} />
                 <Route path="/genre/:genre" element={<Main content={Genre} filterType={'mediaItems'} />} />
                 <Route path="/playlist/:playlistId" element={<Main content={Playlist} />} />
                 <Route path="/queue" element={<Main content={Queue} />} />
