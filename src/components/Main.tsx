@@ -1,6 +1,6 @@
 import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
 import { JSX, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
 import { FilterContextProvider } from '../context/FilterContext/FilterContextProvider'
 import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
@@ -29,18 +29,12 @@ export const MainContent = ({
     const { pageTitle } = usePageTitle()
     const { goBack: previousPage } = useHistoryContext()
     const location = useLocation()
-    const navigate = useNavigate()
     const { toggleSidenav } = useSidenavContext()
     const { filter, setFilter } = useFilterContext()
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
     }, [location.pathname])
-
-    const toggleLyrics = useCallback(() => {
-        if (location.pathname.startsWith('/lyrics')) previousPage()
-        else navigate('/lyrics')
-    }, [location.pathname, previousPage, navigate])
 
     const memoHeader = useMemo(() => {
         return (
@@ -262,9 +256,7 @@ export const MainContent = ({
             </div>
         )
     }, [
-        location.pathname,
         playback.currentTrack,
-        playback.currentTrackLyrics?.Lyrics?.length,
         playback.isPlaying,
         playback.nextTrack,
         playback.previousTrack,
@@ -273,7 +265,6 @@ export const MainContent = ({
         playback.togglePlayPause,
         playback.toggleRepeat,
         playback.toggleShuffle,
-        toggleLyrics,
     ])
 
     return (

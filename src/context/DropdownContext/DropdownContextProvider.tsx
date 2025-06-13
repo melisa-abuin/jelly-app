@@ -305,14 +305,29 @@ const useInitialState = () => {
     const handlePlayNext = useCallback(
         async (item: MediaItem) => {
             const insertionPoint = (playback.currentTrackIndex ?? -1) + 1
-            const playlist = playback.currentPlaylist
-            const newPlaylist = [
-                ...playlist.slice(0, insertionPoint),
-                ...(await expandItems(item)),
-                ...playlist.slice(insertionPoint),
-            ]
 
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue', reviver: 'persistReviver' })
+            await playback.updateCurrentPlaylist(async pages => {
+                for (const [pageIndex, page] of Object.entries(pages)) {
+                    for (const [trackIndex, _track] of Object.entries(page)) {
+                        if (Number(trackIndex) === insertionPoint) {
+                            return [
+                                ...pages.slice(0, Number(pageIndex)),
+                                [
+                                    ...page.slice(0, Number(trackIndex)),
+                                    ...(await expandItems(item)),
+                                    ...page.slice(Number(trackIndex)),
+                                ],
+                                ...pages.slice(Number(pageIndex) + 1),
+                            ]
+                        }
+                    }
+                }
+
+                return [
+                    [...(pages[0]?.slice(0, 1) || []), ...(await expandItems(item)), ...(pages[0]?.slice(1) || [])],
+                    ...pages.slice(1),
+                ]
+            })
 
             if (playback.currentTrackIndex === -1) {
                 playback.playTrack(0)
@@ -325,9 +340,17 @@ const useInitialState = () => {
 
     const handleAddToQueue = useCallback(
         async (item: MediaItem) => {
-            const playlist = playback.currentPlaylist
-            const newPlaylist = [...playlist, ...(await expandItems(item))]
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue', reviver: 'persistReviver' })
+            await playback.updateCurrentPlaylist(async pages => {
+                console.log([
+                    ...pages.slice(0, pages.length - 1),
+                    [...(pages[pages.length - 1] || []), ...(await expandItems(item))],
+                ])
+
+                return [
+                    ...pages.slice(0, pages.length - 1),
+                    [...(pages[pages.length - 1] || []), ...(await expandItems(item))],
+                ]
+            })
 
             if (playback.currentTrackIndex === -1) {
                 playback.playTrack(0)

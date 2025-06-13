@@ -1,11 +1,11 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import Hls, { FragmentLoaderContext, HlsConfig, LoaderCallbacks, LoaderConfiguration } from 'hls.js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
 import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { IJellyfinInfiniteProps, useJellyfinInfiniteData } from '../hooks/Jellyfin/Infinite/useJellyfinInfiniteData'
-import { AxiosError } from 'axios'
 
 export type IReviver = {
     queryKey: unknown[]
@@ -125,50 +125,69 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return a
     }, [])
 
-    const { items: _items, hasNextPage, loadMore, isLoading } = useJellyfinInfiniteData(reviverFn)
+    const { items: _items, hasNextPage, loadMore, isLoading, pages: _pages } = useJellyfinInfiniteData(reviverFn)
     const items = useMemo(() => _items.map(addQueueId), [_items, addQueueId])
 
+    const updateCurrentPlaylist = useCallback(
+        async (cb: (pages: MediaItem[][]) => Promise<MediaItem[][]>) => {
+            if (shuffle) {
+                setShuffle(false)
+            }
+
+            const queryKey = reviverFn.queryKey
+
+            queryClient.setQueryData(queryKey, {
+                pageParams: [1],
+                pages: await cb(_pages),
+            } satisfies InfiniteData<MediaItem[], unknown>)
+        },
+        [_pages, queryClient, reviverFn.queryKey, shuffle]
+    )
+
     const setCurrentPlaylist = useCallback(
-        (props: { playlist: MediaItem[]; title: string; reviver?: IReviver | 'persistAll' | 'persistReviver' }) => {
+        (props: { playlist: MediaItem[]; title: string; reviver?: IReviver | 'persistAll' }) => {
             if (shuffle) {
                 setShuffle(false)
             }
 
             if (props.reviver !== 'persistAll') {
-                const queryKey =
-                    props.reviver === 'persistReviver'
-                        ? reviverFn.queryKey
-                        : ['reviver', ...(props.reviver?.queryKey || [])]
+                const queryKey = ['reviver', ...(props.reviver?.queryKey || [])]
 
                 queryClient.setQueryData(queryKey, {
                     pageParams: [1],
                     pages: [props.playlist],
                 } satisfies InfiniteData<MediaItem[], unknown>)
 
-                if (props.reviver !== 'persistReviver') {
-                    localStorage.setItem('reviver', JSON.stringify(props.reviver || {}))
-                    setReviver(props.reviver || ({} as IReviver))
-                }
+                localStorage.setItem('reviver', JSON.stringify(props.reviver || {}))
+                setReviver(props.reviver || ({} as IReviver))
             }
 
             localStorage.setItem('playlistTitle', props.title)
             setPlaylistTitle(props.title)
         },
-        [queryClient, reviverFn.queryKey, shuffle]
+        [queryClient, shuffle]
     )
 
     const moveItemInPlaylist = useCallback(
-        (oldIndex: number, newIndex: number) => {
-            const newItems = [...items]
-            const [movedItem] = newItems.splice(oldIndex, 1)
-            newItems.splice(newIndex, 0, movedItem)
-            setCurrentPlaylist({
-                playlist: newItems,
-                title: playlistTitle,
-                reviver: 'persistReviver',
+        async (oldIndex: number, newIndex: number) => {
+            await updateCurrentPlaylist(async pages => {
+                const flat = pages.flat()
+                const [movedItem] = flat.splice(oldIndex, 1)
+                flat.splice(newIndex, 0, movedItem)
+
+                const newPages: typeof pages = []
+                let offset = 0
+
+                for (const page of pages) {
+                    const length = page.length
+                    newPages.push(flat.slice(offset, offset + length))
+                    offset += length
+                }
+
+                return newPages
             })
         },
-        [items, setCurrentPlaylist, playlistTitle]
+        [updateCurrentPlaylist]
     )
 
     const abortControllerRef = useRef<AbortController | null>(null)
@@ -191,8 +210,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 try {
                     return await api.getTrackLyrics(id)
                 } catch (e) {
-                    if (!(e instanceof AxiosError && e.response?.status === 404))
-                        console.error(e)
+                    if (!(e instanceof AxiosError && e.response?.status === 404)) console.error(e)
                     return null
                 }
             }
@@ -909,6 +927,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         toggleRepeat,
         currentPlaylist: items,
         setCurrentPlaylist,
+        updateCurrentPlaylist,
         moveItemInPlaylist,
         loadMore,
         sessionPlayCount,

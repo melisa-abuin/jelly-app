@@ -61,5 +61,6 @@ export const useJellyfinInfiniteData = ({
             queryKey,
             queryFn: queryFnReviver,
         },
+        pages: data?.pages || [],
     }
 }
