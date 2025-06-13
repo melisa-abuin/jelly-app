@@ -34,6 +34,7 @@ import { Favorites } from './pages/Favorites'
 import { FrequentlyPlayed } from './pages/FrequentlyPlayed'
 import { Genre } from './pages/Genre'
 import { Home } from './pages/Home'
+import { InstantMix } from './pages/InstantMix'
 import { Login } from './pages/Login'
 import { Lyrics } from './pages/Lyrics'
 import { Playlist } from './pages/Playlist'
@@ -208,6 +209,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                 <Route path="/frequently" element={<Main content={FrequentlyPlayed} />} />
                 <Route path="/synced" element={<Main content={Downloads} filterType={'favorites'} />} />
                 <Route path="/settings" element={<Main content={memoSettings} />} />
+                <Route path="/instantmix/:songId" element={<Main content={InstantMix} />} />
                 <Route path="/search/:query" element={<Main content={SearchResults} />} />
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>

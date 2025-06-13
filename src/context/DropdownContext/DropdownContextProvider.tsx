@@ -420,18 +420,11 @@ const useInitialState = () => {
                         if (!context) return
 
                         closeDropdown()
-
-                        const r = await api.getInstantMixFromSong(context.item.Id)
-
-                        if (r) {
-                            playback.setCurrentPlaylist({ playlist: r, title: 'Instant Mix' })
-                            playback.playTrack(0)
-                            navigate('/queue')
-                        }
+                        navigate('/instantmix/' + context.item.Id)
                     }}
                     onMouseEnter={closeSubDropdown}
                 >
-                    <span>Play instant mix</span>
+                    <span>Go to instant mix</span>
                 </div>
             ),
             delete_playlist: (
@@ -671,7 +664,6 @@ const useInitialState = () => {
         addItemsToPlaylist,
         addToDownloads,
         addToFavorites,
-        api,
         closeDropdown,
         closeSubDropdown,
         context,
