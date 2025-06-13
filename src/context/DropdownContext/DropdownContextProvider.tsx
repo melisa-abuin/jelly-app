@@ -354,6 +354,17 @@ const useInitialState = () => {
         [closeDropdown, expandItems, playback]
     )
 
+    const handleRemoveFromQueue = useCallback(
+        async (item: MediaItem) => {
+            await playback.updateCurrentPlaylist(async pages =>
+                pages.map(page => page.filter(i => i.queueId !== item.queueId))
+            )
+
+            closeDropdown()
+        },
+        [closeDropdown, playback]
+    )
+
     // Actually working
     const handleViewAlbum = useCallback(
         (item: MediaItem) => {
@@ -400,14 +411,7 @@ const useInitialState = () => {
             remove_from_queue: (
                 <div
                     className="dropdown-item remove-queue has-removable"
-                    onClick={async () => {
-                        closeDropdown()
-
-                        if (context) {
-                            const playlist = playback.currentPlaylist.filter(item => item !== context.item)
-                            playback.setCurrentPlaylist({ playlist, title: 'Direct Queue' })
-                        }
-                    }}
+                    onClick={async () => handleRemoveFromQueue(context!.item)}
                     onMouseEnter={closeSubDropdown}
                 >
                     <span>Remove from queue</span>
@@ -674,12 +678,12 @@ const useInitialState = () => {
         handleInputChange,
         handleInputKeyDown,
         handlePlayNext,
+        handleRemoveFromQueue,
         handleViewAlbum,
         handleViewArtist,
         isTouchDevice,
         navigate,
         openSubDropdown,
-        playback,
         playlistName,
         playlists,
         removeFromDownloads,

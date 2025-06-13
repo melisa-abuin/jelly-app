@@ -121,12 +121,13 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const queueCounter = useRef(0)
 
     const addQueueId = useCallback((a: MediaItem) => {
-        a.queueId = `${a.Id}-${Date.now().toString(36)}-${queueCounter.current++}`
+        a.queueId ||= `${a.Id}-${Date.now().toString(36)}-${queueCounter.current++}`
         return a
     }, [])
 
-    const { items: _items, hasNextPage, loadMore, isLoading, pages: _pages } = useJellyfinInfiniteData(reviverFn)
+    const { items: _items, hasNextPage, loadMore, isLoading, pages: __pages } = useJellyfinInfiniteData(reviverFn)
     const items = useMemo(() => _items.map(addQueueId), [_items, addQueueId])
+    const _pages = useMemo(() => __pages.map(page => page.map(addQueueId)), [__pages, addQueueId])
 
     const updateCurrentPlaylist = useCallback(
         async (cb: (pages: MediaItem[][]) => Promise<MediaItem[][]>) => {
@@ -916,12 +917,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         isPlaying,
         togglePlayPause,
         formatTime,
-        // Lyrics
         lyricsTimestamps,
         setLyricsTimestamps,
         centeredLyrics,
         setCenteredLyrics,
-
         volume,
         setVolume,
         playTrack: (index: number) => {
