@@ -1079,6 +1079,19 @@ body.lockscroll {
     font-size: 0.85rem;
 }
 
+/* Artists page */
+.main > .main_content > .artists-page > .album-artists {
+    font-size: 0.725rem;
+    font-weight: 500;
+    text-align: right;
+    margin-right: -4px;
+    margin-bottom: 8px;
+}
+
+.main > .main_content > .artists-page > .album-artists > a.textlink {
+    color: var(--font-color-tertiary);
+}
+
 /* Responsive */
 @media only screen and (max-width: 800px) {
     body {

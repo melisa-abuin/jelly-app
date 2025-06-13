@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { MediaList } from '../components/MediaList'
 import { useJellyfinArtistsData } from '../hooks/Jellyfin/Infinite/useJellyfinArtistsData'
 
@@ -6,6 +7,11 @@ export const Artists = () => {
 
     return (
         <div className="artists-page">
+            <div className="album-artists">
+                <Link to="/albumartists" className="textlink">
+                    View album artists
+                </Link>
+            </div>
             <MediaList
                 items={items}
                 isLoading={isLoading}

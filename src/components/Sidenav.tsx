@@ -170,11 +170,6 @@ export const Sidenav = (props: { username: string }) => {
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/albumartists" onClick={closeSidenav}>
-                                Album Artists
-                            </NavLink>
-                        </li>
-                        <li>
                             <NavLink to="/favorites" onClick={closeSidenav}>
                                 Favorites
                             </NavLink>
