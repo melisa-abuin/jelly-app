@@ -340,17 +340,10 @@ const useInitialState = () => {
 
     const handleAddToQueue = useCallback(
         async (item: MediaItem) => {
-            await playback.updateCurrentPlaylist(async pages => {
-                console.log([
-                    ...pages.slice(0, pages.length - 1),
-                    [...(pages[pages.length - 1] || []), ...(await expandItems(item))],
-                ])
-
-                return [
-                    ...pages.slice(0, pages.length - 1),
-                    [...(pages[pages.length - 1] || []), ...(await expandItems(item))],
-                ]
-            })
+            await playback.updateCurrentPlaylist(async pages => [
+                ...pages.slice(0, pages.length - 1),
+                [...(pages[pages.length - 1] || []), ...(await expandItems(item))],
+            ])
 
             if (playback.currentTrackIndex === -1) {
                 playback.playTrack(0)
