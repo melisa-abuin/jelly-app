@@ -15,6 +15,7 @@ export const getPageTitle = (pageTitle: string, location: Location): string => {
         const query = decodeURIComponent(location.pathname.split('/search/')[1])
         return `Search results for '${query}'`
     }
+    if (location.pathname.startsWith('/instantmix/')) return 'Instant Mix'
 
     switch (location.pathname) {
         case '/':
