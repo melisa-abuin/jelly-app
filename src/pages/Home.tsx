@@ -26,7 +26,13 @@ export const Home = () => {
                         See more
                     </Link>
                 </div>
-                <MediaList items={recentlyPlayed} isLoading={isLoading} type="song" title={'Home - Recently Played'} />
+                <MediaList
+                    items={recentlyPlayed}
+                    infiniteData={{ pageParams: [1], pages: [recentlyPlayed || []] }}
+                    isLoading={isLoading}
+                    type="song"
+                    title={'Home - Recently Played'}
+                />
             </div>
             <div className="section">
                 <div className="section-header">
@@ -40,6 +46,7 @@ export const Home = () => {
                 </div>
                 <MediaList
                     items={frequentlyPlayed}
+                    infiniteData={{ pageParams: [1], pages: [frequentlyPlayed || []] }}
                     isLoading={isLoading}
                     type="song"
                     title={'Home - Frequently Played'}
@@ -52,7 +59,13 @@ export const Home = () => {
                         <div className="section_desc">Albums recently added to the Library</div>
                     </div>
                 </div>
-                <MediaList items={recentlyAdded} isLoading={isLoading} type="album" title={'Home - Recently Added'} />
+                <MediaList
+                    items={recentlyAdded}
+                    infiniteData={{ pageParams: [1], pages: [recentlyAdded || []] }}
+                    isLoading={isLoading}
+                    type="album"
+                    title={'Home - Recently Added'}
+                />
             </div>
         </div>
     )

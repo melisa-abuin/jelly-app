@@ -9,7 +9,14 @@ import { useJellyfinArtistData } from '../hooks/Jellyfin/useJellyfinArtistData'
 export const ArtistTracks = () => {
     const { artistId } = useParams<{ artistId: string }>()
     const { artist } = useJellyfinArtistData(artistId!)
-    const { items: allTracks, isLoading, error, reviver, loadMore } = useJellyfinArtistTracksData(artistId!)
+    const {
+        items: allTracks,
+        infiniteData,
+        isLoading,
+        error,
+        reviver,
+        loadMore,
+    } = useJellyfinArtistTracksData(artistId!)
     const { setPageTitle } = usePageTitle()
 
     useEffect(() => {
@@ -30,6 +37,7 @@ export const ArtistTracks = () => {
             {error && <div className="error">{error}</div>}
             <PlaylistTrackList
                 tracks={allTracks}
+                infiniteData={infiniteData}
                 isLoading={isLoading}
                 showType="album"
                 title={artist ? `${artist.Name}'s Tracks` : 'Artist Tracks'}

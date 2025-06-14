@@ -103,7 +103,7 @@ export const Album = () => {
                             <div
                                 className="play-album"
                                 onClick={() => {
-                                    playback.setCurrentPlaylist({ playlist: sortedTracks, title: album.Name })
+                                    playback.setCurrentPlaylistSimple({ playlist: sortedTracks, title: album.Name })
                                     playback.playTrack(0)
                                 }}
                             >
@@ -148,7 +148,7 @@ export const Album = () => {
                         {discCount > 1 && <div className={`disc ${index === 0 ? 'first' : ''}`}>Disc {discNumber}</div>}
                         <TrackList
                             tracks={tracksByDisc[Number(discNumber)]}
-                            playlist={sortedTracks}
+                            playlistItems={sortedTracks}
                             title={album.Name}
                             hidden={{ view_album: true }}
                         />

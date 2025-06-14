@@ -307,19 +307,21 @@ const useInitialState = () => {
             const insertionPoint = (playback.currentTrackIndex ?? -1) + 1
 
             await playback.updateCurrentPlaylist(async pages => {
-                for (const [pageIndex, page] of Object.entries(pages)) {
-                    for (const [trackIndex, _track] of Object.entries(page)) {
-                        if (Number(trackIndex) === insertionPoint) {
+                let trackCounter = 0
+
+                for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+                    const page = pages[pageIndex]
+
+                    for (let trackIndex = 0; trackIndex < page.length; trackIndex++) {
+                        if (trackCounter === insertionPoint) {
                             return [
-                                ...pages.slice(0, Number(pageIndex)),
-                                [
-                                    ...page.slice(0, Number(trackIndex)),
-                                    ...(await expandItems(item)),
-                                    ...page.slice(Number(trackIndex)),
-                                ],
-                                ...pages.slice(Number(pageIndex) + 1),
+                                ...pages.slice(0, pageIndex),
+                                [...page.slice(0, trackIndex), ...(await expandItems(item)), ...page.slice(trackIndex)],
+                                ...pages.slice(pageIndex + 1),
                             ]
                         }
+
+                        trackCounter++
                     }
                 }
 

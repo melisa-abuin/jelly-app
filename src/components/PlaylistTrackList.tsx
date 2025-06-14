@@ -1,4 +1,5 @@
 import { HeartFillIcon } from '@primer/octicons-react'
+import { InfiniteData } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
@@ -16,6 +17,7 @@ import { DeletingIcon, DownloadedIcon, DownloadingIcon, PlaystateAnimationTrackl
 
 export const PlaylistTrackList = ({
     tracks,
+    infiniteData = { pageParams: [], pages: [] },
     isLoading,
     playlistId,
     showType,
@@ -24,6 +26,7 @@ export const PlaylistTrackList = ({
     loadMore,
 }: {
     tracks: MediaItem[]
+    infiniteData: InfiniteData<MediaItem[], unknown> | undefined
     isLoading: boolean
     playlistId?: string
     showType?: 'artist' | 'album'
@@ -42,11 +45,11 @@ export const PlaylistTrackList = ({
             if (playback.currentTrack?.Id === track.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ playlist: tracks, title, reviver })
+                playback.setCurrentPlaylist({ pages: infiniteData, title, reviver })
                 playback.playTrack(index)
             }
         },
-        [playback, reviver, title, tracks]
+        [playback, infiniteData, reviver, title]
     )
 
     const renderTrack = (index: number, item: MediaItem | { isPlaceholder: true }) => {

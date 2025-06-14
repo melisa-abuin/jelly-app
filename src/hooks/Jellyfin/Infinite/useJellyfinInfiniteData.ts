@@ -53,6 +53,7 @@ export const useJellyfinInfiniteData = ({
 
     return {
         items: allTracks,
+        infiniteData: data,
         isLoading: isFetching || isPending,
         error: error ? error.message : null,
         hasNextPage,
@@ -61,6 +62,5 @@ export const useJellyfinInfiniteData = ({
             queryKey,
             queryFn: queryFnReviver,
         },
-        pages: data?.pages || [],
     }
 }

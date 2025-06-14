@@ -9,7 +9,7 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
     const api = useJellyfinContext()
     const itemsPerPage = 40
 
-    const { data: playlist, error: playlistError } = useQuery<MediaItem, ApiError>({
+    const { data: playlistData, error: playlistError } = useQuery<MediaItem, ApiError>({
         queryKey: ['playlist', playlistId],
         queryFn: () => api.getPlaylist(playlistId),
     })
@@ -54,7 +54,7 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
 
     return {
         ...infiniteData,
-        playlist,
+        playlistData,
         totalPlaytime,
         totalTrackCount,
         totalPlays,

@@ -125,9 +125,12 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return a
     }, [])
 
-    const { items: _items, hasNextPage, loadMore, isLoading, pages: __pages } = useJellyfinInfiniteData(reviverFn)
+    const { items: _items, hasNextPage, loadMore, isLoading, infiniteData } = useJellyfinInfiniteData(reviverFn)
     const items = useMemo(() => _items.map(addQueueId), [_items, addQueueId])
-    const _pages = useMemo(() => __pages.map(page => page.map(addQueueId)), [__pages, addQueueId])
+    const _pages = useMemo(
+        () => infiniteData?.pages.map(page => page.map(addQueueId)) || [],
+        [addQueueId, infiniteData?.pages]
+    )
 
     const updateCurrentPlaylist = useCallback(
         async (cb: (pages: MediaItem[][]) => Promise<MediaItem[][]>) => {
@@ -138,7 +141,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             const queryKey = reviverFn.queryKey
 
             queryClient.setQueryData(queryKey, {
-                pageParams: [1],
+                pageParams: Object.keys(_pages),
                 pages: await cb(_pages),
             } satisfies InfiniteData<MediaItem[], unknown>)
         },
@@ -146,7 +149,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     )
 
     const setCurrentPlaylist = useCallback(
-        (props: { playlist: MediaItem[]; title: string; reviver?: IReviver | 'persistAll' }) => {
+        (props: { pages: InfiniteData<MediaItem[], unknown>; title: string; reviver?: IReviver | 'persistAll' }) => {
             if (shuffle) {
                 setShuffle(false)
             }
@@ -154,10 +157,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             if (props.reviver !== 'persistAll') {
                 const queryKey = ['reviver', ...(props.reviver?.queryKey || [])]
 
-                queryClient.setQueryData(queryKey, {
-                    pageParams: [1],
-                    pages: [props.playlist],
-                } satisfies InfiniteData<MediaItem[], unknown>)
+                queryClient.setQueryData(queryKey, props.pages)
 
                 localStorage.setItem('reviver', JSON.stringify(props.reviver || {}))
                 setReviver(props.reviver || ({} as IReviver))
@@ -167,6 +167,16 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             setPlaylistTitle(props.title)
         },
         [queryClient, shuffle]
+    )
+
+    const setCurrentPlaylistSimple = useCallback(
+        (props: { playlist: MediaItem[]; title: string }) => {
+            setCurrentPlaylist({
+                pages: { pageParams: [1], pages: [props.playlist] },
+                title: props.title,
+            })
+        },
+        [setCurrentPlaylist]
     )
 
     const moveItemInPlaylist = useCallback(
@@ -938,6 +948,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         toggleRepeat,
         currentPlaylist: items,
         setCurrentPlaylist,
+        setCurrentPlaylistSimple,
         updateCurrentPlaylist,
         moveItemInPlaylist,
         loadMore,

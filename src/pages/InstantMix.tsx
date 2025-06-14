@@ -9,7 +9,13 @@ export const InstantMix = () => {
     return (
         <div className="tracks-page">
             {error && <div className="error">{error}</div>}
-            <MediaList items={items} isLoading={loading} type="song" title={'Instant Mix'} />
+            <MediaList
+                items={items}
+                infiniteData={{ pageParams: [1], pages: [items] }}
+                isLoading={loading}
+                type="song"
+                title={'Instant Mix'}
+            />
         </div>
     )
 }

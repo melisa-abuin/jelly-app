@@ -12,6 +12,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { HeartFillIcon } from '@primer/octicons-react'
+import { InfiniteData } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
@@ -29,7 +30,7 @@ import { DeletingIcon, DownloadedIcon, DownloadingIcon, PlaystateAnimationMedali
 
 export const MediaList = ({
     items = [],
-    playlistItems,
+    infiniteData = { pageParams: [], pages: [] },
     indexOffset = 0,
     isLoading,
     type,
@@ -42,7 +43,7 @@ export const MediaList = ({
     isDraggable,
 }: {
     items: MediaItem[] | undefined
-    playlistItems?: MediaItem[]
+    infiniteData: InfiniteData<MediaItem[], unknown> | undefined
     indexOffset?: number
     isLoading: boolean
     type: 'song' | 'album' | 'artist' | 'playlist'
@@ -111,7 +112,7 @@ export const MediaList = ({
             if (isEqual(playback.currentTrack, item)) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ playlist: playlistItems || items, title, reviver })
+                playback.setCurrentPlaylist({ pages: infiniteData, title, reviver })
                 playback.playTrack(indexOffset + index)
             }
         }

@@ -3,7 +3,7 @@ import { MediaList } from '../components/MediaList'
 import { useJellyfinArtistsData } from '../hooks/Jellyfin/Infinite/useJellyfinArtistsData'
 
 export const Artists = () => {
-    const { items, isLoading, error, reviver, loadMore } = useJellyfinArtistsData()
+    const { items, infiniteData, isLoading, error, reviver, loadMore } = useJellyfinArtistsData()
 
     return (
         <div className="artists-page">
@@ -14,6 +14,7 @@ export const Artists = () => {
             </div>
             <MediaList
                 items={items}
+                infiniteData={infiniteData}
                 isLoading={isLoading}
                 type="artist"
                 title={'Artists'}

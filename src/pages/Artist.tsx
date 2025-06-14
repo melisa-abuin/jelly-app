@@ -108,7 +108,7 @@ export const Artist = () => {
                             <div
                                 className="play-artist"
                                 onClick={() => {
-                                    playback.setCurrentPlaylist({ playlist: tracks, title: artist.Name })
+                                    playback.setCurrentPlaylistSimple({ playlist: tracks, title: artist.Name })
                                     playback.playTrack(0)
                                 }}
                             >
@@ -171,6 +171,7 @@ export const Artist = () => {
                         <div className="desc">Complete discography</div>
                         <MediaList
                             items={albums}
+                            infiniteData={{ pageParams: [1], pages: [albums] }}
                             isLoading={loading}
                             type="album"
                             albumDisplayMode="year"
@@ -186,6 +187,7 @@ export const Artist = () => {
                         <div className="desc">Additional recordings</div>
                         <MediaList
                             items={appearsInAlbums}
+                            infiniteData={{ pageParams: [1], pages: [appearsInAlbums] }}
                             isLoading={loading}
                             type="album"
                             albumDisplayMode="both"
@@ -205,6 +207,7 @@ export const Artist = () => {
                                 <div className="desc">Included in curated collections</div>
                                 <MediaList
                                     items={playlists}
+                                    infiniteData={{ pageParams: [1], pages: [playlists] }}
                                     isLoading={playlistsLoading}
                                     type="playlist"
                                     title={artist.Name ? `${artist.Name} Playlists` : 'Playlists'}

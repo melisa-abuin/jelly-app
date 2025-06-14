@@ -115,7 +115,7 @@ export const Sidenav = (props: { username: string }) => {
             if (song.Id === playback.currentTrack?.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ playlist: [song], title: 'Sidenav Track' })
+                playback.setCurrentPlaylistSimple({ playlist: [song], title: 'Sidenav Track' })
                 playback.playTrack(0)
             }
 
