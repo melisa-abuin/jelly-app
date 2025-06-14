@@ -378,7 +378,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         [api, audioRef, audioStorage, bitrate, handleHls, hlsRef]
     )
 
-    const generateShuffledPlaylist = useCallback((currentIdx: number, totalItems: number) => {
+    const generateShuffledPlaylist = useCallback(() => {
+        const currentIdx = currentTrackIndex.index
+        const totalItems = items.length
+
         const newShuffledPlaylist = [...Array(totalItems).keys()]
             .filter(i => i !== currentIdx)
             .sort(() => Math.random() - 0.5)
@@ -388,7 +391,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         }
 
         return newShuffledPlaylist
-    }, [])
+    }, [currentTrackIndex.index, items.length])
 
     const playTrack = useCallback(
         async (index: number) => {
@@ -573,7 +576,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                     return
                 } else if (repeat === 'all') {
                     playedIndices.current.clear()
-                    shuffledPlaylist.current = generateShuffledPlaylist(currentTrackIndex.index, items.length)
+                    shuffledPlaylist.current = generateShuffledPlaylist()
                     setCurrentShuffledIndex({ index: 0 })
                 } else {
                     if (audioRef.current) {
@@ -635,7 +638,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             if (prevIndex < 0) {
                 if (repeat === 'all') {
                     playedIndices.current.clear()
-                    shuffledPlaylist.current = generateShuffledPlaylist(currentTrackIndex.index, items.length)
+                    shuffledPlaylist.current = generateShuffledPlaylist()
                     setCurrentShuffledIndex({ index: shuffledPlaylist.current.length - 1 })
                 } else {
                     if (audioRef.current) {
@@ -707,7 +710,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
             if (newShuffle) {
                 playedIndices.current.clear()
-                shuffledPlaylist.current = generateShuffledPlaylist(currentTrackIndex.index, items.length)
+                shuffledPlaylist.current = generateShuffledPlaylist()
                 setCurrentShuffledIndex({ index: 0 })
 
                 if (currentTrack && currentTrackIndex.index !== -1) {
@@ -728,7 +731,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             }
             return newShuffle
         })
-    }, [currentShuffledIndex.index, currentTrack, currentTrackIndex.index, generateShuffledPlaylist, items.length])
+    }, [currentShuffledIndex.index, currentTrack, currentTrackIndex.index, generateShuffledPlaylist])
 
     const toggleRepeat = () => {
         setRepeat(prev => {
