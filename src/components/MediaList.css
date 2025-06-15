@@ -354,3 +354,35 @@
 .media-list .media-item.paused > .media-indicators > .favorited {
     color: var(--font-color-secondary);
 }
+
+.media-list .media-item > .media-indicators > .draggable {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    cursor: grab;
+    padding: 6px;
+    transition: gap 1.2s ease-out;
+}
+
+.media-list .media-item > .media-indicators > .draggable > .bar {
+    height: 2px;
+    width: 16px;
+    /* Force pixel alignment, on some devices the bars are uneven... subpixel rendering */
+    will-change: transform;
+    transform: translateZ(0);
+    border-radius: 2px;
+    background-color: var(--font-color-tertiary);
+    transition: transform 0.2s ease-out, background-color 0.2s ease-out;
+}
+
+.media-list .media-item > .media-indicators > .draggable:hover > .bar.primary {
+    transform: translateZ(0) translateY(-1px);
+    background-color: var(--font-color-secondary);
+}
+
+.media-list .media-item > .media-indicators > .draggable:hover > .bar.secondary {
+    transform: translateZ(0) translateY(1px);
+    background-color: var(--font-color-secondary);
+}

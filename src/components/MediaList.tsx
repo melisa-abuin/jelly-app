@@ -433,6 +433,13 @@ const MediaIndicators = ({ item, disableActions }: { item: MediaItem; disableAct
                     <HeartFillIcon size={16} />
                 </div>
             )}
+
+            {location.pathname.startsWith('/queue') && (
+                <div className="draggable" title="Drag">
+                    <div className="bar primary"></div>
+                    <div className="bar secondary"></div>
+                </div>
+            )}
         </div>
     )
 }
