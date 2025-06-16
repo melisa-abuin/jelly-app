@@ -14,7 +14,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities'
 import { HeartFillIcon } from '@primer/octicons-react'
 import { InfiniteData } from '@tanstack/react-query'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
@@ -409,9 +409,11 @@ const SortableItem = ({
         opacity: isDragging ? 0 : 1,
     }
 
+    const memoCb = useMemo(() => cb({ listeners }), [listeners, cb])
+
     return (
         <li ref={setNodeRef} className={isDragging ? 'active' : ''} style={style} {...attributes}>
-            {cb({ listeners })}
+            {memoCb}
         </li>
     )
 }
