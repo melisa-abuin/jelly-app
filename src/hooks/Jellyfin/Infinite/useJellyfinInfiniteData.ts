@@ -29,7 +29,6 @@ export const useJellyfinInfiniteData = ({
         queryFn,
         getNextPageParam: (lastPage, pages) => (lastPage.length >= itemsPerPage ? pages.length : undefined),
         initialPageParam,
-        staleTime: Infinity,
     })
 
     useEffect(() => {
