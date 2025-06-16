@@ -381,7 +381,7 @@ const DraggableVirtuoso = ({
             <SortableContext items={items.map(i => i.queueId || i.Id)} strategy={verticalListSortingStrategy}>
                 {children}
             </SortableContext>
-            <DragOverlay>
+            <DragOverlay className="drag-overlay">
                 {activeId
                     ? renderItem(
                           items.findIndex(i => (i.queueId || i.Id) === activeId),
