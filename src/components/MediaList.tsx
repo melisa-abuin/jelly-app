@@ -27,6 +27,7 @@ import { JellyImg } from './JellyImg'
 import { Loader } from './Loader'
 import { IReviver } from './PlaybackManager'
 import { Skeleton } from './Skeleton'
+import { Squircle } from './Squircle'
 import { DeletingIcon, DownloadedIcon, DownloadingIcon, PlaystateAnimationMedalist } from './SvgIcons'
 
 export const MediaList = ({
@@ -172,9 +173,9 @@ export const MediaList = ({
                     onTouchMove={dropdown.onTouchClear}
                     onTouchEnd={dropdown.onTouchClear}
                 >
-                    <div className="media-state">
+                    <Squircle width={46} height={46} cornerRadius={6} className="media-state">
                         <JellyImg item={item} type={'Primary'} width={46} height={46} />
-                    </div>
+                    </Squircle>
                     <div className="media-details">
                         <span className="song-name">{item.Name}</span>
                         <div className="container">
@@ -229,9 +230,9 @@ export const MediaList = ({
                     onTouchMove={dropdown.onTouchClear}
                     onTouchEnd={dropdown.onTouchClear}
                 >
-                    <div className="media-state">
+                    <Squircle width={46} height={46} cornerRadius={6} className="media-state">
                         <JellyImg item={item} type={'Primary'} width={46} height={46} />
-                    </div>
+                    </Squircle>
                     <div className="media-details">
                         <span className="song-name">{item.Name}</span>
                         <div className="container">
@@ -256,7 +257,7 @@ export const MediaList = ({
                     onTouchMove={dropdown.onTouchClear}
                     onTouchEnd={dropdown.onTouchClear}
                 >
-                    <div className="media-state">
+                    <Squircle width={46} height={46} cornerRadius={6} className="media-state">
                         <JellyImg item={item} type={'Primary'} width={46} height={46} />
 
                         <div className="overlay">
@@ -272,7 +273,7 @@ export const MediaList = ({
                                 <PlaystateAnimationMedalist width={28} height={20} className="sound-bars" />
                             </div>
                         </div>
-                    </div>
+                    </Squircle>
                     <div className="media-details">
                         <span className="song-name">{item.Name}</span>
                         <div className="container">
@@ -461,6 +462,7 @@ const MediaIndicators = ({
                 <div className="draggable" title="Drag" {...listeners}>
                     <div className="bar primary"></div>
                     <div className="bar secondary"></div>
+                    <div className="bar tertiary"></div>
                 </div>
             )}
         </div>

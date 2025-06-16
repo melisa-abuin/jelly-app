@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
 import { Loader } from '../components/Loader'
 import { MediaList } from '../components/MediaList'
+import { Squircle } from '../components/Squircle'
 import { MoreIcon } from '../components/SvgIcons'
 import { TrackList } from '../components/TrackList'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
@@ -67,7 +68,9 @@ export const Artist = () => {
     return (
         <div className="artist-page">
             <div className="artist-header">
-                <JellyImg item={artist} type={'Primary'} width={100} height={100} />
+                <Squircle width={100} height={100} cornerRadius={8} className="thumbnail">
+                    <JellyImg item={artist} type={'Primary'} width={100} height={100} />
+                </Squircle>
                 <div className="artist-details">
                     <div className="artist">{artist.Name}</div>
                     {genres.length > 0 && (

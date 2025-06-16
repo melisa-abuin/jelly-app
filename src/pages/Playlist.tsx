@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
 import { Loader } from '../components/Loader'
 import { PlaylistTrackList } from '../components/PlaylistTrackList'
+import { Squircle } from '../components/Squircle'
 import { MoreIcon } from '../components/SvgIcons'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
@@ -60,8 +61,9 @@ export const Playlist = () => {
     return (
         <div className="playlist-page">
             <div className="playlist-header">
-                <JellyImg item={playlistData} type={'Primary'} width={100} height={100} />
-
+                <Squircle width={100} height={100} cornerRadius={8} className="thumbnail">
+                    <JellyImg item={playlistData} type={'Primary'} width={100} height={100} />
+                </Squircle>
                 <div className="playlist-details">
                     <div className="title">{playlistData.Name}</div>
                     <div className="date">{formatDate(playlistData.DateCreated)}</div>

@@ -31,3 +31,22 @@
 .queue-page > .media-list .media-item {
     margin: unset;
 }
+
+.queue-page > .media-list .drag-overlay > .media-item {
+    background-color: var(--bg-color-secondary);
+}
+
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .bar.primary {
+    transform: translateZ(0) translateY(-1px);
+    background-color: var(--font-color-secondary);
+}
+
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .bar.secondary {
+    transform: translateZ(0) translateY(0);
+    background-color: var(--font-color-secondary);
+}
+
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .bar.tertiary {
+    transform: translateZ(0) translateY(1px);
+    background-color: var(--font-color-secondary);
+}
