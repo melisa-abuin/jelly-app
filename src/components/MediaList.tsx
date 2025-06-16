@@ -8,12 +8,13 @@ import {
     useSensor,
     useSensors,
 } from '@dnd-kit/core'
+import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { HeartFillIcon } from '@primer/octicons-react'
 import { InfiniteData } from '@tanstack/react-query'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
@@ -118,7 +119,11 @@ export const MediaList = ({
         }
     }
 
-    const renderItem = (index: number, item: MediaItem | { isPlaceholder: true }) => {
+    const renderItem = (
+        index: number,
+        item: MediaItem | { isPlaceholder: true },
+        listeners?: SyntheticListenerMap | undefined
+    ) => {
         if ('isPlaceholder' in item) {
             if (type === 'album') {
                 return (
@@ -140,9 +145,9 @@ export const MediaList = ({
                 )
             } else {
                 return (
-                    <li className="media-item song-item" ref={el => setRowRefs(index, el)}>
+                    <div className="media-item song-item" ref={el => setRowRefs(index, el)}>
                         <Skeleton type="song" />
-                    </li>
+                    </div>
                 )
             }
         }
@@ -189,7 +194,7 @@ export const MediaList = ({
                         </div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} />
+                    <MediaIndicators item={item} disableActions={disableActions} listeners={listeners} />
                 </div>
             )
         } else if (type === 'artist') {
@@ -210,7 +215,7 @@ export const MediaList = ({
                         <div className="song-name">{item.Name || 'Unknown Artist'}</div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} />
+                    <MediaIndicators item={item} disableActions={disableActions} listeners={listeners} />
                 </div>
             )
         } else if (type === 'playlist') {
@@ -237,7 +242,7 @@ export const MediaList = ({
                         </div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} />
+                    <MediaIndicators item={item} disableActions={disableActions} listeners={listeners} />
                 </div>
             )
         } else {
@@ -279,7 +284,7 @@ export const MediaList = ({
                         </div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} />
+                    <MediaIndicators item={item} disableActions={disableActions} listeners={listeners} />
                 </div>
             )
         }
@@ -322,9 +327,11 @@ export const MediaList = ({
                             }
 
                             return (
-                                <SortableItem key={item.queueId || item.Id} id={item.queueId || item.Id}>
-                                    {renderItem(index, item)}
-                                </SortableItem>
+                                <SortableItem
+                                    key={item.queueId || item.Id}
+                                    id={item.queueId || item.Id}
+                                    cb={({ listeners }) => renderItem(index, item, listeners)}
+                                />
                             )
                         }}
                         endReached={loadMore}
@@ -361,7 +368,7 @@ const DraggableVirtuoso = ({
     activeId: string | null
     children: React.ReactNode
 }) => {
-    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
+    const sensors = useSensors(useSensor(PointerSensor))
 
     return (
         <DndContext
@@ -386,7 +393,13 @@ const DraggableVirtuoso = ({
     )
 }
 
-const SortableItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
+const SortableItem = ({
+    id,
+    cb,
+}: {
+    id: string
+    cb: (props: { listeners: SyntheticListenerMap | undefined }) => ReactNode
+}) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
     const style = {
@@ -397,13 +410,21 @@ const SortableItem = ({ id, children }: { id: string; children: React.ReactNode 
     }
 
     return (
-        <li ref={setNodeRef} className={isDragging ? 'active' : ''} style={style} {...attributes} {...listeners}>
-            {children}
+        <li ref={setNodeRef} className={isDragging ? 'active' : ''} style={style} {...attributes}>
+            {cb({ listeners })}
         </li>
     )
 }
 
-const MediaIndicators = ({ item, disableActions }: { item: MediaItem; disableActions: boolean }) => {
+const MediaIndicators = ({
+    item,
+    disableActions,
+    listeners,
+}: {
+    item: MediaItem
+    disableActions: boolean
+    listeners?: SyntheticListenerMap | undefined
+}) => {
     return (
         <div className="media-indicators">
             {item.offlineState && (
@@ -435,7 +456,7 @@ const MediaIndicators = ({ item, disableActions }: { item: MediaItem; disableAct
             )}
 
             {location.pathname.startsWith('/queue') && (
-                <div className="draggable" title="Drag">
+                <div className="draggable" title="Drag" {...listeners}>
                     <div className="bar primary"></div>
                     <div className="bar secondary"></div>
                 </div>
