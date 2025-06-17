@@ -262,7 +262,11 @@ const useInitialState = () => {
                 }
             }
             setIsOpen(true)
-            setDisabled(true)
+
+            if (isTouchDevice) {
+                setDisabled(true)
+            }
+
             setPosition({ x: adjustedX, y: adjustedY })
             setContext(context)
             setSubDropdown({
