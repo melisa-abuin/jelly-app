@@ -1,6 +1,6 @@
 import '@fontsource-variable/inter'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
-import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
+import { QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { useCallback, useEffect, useState } from 'react'
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
@@ -43,14 +43,7 @@ import { RecentlyPlayed } from './pages/RecentlyPlayed'
 import { SearchResults } from './pages/SearchResults'
 import { Settings } from './pages/Settings'
 import { Tracks } from './pages/Tracks'
-
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            staleTime: 1000 * 60 * 5, // 5 minutes
-        },
-    },
-})
+import { queryClient } from './queryClient'
 
 const persister = createSyncStoragePersister({
     storage: window.localStorage,

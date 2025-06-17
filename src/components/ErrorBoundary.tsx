@@ -1,4 +1,5 @@
 import React, { ErrorInfo, ReactNode } from 'react'
+import { queryClient } from '../queryClient'
 import './ErrorBoundary.css'
 
 interface Props {
@@ -31,6 +32,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     }
 
     reloadPage = () => {
+        queryClient.clear()
         window.location.reload()
     }
 
