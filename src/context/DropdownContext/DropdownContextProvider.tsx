@@ -43,7 +43,7 @@ const useInitialState = () => {
         triggerRect: null,
     })
     const [isTouchDevice, setIsTouchDevice] = useState(false)
-    const scrollContext = useScrollContext()
+    const { setDisabled } = useScrollContext()
     type IMenuItems = { [x in keyof typeof menuItems]?: boolean }
     const [hidden, setHidden] = useState<IMenuItems>()
     const navigate = useNavigate()
@@ -80,6 +80,7 @@ const useInitialState = () => {
 
     const closeDropdown = useCallback(() => {
         setIsOpen(false)
+        setDisabled(false)
         setSubDropdown({
             isOpen: false,
             type: '',
@@ -91,7 +92,7 @@ const useInitialState = () => {
             measured: false,
             triggerRect: null,
         })
-    }, [])
+    }, [setDisabled])
 
     const handleInputChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => setPlaylistName(e.target.value),
@@ -227,12 +228,6 @@ const useInitialState = () => {
         setIsTouchDevice(isTouch)
     }, [])
 
-    useEffect(() => {
-        if (scrollContext && isTouchDevice) {
-            scrollContext.setDisabled(isOpen)
-        }
-    }, [isOpen, isTouchDevice, scrollContext])
-
     const openDropdown = useCallback(
         (context: IContext, x: number, y: number, ignoreMargin: boolean) => {
             let adjustedX = x
@@ -267,6 +262,7 @@ const useInitialState = () => {
                 }
             }
             setIsOpen(true)
+            setDisabled(true)
             setPosition({ x: adjustedX, y: adjustedY })
             setContext(context)
             setSubDropdown({
@@ -281,7 +277,7 @@ const useInitialState = () => {
                 triggerRect: null,
             })
         },
-        [isTouchDevice]
+        [isTouchDevice, setDisabled]
     )
 
     const expandItems = useCallback(
@@ -929,9 +925,21 @@ const useInitialState = () => {
 
     const touchTimeoutRef = useRef<number | null>(null)
 
+    const clearTouchTimer = useCallback(() => {
+        if (touchTimeoutRef.current !== null) {
+            clearTimeout(touchTimeoutRef.current)
+            touchTimeoutRef.current = null
+        }
+    }, [])
+
     const handleTouchStart = useCallback(
         (e: React.TouchEvent<HTMLElement>, context: IContext, ignoreMargin = false, hidden: IMenuItems = {}) => {
+            if ((e.target as HTMLElement).closest('.draggable')) {
+                return
+            }
+
             e.preventDefault()
+            clearTouchTimer()
             touchTimeoutRef.current = window.setTimeout(() => {
                 const touch = e.touches[0]
                 const x = touch.clientX
@@ -940,15 +948,8 @@ const useInitialState = () => {
                 setHidden(hidden)
             }, 400)
         },
-        [openDropdown]
+        [clearTouchTimer, openDropdown]
     )
-
-    const clearTouchTimer = useCallback(() => {
-        if (touchTimeoutRef.current !== null) {
-            clearTimeout(touchTimeoutRef.current)
-            touchTimeoutRef.current = null
-        }
-    }, [])
 
     return {
         isOpen,
@@ -967,6 +968,10 @@ const useInitialState = () => {
             ignoreMargin = false,
             hidden: IMenuItems = {}
         ) => {
+            if ((e.target as HTMLElement).closest('.draggable')) {
+                return
+            }
+
             e.preventDefault()
             const x = e.clientX
             const y = e.clientY + window.pageYOffset
