@@ -363,6 +363,7 @@
     width: 28px;
     height: 28px;
     padding: 6px;
+    touch-action: none;
 }
 
 .media-list .media-item > .media-indicators > .draggable > .grid {

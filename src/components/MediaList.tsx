@@ -5,6 +5,7 @@ import {
     DragOverlay,
     DragStartEvent,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
 } from '@dnd-kit/core'
@@ -389,7 +390,7 @@ const DraggableVirtuoso = ({
     activeId: string | null
     children: React.ReactNode
 }) => {
-    const sensors = useSensors(useSensor(PointerSensor))
+    const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor))
 
     return (
         <DndContext
