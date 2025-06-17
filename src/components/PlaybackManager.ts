@@ -99,27 +99,21 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const reviverFn = useMemo(() => {
         const queryFn = reviver.queryFn?.fn || ''
         const params = [...(reviver.queryFn?.params || [])]
-
         const pageParamIndex = params.findIndex(param => param === ___PAGE_PARAM_INDEX___)
-
-        if (pageParamIndex === -1) {
-            console.error('Reviver query param ___PAGE_PARAM_INDEX___ missing')
-        }
-
-        const itemsPerPage = params[pageParamIndex + 1]
-
-        // When shuffle is enabled, we set the pageParam to 'Random' to fetch random items
-        // Note; Hardcoded it to 2 params after the pageParam, should improve this
-        if (shuffle) {
-            params[pageParamIndex + 2] = 'Random'
-        }
 
         return {
             queryKey: ['reviver', ...(shuffle ? ['shuffle'] : []), ...(reviver.queryKey || [])],
             queryFn: async ({ pageParam = 0 }) => {
+                const itemsPerPage = params[pageParamIndex + 1]
                 const startIndex = (pageParam as number) * (itemsPerPage as number)
 
                 params[pageParamIndex] = startIndex
+
+                // When shuffle is enabled, we set the pageParam to 'Random' to fetch random items
+                // Note; Hardcoded it to 2 params after the pageParam, should improve this
+                if (shuffle) {
+                    params[pageParamIndex + 2] = 'Random'
+                }
 
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 return (await (api as any)[queryFn]?.(...params)) || []
@@ -128,6 +122,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             // NOTE; The reviverPageIndex is probably wrong but its not really an issue for now
             initialPageParam: Number(localStorage.getItem('reviverPageIndex')) || 0,
             allowDuplicates: true,
+            enabled: params.length > 0,
         } satisfies IJellyfinInfiniteProps
     }, [api, reviver.queryFn, reviver.queryKey, shuffle])
 
@@ -135,6 +130,12 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const addQueueId = useCallback((a: MediaItem) => {
         a.queueId ||= `${a.Id}-${Date.now().toString(36)}-${queueCounter.current++}`
+        return a
+    }, [])
+
+    // Playlist can contain duplicates, so we need to ensure each item has a unique queueId
+    const updateQueueId = useCallback((a: MediaItem) => {
+        a.queueId = `${a.Id}-${Date.now().toString(36)}-${queueCounter.current++}`
         return a
     }, [])
 
@@ -151,10 +152,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
             queryClient.setQueryData(queryKey, {
                 pageParams: Object.keys(_pages),
-                pages: await cb(_pages),
+                pages: (await cb(_pages)).map(page => page.map(updateQueueId)),
             } satisfies InfiniteData<MediaItem[], unknown>)
         },
-        [_pages, queryClient, reviverFn.queryKey]
+        [_pages, updateQueueId, queryClient, reviverFn.queryKey]
     )
 
     const setCurrentPlaylist = useCallback(

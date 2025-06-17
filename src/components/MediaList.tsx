@@ -106,7 +106,7 @@ export const MediaList = ({
     const isEqual = (a?: MediaItem, b?: MediaItem) => {
         if (!a || !b) return false
 
-        return (a.queueId && b.queueId && a.queueId === b.queueId) || a.Id === b.Id
+        return a.queueId && b.queueId ? a.queueId === b.queueId : a.Id === b.Id
     }
 
     const handleSongClick = (item: MediaItem, index: number) => {
@@ -195,7 +195,12 @@ export const MediaList = ({
                         </div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} listeners={listeners} />
+                    <MediaIndicators
+                        item={item}
+                        disableActions={disableActions}
+                        listeners={listeners}
+                        isDraggable={isDraggable}
+                    />
                 </div>
             )
         } else if (type === 'artist') {
@@ -216,7 +221,12 @@ export const MediaList = ({
                         <div className="song-name">{item.Name || 'Unknown Artist'}</div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} listeners={listeners} />
+                    <MediaIndicators
+                        item={item}
+                        disableActions={disableActions}
+                        listeners={listeners}
+                        isDraggable={isDraggable}
+                    />
                 </div>
             )
         } else if (type === 'playlist') {
@@ -243,7 +253,12 @@ export const MediaList = ({
                         </div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} listeners={listeners} />
+                    <MediaIndicators
+                        item={item}
+                        disableActions={disableActions}
+                        listeners={listeners}
+                        isDraggable={isDraggable}
+                    />
                 </div>
             )
         } else {
@@ -285,7 +300,12 @@ export const MediaList = ({
                         </div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} listeners={listeners} />
+                    <MediaIndicators
+                        item={item}
+                        disableActions={disableActions}
+                        listeners={listeners}
+                        isDraggable={isDraggable}
+                    />
                 </div>
             )
         }
@@ -423,10 +443,12 @@ const MediaIndicators = ({
     item,
     disableActions,
     listeners,
+    isDraggable,
 }: {
     item: MediaItem
     disableActions: boolean
     listeners?: SyntheticListenerMap | undefined
+    isDraggable?: boolean
 }) => {
     return (
         <div className="media-indicators">
@@ -458,7 +480,7 @@ const MediaIndicators = ({
                 </div>
             )}
 
-            {location.pathname.startsWith('/queue') && (
+            {isDraggable && (
                 <div className="draggable" title="Drag" {...listeners}>
                     <div className="grid">
                         <div className="dot"></div>
