@@ -352,7 +352,7 @@ const Progressbar = () => {
                 return
             }
 
-            // restoreProgress()
+            restoreProgress()
         }
 
         const handleBuffered = () => {
