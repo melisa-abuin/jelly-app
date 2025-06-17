@@ -7,6 +7,7 @@ import { useDownloadContext } from '../context/DownloadContext/DownloadContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useThemeContext } from '../context/ThemeContext/ThemeContext'
+import { persister } from '../queryClient'
 import { formatFileSize } from '../utils/formatFileSize'
 import './Settings.css'
 
@@ -81,6 +82,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
             setClearing(true)
             await audioStorage.clearAllDownloads()
             queryClient.clear()
+            await persister.removeClient()
             clearQueue()
             await refreshStorageStats()
         } catch (error) {

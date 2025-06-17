@@ -1,5 +1,4 @@
 import '@fontsource-variable/inter'
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { useCallback, useEffect, useState } from 'react'
@@ -43,11 +42,7 @@ import { RecentlyPlayed } from './pages/RecentlyPlayed'
 import { SearchResults } from './pages/SearchResults'
 import { Settings } from './pages/Settings'
 import { Tracks } from './pages/Tracks'
-import { queryClient } from './queryClient'
-
-const persister = createSyncStoragePersister({
-    storage: window.localStorage,
-})
+import { persister, queryClient } from './queryClient'
 
 export const App = () => {
     return (
@@ -78,13 +73,14 @@ const RoutedApp = () => {
         localStorage.setItem('auth', JSON.stringify(authData))
     }
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setIsLoggingOut(true)
         localStorage.removeItem('repeatMode')
         setAuth(null)
         localStorage.removeItem('auth')
         setIsLoggingOut(false)
         queryClient.clear()
+        await persister.removeClient()
     }
 
     useEffect(() => {
