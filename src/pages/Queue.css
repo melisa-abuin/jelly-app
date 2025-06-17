@@ -36,17 +36,47 @@
     background-color: var(--bg-color-secondary);
 }
 
-.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .bar.primary {
-    transform: translateZ(0) translateY(-1px);
+/* dnd handle */
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .grid > .dot {
     background-color: var(--font-color-secondary);
 }
 
-.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .bar.secondary {
-    transform: translateZ(0) translateY(0);
-    background-color: var(--font-color-secondary);
+/* Top-left */
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .grid > .dot:nth-child(1) {
+    transform: translate(-1px, -1px);
 }
 
-.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .bar.tertiary {
-    transform: translateZ(0) translateY(1px);
-    background-color: var(--font-color-secondary);
+/* Top-center */
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .grid > .dot:nth-child(2) {
+    transform: translate(0, -1px);
+}
+
+/* Top-right */
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .grid > .dot:nth-child(3) {
+    transform: translate(1px, -1px);
+}
+
+/* Middle-left */
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .grid > .dot:nth-child(4) {
+    transform: translate(-1px, 0);
+}
+
+/* Middle-right */
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .grid > .dot:nth-child(6) {
+    transform: translate(1px, 0);
+}
+
+/* Bottom-left */
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .grid > .dot:nth-child(7) {
+    transform: translate(-1px, 1px);
+}
+
+/* Bottom-center */
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .grid > .dot:nth-child(8) {
+    transform: translate(0, 1px);
+}
+
+/* Bottom-right */
+.queue-page > .media-list .drag-overlay > .media-item > .media-indicators > .draggable > .grid > .dot:nth-child(9) {
+    transform: translate(1px, 1px);
 }

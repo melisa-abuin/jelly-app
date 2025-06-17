@@ -357,37 +357,69 @@
 
 .media-list .media-item > .media-indicators > .draggable {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
     cursor: grab;
+    width: 28px;
+    height: 28px;
     padding: 6px;
-    transition: gap 1.2s ease-out;
 }
 
-.media-list .media-item > .media-indicators > .draggable > .bar {
-    height: 1px;
-    width: 20px;
-    /* Force pixel alignment, on some devices the bars are uneven... subpixel rendering */
-    will-change: transform;
-    transform: translateZ(0);
-    border-radius: 2px;
+.media-list .media-item > .media-indicators > .draggable > .grid {
+    display: grid;
+    grid-template: repeat(3, 3px) / repeat(3, 3px);
+    gap: 2px;
+    justify-content: center;
+    align-content: center;
+}
+
+.media-list .media-item > .media-indicators > .draggable > .grid > .dot {
+    width: 2px;
+    height: 2px;
     background-color: var(--font-color-tertiary);
-    transition: transform 0.2s ease-out, background-color 0.2s ease-out;
+    transition: background-color 0.2s ease-out, transform 0.2s ease-out;
 }
 
-.media-list .media-item > .media-indicators > .draggable:hover > .bar.primary {
-    transform: translateZ(0) translateY(-1px);
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot {
     background-color: var(--font-color-secondary);
 }
 
-.media-list .media-item > .media-indicators > .draggable:hover > .bar.secondary {
-    transform: translateZ(0) translateY(0);
-    background-color: var(--font-color-secondary);
+/* Top-left */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(1) {
+    transform: translate(-1px, -1px);
 }
 
-.media-list .media-item > .media-indicators > .draggable:hover > .bar.tertiary {
-    transform: translateZ(0) translateY(1px);
-    background-color: var(--font-color-secondary);
+/* Top-center */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(2) {
+    transform: translate(0, -1px);
+}
+
+/* Top-right */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(3) {
+    transform: translate(1px, -1px);
+}
+
+/* Middle-left */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(4) {
+    transform: translate(-1px, 0);
+}
+
+/* Middle-right */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(6) {
+    transform: translate(1px, 0);
+}
+
+/* Bottom-left */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(7) {
+    transform: translate(-1px, 1px);
+}
+
+/* Bottom-center */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(8) {
+    transform: translate(0, 1px);
+}
+
+/* Bottom-right */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(9) {
+    transform: translate(1px, 1px);
 }

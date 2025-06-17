@@ -460,9 +460,17 @@ const MediaIndicators = ({
 
             {location.pathname.startsWith('/queue') && (
                 <div className="draggable" title="Drag" {...listeners}>
-                    <div className="bar primary"></div>
-                    <div className="bar secondary"></div>
-                    <div className="bar tertiary"></div>
+                    <div className="grid">
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                    </div>
                 </div>
             )}
         </div>
