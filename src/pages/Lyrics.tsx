@@ -1,4 +1,5 @@
 import { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Loader } from '../components/Loader'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import './Lyrics.css'
 
@@ -183,7 +184,7 @@ export const Lyrics = () => {
     return (
         <div className={'lyrics-page' + (lyrics ? ' active' : '') + (isSynced ? ' synced noSelect' : '')}>
             {(lyrics && displayedLines) || (
-                <div className="empty">{playback.currentTrackLyricsLoading ? 'Loading...' : 'No Lyrics'}</div>
+                <div className="empty">{playback.currentTrackLyricsLoading ? <Loader /> : 'No Lyrics'}</div>
             )}
         </div>
     )

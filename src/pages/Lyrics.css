@@ -12,12 +12,11 @@
     align-items: flex-start;
     gap: 12px;
     margin: 0 -8px;
-    padding: 8px 12px;
-    padding-left: 38px;
+    padding: 8px 38px;
 }
 
 .lyrics-page:not(.lyrics-page.synced) > .lyrics-line:has(.text.centered) {
-    padding-left: 12px;
+    padding: 8px 12px;
 }
 
 .lyrics-page.synced > .lyrics-line {
@@ -42,7 +41,7 @@
 }
 
 .lyrics-page.synced:has(.lyrics-line > .numbers) > .lyrics-line {
-    padding-left: 12px;
+    padding: 8px 12px;
     margin: 0 -12px;
 }
 
@@ -85,6 +84,11 @@
     gap: 0;
 }
 
+/* Empty line with synced lyrics and centered text but only without numbers */
+.lyrics-page.synced > .lyrics-line:has(.text.centered:empty):not(:has(.numbers)) {
+    gap: 0;
+}
+
 /*
 .lyrics-page .lyrics-line > * {
     align-content: center;
@@ -123,7 +127,7 @@
 
 @media only screen and (max-width: 500px) {
     .lyrics-page > .lyrics-line {
-        padding-left: 12px;
+        padding: 8px 12px;
         margin: 0 -12px;
     }
 }
@@ -138,7 +142,7 @@
         gap: 2px;
     }
 
-    .lyrics-page.synced:has(.lyrics-line > .text.centered) > .lyrics-line {
+    .lyrics-page.synced:has(.lyrics-line > .text.centered):has(.lyrics-line > .numbers) > .lyrics-line {
         align-items: center;
     }
 }
