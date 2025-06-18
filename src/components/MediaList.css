@@ -377,6 +377,9 @@
 .media-list .media-item > .media-indicators > .draggable > .grid > .dot {
     width: 2px;
     height: 2px;
+    /* Force pixel alignment, on some devices the dots are uneven... subpixel rendering */
+    will-change: transform;
+    transform: translateZ(0);
     background-color: var(--font-color-tertiary);
     transition: background-color 0.2s ease-out, transform 0.2s ease-out;
 }
@@ -387,40 +390,40 @@
 
 /* Top-left */
 .media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(1) {
-    transform: translate(-1px, -1px);
+    transform: translate(-1px, -1px) translateZ(0);
 }
 
 /* Top-center */
 .media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(2) {
-    transform: translate(0, -1px);
+    transform: translate(0, -1px) translateZ(0);
 }
 
 /* Top-right */
 .media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(3) {
-    transform: translate(1px, -1px);
+    transform: translate(1px, -1px) translateZ(0);
 }
 
 /* Middle-left */
 .media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(4) {
-    transform: translate(-1px, 0);
+    transform: translate(-1px, 0) translateZ(0);
 }
 
 /* Middle-right */
 .media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(6) {
-    transform: translate(1px, 0);
+    transform: translate(1px, 0) translateZ(0);
 }
 
 /* Bottom-left */
 .media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(7) {
-    transform: translate(-1px, 1px);
+    transform: translate(-1px, 1px) translateZ(0);
 }
 
 /* Bottom-center */
 .media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(8) {
-    transform: translate(0, 1px);
+    transform: translate(0, 1px) translateZ(0);
 }
 
 /* Bottom-right */
 .media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(9) {
-    transform: translate(1px, 1px);
+    transform: translate(1px, 1px) translateZ(0);
 }
