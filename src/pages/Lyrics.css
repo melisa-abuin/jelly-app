@@ -49,6 +49,7 @@
 .lyrics-page > .lyrics-line:has(.text:empty)::before {
     content: '...';
     margin-top: -5px;
+    letter-spacing: 1px;
 }
 
 /* Empty line with centered text */
@@ -66,6 +67,7 @@
 .lyrics-page > .lyrics-line:has(.numbers ~ .text:empty)::after {
     content: '...';
     margin-top: -7px;
+    letter-spacing: 1px;
 }
 
 /* Empty line with timestamps and centered text */
