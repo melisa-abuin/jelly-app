@@ -30,9 +30,9 @@ FROM nginx:mainline-alpine AS server
 RUN apk --update add jq
 
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/src/config.template.json /config.template.json
-COPY --from=builder /app/docker-entrypoint.sh /jelly-app.docker-entrypoint.sh
+COPY --from=builder /app/docker/docker-entrypoint.sh /jelly-app.docker-entrypoint.sh
 
 ENTRYPOINT ["/jelly-app.docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
