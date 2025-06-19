@@ -725,6 +725,21 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     background-color: var(--volume-dot-color-active);
 }
 
+.sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input::-moz-range-thumb {
+    appearance: none;
+    border: none;
+    width: 13px;
+    height: 13px;
+    border-radius: 100%;
+    background-color: var(--volume-dot-color);
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.2s ease-out;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input::-moz-range-thumb:active {
+    background-color: var(--volume-dot-color-active);
+}
+
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account {
     display: flex;
     justify-content: space-between;
@@ -753,6 +768,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions {
     display: flex;
     align-items: center;
+    margin-right: -6px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon {
@@ -763,10 +779,6 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon:hover {
     background-color: var(--bg-color-tertiary);
-}
-
-.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon.settings {
-    margin-right: -6px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon > svg {

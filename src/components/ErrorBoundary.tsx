@@ -1,4 +1,5 @@
 import React, { ErrorInfo, ReactNode } from 'react'
+import { persister, queryClient } from '../queryClient'
 import './ErrorBoundary.css'
 
 interface Props {
@@ -30,7 +31,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
         this.setState(({ showDetails }) => ({ showDetails: !showDetails }))
     }
 
-    reloadPage = () => {
+    reloadPage = async () => {
+        queryClient.clear()
+        await persister.removeClient()
         window.location.reload()
     }
 
@@ -47,27 +50,30 @@ export class ErrorBoundary extends React.Component<Props, State> {
                         <div className="container">
                             <div className="title">Something went wrong</div>
                             <div className="description">
-                                Please reveal the error details below and report them on our{' '}
+                                Try clearing cache and refreshing. If that fails, reveal the error details below and
+                                report them on{' '}
                                 <a
                                     href="https://github.com/Stannnnn/jelly-app/issues"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="textlink"
                                 >
-                                    GitHub page.
+                                    GitHub.
                                 </a>{' '}
                                 Consider removing sensitive info (like IP or URL) before sharing.
                             </div>
-                            <div className="error-actions">
+                            <div className="error-actions noSelect">
                                 <button onClick={this.toggleDetails} className="btn-details">
                                     {showDetails ? 'Hide Details' : 'Show Error'}
                                 </button>
                                 <button onClick={this.reloadPage} className="btn-reload">
-                                    Reload Page
+                                    Clear & Refresh
                                 </button>
                             </div>
                         </div>
-                        {showDetails && error && <pre className="error-details">{error.stack || error.toString()}</pre>}
+                        <pre className={`error-details ${showDetails && error ? 'visible' : 'hidden'}`}>
+                            {error?.stack || error?.toString()}
+                        </pre>
                     </div>
                     <div className="disclaimer">Jelly Music App - Version {__VERSION__}</div>
                 </div>

@@ -12,10 +12,16 @@
     display: block;
     width: 100px;
     height: 100px;
-    object-fit: cover;
     border-radius: 8px;
     margin-right: 20px;
     background-color: var(--bg-color-secondary);
+}
+
+.playlist-page > .playlist-header > .thumbnail > .thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
 }
 
 .playlist-page > .playlist-header > .playlist-details {

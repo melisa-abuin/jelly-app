@@ -307,13 +307,10 @@ const Progressbar = () => {
         progressRef.current?.style.setProperty('--transition-duration', `0s`)
         progressRef.current?.style.setProperty('--progress-width', `${calcProgress()}%`)
 
-        if (playback.isPlaying) {
+        if (playback.isPlaying && audio?.currentTime) {
             void progressRef.current?.offsetWidth // Trigger reflow
 
-            progressRef.current?.style.setProperty(
-                '--transition-duration',
-                `${calcDuration() - (audio?.currentTime || 0)}s`
-            )
+            progressRef.current?.style.setProperty('--transition-duration', `${calcDuration() - audio.currentTime}s`)
             progressRef.current?.style.setProperty('--progress-width', `100%`)
         }
     }, [audio?.currentTime, calcDuration, calcProgress, playback.isPlaying])

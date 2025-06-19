@@ -5,14 +5,17 @@ import {
     DragOverlay,
     DragStartEvent,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
 } from '@dnd-kit/core'
+import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { HeartFillIcon } from '@primer/octicons-react'
-import { useState } from 'react'
+import { InfiniteData } from '@tanstack/react-query'
+import { ReactNode, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 import { MediaItem } from '../api/jellyfin'
@@ -25,11 +28,12 @@ import { JellyImg } from './JellyImg'
 import { Loader } from './Loader'
 import { IReviver } from './PlaybackManager'
 import { Skeleton } from './Skeleton'
+import { Squircle } from './Squircle'
 import { DeletingIcon, DownloadedIcon, DownloadingIcon, PlaystateAnimationMedalist } from './SvgIcons'
 
 export const MediaList = ({
     items = [],
-    playlistItems,
+    infiniteData = { pageParams: [], pages: [] },
     indexOffset = 0,
     isLoading,
     type,
@@ -42,7 +46,7 @@ export const MediaList = ({
     isDraggable,
 }: {
     items: MediaItem[] | undefined
-    playlistItems?: MediaItem[]
+    infiniteData: InfiniteData<MediaItem[], unknown> | undefined
     indexOffset?: number
     isLoading: boolean
     type: 'song' | 'album' | 'artist' | 'playlist'
@@ -103,7 +107,7 @@ export const MediaList = ({
     const isEqual = (a?: MediaItem, b?: MediaItem) => {
         if (!a || !b) return false
 
-        return (a.queueId && b.queueId && a.queueId === b.queueId) || a.Id === b.Id
+        return a.queueId && b.queueId ? a.queueId === b.queueId : a.Id === b.Id
     }
 
     const handleSongClick = (item: MediaItem, index: number) => {
@@ -111,13 +115,17 @@ export const MediaList = ({
             if (isEqual(playback.currentTrack, item)) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ playlist: playlistItems || items, title, reviver })
+                playback.setCurrentPlaylist({ pages: infiniteData, title, reviver })
                 playback.playTrack(indexOffset + index)
             }
         }
     }
 
-    const renderItem = (index: number, item: MediaItem | { isPlaceholder: true }) => {
+    const renderItem = (
+        index: number,
+        item: MediaItem | { isPlaceholder: true },
+        listeners?: SyntheticListenerMap | undefined
+    ) => {
         if ('isPlaceholder' in item) {
             if (type === 'album') {
                 return (
@@ -139,9 +147,9 @@ export const MediaList = ({
                 )
             } else {
                 return (
-                    <li className="media-item song-item" ref={el => setRowRefs(index, el)}>
+                    <div className="media-item song-item" ref={el => setRowRefs(index, el)}>
                         <Skeleton type="song" />
-                    </li>
+                    </div>
                 )
             }
         }
@@ -166,9 +174,9 @@ export const MediaList = ({
                     onTouchMove={dropdown.onTouchClear}
                     onTouchEnd={dropdown.onTouchClear}
                 >
-                    <div className="media-state">
+                    <Squircle width={46} height={46} cornerRadius={6} className="media-state">
                         <JellyImg item={item} type={'Primary'} width={46} height={46} />
-                    </div>
+                    </Squircle>
                     <div className="media-details">
                         <span className="song-name">{item.Name}</span>
                         <div className="container">
@@ -188,7 +196,12 @@ export const MediaList = ({
                         </div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} />
+                    <MediaIndicators
+                        item={item}
+                        disableActions={disableActions}
+                        listeners={listeners}
+                        isDraggable={isDraggable}
+                    />
                 </div>
             )
         } else if (type === 'artist') {
@@ -209,7 +222,12 @@ export const MediaList = ({
                         <div className="song-name">{item.Name || 'Unknown Artist'}</div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} />
+                    <MediaIndicators
+                        item={item}
+                        disableActions={disableActions}
+                        listeners={listeners}
+                        isDraggable={isDraggable}
+                    />
                 </div>
             )
         } else if (type === 'playlist') {
@@ -223,9 +241,9 @@ export const MediaList = ({
                     onTouchMove={dropdown.onTouchClear}
                     onTouchEnd={dropdown.onTouchClear}
                 >
-                    <div className="media-state">
+                    <Squircle width={46} height={46} cornerRadius={6} className="media-state">
                         <JellyImg item={item} type={'Primary'} width={46} height={46} />
-                    </div>
+                    </Squircle>
                     <div className="media-details">
                         <span className="song-name">{item.Name}</span>
                         <div className="container">
@@ -236,7 +254,12 @@ export const MediaList = ({
                         </div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} />
+                    <MediaIndicators
+                        item={item}
+                        disableActions={disableActions}
+                        listeners={listeners}
+                        isDraggable={isDraggable}
+                    />
                 </div>
             )
         } else {
@@ -250,7 +273,7 @@ export const MediaList = ({
                     onTouchMove={dropdown.onTouchClear}
                     onTouchEnd={dropdown.onTouchClear}
                 >
-                    <div className="media-state">
+                    <Squircle width={46} height={46} cornerRadius={6} className="media-state">
                         <JellyImg item={item} type={'Primary'} width={46} height={46} />
 
                         <div className="overlay">
@@ -266,7 +289,7 @@ export const MediaList = ({
                                 <PlaystateAnimationMedalist width={28} height={20} className="sound-bars" />
                             </div>
                         </div>
-                    </div>
+                    </Squircle>
                     <div className="media-details">
                         <span className="song-name">{item.Name}</span>
                         <div className="container">
@@ -278,7 +301,12 @@ export const MediaList = ({
                         </div>
                     </div>
 
-                    <MediaIndicators item={item} disableActions={disableActions} />
+                    <MediaIndicators
+                        item={item}
+                        disableActions={disableActions}
+                        listeners={listeners}
+                        isDraggable={isDraggable}
+                    />
                 </div>
             )
         }
@@ -321,9 +349,11 @@ export const MediaList = ({
                             }
 
                             return (
-                                <SortableItem key={item.queueId || item.Id} id={item.queueId || item.Id}>
-                                    {renderItem(index, item)}
-                                </SortableItem>
+                                <SortableItem
+                                    key={item.queueId || item.Id}
+                                    id={item.queueId || item.Id}
+                                    cb={({ listeners }) => renderItem(index, item, listeners)}
+                                />
                             )
                         }}
                         endReached={loadMore}
@@ -360,7 +390,7 @@ const DraggableVirtuoso = ({
     activeId: string | null
     children: React.ReactNode
 }) => {
-    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
+    const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor))
 
     return (
         <DndContext
@@ -373,7 +403,7 @@ const DraggableVirtuoso = ({
             <SortableContext items={items.map(i => i.queueId || i.Id)} strategy={verticalListSortingStrategy}>
                 {children}
             </SortableContext>
-            <DragOverlay>
+            <DragOverlay className="drag-overlay">
                 {activeId
                     ? renderItem(
                           items.findIndex(i => (i.queueId || i.Id) === activeId),
@@ -385,7 +415,13 @@ const DraggableVirtuoso = ({
     )
 }
 
-const SortableItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
+const SortableItem = ({
+    id,
+    cb,
+}: {
+    id: string
+    cb: (props: { listeners: SyntheticListenerMap | undefined }) => ReactNode
+}) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
     const style = {
@@ -395,14 +431,26 @@ const SortableItem = ({ id, children }: { id: string; children: React.ReactNode 
         opacity: isDragging ? 0 : 1,
     }
 
+    const memoCb = useMemo(() => cb({ listeners }), [listeners, cb])
+
     return (
-        <li ref={setNodeRef} className={isDragging ? 'active' : ''} style={style} {...attributes} {...listeners}>
-            {children}
+        <li ref={setNodeRef} className={isDragging ? 'active' : ''} style={style} {...attributes}>
+            {memoCb}
         </li>
     )
 }
 
-const MediaIndicators = ({ item, disableActions }: { item: MediaItem; disableActions: boolean }) => {
+const MediaIndicators = ({
+    item,
+    disableActions,
+    listeners,
+    isDraggable,
+}: {
+    item: MediaItem
+    disableActions: boolean
+    listeners?: SyntheticListenerMap | undefined
+    isDraggable?: boolean
+}) => {
     return (
         <div className="media-indicators">
             {item.offlineState && (
@@ -430,6 +478,22 @@ const MediaIndicators = ({ item, disableActions }: { item: MediaItem; disableAct
             {!disableActions && item.UserData?.IsFavorite && location.pathname !== '/favorites' && (
                 <div className="favorited" title="Favorited">
                     <HeartFillIcon size={16} />
+                </div>
+            )}
+
+            {isDraggable && (
+                <div className="draggable" title="Drag" {...listeners}>
+                    <div className="grid">
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                    </div>
                 </div>
             )}
         </div>

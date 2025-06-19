@@ -13,10 +13,16 @@
     display: block;
     width: 100px;
     height: 100px;
-    object-fit: cover;
     border-radius: 8px;
     margin-right: 20px;
     background-color: var(--bg-color-secondary);
+}
+
+.artist-page > .artist-header > .thumbnail > .thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
 }
 
 .artist-page > .artist-header > .artist-details {

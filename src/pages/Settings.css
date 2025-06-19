@@ -65,7 +65,6 @@
     border-radius: 10px;
     outline: 3px solid rgba(0, 0, 0, 0);
     background-size: cover;
-    background-repeat: no-repeat;
     background-color: var(--bg-color-secondary);
     transition: outline-color 0.2s ease-out;
 }
@@ -239,7 +238,7 @@
 }
 
 .switch > input:checked + .slider:before {
-    transform: translateX(12px);
+    transform: translateX(11px);
     background-color: var(--font-color-inverted);
 }
 
@@ -340,26 +339,65 @@
     background-color: var(--volume-dot-color-active);
 }
 
+.settings-page > .section.crossfade > .primary > .options > .option > .slider > input::-moz-range-thumb {
+    appearance: none;
+    border: none;
+    width: 13px;
+    height: 13px;
+    border-radius: 100%;
+    background-color: var(--volume-dot-color);
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.2s ease-out;
+}
+
+.settings-page > .section.crossfade > .primary > .options > .option > .slider > input::-moz-range-thumb:active {
+    background-color: var(--volume-dot-color-active);
+}
+
+/* Lyrics */
+.settings-page > .section.lyrics > .inner:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+.settings-page > .section.lyrics .desc > .subtitle {
+    margin-bottom: 0;
+}
+
+.settings-page > .section.lyrics .desc > .subdesc {
+    color: var(--font-color-tertiary);
+}
+
+.settings-page > .section.lyrics > .inner > .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
 /* About and Session */
-.settings-page > .section > .desc {
+.settings-page > .section .desc {
     font-size: 0.75rem;
     line-height: 1.5;
     color: var(--font-color-secondary);
 }
 
-.settings-page > .section > .desc > .subtitle {
+.settings-page > .section .desc > .subtitle {
     font-weight: 500;
     margin-bottom: 4px;
 }
 
-.settings-page > .section > .desc > .subfooter {
+.settings-page > .section .desc > .subfooter {
     margin-top: 14px;
 }
 
-.settings-page > .section > .desc > p > .mantra {
+.settings-page > .section .desc > p > .mantra {
     font-style: italic;
 }
 
 .settings-page > .section > .actions {
     margin-top: 14px;
+}
+
+.settings-page > .section .desc > .info {
+    color: var(--font-color-tertiary);
 }

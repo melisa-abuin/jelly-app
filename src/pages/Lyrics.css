@@ -1,0 +1,148 @@
+.lyrics-page {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.lyrics-page > .lyrics-line {
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 -8px;
+    padding: 8px 38px;
+}
+
+.lyrics-page:not(.lyrics-page.synced) > .lyrics-line:has(.text.centered) {
+    padding: 8px 12px;
+}
+
+.lyrics-page.synced > .lyrics-line {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--font-color-tertiary);
+    cursor: pointer;
+    opacity: 0.5;
+    border-radius: 8px;
+    transition: font 0.2s ease-out, color 0.6s ease-out, opacity 0.6s ease-out, background-color 0.2s ease-out;
+}
+
+.lyrics-page.synced > .lyrics-line.active {
+    font-weight: 800;
+    color: var(--brand-color);
+    opacity: 1;
+}
+
+.lyrics-page.synced > .lyrics-line:hover {
+    background-color: var(--bg-color-secondary);
+    transition: opacity 0.2s ease-out;
+}
+
+.lyrics-page.synced:has(.lyrics-line > .numbers) > .lyrics-line {
+    padding: 8px 12px;
+    margin: 0 -12px;
+}
+
+/* Empty line without timestamps */
+.lyrics-page > .lyrics-line:has(.text:empty)::before {
+    content: '...';
+    margin-top: -5px;
+}
+
+/* Empty line with centered text */
+.lyrics-page > .lyrics-line:has(.text.centered:empty)::before {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* Empty line with timestamps */
+.lyrics-page > .lyrics-line:has(.numbers ~ .text:empty)::before {
+    display: none !important;
+}
+
+.lyrics-page > .lyrics-line:has(.numbers ~ .text:empty)::after {
+    content: '...';
+    margin-top: -7px;
+}
+
+/* Empty line with timestamps and centered text */
+.lyrics-page > .lyrics-line:has(.numbers ~ .text.centered:empty)::after {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.lyrics-page > .lyrics-line:has(.numbers ~ .text:empty) > .text {
+    display: none;
+}
+
+/* Empty line with unsynced lyrics and centered text */
+.lyrics-page:not(.lyrics-page.synced) > .lyrics-line:has(.text.centered:empty) {
+    gap: 0;
+}
+
+/* Empty line with synced lyrics and centered text but only without numbers */
+.lyrics-page.synced > .lyrics-line:has(.text.centered:empty):not(:has(.numbers)) {
+    gap: 0;
+}
+
+/*
+.lyrics-page .lyrics-line > * {
+    align-content: center;
+}
+*/
+
+.lyrics-page > .lyrics-line > .numbers {
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    margin-top: 1px;
+}
+
+/* Align numbers and empty line when text is empty */
+.lyrics-page > .lyrics-line:has(.numbers ~ .text:empty) > .numbers {
+    margin-top: 0;
+}
+
+.lyrics-page > .lyrics-line > .text {
+    flex: 1;
+    min-height: 21px;
+}
+
+.lyrics-page > .lyrics-line > .text.centered {
+    text-align: center;
+}
+
+@media only screen and (pointer: coarse) {
+    .lyrics-page.synced > .lyrics-line:hover {
+        background-color: unset;
+    }
+
+    .lyrics-page.synced > .lyrics-line:active {
+        background-color: var(--bg-color-secondary);
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    .lyrics-page > .lyrics-line {
+        padding: 8px 12px;
+        margin: 0 -12px;
+    }
+}
+
+@media only screen and (max-width: 320px) {
+    .lyrics-page.synced:has(.lyrics-line > .numbers) {
+        gap: 8px;
+    }
+
+    .lyrics-page.synced:has(.lyrics-line > .numbers) > .lyrics-line {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .lyrics-page.synced:has(.lyrics-line > .text.centered):has(.lyrics-line > .numbers) > .lyrics-line {
+        align-items: center;
+    }
+}

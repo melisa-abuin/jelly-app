@@ -43,7 +43,7 @@ const useInitialState = () => {
         triggerRect: null,
     })
     const [isTouchDevice, setIsTouchDevice] = useState(false)
-    const scrollContext = useScrollContext()
+    const { setDisabled } = useScrollContext()
     type IMenuItems = { [x in keyof typeof menuItems]?: boolean }
     const [hidden, setHidden] = useState<IMenuItems>()
     const navigate = useNavigate()
@@ -80,6 +80,7 @@ const useInitialState = () => {
 
     const closeDropdown = useCallback(() => {
         setIsOpen(false)
+        setDisabled(false)
         setSubDropdown({
             isOpen: false,
             type: '',
@@ -91,7 +92,7 @@ const useInitialState = () => {
             measured: false,
             triggerRect: null,
         })
-    }, [])
+    }, [setDisabled])
 
     const handleInputChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => setPlaylistName(e.target.value),
@@ -227,12 +228,6 @@ const useInitialState = () => {
         setIsTouchDevice(isTouch)
     }, [])
 
-    useEffect(() => {
-        if (scrollContext && isTouchDevice) {
-            scrollContext.setDisabled(isOpen)
-        }
-    }, [isOpen, isTouchDevice, scrollContext])
-
     const openDropdown = useCallback(
         (context: IContext, x: number, y: number, ignoreMargin: boolean) => {
             let adjustedX = x
@@ -267,6 +262,11 @@ const useInitialState = () => {
                 }
             }
             setIsOpen(true)
+
+            if (isTouchDevice) {
+                setDisabled(true)
+            }
+
             setPosition({ x: adjustedX, y: adjustedY })
             setContext(context)
             setSubDropdown({
@@ -281,7 +281,7 @@ const useInitialState = () => {
                 triggerRect: null,
             })
         },
-        [isTouchDevice]
+        [isTouchDevice, setDisabled]
     )
 
     const expandItems = useCallback(
@@ -305,14 +305,31 @@ const useInitialState = () => {
     const handlePlayNext = useCallback(
         async (item: MediaItem) => {
             const insertionPoint = (playback.currentTrackIndex ?? -1) + 1
-            const playlist = playback.currentPlaylist
-            const newPlaylist = [
-                ...playlist.slice(0, insertionPoint),
-                ...(await expandItems(item)),
-                ...playlist.slice(insertionPoint),
-            ]
 
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue', reviver: 'persistReviver' })
+            await playback.updateCurrentPlaylist(async pages => {
+                let trackCounter = 0
+
+                for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+                    const page = pages[pageIndex]
+
+                    for (let trackIndex = 0; trackIndex < page.length; trackIndex++) {
+                        if (trackCounter === insertionPoint) {
+                            return [
+                                ...pages.slice(0, pageIndex),
+                                [...page.slice(0, trackIndex), ...(await expandItems(item)), ...page.slice(trackIndex)],
+                                ...pages.slice(pageIndex + 1),
+                            ]
+                        }
+
+                        trackCounter++
+                    }
+                }
+
+                return [
+                    [...(pages[0]?.slice(0, 1) || []), ...(await expandItems(item)), ...(pages[0]?.slice(1) || [])],
+                    ...pages.slice(1),
+                ]
+            })
 
             if (playback.currentTrackIndex === -1) {
                 playback.playTrack(0)
@@ -325,9 +342,10 @@ const useInitialState = () => {
 
     const handleAddToQueue = useCallback(
         async (item: MediaItem) => {
-            const playlist = playback.currentPlaylist
-            const newPlaylist = [...playlist, ...(await expandItems(item))]
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue', reviver: 'persistReviver' })
+            await playback.updateCurrentPlaylist(async pages => [
+                ...pages.slice(0, pages.length - 1),
+                [...(pages[pages.length - 1] || []), ...(await expandItems(item))],
+            ])
 
             if (playback.currentTrackIndex === -1) {
                 playback.playTrack(0)
@@ -336,6 +354,17 @@ const useInitialState = () => {
             closeDropdown()
         },
         [closeDropdown, expandItems, playback]
+    )
+
+    const handleRemoveFromQueue = useCallback(
+        async (item: MediaItem) => {
+            await playback.updateCurrentPlaylist(async pages =>
+                pages.map(page => page.filter(i => i.queueId !== item.queueId))
+            )
+
+            closeDropdown()
+        },
+        [closeDropdown, playback]
     )
 
     // Actually working
@@ -384,14 +413,7 @@ const useInitialState = () => {
             remove_from_queue: (
                 <div
                     className="dropdown-item remove-queue has-removable"
-                    onClick={async () => {
-                        closeDropdown()
-
-                        if (context) {
-                            const playlist = playback.currentPlaylist.filter(item => item !== context.item)
-                            playback.setCurrentPlaylist({ playlist, title: 'Direct Queue' })
-                        }
-                    }}
+                    onClick={async () => handleRemoveFromQueue(context!.item)}
                     onMouseEnter={closeSubDropdown}
                 >
                     <span>Remove from queue</span>
@@ -404,18 +426,11 @@ const useInitialState = () => {
                         if (!context) return
 
                         closeDropdown()
-
-                        const r = await api.getInstantMixFromSong(context.item.Id)
-
-                        if (r) {
-                            playback.setCurrentPlaylist({ playlist: r, title: 'Instant Mix' })
-                            playback.playTrack(0)
-                            navigate('/queue')
-                        }
+                        navigate('/instantmix/' + context.item.Id)
                     }}
                     onMouseEnter={closeSubDropdown}
                 >
-                    <span>Play instant mix</span>
+                    <span>Go to instant mix</span>
                 </div>
             ),
             delete_playlist: (
@@ -655,7 +670,6 @@ const useInitialState = () => {
         addItemsToPlaylist,
         addToDownloads,
         addToFavorites,
-        api,
         closeDropdown,
         closeSubDropdown,
         context,
@@ -666,12 +680,12 @@ const useInitialState = () => {
         handleInputChange,
         handleInputKeyDown,
         handlePlayNext,
+        handleRemoveFromQueue,
         handleViewAlbum,
         handleViewArtist,
         isTouchDevice,
         navigate,
         openSubDropdown,
-        playback,
         playlistName,
         playlists,
         removeFromDownloads,
@@ -915,9 +929,21 @@ const useInitialState = () => {
 
     const touchTimeoutRef = useRef<number | null>(null)
 
+    const clearTouchTimer = useCallback(() => {
+        if (touchTimeoutRef.current !== null) {
+            clearTimeout(touchTimeoutRef.current)
+            touchTimeoutRef.current = null
+        }
+    }, [])
+
     const handleTouchStart = useCallback(
         (e: React.TouchEvent<HTMLElement>, context: IContext, ignoreMargin = false, hidden: IMenuItems = {}) => {
+            if ((e.target as HTMLElement).closest('.draggable')) {
+                return
+            }
+
             e.preventDefault()
+            clearTouchTimer()
             touchTimeoutRef.current = window.setTimeout(() => {
                 const touch = e.touches[0]
                 const x = touch.clientX
@@ -926,15 +952,8 @@ const useInitialState = () => {
                 setHidden(hidden)
             }, 400)
         },
-        [openDropdown]
+        [clearTouchTimer, openDropdown]
     )
-
-    const clearTouchTimer = useCallback(() => {
-        if (touchTimeoutRef.current !== null) {
-            clearTimeout(touchTimeoutRef.current)
-            touchTimeoutRef.current = null
-        }
-    }, [])
 
     return {
         isOpen,
@@ -953,6 +972,10 @@ const useInitialState = () => {
             ignoreMargin = false,
             hidden: IMenuItems = {}
         ) => {
+            if ((e.target as HTMLElement).closest('.draggable')) {
+                return
+            }
+
             e.preventDefault()
             const x = e.clientX
             const y = e.clientY + window.pageYOffset

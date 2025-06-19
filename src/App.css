@@ -846,6 +846,7 @@ body.lockscroll {
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous {
     cursor: pointer;
+    padding: 2px 0;
     transform: rotate(180deg);
 }
 
@@ -937,6 +938,7 @@ body.lockscroll {
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next {
     cursor: pointer;
+    padding: 2px 0;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next > .next-icon {
@@ -1056,7 +1058,8 @@ body.lockscroll {
 .frequently-page,
 .genre-page,
 .artist-tracks-page,
-.artists-page {
+.artists-page,
+.lyrics-page {
     margin-top: -4px;
 }
 
@@ -1066,13 +1069,27 @@ body.lockscroll {
 .recently-page > .empty,
 .frequently-page > .empty,
 .genre-page > .empty,
-.playlist-page > .empty {
+.playlist-page > .empty,
+.lyrics-page > .empty {
     font-size: 0.85rem;
     margin: 4px 0;
 }
 
 .main > .main_content > .empty-queue {
     font-size: 0.85rem;
+}
+
+/* Artists page */
+.main > .main_content > .artists-page > .album-artists {
+    font-size: 0.725rem;
+    font-weight: 500;
+    text-align: right;
+    margin-right: -4px;
+    margin-bottom: 8px;
+}
+
+.main > .main_content > .artists-page > .album-artists > a.textlink {
+    color: var(--font-color-tertiary);
 }
 
 /* Responsive */

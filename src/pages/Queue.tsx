@@ -25,6 +25,7 @@ export const Queue = () => {
             <div className="queue-header">
                 <MediaList
                     items={[currentTrack]}
+                    infiniteData={{ pageParams: [1], pages: [[currentTrack]] }}
                     isLoading={false}
                     type="song"
                     title={'Current Track - Queue'}
@@ -41,7 +42,7 @@ export const Queue = () => {
                     </div>
                     <MediaList
                         items={queueTracks}
-                        playlistItems={currentPlaylist}
+                        infiniteData={{ pageParams: [1], pages: [queueTracks] }}
                         indexOffset={currentTrackIndex + 1}
                         isLoading={isLoading}
                         type="song"
