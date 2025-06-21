@@ -127,8 +127,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                         <div className="subtitle">Streaming & Offline Sync</div>
                         <div className="subdesc">
                             Adjusting audio quality enables server-side transcoding, converting to a compatible format
-                            with a lower bitrate for smoother streaming or efficient offline syncing with reduced
-                            bandwidth and storage
+                            with a lower bitrate for smoother streaming or efficient offline syncing
                         </div>
                     </div>
                     <div className="options noSelect">
@@ -244,11 +243,11 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 <div className="desc">
                     <div className="info">
                         Cache your music library for seamless offline playback, with new tracks auto-syncing to saved
-                        playlists, albums, or artists. Browse your{' '}
+                        playlists, albums, or artists. Browse{' '}
                         <Link to="/synced" className="textlink">
-                            synced music library
+                            music library
                         </Link>{' '}
-                        with ease
+                        with ease, available once tracks are synced
                     </div>
                 </div>
             </div>
