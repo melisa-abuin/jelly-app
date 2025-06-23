@@ -436,6 +436,10 @@ body.lockscroll {
     max-width: calc(100% - 160px);
 }
 
+.main > .main_header:has(.sorting > .sort):has(.sorting.links > .filter) > .primary {
+    max-width: calc(100% - 236px);
+}
+
 .main > .main_header > .primary > .container {
     position: relative;
     max-width: calc(100% - 14px);
@@ -505,6 +509,10 @@ body.lockscroll {
     display: flex;
     align-items: center;
     flex-shrink: 0;
+}
+
+.main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon {
+    display: none;
 }
 
 .main > .main_header > .secondary > .sorting > .filter > select {
@@ -1211,6 +1219,37 @@ body.lockscroll {
 }
 
 @media only screen and (max-width: 390px) {
+    .main > .main_header:has(.sorting > .sort):has(.sorting.links > .filter) > .primary {
+        max-width: calc(100% - 208px);
+    }
+
+    .main > .main_header > .secondary > .sorting {
+        border-radius: 20px;
+    }
+
+    .main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon {
+        position: absolute;
+        left: 6px;
+        display: block;
+        fill: var(--brand-color);
+    }
+
+    .main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon > .track {
+    }
+
+    .main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon > .album {
+        display: none;
+    }
+
+    .main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon > .artist {
+        display: none;
+    }
+
+    .main > .main_header > .secondary > .sorting.links > .filter > select {
+        opacity: 0;
+        width: 44px;
+    }
+
     .main > .main_footer > .playback > .container > .track-info {
         max-width: calc(100% - 110px);
     }

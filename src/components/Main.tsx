@@ -8,7 +8,7 @@ import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useSidenavContext } from '../context/SidenavContext/SidenavContext'
 import { getPageTitle } from '../utils/titleUtils'
-import { AlbumIcon, ArtistsIcon, PlaylistIcon, SortingIcon, TracksIcon } from './SvgIcons'
+import { AlbumIcon, ArtistsIcon, PlaylistIcon, SortingIcon, TrackIcon, TracksIcon } from './SvgIcons'
 
 export const Main = (props: Parameters<typeof MainContent>[0]) => {
     return (
@@ -112,21 +112,59 @@ export const MainContent = ({
                     )}
 
                     {filterType === 'favorites' && (
-                        <div className="sorting">
-                            <div className="filter">
-                                <select
-                                    onChange={e => setFilter(c => ({ ...c, sort: e.target.value }))}
-                                    value={filter.sort}
-                                >
-                                    <option value="Tracks">Tracks</option>
-                                    <option value="Albums">Albums</option>
-                                    <option value="Artists">Artists</option>
-                                </select>
-                                <div className="icon">
-                                    <ChevronDownIcon size={12} />
+                        <>
+                            <div className="sorting links">
+                                <div className="filter">
+                                    <div className="responsive-icon">
+                                        <TrackIcon width="12" height="12" className="track" />
+                                        <AlbumIcon width="14" height="14" className="album" />
+                                        <ArtistsIcon width="14" height="14" className="artist" />
+                                    </div>
+                                    <select
+                                        onChange={e => setFilter(c => ({ ...c, sort: e.target.value }))}
+                                        value={filter.sort}
+                                    >
+                                        <option value="Tracks">Tracks</option>
+                                        <option value="Albums">Albums</option>
+                                        <option value="Artists">Artists</option>
+                                    </select>
+                                    <div className="icon">
+                                        <ChevronDownIcon size={12} />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                            <div className="sorting">
+                                <div className="filter">
+                                    <select
+                                        onChange={e => setFilter(c => ({ ...c, sort: e.target.value }))}
+                                        value={filter.sort}
+                                    >
+                                        <option value="Added">Added</option>
+                                        <option value="Released">Released</option>
+                                        <option value="Runtime">Runtime</option>
+                                        <option value="Random">Random</option>
+                                        <option value="Name">Name</option>
+                                    </select>
+                                    <div className="icon">
+                                        <ChevronDownIcon size={12} />
+                                    </div>
+                                </div>
+                                <div
+                                    className="sort"
+                                    onClick={() => {
+                                        setFilter(c => ({
+                                            ...c,
+                                            order: c.order === 'Ascending' ? 'Descending' : 'Ascending',
+                                        }))
+                                    }}
+                                    title={filter.order === 'Ascending' ? 'Ascending' : 'Descending'}
+                                >
+                                    <div className={'icon' + (filter.order === 'Ascending' ? ' active' : '')}>
+                                        <SortingIcon width={12} height={12} />
+                                    </div>
+                                </div>
+                            </div>
+                        </>
                     )}
 
                     <div className="sidenav_toggle" onClick={toggleSidenav}>

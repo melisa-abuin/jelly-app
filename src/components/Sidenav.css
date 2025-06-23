@@ -783,6 +783,11 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon > svg {
     fill: var(--font-color);
+    transition: fill 0.2s ease-out;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon.active > svg {
+    fill: var(--font-color-active);
 }
 
 /* Responsive */
