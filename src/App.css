@@ -627,8 +627,8 @@ body.lockscroll {
     width: 100%;
     margin-top: auto;
     background-color: var(--bg-color);
-    /* Attempted fix to subpixel rendering that causes 1px content bleed at bottom */
-    will-change: transform;
+    /* Attempted fix to subpixel rendering that causes 1px content bleed at bottom
+    will-change: transform;*/
 }
 
 /* Playback area */
@@ -1223,7 +1223,7 @@ body.lockscroll {
         max-width: calc(100% - 208px);
     }
 
-    .main > .main_header > .secondary > .sorting {
+    .main > .main_header:has(.sorting > .sort):has(.sorting.links > .filter) > .secondary > .sorting {
         border-radius: 20px;
     }
 
@@ -1232,17 +1232,6 @@ body.lockscroll {
         left: 6px;
         display: block;
         fill: var(--brand-color);
-    }
-
-    .main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon > .track {
-    }
-
-    .main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon > .album {
-        display: none;
-    }
-
-    .main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon > .artist {
-        display: none;
     }
 
     .main > .main_header > .secondary > .sorting.links > .filter > select {
