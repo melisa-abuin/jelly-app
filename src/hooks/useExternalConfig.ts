@@ -28,9 +28,8 @@ export function useExternalConfig() {
                     newConfig.lockJellyfinUrl = data.LOCK_JELLYFIN_URL === 'true' || data.LOCK_JELLYFIN_URL === true
 
                 return newConfig
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            } catch (_) {
-                console.warn(`config.json was not loaded`)
+            } catch (e) {
+                console.error(e)
             }
 
             return {}

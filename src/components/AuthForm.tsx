@@ -1,6 +1,6 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { ApiError, loginToJellyfin } from '../api/jellyfin'
-import { useExternalConfig } from '../utils/config'
+import { useExternalConfig } from '../hooks/useExternalConfig'
 
 export const AuthForm = ({
     onLogin,
@@ -19,6 +19,13 @@ export const AuthForm = ({
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+
+    useEffect(() => {
+        if (!config) return
+
+        if (config.lockJellyfinUrl) setServerUrl(config.defaultJellyfinUrl || '')
+        else if (!serverUrl) setServerUrl(config.defaultJellyfinUrl || '')
+    }, [serverUrl, loadingConfiguration, config])
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
