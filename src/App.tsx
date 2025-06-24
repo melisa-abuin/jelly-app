@@ -196,7 +196,7 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                 <Route path="/favorites" element={<Main content={Favorites} filterType={'favorites'} />} />
                 <Route path="/recently" element={<Main content={RecentlyPlayed} />} />
                 <Route path="/frequently" element={<Main content={FrequentlyPlayed} />} />
-                <Route path="/synced" element={<Main content={Downloads} filterType={'favorites'} />} />
+                <Route path="/synced" element={<Main content={Downloads} filterType={'kind'} />} />
                 <Route path="/settings" element={<Main content={memoSettings} />} />
                 <Route path="/instantmix/:songId" element={<Main content={InstantMix} />} />
                 <Route path="/search/:query" element={<Main content={SearchResults} />} />
