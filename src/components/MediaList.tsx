@@ -107,7 +107,7 @@ export const MediaList = ({
     const isEqual = (a?: MediaItem, b?: MediaItem) => {
         if (!a || !b) return false
 
-        return a.queueId && b.queueId ? a.queueId === b.queueId : a.Id === b.Id
+        return isDraggable && a.queueId && b.queueId ? a.queueId === b.queueId : a.Id === b.Id
     }
 
     const handleSongClick = (item: MediaItem, index: number) => {
