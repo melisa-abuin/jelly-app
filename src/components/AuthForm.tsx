@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { ApiError, loginToJellyfin } from '../api/jellyfin'
 import { useExternalConfig } from '../hooks/useExternalConfig'
+import { Loader } from './Loader'
 
 export const AuthForm = ({
     onLogin,
@@ -95,44 +96,44 @@ export const AuthForm = ({
         }
     }
 
-    return (
-        !loadingConfiguration && (
-            <form className="login_form" onSubmit={handleSubmit}>
-                <div className="error_placeholder">{error && <div className="error">{error}</div>}</div>
-                <div className="title">Welcome back</div>
-                {!config?.lockJellyfinUrl && ( // We do not render if the URL is locked
-                    <div className="input_container">
-                        <input
-                            type="text"
-                            placeholder="Server URL (http://localhost:8096)"
-                            value={serverUrl}
-                            onChange={e => setServerUrl(e.target.value)}
-                            disabled={loading}
-                        />
-                    </div>
-                )}
+    return loadingConfiguration ? (
+        <Loader></Loader>
+    ) : (
+        <form className="login_form" onSubmit={handleSubmit}>
+            <div className="error_placeholder">{error && <div className="error">{error}</div>}</div>
+            <div className="title">Welcome back</div>
+            {!config?.lockJellyfinUrl && ( // We do not render if the URL is locked
                 <div className="input_container">
                     <input
                         type="text"
-                        placeholder="Username"
-                        value={username}
-                        onChange={e => setUsername(e.target.value)}
+                        placeholder="Server URL (http://localhost:8096)"
+                        value={serverUrl}
+                        onChange={e => setServerUrl(e.target.value)}
                         disabled={loading}
                     />
                 </div>
-                <div className="input_container">
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        disabled={loading}
-                    />
-                </div>
-                <button className="submit_button noSelect" type="submit" disabled={loading}>
-                    {loading ? 'Logging in...' : 'Login with Jellyfin'}
-                </button>
-            </form>
-        )
+            )}
+            <div className="input_container">
+                <input
+                    type="text"
+                    placeholder="Username"
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    disabled={loading}
+                />
+            </div>
+            <div className="input_container">
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    disabled={loading}
+                />
+            </div>
+            <button className="submit_button noSelect" type="submit" disabled={loading}>
+                {loading ? 'Logging in...' : 'Login with Jellyfin'}
+            </button>
+        </form>
     )
 }
