@@ -80,7 +80,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const hlsRef = crossfade.current === 'A' ? hlsA : hlsB
 
-    const playedIndices = useRef<Set<number>>(new Set())
     const hasRestored = useRef(false)
     const queryClient = useQueryClient()
 
@@ -96,13 +95,18 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         localStorage.setItem('bitrate', bitrate.toString())
     }, [bitrate])
 
+    // Shuffle is normally handled by passing 'random' to queryFn but when this is not an infinite query we have to manually handle it
+    const isManualShuffle = useMemo(() => {
+        return shuffle && !(reviver.queryFn?.params || []).includes(___PAGE_PARAM_INDEX___)
+    }, [reviver.queryFn?.params, shuffle])
+
     const reviverFn = useMemo(() => {
         const queryFn = reviver.queryFn?.fn || ''
         const params = [...(reviver.queryFn?.params || [])]
         const pageParamIndex = params.findIndex(param => param === ___PAGE_PARAM_INDEX___)
 
         return {
-            queryKey: ['reviver', ...(shuffle ? ['shuffle'] : []), ...(reviver.queryKey || [])],
+            queryKey: ['reviver', ...(shuffle && !isManualShuffle ? ['shuffle'] : []), ...(reviver.queryKey || [])],
             queryFn: async ({ pageParam = 0 }) => {
                 const itemsPerPage = params[pageParamIndex + 1]
                 const startIndex = (pageParam as number) * (itemsPerPage as number)
@@ -111,7 +115,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
                 // When shuffle is enabled, we set the pageParam to 'Random' to fetch random items
                 // Note; Hardcoded it to 2 params after the pageParam, should improve this
-                if (shuffle) {
+                if (shuffle && !isManualShuffle) {
                     params[pageParamIndex + 2] = 'Random'
                 }
 
@@ -124,7 +128,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             allowDuplicates: true,
             enabled: params.length > 0,
         } satisfies IJellyfinInfiniteProps
-    }, [api, reviver.queryFn, reviver.queryKey, shuffle])
+    }, [api, isManualShuffle, reviver.queryFn?.fn, reviver.queryFn?.params, reviver.queryKey, shuffle])
 
     const queueCounter = useRef(0)
 
@@ -140,7 +144,21 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     }, [])
 
     const { items: _items, hasNextPage, loadMore, isLoading, infiniteData } = useJellyfinInfiniteData(reviverFn)
-    const items = useMemo(() => _items.map(addQueueId), [_items, addQueueId])
+
+    const items = useMemo(() => {
+        const itemsWithIds = _items.map(addQueueId)
+
+        if (isManualShuffle && itemsWithIds.length) {
+            const playedEnd = currentTrackIndex.index + 1
+            const played = itemsWithIds.slice(0, playedEnd)
+            const future = itemsWithIds.slice(playedEnd).sort(() => Math.random() - 0.5)
+            return [...played, ...future]
+        }
+
+        return itemsWithIds
+        // We ignore 'currentTrackIndex.index' here because we only want to shuffle once, not on every render.
+    }, [_items, addQueueId, isManualShuffle]) // eslint-disable-line react-hooks/exhaustive-deps
+
     const _pages = useMemo(
         () => infiniteData?.pages.map(page => page.map(addQueueId)) || [],
         [addQueueId, infiniteData?.pages]
@@ -155,7 +173,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 pages: (await cb(_pages)).map(page => page.map(updateQueueId)),
             } satisfies InfiniteData<MediaItem[], unknown>)
         },
-        [_pages, updateQueueId, queryClient, reviverFn.queryKey]
+        [reviverFn.queryKey, _pages, queryClient, updateQueueId]
     )
 
     const setCurrentPlaylist = useCallback(
@@ -213,7 +231,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const currentTrack = useMemo(() => {
         return items[currentTrackIndex.index] || null
-    }, [currentTrackIndex.index, items])
+        // We ignore 'items' here because we only want to update the current track when the index changes, this happens on explicit actions. When we change the items through shuffle it will not change the current track.
+    }, [currentTrackIndex.index]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const { data: currentTrackLyrics, isLoading: currentTrackLyricsLoading } = useQuery({
         queryKey: ['lyrics', currentTrack?.Id],
@@ -391,83 +410,70 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         [api, audioRef, audioStorage, bitrate, handleHls, hlsRef]
     )
 
-    const playTrack = useCallback(
-        async (index: number) => {
-            const track = items[index]
+    const playTrack = useCallback(async () => {
+        const track = currentTrack
 
-            if (!track) {
-                return
+        if (!track) {
+            return
+        }
+
+        if (track.pageIndex) {
+            localStorage.setItem('reviverPageIndex', track.pageIndex.toString())
+        } else {
+            localStorage.removeItem('reviverPageIndex')
+        }
+
+        abortControllerRef.current?.abort('abort')
+        abortControllerRef.current = new AbortController()
+        const signal = abortControllerRef.current.signal
+
+        if (audioRef.current) {
+            const audio = audioRef.current
+            if (currentTrack && isPlaying) {
+                // If the playback stopped request fails, we can still continue playing the new track
+                api.reportPlaybackStopped(currentTrack.Id, audio.currentTime, signal)
             }
 
-            if (track.pageIndex) {
-                localStorage.setItem('reviverPageIndex', track.pageIndex.toString())
-            } else {
-                localStorage.removeItem('reviverPageIndex')
-            }
+            try {
+                await setAudioSourceAndLoad(track)
 
-            abortControllerRef.current?.abort('abort')
-            abortControllerRef.current = new AbortController()
-            const signal = abortControllerRef.current.signal
+                await new Promise<void>((resolve, reject) => {
+                    const onLoadedMetadata = async () => {
+                        audio.removeEventListener('loadedmetadata', onLoadedMetadata)
+                        signal.removeEventListener('abort', onAbort)
 
-            if (audioRef.current) {
-                const audio = audioRef.current
-                if (currentTrack && isPlaying) {
-                    // If the playback stopped request fails, we can still continue playing the new track
-                    api.reportPlaybackStopped(currentTrack.Id, audio.currentTime, signal)
-                }
-
-                try {
-                    await setAudioSourceAndLoad(track)
-
-                    await new Promise<void>((resolve, reject) => {
-                        const onLoadedMetadata = async () => {
-                            audio.removeEventListener('loadedmetadata', onLoadedMetadata)
-                            signal.removeEventListener('abort', onAbort)
-
-                            try {
-                                if (userInteracted) {
-                                    await audio.play()
-                                }
-                            } catch (e) {
-                                reject(e)
+                        try {
+                            if (userInteracted) {
+                                await audio.play()
                             }
-
-                            resolve()
+                        } catch (e) {
+                            reject(e)
                         }
-                        const onAbort = () => {
-                            audio.removeEventListener('loadedmetadata', onLoadedMetadata)
-                            resolve()
-                        }
-                        signal.addEventListener('abort', onAbort)
-                        audio.addEventListener('loadedmetadata', onLoadedMetadata)
-                    })
 
-                    setSessionPlayCount(prev => {
-                        const newCount = prev + 1
-                        return newCount
-                    })
+                        resolve()
+                    }
+                    const onAbort = () => {
+                        audio.removeEventListener('loadedmetadata', onLoadedMetadata)
+                        resolve()
+                    }
+                    signal.addEventListener('abort', onAbort)
+                    audio.addEventListener('loadedmetadata', onLoadedMetadata)
+                })
 
-                    playedIndices.current.add(index)
-                    updateMediaSessionMetadata(track)
+                setSessionPlayCount(prev => {
+                    const newCount = prev + 1
+                    return newCount
+                })
 
-                    // Report playback start to Jellyfin
-                    api.reportPlaybackStart(track.Id, signal)
-                } catch (error) {
-                    console.error('Error playing track:', error)
-                }
+                updateMediaSessionMetadata(track)
+
+                // Report playback start to Jellyfin
+                api.reportPlaybackStart(track.Id, signal)
+            } catch (error) {
+                console.error('Error playing track:', error)
             }
-        },
-        [
-            items,
-            audioRef,
-            currentTrack,
-            isPlaying,
-            api,
-            setAudioSourceAndLoad,
-            updateMediaSessionMetadata,
-            userInteracted,
-        ]
-    )
+        }
+    }, [api, audioRef, currentTrack, isPlaying, setAudioSourceAndLoad, updateMediaSessionMetadata, userInteracted])
 
     const togglePlayPause = useCallback(async () => {
         setUserInteracted(true)
@@ -515,7 +521,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     useEffect(() => {
         if (currentTrackIndex.index >= 0 && currentTrackIndex.index < items.length && items[currentTrackIndex.index]) {
-            playTrack(currentTrackIndex.index)
+            playTrack()
         } else {
             if (audioRef.current) {
                 audioRef.current.pause()
@@ -627,7 +633,6 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const toggleShuffle = useCallback(() => {
         setShuffle(prevShuffleState => {
             const newShuffle = !prevShuffleState
-            setCurrentTrackIndex({ index: currentTrackIndex.index })
 
             if (!newShuffle) {
                 queryClient.invalidateQueries({ queryKey: reviverFn.queryKey })
@@ -635,7 +640,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
             return newShuffle
         })
-    }, [currentTrackIndex.index, queryClient, reviverFn.queryKey])
+    }, [queryClient, reviverFn.queryKey])
 
     const toggleRepeat = () => {
         setRepeat(prev => {
