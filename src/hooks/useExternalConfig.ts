@@ -19,9 +19,6 @@ export function useExternalConfig() {
 
                 const newConfig: ExternalConfiguration = {}
 
-                newConfig.defaultJellyfinUrl = import.meta.env.VITE_DEFAULT_JELLYFIN_URL || null
-                newConfig.lockJellyfinUrl = import.meta.env.VITE_LOCK_JELLYFIN_URL || null
-
                 if (isNullOrUndefined(newConfig.defaultJellyfinUrl))
                     newConfig.defaultJellyfinUrl = data.DEFAULT_JELLYFIN_URL
                 if (isNullOrUndefined(newConfig.lockJellyfinUrl))
