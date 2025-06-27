@@ -243,11 +243,11 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 <div className="desc">
                     <div className="info">
                         Cache your music library for seamless offline playback, with new tracks auto-syncing to saved
-                        playlists, albums, or artists. Browse{' '}
+                        playlists, albums, or artists.{' '}
                         <Link to="/synced" className="textlink">
-                            music library
-                        </Link>{' '}
-                        with ease, available once tracks are synced
+                            Browse music library
+                        </Link>
+                        , officially available once tracks are synced
                     </div>
                 </div>
             </div>

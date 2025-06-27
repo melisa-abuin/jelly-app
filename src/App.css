@@ -428,7 +428,7 @@ body.lockscroll {
 .main > .main_header > .primary {
     display: flex;
     align-items: center;
-    width: 100%;
+    flex-grow: 1;
     max-width: calc(100% - 30px);
 }
 

@@ -184,7 +184,9 @@ export const Lyrics = () => {
     return (
         <div className={'lyrics-page' + (lyrics ? ' active' : '') + (isSynced ? ' synced noSelect' : '')}>
             {(lyrics && displayedLines) || (
-                <div className="empty">{playback.currentTrackLyricsLoading ? <Loader /> : 'No Lyrics'}</div>
+                <div className="empty">
+                    {playback.currentTrackLyricsLoading ? <Loader /> : 'No lyrics found for this track'}
+                </div>
             )}
         </div>
     )
