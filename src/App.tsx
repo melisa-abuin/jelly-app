@@ -170,38 +170,52 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     }, [handleLogout])
 
     return (
-        <div className="interface">
-            <div
-                className={
-                    showSidenav || (isDropdownOpen && isTouchDevice) ? 'dimmer active noSelect' : 'dimmer noSelect'
+        <Routes>
+            <Route path="/bla" element={<div>bla</div>} />
+
+            <Route
+                path="*"
+                element={
+                    <div className="interface">
+                        <div
+                            className={
+                                showSidenav || (isDropdownOpen && isTouchDevice)
+                                    ? 'dimmer active noSelect'
+                                    : 'dimmer noSelect'
+                            }
+                            onClick={showSidenav ? toggleSidenav : dropdownContext?.closeDropdown}
+                        />
+
+                        <Sidenav username={auth.username} />
+
+                        <Routes>
+                            <Route path="/" element={<Main content={Home}></Main>} />
+                            <Route path="/tracks" element={<Main content={Tracks} filterType={'mediaItems'} />} />
+                            <Route path="/lyrics" element={<Main content={Lyrics} />} />
+                            <Route path="/albums" element={<Main content={Albums} filterType={'mediaItems'} />} />
+                            <Route path="/album/:albumId" element={<Main content={Album} />} />
+                            <Route path="/artists" element={<Main content={Artists} filterType={'mediaItems'} />} />
+                            <Route path="/artist/:artistId" element={<Main content={Artist} />} />
+                            <Route path="/artist/:artistId/tracks" element={<Main content={ArtistTracks} />} />
+                            <Route
+                                path="/albumartists"
+                                element={<Main content={AlbumArtists} filterType={'mediaItems'} />}
+                            />
+                            <Route path="/genre/:genre" element={<Main content={Genre} filterType={'mediaItems'} />} />
+                            <Route path="/playlist/:playlistId" element={<Main content={Playlist} />} />
+                            <Route path="/queue" element={<Main content={Queue} />} />
+                            <Route path="/favorites" element={<Main content={Favorites} filterType={'favorites'} />} />
+                            <Route path="/recently" element={<Main content={RecentlyPlayed} />} />
+                            <Route path="/frequently" element={<Main content={FrequentlyPlayed} />} />
+                            <Route path="/synced" element={<Main content={Downloads} filterType={'kind'} />} />
+                            <Route path="/settings" element={<Main content={memoSettings} />} />
+                            <Route path="/instantmix/:songId" element={<Main content={InstantMix} />} />
+                            <Route path="/search/:query" element={<Main content={SearchResults} />} />
+                            <Route path="*" element={<Navigate to="/" />} />
+                        </Routes>
+                    </div>
                 }
-                onClick={showSidenav ? toggleSidenav : dropdownContext?.closeDropdown}
             />
-
-            <Sidenav username={auth.username} />
-
-            <Routes>
-                <Route path="/" element={<Main content={Home}></Main>} />
-                <Route path="/tracks" element={<Main content={Tracks} filterType={'mediaItems'} />} />
-                <Route path="/lyrics" element={<Main content={Lyrics} />} />
-                <Route path="/albums" element={<Main content={Albums} filterType={'mediaItems'} />} />
-                <Route path="/album/:albumId" element={<Main content={Album} />} />
-                <Route path="/artists" element={<Main content={Artists} filterType={'mediaItems'} />} />
-                <Route path="/artist/:artistId" element={<Main content={Artist} />} />
-                <Route path="/artist/:artistId/tracks" element={<Main content={ArtistTracks} />} />
-                <Route path="/albumartists" element={<Main content={AlbumArtists} filterType={'mediaItems'} />} />
-                <Route path="/genre/:genre" element={<Main content={Genre} filterType={'mediaItems'} />} />
-                <Route path="/playlist/:playlistId" element={<Main content={Playlist} />} />
-                <Route path="/queue" element={<Main content={Queue} />} />
-                <Route path="/favorites" element={<Main content={Favorites} filterType={'favorites'} />} />
-                <Route path="/recently" element={<Main content={RecentlyPlayed} />} />
-                <Route path="/frequently" element={<Main content={FrequentlyPlayed} />} />
-                <Route path="/synced" element={<Main content={Downloads} filterType={'kind'} />} />
-                <Route path="/settings" element={<Main content={memoSettings} />} />
-                <Route path="/instantmix/:songId" element={<Main content={InstantMix} />} />
-                <Route path="/search/:query" element={<Main content={SearchResults} />} />
-                <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-        </div>
+        </Routes>
     )
 }
