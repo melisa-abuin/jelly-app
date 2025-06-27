@@ -84,9 +84,29 @@ Jelly Music App is available as a production build, ready to deploy on an existi
 
 Alternatively, you can run the development server directly: `yarn dev` or `yarn dev:nocache`
 
+### Docker
+
+You can reasily host Jelly Music App using Docker with the prebuilt image from ghcr.io:
+
+```bash
+# With or without configuration variables
+docker run --rm \
+    -e DEFAULT_JELLYFIN_URL=https://demo.jellyfin.org/stable \
+    -p 80:80 ghcr.io/Stannnnn/jelly-app:latest
+```
+
+The following are the available tags for docker:
+
+| Tag     | Description                |
+| ------- | -------------------------- |
+| latest  | Tracks most recent release |
+| main    | Tracks the main branch     |
+| develop | Tracks the develop branch  |
+| vX.X.X  | Version specific tags      |
+
 #### Docker Container Build
 
-You can build Jelly Music App using Docker.
+You can also build Jelly Music App using Docker.
 
 1.  Build the Docker image:
 
