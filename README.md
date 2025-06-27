@@ -92,17 +92,16 @@ You can reasily host Jelly Music App using Docker with the prebuilt image from g
 # With or without configuration variables
 docker run --rm \
     -e DEFAULT_JELLYFIN_URL=https://demo.jellyfin.org/stable \
-    -p 80:80 ghcr.io/Stannnnn/jelly-app:latest
+    -p 80:80 ghcr.io/Stannnnn/jelly-music-app:latest
 ```
 
 The following are the available tags for docker:
 
-| Tag     | Description                |
-| ------- | -------------------------- |
-| latest  | Tracks most recent release |
-| main    | Tracks the main branch     |
-| develop | Tracks the develop branch  |
-| vX.X.X  | Version specific tags      |
+| Tag    | Description                |
+| ------ | -------------------------- |
+| latest | Tracks most recent release |
+| main   | Tracks the main branch     |
+| vX.X.X | Version specific tags      |
 
 #### Docker Container Build
 
@@ -111,20 +110,20 @@ You can also build Jelly Music App using Docker.
 1.  Build the Docker image:
 
     ```bash
-    docker build . --tag jelly-app
+    docker build . --tag jelly-music-app
     ```
 
 2.  Run the Docker container:
 
     ```bash
     # Run the container
-    docker run --rm -p 80:80 jelly-app:latest
+    docker run --rm -p 80:80 jelly-music-app:latest
 
     # You can also provide configuration using environment variables.
     docker run --rm \
         -e DEFAULT_JELLYFIN_URL=https://demo.jellyfin.org/stable \
         -e LOCK_JELLYFIN_URL=true \
-        -p 80:80 jelly-app:latest
+        -p 80:80 jelly-music-app:latest
     ```
 
 ### App Configuration

@@ -4,13 +4,12 @@ on:
   push:
     branches:
       - main
-      - develop
   release:
     types: [published]
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: jelly-music-app
 
 jobs:
   build-and-push:
@@ -40,8 +39,6 @@ jobs:
             echo "TAGS=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION_TAG},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_ENV
           elif [[ "${GITHUB_REF##*/}" == "main" ]]; then
             echo "TAGS=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main" >> $GITHUB_ENV
-          elif [[ "${GITHUB_REF##*/}" == "develop" ]]; then
-            echo "TAGS=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop" >> $GITHUB_ENV
           fi
 
       - name: Build and push Docker image
