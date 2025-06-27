@@ -14,7 +14,7 @@ export const Queue = () => {
         return () => setPageTitle('')
     }, [setPageTitle])
 
-    if (!currentTrack || currentPlaylist.length === 0) {
+    if (!currentTrack) {
         return <div className="empty-queue">Queue is currently empty</div>
     }
 
@@ -32,7 +32,8 @@ export const Queue = () => {
                     hidden={{ add_to_queue: true, remove_from_queue: true }}
                 />
             </div>
-            {queueTracks.length > 0 && (
+
+            {(queueTracks.length > 0 || isLoading) && (
                 <>
                     <div className="queue-title">Playing Next</div>
                     <div className="queue-desc">

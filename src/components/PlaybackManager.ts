@@ -91,6 +91,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const audioStorage = useAudioStorageContext()
 
+    const tmpShuffleTrackRef = useRef<MediaItem | undefined>(undefined)
+
     useEffect(() => {
         localStorage.setItem('bitrate', bitrate.toString())
     }, [bitrate])
@@ -120,7 +122,15 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 }
 
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                return (await (api as any)[queryFn]?.(...params)) || []
+                const response: MediaItem[] = (await (api as any)[queryFn]?.(...params)) || []
+
+                if (shuffle && !isManualShuffle && tmpShuffleTrackRef.current) {
+                    response.splice(currentTrackIndex.index, 0, tmpShuffleTrackRef.current)
+                }
+
+                tmpShuffleTrackRef.current = undefined
+
+                return response
             },
             queryFnReviver: undefined,
             // NOTE; The reviverPageIndex is probably wrong but its not really an issue for now
@@ -128,7 +138,15 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             allowDuplicates: true,
             enabled: params.length > 0,
         } satisfies IJellyfinInfiniteProps
-    }, [api, isManualShuffle, reviver.queryFn?.fn, reviver.queryFn?.params, reviver.queryKey, shuffle])
+    }, [
+        api,
+        currentTrackIndex.index,
+        isManualShuffle,
+        reviver.queryFn?.fn,
+        reviver.queryFn?.params,
+        reviver.queryKey,
+        shuffle,
+    ])
 
     const queueCounter = useRef(0)
 
@@ -185,10 +203,14 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
                 localStorage.setItem('reviver', JSON.stringify(props.reviver || {}))
                 setReviver(props.reviver || ({} as IReviver))
+
+                setShuffle(false)
             }
 
             localStorage.setItem('playlistTitle', props.title)
             setPlaylistTitle(props.title)
+
+            tmpShuffleTrackRef.current = undefined
         },
         [queryClient]
     )
@@ -229,10 +251,15 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
     const [userInteracted, setUserInteracted] = useState(false)
 
-    const currentTrack = useMemo(() => {
-        return items[currentTrackIndex.index] || null
-        // We ignore 'items' here because we only want to update the current track when the index changes, this happens on explicit actions. When we change the items through shuffle it will not change the current track.
-    }, [currentTrackIndex.index]) // eslint-disable-line react-hooks/exhaustive-deps
+    const currentTrack = useMemo<MediaItem | undefined>(() => {
+        return tmpShuffleTrackRef.current || items[currentTrackIndex.index] || undefined
+    }, [currentTrackIndex.index, items])
+
+    useEffect(() => {
+        if (isManualShuffle) {
+            tmpShuffleTrackRef.current = undefined
+        }
+    }, [isManualShuffle, items])
 
     const { data: currentTrackLyrics, isLoading: currentTrackLyricsLoading } = useQuery({
         queryKey: ['lyrics', currentTrack?.Id],
@@ -527,7 +554,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 audioRef.current.pause()
             }
         }
-    }, [currentTrackIndex]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [currentTrack?.Id]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const hasNextTrack = useCallback(() => {
         if (!items || items.length === 0 || currentTrackIndex.index === -1) {
@@ -631,16 +658,22 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     }, [audioRef, crossfadeDuration, isPlaying, nextTrackCrossfade])
 
     const toggleShuffle = useCallback(() => {
-        setShuffle(prevShuffleState => {
-            const newShuffle = !prevShuffleState
+        const newShuffle = !shuffle
 
-            if (!newShuffle) {
-                queryClient.invalidateQueries({ queryKey: reviverFn.queryKey })
-            }
+        setShuffle(newShuffle)
 
-            return newShuffle
-        })
-    }, [queryClient, reviverFn.queryKey])
+        if (newShuffle) {
+            tmpShuffleTrackRef.current = currentTrack
+
+            queryClient.removeQueries({
+                queryKey: [
+                    'reviver',
+                    ...(newShuffle && !isManualShuffle ? ['shuffle'] : []),
+                    ...(reviver.queryKey || []),
+                ],
+            })
+        }
+    }, [currentTrack, isManualShuffle, queryClient, reviver.queryKey, shuffle])
 
     const toggleRepeat = () => {
         setRepeat(prev => {

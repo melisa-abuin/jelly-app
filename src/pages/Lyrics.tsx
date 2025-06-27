@@ -145,7 +145,7 @@ export const Lyrics = () => {
         return (
             lyrics?.map((line, index) => (
                 <div
-                    key={`lyrics-${playback.currentTrack.Id}-${index}`}
+                    key={`lyrics-${playback.currentTrack?.Id}-${index}`}
                     className={'lyrics-line' + (currentLineIndex === index ? ' active' : '')}
                     ref={el => {
                         lineRefs.current[index] = el
