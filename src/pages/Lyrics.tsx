@@ -153,7 +153,9 @@ export const Lyrics = () => {
                     onClick={() => goToLine(index)}
                 >
                     {isSynced && playback.lyricsTimestamps ? (
-                        <div className="numbers">{line.Start && tickToTimeString(line.Start)}</div>
+                        <div className="numbers">
+                            {line.Start !== null && line.Start !== undefined && tickToTimeString(line.Start)}
+                        </div>
                     ) : null}
                     <div className={'text' + (playback.centeredLyrics ? ' centered' : '')}>{line.Text}</div>
                 </div>
