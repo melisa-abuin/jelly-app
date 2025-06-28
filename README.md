@@ -40,7 +40,6 @@ A lightweight & elegant music interface for Jellyfin. Made to be intuitive and m
 
 -   **Elegant & Simple Design:** A clean, clutter-free interface that makes music playback effortless and enjoyable. Built with modern tools like React for a snappy, reliable experience.
 -   **Device Friendly:** Enjoy a smooth, app-like experience on mobile and desktop alike, installable as a PWA for instant access.
--   **Personalized Settings:** Tailor the app to your preferences with a range of customizable options to perfectly match your needs.
 -   **Seamless Library Access:** Connect to your Jellyfin server to explore your personal music collection with ease.
 -   **Discover Your Favorites:**
     -   **Home:** Jump back in with recently played tracks, your most-played favorites, and newly added media.
