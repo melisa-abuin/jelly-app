@@ -4,23 +4,20 @@ import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { IMenuItems } from '../context/DropdownContext/DropdownContextProvider'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { formatDuration } from '../utils/formatDuration'
-import { IReviver } from './PlaybackManager'
 import { DeletingIcon, DownloadedIcon, DownloadingIcon, PlaystateAnimationTracklist } from './SvgIcons'
 import './TrackList.css'
 
 export const TrackList = ({
     tracks,
-    playlist,
+    playlistItems,
     showAlbum = false,
     title,
-    reviver,
     hidden = {},
 }: {
     tracks: MediaItem[]
-    playlist?: MediaItem[]
+    playlistItems?: MediaItem[]
     showAlbum?: boolean
     title: string
-    reviver?: IReviver
     hidden?: IMenuItems
 }) => {
     const playback = usePlaybackContext()
@@ -60,9 +57,12 @@ export const TrackList = ({
                             if (isCurrentTrack) {
                                 playback.togglePlayPause()
                             } else {
-                                const tracksToPlay = playlist || tracks
-                                playback.setCurrentPlaylist({ playlist: tracksToPlay, title, reviver })
-                                const playIndex = playlist ? playlist.findIndex(t => t.Id === track.Id) : index
+                                playback.setCurrentPlaylistSimple({ playlist: playlistItems || tracks || [], title })
+
+                                const playIndex = playlistItems
+                                    ? playlistItems.findIndex(t => t.Id === track.Id)
+                                    : index
+
                                 playback.playTrack(playIndex)
                             }
                         }}

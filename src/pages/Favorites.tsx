@@ -3,7 +3,7 @@ import { useFilterContext } from '../context/FilterContext/FilterContext'
 import { useJellyfinFavoritesData } from '../hooks/Jellyfin/Infinite/useJellyfinFavoritesData'
 
 export const Favorites = () => {
-    const { items, isLoading, error, reviver, loadMore } = useJellyfinFavoritesData()
+    const { items, infiniteData, isLoading, error, reviver, loadMore } = useJellyfinFavoritesData()
     const { jellyItemKind } = useFilterContext()
 
     return (
@@ -11,6 +11,7 @@ export const Favorites = () => {
             {error && <div className="error">{error}</div>}
             <MediaList
                 items={items}
+                infiniteData={infiniteData}
                 isLoading={isLoading}
                 type={jellyItemKind === 'Audio' ? 'song' : jellyItemKind === 'MusicAlbum' ? 'album' : 'artist'}
                 reviver={reviver}

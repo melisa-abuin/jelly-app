@@ -73,38 +73,65 @@ Jelly Music App is available as a production build, ready to deploy on an existi
     ```bash
     yarn
     ```
-3. Build the production files:
+3. Leave the configuration as the default, or change [`config.json`](public/config.json) as needed. Configurations are explained on the [App Configuration Section](#app-configuration) \
+   The `config.json` file can be changed directly in the built application afterwards. There is no need to rebuild if only changing a configuration variable.
+4. Build the production files:
     ```bash
     yarn build
     ```
-4. Deploy the contents of the `dist` folder to a web-accessible directory.
+5. Deploy the contents of the `dist` folder to a web-accessible directory.
    <br/>
 
 Alternatively, you can run the development server directly: `yarn dev` or `yarn dev:nocache`
 
-#### Docker Deployment
+### Docker
 
-You can now deploy Jelly Music App using Docker, with the option to set a default or locked Jellyfin server URL at build time for simplified self-hosting.
+You can reasily host Jelly Music App using Docker with the prebuilt image from ghcr.io:
 
-1.  Build the Docker image with optional environment variables:
+```bash
+# With or without configuration variables
+docker run --rm \
+    -e DEFAULT_JELLYFIN_URL=https://demo.jellyfin.org/stable \
+    -p 80:80 ghcr.io/Stannnnn/jelly-music-app:latest
+```
+
+The following are the available tags for docker:
+
+| Tag    | Description                |
+| ------ | -------------------------- |
+| latest | Tracks most recent release |
+| main   | Tracks the main branch     |
+| vX.X.X | Version specific tags      |
+
+#### Docker Container Build
+
+You can also build Jelly Music App using Docker.
+
+1.  Build the Docker image:
 
     ```bash
-    docker build . \
-    --build-arg VITE_DEFAULT_JELLYFIN_URL=https://demo.jellyfin.org/stable \
-    --build-arg VITE_LOCK_JELLYFIN_URL=true \
-    --tag jelly-app
+    docker build . --tag jelly-music-app
     ```
 
-    -   `VITE_DEFAULT_JELLYFIN_URL`: Sets the default Jellyfin server URL loaded on first app access if no URL is stored in Local Storage.
-    -   `VITE_LOCK_JELLYFIN_URL`: If set to `true`, removes the URL input field and enforces the default URL for all connections, ideal for self-hosted instances tied to a single server.
-
-1.  Run the Docker container:
+2.  Run the Docker container:
 
     ```bash
-    docker run --rm -p 80:80 jelly-app:latest
+    # Run the container
+    docker run --rm -p 80:80 jelly-music-app:latest
+
+    # You can also provide configuration using environment variables.
+    docker run --rm \
+        -e DEFAULT_JELLYFIN_URL=https://demo.jellyfin.org/stable \
+        -e LOCK_JELLYFIN_URL=true \
+        -p 80:80 jelly-music-app:latest
     ```
 
-**Note**: Environment variables must be set during the Docker build process, as setting them at runtime (e.g., via -e in `docker run`) will not work.
+### App Configuration
+
+App configuration can be done changing the `config.json` on when building or on the release files. If using docker, they can be provided as environment variables. The following are the available configurations:
+
+-   `DEFAULT_JELLYFIN_URL`: Sets the default Jellyfin server URL loaded on first app access if no URL is stored in Local Storage.
+-   `LOCK_JELLYFIN_URL`: If set to `true`, removes the URL input field and enforces the default URL (`DEFAULT_JELLYFIN_URL`) for all connections, ideal for self-hosted instances tied to a single server.
 
 ### Contributing
 

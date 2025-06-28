@@ -1,11 +1,11 @@
 import '@fontsource-variable/inter'
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
-import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
+import { QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { useCallback, useEffect, useState } from 'react'
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import './App.css'
 import { Dropdown } from './components/Dropdown'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { Main } from './components/Main'
 import './components/MediaList.css'
 import { Sidenav } from './components/Sidenav'
@@ -23,6 +23,7 @@ import { SidenavContextProvider } from './context/SidenavContext/SidenavContextP
 import { ThemeContextProvider } from './context/ThemeContext/ThemeContextProvider'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
 import { Album } from './pages/Album'
+import { AlbumArtists } from './pages/AlbumArtists'
 import { Albums } from './pages/Albums'
 import { Artist } from './pages/Artist'
 import { Artists } from './pages/Artists'
@@ -32,29 +33,20 @@ import { Favorites } from './pages/Favorites'
 import { FrequentlyPlayed } from './pages/FrequentlyPlayed'
 import { Genre } from './pages/Genre'
 import { Home } from './pages/Home'
+import { InstantMix } from './pages/InstantMix'
 import { Login } from './pages/Login'
+import { Lyrics } from './pages/Lyrics'
 import { Playlist } from './pages/Playlist'
 import { Queue } from './pages/Queue'
 import { RecentlyPlayed } from './pages/RecentlyPlayed'
 import { SearchResults } from './pages/SearchResults'
 import { Settings } from './pages/Settings'
 import { Tracks } from './pages/Tracks'
-
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            staleTime: 1000 * 60 * 5, // 5 minutes
-        },
-    },
-})
-
-const persister = createSyncStoragePersister({
-    storage: window.localStorage,
-})
+import { persister, queryClient } from './queryClient'
 
 export const App = () => {
     return (
-        <>
+        <ErrorBoundary>
             {window.__NPM_LIFECYCLE_EVENT__ === 'dev:nocache' ? (
                 <QueryClientProvider client={queryClient}>
                     <RoutedApp />
@@ -64,7 +56,7 @@ export const App = () => {
                     <RoutedApp />
                 </PersistQueryClientProvider>
             )}
-        </>
+        </ErrorBoundary>
     )
 }
 
@@ -81,13 +73,14 @@ const RoutedApp = () => {
         localStorage.setItem('auth', JSON.stringify(authData))
     }
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setIsLoggingOut(true)
         localStorage.removeItem('repeatMode')
         setAuth(null)
         localStorage.removeItem('auth')
         setIsLoggingOut(false)
         queryClient.clear()
+        await persister.removeClient()
     }
 
     useEffect(() => {
@@ -177,35 +170,52 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
     }, [handleLogout])
 
     return (
-        <div className="interface">
-            <div
-                className={
-                    showSidenav || (isDropdownOpen && isTouchDevice) ? 'dimmer active noSelect' : 'dimmer noSelect'
+        <Routes>
+            <Route path="/bla" element={<div>bla</div>} />
+
+            <Route
+                path="*"
+                element={
+                    <div className="interface">
+                        <div
+                            className={
+                                showSidenav || (isDropdownOpen && isTouchDevice)
+                                    ? 'dimmer active noSelect'
+                                    : 'dimmer noSelect'
+                            }
+                            onClick={showSidenav ? toggleSidenav : dropdownContext?.closeDropdown}
+                        />
+
+                        <Sidenav username={auth.username} />
+
+                        <Routes>
+                            <Route path="/" element={<Main content={Home}></Main>} />
+                            <Route path="/tracks" element={<Main content={Tracks} filterType={'mediaItems'} />} />
+                            <Route path="/lyrics" element={<Main content={Lyrics} />} />
+                            <Route path="/albums" element={<Main content={Albums} filterType={'mediaItems'} />} />
+                            <Route path="/album/:albumId" element={<Main content={Album} />} />
+                            <Route path="/artists" element={<Main content={Artists} filterType={'mediaItems'} />} />
+                            <Route path="/artist/:artistId" element={<Main content={Artist} />} />
+                            <Route path="/artist/:artistId/tracks" element={<Main content={ArtistTracks} />} />
+                            <Route
+                                path="/albumartists"
+                                element={<Main content={AlbumArtists} filterType={'mediaItems'} />}
+                            />
+                            <Route path="/genre/:genre" element={<Main content={Genre} filterType={'mediaItems'} />} />
+                            <Route path="/playlist/:playlistId" element={<Main content={Playlist} />} />
+                            <Route path="/queue" element={<Main content={Queue} />} />
+                            <Route path="/favorites" element={<Main content={Favorites} filterType={'favorites'} />} />
+                            <Route path="/recently" element={<Main content={RecentlyPlayed} />} />
+                            <Route path="/frequently" element={<Main content={FrequentlyPlayed} />} />
+                            <Route path="/synced" element={<Main content={Downloads} filterType={'kind'} />} />
+                            <Route path="/settings" element={<Main content={memoSettings} />} />
+                            <Route path="/instantmix/:songId" element={<Main content={InstantMix} />} />
+                            <Route path="/search/:query" element={<Main content={SearchResults} />} />
+                            <Route path="*" element={<Navigate to="/" />} />
+                        </Routes>
+                    </div>
                 }
-                onClick={showSidenav ? toggleSidenav : dropdownContext?.closeDropdown}
             />
-
-            <Sidenav username={auth.username} />
-
-            <Routes>
-                <Route path="/" element={<Main content={Home}></Main>} />
-                <Route path="/tracks" element={<Main content={Tracks} filterType={'mediaItems'} />} />
-                <Route path="/albums" element={<Main content={Albums} filterType={'mediaItems'} />} />
-                <Route path="/album/:albumId" element={<Main content={Album} />} />
-                <Route path="/artists" element={<Main content={Artists} filterType={'mediaItems'} />} />
-                <Route path="/artist/:artistId" element={<Main content={Artist} />} />
-                <Route path="/artist/:artistId/tracks" element={<Main content={ArtistTracks} />} />
-                <Route path="/genre/:genre" element={<Main content={Genre} filterType={'mediaItems'} />} />
-                <Route path="/playlist/:playlistId" element={<Main content={Playlist} />} />
-                <Route path="/queue" element={<Main content={Queue} />} />
-                <Route path="/favorites" element={<Main content={Favorites} filterType={'favorites'} />} />
-                <Route path="/recently" element={<Main content={RecentlyPlayed} />} />
-                <Route path="/frequently" element={<Main content={FrequentlyPlayed} />} />
-                <Route path="/synced" element={<Main content={Downloads} filterType={'favorites'} />} />
-                <Route path="/settings" element={<Main content={memoSettings} />} />
-                <Route path="/search/:query" element={<Main content={SearchResults} />} />
-                <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-        </div>
+        </Routes>
     )
 }

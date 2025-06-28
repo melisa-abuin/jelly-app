@@ -11,6 +11,7 @@ export const Downloads = () => {
             {error && <div className="error">{error}</div>}
             <MediaList
                 items={items}
+                infiniteData={{ pageParams: [1], pages: [items] }}
                 isLoading={isLoading}
                 type={jellyItemKind === 'Audio' ? 'song' : jellyItemKind === 'MusicAlbum' ? 'album' : 'artist'}
                 loadMore={loadMore}

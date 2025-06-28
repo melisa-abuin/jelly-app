@@ -9,7 +9,7 @@ export const useJellyfinFavoritesData = () => {
     const { jellySort, jellyItemKind } = useFilterContext()
 
     return useJellyfinInfiniteData({
-        queryKey: ['favorites', jellyItemKind],
+        queryKey: ['favorites', jellySort.sortBy, jellySort.sortOrder, jellyItemKind],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
             return await api.getFavoriteTracks(

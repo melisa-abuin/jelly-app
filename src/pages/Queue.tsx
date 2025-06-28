@@ -14,7 +14,7 @@ export const Queue = () => {
         return () => setPageTitle('')
     }, [setPageTitle])
 
-    if (!currentTrack || currentPlaylist.length === 0) {
+    if (!currentTrack) {
         return <div className="empty-queue">Queue is currently empty</div>
     }
 
@@ -25,13 +25,15 @@ export const Queue = () => {
             <div className="queue-header">
                 <MediaList
                     items={[currentTrack]}
+                    infiniteData={{ pageParams: [1], pages: [[currentTrack]] }}
                     isLoading={false}
                     type="song"
                     title={'Current Track - Queue'}
                     hidden={{ add_to_queue: true, remove_from_queue: true }}
                 />
             </div>
-            {queueTracks.length > 0 && (
+
+            {(queueTracks.length > 0 || isLoading) && (
                 <>
                     <div className="queue-title">Playing Next</div>
                     <div className="queue-desc">
@@ -41,14 +43,15 @@ export const Queue = () => {
                     </div>
                     <MediaList
                         items={queueTracks}
-                        playlistItems={currentPlaylist}
+                        infiniteData={{ pageParams: [1], pages: [queueTracks] }}
                         indexOffset={currentTrackIndex + 1}
                         isLoading={isLoading}
                         type="song"
                         loadMore={loadMore}
                         title={'Next Up - Queue'}
                         hidden={{ add_to_queue: true }}
-                        reviver={'persist'}
+                        reviver={'persistAll'}
+                        isDraggable={true}
                     />
                 </>
             )}

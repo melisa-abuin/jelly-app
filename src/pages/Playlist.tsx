@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
 import { Loader } from '../components/Loader'
 import { PlaylistTrackList } from '../components/PlaylistTrackList'
+import { Squircle } from '../components/Squircle'
 import { MoreIcon } from '../components/SvgIcons'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
@@ -20,8 +21,9 @@ export const Playlist = () => {
 
     const { playlistId } = useParams<{ playlistId: string }>()
     const {
-        playlist,
+        playlistData,
         items: tracks,
+        infiniteData,
         isLoading,
         error,
         totalPlaytime,
@@ -35,35 +37,36 @@ export const Playlist = () => {
     const { isOpen, selectedItem, onContextMenu } = useDropdownContext()
 
     useEffect(() => {
-        if (playlist) {
-            setPageTitle(playlist.Name)
+        if (playlistData) {
+            setPageTitle(playlistData.Name)
         }
         return () => {
             setPageTitle('')
         }
-    }, [playlist, setPageTitle])
+    }, [playlistData, setPageTitle])
 
     if (isLoading && tracks.length === 0) {
         return <Loader />
     }
 
-    if (error || !playlist) {
+    if (error || !playlistData) {
         return <div className="error">{error || 'Playlist not found'}</div>
     }
 
     const handleMoreClick = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation()
-        onContextMenu(e, { item: playlist }, true, { add_to_favorite: true, remove_from_favorite: true })
+        onContextMenu(e, { item: playlistData }, true, { add_to_favorite: true, remove_from_favorite: true })
     }
 
     return (
         <div className="playlist-page">
             <div className="playlist-header">
-                <JellyImg item={playlist} type={'Primary'} width={100} height={100} />
-
+                <Squircle width={100} height={100} cornerRadius={8} className="thumbnail">
+                    <JellyImg item={playlistData} type={'Primary'} width={100} height={100} />
+                </Squircle>
                 <div className="playlist-details">
-                    <div className="title">{playlist.Name}</div>
-                    <div className="date">{formatDate(playlist.DateCreated)}</div>
+                    <div className="title">{playlistData.Name}</div>
+                    <div className="date">{formatDate(playlistData.DateCreated)}</div>
                     <div className="stats">
                         <div className="track-amount">
                             <span className="number">{totalTrackCount}</span>{' '}
@@ -87,7 +90,7 @@ export const Playlist = () => {
                             <div
                                 className="play-playlist"
                                 onClick={() => {
-                                    playback.setCurrentPlaylist({ playlist: tracks, title: playlist.Name })
+                                    playback.setCurrentPlaylistSimple({ playlist: tracks, title: playlistData.Name })
                                     playback.playTrack(0)
                                 }}
                             >
@@ -96,14 +99,14 @@ export const Playlist = () => {
                             </div>
                             <div
                                 className="favorite-state"
-                                title={playlist.UserData?.IsFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                                title={playlistData.UserData?.IsFavorite ? 'Remove from favorites' : 'Add to favorites'}
                                 onClick={async () => {
-                                    if (playlist?.Id) {
+                                    if (playlistData?.Id) {
                                         try {
-                                            if (playlist.UserData?.IsFavorite) {
-                                                await removeFromFavorites(playlist)
+                                            if (playlistData.UserData?.IsFavorite) {
+                                                await removeFromFavorites(playlistData)
                                             } else {
-                                                await addToFavorites(playlist)
+                                                await addToFavorites(playlistData)
                                             }
                                         } catch (error) {
                                             console.error('Failed to update favorite status:', error)
@@ -111,11 +114,15 @@ export const Playlist = () => {
                                     }
                                 }}
                             >
-                                {playlist.UserData?.IsFavorite ? <HeartFillIcon size={16} /> : <HeartIcon size={16} />}
+                                {playlistData.UserData?.IsFavorite ? (
+                                    <HeartFillIcon size={16} />
+                                ) : (
+                                    <HeartIcon size={16} />
+                                )}
                             </div>
                         </div>
                         <div
-                            className={`more ${isOpen && selectedItem?.Id === playlist?.Id ? 'active' : ''}`}
+                            className={`more ${isOpen && selectedItem?.Id === playlistData?.Id ? 'active' : ''}`}
                             onClick={handleMoreClick}
                             title="More"
                         >
@@ -127,10 +134,11 @@ export const Playlist = () => {
 
             <PlaylistTrackList
                 tracks={tracks}
+                infiniteData={infiniteData}
                 isLoading={isLoading}
                 showType="artist"
                 playlistId={playlistId}
-                title={playlist ? playlist.Name : 'Playlist'}
+                title={playlistData ? playlistData.Name : 'Playlist'}
                 reviver={reviver}
                 loadMore={loadMore}
             />

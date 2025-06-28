@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
 import { Loader } from '../components/Loader'
 import { MediaList } from '../components/MediaList'
+import { Squircle } from '../components/Squircle'
 import { MoreIcon } from '../components/SvgIcons'
 import { TrackList } from '../components/TrackList'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
@@ -67,20 +68,20 @@ export const Artist = () => {
     return (
         <div className="artist-page">
             <div className="artist-header">
-                <JellyImg item={artist} type={'Primary'} width={100} height={100} />
+                <Squircle width={100} height={100} cornerRadius={8} className="thumbnail">
+                    <JellyImg item={artist} type={'Primary'} width={100} height={100} />
+                </Squircle>
                 <div className="artist-details">
                     <div className="artist">{artist.Name}</div>
                     {genres.length > 0 && (
-                        <>
-                            <div className="genres">
-                                {genres.slice(0, 6).map((genre, index) => (
-                                    <span key={genre}>
-                                        <Link to={`/genre/${encodeURIComponent(genre)}`}>{genre}</Link>
-                                        {index < genres.slice(0, 6).length - 1 && ', '}
-                                    </span>
-                                ))}
-                            </div>
-                        </>
+                        <div className="genres">
+                            {genres.slice(0, 6).map((genre, index) => (
+                                <span key={genre}>
+                                    <Link to={`/genre/${encodeURIComponent(genre)}`}>{genre}</Link>
+                                    {index < genres.slice(0, 6).length - 1 && ', '}
+                                </span>
+                            ))}
+                        </div>
                     )}
                     <div className="stats">
                         <div className="track-amount">
@@ -110,7 +111,7 @@ export const Artist = () => {
                             <div
                                 className="play-artist"
                                 onClick={() => {
-                                    playback.setCurrentPlaylist({ playlist: tracks, title: artist.Name })
+                                    playback.setCurrentPlaylistSimple({ playlist: tracks, title: artist.Name })
                                     playback.playTrack(0)
                                 }}
                             >
@@ -173,6 +174,7 @@ export const Artist = () => {
                         <div className="desc">Complete discography</div>
                         <MediaList
                             items={albums}
+                            infiniteData={{ pageParams: [1], pages: [albums] }}
                             isLoading={loading}
                             type="album"
                             albumDisplayMode="year"
@@ -188,6 +190,7 @@ export const Artist = () => {
                         <div className="desc">Additional recordings</div>
                         <MediaList
                             items={appearsInAlbums}
+                            infiniteData={{ pageParams: [1], pages: [appearsInAlbums] }}
                             isLoading={loading}
                             type="album"
                             albumDisplayMode="both"
@@ -207,6 +210,7 @@ export const Artist = () => {
                                 <div className="desc">Included in curated collections</div>
                                 <MediaList
                                     items={playlists}
+                                    infiniteData={{ pageParams: [1], pages: [playlists] }}
                                     isLoading={playlistsLoading}
                                     type="playlist"
                                     title={artist.Name ? `${artist.Name} Playlists` : 'Playlists'}

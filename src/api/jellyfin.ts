@@ -1,5 +1,5 @@
 import { Jellyfin } from '@jellyfin/sdk'
-import { InstantMixApi, PlaylistsApi } from '@jellyfin/sdk/lib/generated-client'
+import { InstantMixApi, LyricsApi, PlaylistsApi } from '@jellyfin/sdk/lib/generated-client'
 import { ArtistsApi } from '@jellyfin/sdk/lib/generated-client/api/artists-api'
 import { GenresApi } from '@jellyfin/sdk/lib/generated-client/api/genres-api'
 import { ItemsApi } from '@jellyfin/sdk/lib/generated-client/api/items-api'
@@ -42,6 +42,7 @@ export type MediaItem = BaseItemDto & {
     Name: string
     pageIndex?: number
     offlineState?: 'downloading' | 'downloaded' | 'deleting'
+    queueId?: string
 }
 
 export type IJellyfinAuth = Parameters<typeof initJellyfinApi>[0]
@@ -77,7 +78,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
     const jellyfin = new Jellyfin({
         clientInfo: {
             name: 'Jelly Music App',
-            version: '0.1',
+            version: __VERSION__,
         },
         deviceInfo: {
             name: 'Web',
@@ -307,6 +308,28 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             },
             { signal: AbortSignal.timeout(20000) }
         )
+        return await parseItemDtos(response.data.Items)
+    }
+
+    const getAllAlbumArtists = async (
+        startIndex = 0,
+        limit = 40,
+        sortBy: ItemSortBy[] = [ItemSortBy.DateCreated],
+        sortOrder: SortOrder[] = [SortOrder.Descending]
+    ) => {
+        const artistsApi = new ArtistsApi(api.configuration)
+
+        const response = await artistsApi.getAlbumArtists(
+            {
+                userId,
+                sortBy,
+                sortOrder,
+                startIndex,
+                limit: Math.min(limit, maxLimit),
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+
         return await parseItemDtos(response.data.Items)
     }
 
@@ -576,7 +599,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             },
             { signal: AbortSignal.timeout(20000) }
         )
-        const playlists = playlistsResponse.data.Items
+        const playlists = await parseItemDtos(playlistsResponse.data.Items)
 
         const playlistsWithArtist: MediaItem[] = []
         const batchSize = 5
@@ -672,6 +695,8 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
 
         // Fetch total playtime (requires items for RunTimeTicks)
         let totalPlaytime = 0
+        let totalPlays = 0
+
         if (totalTrackCount > 0) {
             const fullResponse = await itemsApi.getItems(
                 {
@@ -685,13 +710,13 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 { signal: AbortSignal.timeout(20000) }
             )
 
-            totalPlaytime = (await parseItemDtos(fullResponse.data.Items)).reduce(
-                (sum, track) => sum + (track.RunTimeTicks || 0),
-                0
-            )
+            const parsedItems = await parseItemDtos(fullResponse.data.Items)
+
+            totalPlaytime = parsedItems.reduce((sum, track) => sum + (track.RunTimeTicks || 0), 0)
+            totalPlays = parsedItems.reduce((sum, track) => sum + (track.UserData?.PlayCount || 0), 0)
         }
 
-        return { totalTrackCount, totalPlaytime }
+        return { totalTrackCount, totalPlaytime, totalPlays }
     }
 
     // Same as getPlaylistTotals but returns all tracks instead of just metadata, yes its not very efficient but it be what it be
@@ -702,6 +727,8 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 userId,
                 parentId: playlistId,
                 includeItemTypes: [BaseItemKind.Audio],
+                sortBy: [ItemSortBy.DateCreated],
+                sortOrder: [SortOrder.Descending],
                 recursive: true,
                 limit: maxLimit,
             },
@@ -754,6 +781,15 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             { signal: AbortSignal.timeout(20000) }
         )
         return await parseItemDtos(response.data.Items)
+    }
+
+    const getTrackLyrics = async (trackId: string) => {
+        const lyricsApi = new LyricsApi(api.configuration)
+        const response = await lyricsApi.getLyrics({
+            itemId: trackId,
+        })
+
+        return response.data
     }
 
     const fetchAllTracks = async (artistId: string) => {
@@ -978,6 +1014,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         getRecentlyAdded,
         getAllAlbums,
         getAllArtists,
+        getAllAlbumArtists,
         getAllTracks,
         getFavoriteTracks,
         getAlbumDetails,
@@ -991,6 +1028,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         getPlaylistAllTracks,
         getPlaylistTracks,
         getAllPlaylists,
+        getTrackLyrics,
         fetchAllTracks,
         fetchRecentlyPlayed,
         fetchFrequentlyPlayed,

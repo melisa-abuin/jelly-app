@@ -180,6 +180,7 @@ html.light {
     --error-font: #f15a5a;
     --error-border: #ffd6d6;
     --error-background: #fff0f0;
+    --error-background-hover: #ffe4e4;
     --brand-color: #947bee;
     --btn-brand-color: #b282e9;
     --btn-brand-color-hover: #9470e9;
@@ -213,7 +214,8 @@ html.dark {
     --link-color-active: #af9cdf;
     --error-font: #f76565;
     --error-border: #80241b;
-    --error-background: #200c08;
+    --error-background: #220f0c;
+    --error-background-hover: #301815;
     --brand-color: #a381f3;
     --btn-brand-color: #834ec0;
     --btn-brand-color-hover: #9e53f3;
@@ -426,12 +428,16 @@ body.lockscroll {
 .main > .main_header > .primary {
     display: flex;
     align-items: center;
-    width: 100%;
+    flex-grow: 1;
     max-width: calc(100% - 30px);
 }
 
 .main > .main_header:has(.sorting > .sort) > .primary {
     max-width: calc(100% - 160px);
+}
+
+.main > .main_header:has(.sorting > .sort):has(.sorting.links > .filter) > .primary {
+    max-width: calc(100% - 236px);
 }
 
 .main > .main_header > .primary > .container {
@@ -503,6 +509,10 @@ body.lockscroll {
     display: flex;
     align-items: center;
     flex-shrink: 0;
+}
+
+.main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon {
+    display: none;
 }
 
 .main > .main_header > .secondary > .sorting > .filter > select {
@@ -613,12 +623,12 @@ body.lockscroll {
 .main > .main_footer {
     position: sticky;
     bottom: 0;
-    z-index: 1;
+    z-index: 2;
     width: 100%;
     margin-top: auto;
     background-color: var(--bg-color);
-    /* Attempted fix to subpixel rendering that causes 1px content bleed at bottom */
-    will-change: transform;
+    /* Attempted fix to subpixel rendering that causes 1px content bleed at bottom
+    will-change: transform;*/
 }
 
 /* Playback area */
@@ -844,6 +854,7 @@ body.lockscroll {
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous {
     cursor: pointer;
+    padding: 2px 0;
     transform: rotate(180deg);
 }
 
@@ -935,6 +946,7 @@ body.lockscroll {
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next {
     cursor: pointer;
+    padding: 2px 0;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next > .next-icon {
@@ -1053,7 +1065,9 @@ body.lockscroll {
 .recently-page,
 .frequently-page,
 .genre-page,
-.artist-tracks-page {
+.artist-tracks-page,
+.artists-page,
+.lyrics-page {
     margin-top: -4px;
 }
 
@@ -1063,13 +1077,27 @@ body.lockscroll {
 .recently-page > .empty,
 .frequently-page > .empty,
 .genre-page > .empty,
-.playlist-page > .empty {
+.playlist-page > .empty,
+.lyrics-page > .empty {
     font-size: 0.85rem;
     margin: 4px 0;
 }
 
 .main > .main_content > .empty-queue {
     font-size: 0.85rem;
+}
+
+/* Artists page */
+.main > .main_content > .artists-page > .album-artists {
+    font-size: 0.725rem;
+    font-weight: 500;
+    text-align: right;
+    margin-right: -4px;
+    margin-bottom: 8px;
+}
+
+.main > .main_content > .artists-page > .album-artists > a.textlink {
+    color: var(--font-color-tertiary);
 }
 
 /* Responsive */
@@ -1091,10 +1119,14 @@ body.lockscroll {
 }
 
 @media only screen and (max-width: 700px), (pointer: coarse) {
+    .music-app:has(.dropdown.active) .dimmer {
+        z-index: 5;
+    }
+
     .dimmer {
         display: block;
         position: fixed;
-        z-index: 3;
+        z-index: 4;
         top: 0;
         left: 0;
         width: 100%;
@@ -1125,7 +1157,8 @@ body.lockscroll {
         filter: none;
     }
 
-    body.lockscroll {
+    body.lockscroll,
+    body:has(.sidenav_wrapper.active) {
         overflow: hidden !important;
     }
 
@@ -1186,6 +1219,26 @@ body.lockscroll {
 }
 
 @media only screen and (max-width: 390px) {
+    .main > .main_header:has(.sorting > .sort):has(.sorting.links > .filter) > .primary {
+        max-width: calc(100% - 208px);
+    }
+
+    .main > .main_header:has(.sorting > .sort):has(.sorting.links > .filter) > .secondary > .sorting {
+        border-radius: 20px;
+    }
+
+    .main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon {
+        position: absolute;
+        left: 6px;
+        display: block;
+        fill: var(--brand-color);
+    }
+
+    .main > .main_header > .secondary > .sorting.links > .filter > select {
+        opacity: 0;
+        width: 44px;
+    }
+
     .main > .main_footer > .playback > .container > .track-info {
         max-width: calc(100% - 110px);
     }

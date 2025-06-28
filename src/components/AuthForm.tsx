@@ -1,5 +1,7 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { ApiError, loginToJellyfin } from '../api/jellyfin'
+import { useExternalConfig } from '../hooks/useExternalConfig'
+import { Loader } from './Loader'
 
 export const AuthForm = ({
     onLogin,
@@ -10,20 +12,21 @@ export const AuthForm = ({
     const isDemo = queryParams.get('demo') === '1'
 
     // If the URL is locked, we just use the default
-    const lockedURL = import.meta.env.VITE_LOCK_JELLYFIN_URL === 'true'
-    let loadedURL = import.meta.env.VITE_DEFAULT_JELLYFIN_URL
-
-    if (!lockedURL) {
-        loadedURL = isDemo
-            ? 'https://demo.jellyfin.org/stable'
-            : localStorage.getItem('lastServerUrl') || import.meta.env.VITE_DEFAULT_JELLYFIN_URL || ''
-    }
-
+    const loadedURL = isDemo ? 'https://demo.jellyfin.org/stable' : localStorage.getItem('lastServerUrl') || ''
     const [serverUrl, setServerUrl] = useState(loadedURL)
+
+    const { data: config, isPending: loadingConfiguration } = useExternalConfig()
     const [username, setUsername] = useState(isDemo ? 'demo' : '')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+
+    useEffect(() => {
+        if (!config) return
+
+        if (config.lockJellyfinUrl) setServerUrl(config.defaultJellyfinUrl || '')
+        else if (!serverUrl) setServerUrl(config.defaultJellyfinUrl || '')
+    }, [serverUrl, loadingConfiguration, config])
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
@@ -93,11 +96,13 @@ export const AuthForm = ({
         }
     }
 
-    return (
+    return loadingConfiguration ? (
+        <Loader></Loader>
+    ) : (
         <form className="login_form" onSubmit={handleSubmit}>
             <div className="error_placeholder">{error && <div className="error">{error}</div>}</div>
             <div className="title">Welcome back</div>
-            {!lockedURL && ( // We do not render if the URL is locked
+            {!config?.lockJellyfinUrl && ( // We do not render if the URL is locked
                 <div className="input_container">
                     <input
                         type="text"
