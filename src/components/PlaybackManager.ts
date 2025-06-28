@@ -576,7 +576,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         }
 
         if (repeat === 'one') {
-            setCurrentTrackIndex({ index: currentTrackIndex.index })
+            playTrack()
         } else {
             const nextIndex = currentTrackIndex.index + 1
             if (nextIndex >= items.length) {
@@ -597,7 +597,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 setCurrentTrackIndex({ index: nextIndex })
             }
         }
-    }, [audioRef, currentTrack, currentTrackIndex.index, items, loadMore, repeat])
+    }, [audioRef, currentTrack, currentTrackIndex.index, items, loadMore, playTrack, repeat])
 
     const previousTrack = useCallback(async () => {
         setUserInteracted(true)
@@ -611,7 +611,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         }
 
         if (repeat === 'one') {
-            // If repeat is 'one', play the same track again, no need to change index
+            playTrack()
         } else {
             const prevIndex = currentTrackIndex.index - 1
             if (prevIndex < 0) {
@@ -628,7 +628,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 setCurrentTrackIndex({ index: prevIndex })
             }
         }
-    }, [audioRef, currentTrack, currentTrackIndex.index, items, repeat])
+    }, [audioRef, currentTrack, currentTrackIndex.index, items, playTrack, repeat])
 
     const nextTrackCrossfade = useCallback(async () => {
         if (!audioRef.current) return
@@ -643,7 +643,11 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         if (!audioRef.current) return
 
         const onTimeUpdate = () => {
-            if (audioRef.current.duration - audioRef.current.currentTime < crossfadeDuration && isPlaying) {
+            if (
+                audioRef.current.duration - audioRef.current.currentTime < crossfadeDuration &&
+                isPlaying &&
+                repeat !== 'one'
+            ) {
                 nextTrackCrossfade()
             }
         }
@@ -655,7 +659,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return () => {
             audio.removeEventListener('timeupdate', onTimeUpdate)
         }
-    }, [audioRef, crossfadeDuration, isPlaying, nextTrackCrossfade])
+    }, [audioRef, crossfadeDuration, isPlaying, nextTrackCrossfade, repeat])
 
     const toggleShuffle = useCallback(() => {
         const newShuffle = !shuffle
@@ -814,6 +818,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         if (!audioRef.current) return
 
         const audio = audioRef.current
+
         const handleEnded = async () => {
             if (!currentTrack || currentTrackIndex.index === -1 || !items || items.length === 0) {
                 if (currentTrack) {
@@ -826,7 +831,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             api.reportPlaybackStopped(currentTrack.Id, audio.currentTime)
 
             if (repeat === 'one') {
-                setCurrentTrackIndex({ index: currentTrackIndex.index })
+                playTrack()
             } else {
                 nextTrack()
             }
@@ -837,7 +842,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return () => {
             audio.removeEventListener('ended', handleEnded)
         }
-    }, [api, audioRef, currentTrack, currentTrackIndex.index, items, nextTrack, repeat])
+    }, [api, audioRef, currentTrack, currentTrackIndex.index, items, nextTrack, playTrack, repeat])
 
     useEffect(() => {
         if (clearOnLogout && currentTrack) {
