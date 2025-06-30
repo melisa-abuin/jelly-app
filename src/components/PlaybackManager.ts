@@ -110,27 +110,33 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return {
             queryKey: ['reviver', ...(shuffle && !isManualShuffle ? ['shuffle'] : []), ...(reviver.queryKey || [])],
             queryFn: async ({ pageParam = 0 }) => {
-                const itemsPerPage = params[pageParamIndex + 1]
-                const startIndex = (pageParam as number) * (itemsPerPage as number)
+                try {
+                    const itemsPerPage = params[pageParamIndex + 1]
+                    const startIndex = (pageParam as number) * (itemsPerPage as number)
 
-                params[pageParamIndex] = startIndex
+                    params[pageParamIndex] = startIndex
 
-                // When shuffle is enabled, we set the pageParam to 'Random' to fetch random items
-                // Note; Hardcoded it to 2 params after the pageParam, should improve this
-                if (shuffle && !isManualShuffle) {
-                    params[pageParamIndex + 2] = 'Random'
+                    // When shuffle is enabled, we set the pageParam to 'Random' to fetch random items
+                    // Note; Hardcoded it to 2 params after the pageParam, should improve this
+                    if (shuffle && !isManualShuffle) {
+                        params[pageParamIndex + 2] = 'Random'
+                    }
+
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const response: MediaItem[] = (await (api as any)[queryFn]?.(...params)) || []
+
+                    if (shuffle && !isManualShuffle && tmpShuffleTrackRef.current) {
+                        response.splice(currentTrackIndex.index, 0, tmpShuffleTrackRef.current)
+                    }
+
+                    tmpShuffleTrackRef.current = undefined
+
+                    return response
+                } catch (e) {
+                    console.error('Error in reviver queryFn:', e)
+                    console.trace()
+                    return []
                 }
-
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const response: MediaItem[] = (await (api as any)[queryFn]?.(...params)) || []
-
-                if (shuffle && !isManualShuffle && tmpShuffleTrackRef.current) {
-                    response.splice(currentTrackIndex.index, 0, tmpShuffleTrackRef.current)
-                }
-
-                tmpShuffleTrackRef.current = undefined
-
-                return response
             },
             queryFnReviver: undefined,
             // NOTE; The reviverPageIndex is probably wrong but its not really an issue for now
