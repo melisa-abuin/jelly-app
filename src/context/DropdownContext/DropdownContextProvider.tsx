@@ -586,7 +586,7 @@ const useInitialState = () => {
                                     </div>
                                 </div>
 
-                                <div className="dropdown-separator" />
+                                {playlists.length > 0 && <div className="dropdown-separator" />}
 
                                 {playlists.map(playlist => (
                                     <div
