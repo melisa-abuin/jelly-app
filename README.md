@@ -77,16 +77,16 @@ It's also available as a **docker image** for easy deployment, see docker detail
     ```bash
     yarn
     ```
-3. Leave the configuration as the default, or change [`config.json`](public/config.json) as needed. Configurations are explained on the [App Configuration Section](#app-configuration) \
-   The `config.json` file can be changed directly in the built application afterwards. There is no need to rebuild if only changing a configuration variable.
-4. Build the production files:
+3. Build the production files:
     ```bash
     yarn build
     ```
-5. Deploy the contents of the `dist` folder to a web-accessible directory.
-   <br/>
+4. Deploy the contents of the `dist` folder to a web-accessible directory.
 
 Alternatively, you can run the development server directly: `yarn dev` or `yarn dev:nocache`
+
+Leave the configuration as the default, or change [`config.json`](public/config.json) as needed. Configurations are explained on the [App Configuration Section](#app-configuration).
+The `config.json` file can be changed directly in the built application afterwards. There is no need to rebuild if only changing a configuration variable.
 
 ### Docker
 
