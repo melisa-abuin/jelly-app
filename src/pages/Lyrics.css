@@ -145,7 +145,7 @@
 
 /* Align numbers and empty line when text is empty */
 .lyrics-page > .lyrics-line:has(.numbers ~ .text:empty) > .numbers {
-    margin-top: 0;
+    min-height: 20px;
 }
 
 .lyrics-page > .lyrics-line > .text {
@@ -182,6 +182,7 @@
     opacity: 1;
 }
 
+/* Responsive */
 @media only screen and (pointer: coarse) {
     .lyrics-page.synced > .lyrics-line:hover {
         background-color: unset;
@@ -211,5 +212,13 @@
 
     .lyrics-page.synced:has(.lyrics-line > .text.centered):has(.lyrics-line > .numbers) > .lyrics-line {
         align-items: center;
+    }
+
+    .lyrics-page > .lyrics-line > .numbers {
+        margin-top: 0;
+    }
+
+    .lyrics-page > .lyrics-line:has(.numbers ~ .text:empty) > .numbers {
+        margin-bottom: -4px;
     }
 }
