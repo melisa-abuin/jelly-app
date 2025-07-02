@@ -102,11 +102,6 @@ input::placeholder {
     color: var(--font-color-tertiary);
 }
 
-/* Prevent page zoom for iOS devices */
-html.iOS input {
-    font-size: 1rem !important;
-}
-
 /*
 button:disabled {
     opacity: 0.3;
@@ -1127,8 +1122,23 @@ body.lockscroll {
 }
 
 @media only screen and (pointer: coarse) {
+    /* Prevent page zoom for iOS devices */
+    html.iOS input {
+        font-size: 1rem !important;
+    }
+
+    html.iOS .music-app:not(:has(.login)) {
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+
     .main > .main_footer > .playback > .progress {
         height: 14px;
+    }
+
+    html.iOS .main > .main_footer > .playback > .container {
+        max-height: 90px;
+        padding-bottom: max(14px, env(safe-area-inset-bottom));
     }
 }
 
