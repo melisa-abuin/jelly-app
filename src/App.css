@@ -1247,10 +1247,6 @@ body.lockscroll {
         max-width: calc(100% - 208px);
     }
 
-    .main > .main_header:has(.sorting > .sort):has(.sorting.links > .filter) > .secondary > .sorting {
-        border-radius: 20px;
-    }
-
     .main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon {
         position: absolute;
         left: 6px;
