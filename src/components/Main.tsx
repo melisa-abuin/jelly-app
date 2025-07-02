@@ -335,7 +335,7 @@ export const MainContent = ({
     )
 }
 
-const Progressbar = () => {
+export const Progressbar = () => {
     const playback = usePlaybackContext()
     const audio = playback.audioRef.current as HTMLAudioElement | undefined
     const progressRef = useRef<HTMLInputElement>(null)

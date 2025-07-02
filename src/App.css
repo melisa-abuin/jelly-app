@@ -193,6 +193,13 @@ html.light {
     --scrollbar-color: #a8a8a8;
     --scrollbar-color-hover: #8a8a8a;
     --dropdown-shadow: 0 0 4px rgba(0, 0, 0, 0.04);
+    --playing-artwork-opacity: 0.16;
+    --playing-bg-color: rgba(0, 0, 0, 0.04);
+    --playing-bg-color-secondary: rgba(0, 0, 0, 0.06);
+    --playing-bg-color-tertiary: rgba(0, 0, 0, 0.12);
+    --playing-bg-color-quaternary: rgba(0, 0, 0, 0.18);
+    --playing-border-color: rgba(0, 0, 0, 0.08);
+    --playing-font-color: rgba(0, 0, 0, 0.5);
 }
 
 html.dark {
@@ -228,6 +235,13 @@ html.dark {
     --scrollbar-color: #78767c;
     --scrollbar-color-hover: #aba9af;
     --dropdown-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    --playing-artwork-opacity: 0.08;
+    --playing-bg-color: rgba(255, 255, 255, 0.04);
+    --playing-bg-color-secondary: rgba(255, 255, 255, 0.08);
+    --playing-bg-color-tertiary: rgba(255, 255, 255, 0.16);
+    --playing-bg-color-quaternary: rgba(255, 255, 255, 0.32);
+    --playing-border-color: rgba(255, 255, 255, 0.1);
+    --playing-font-color: rgba(255, 255, 255, 0.4);
 }
 
 html,

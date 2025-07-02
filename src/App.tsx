@@ -36,6 +36,8 @@ import { Home } from './pages/Home'
 import { InstantMix } from './pages/InstantMix'
 import { Login } from './pages/Login'
 import { Lyrics } from './pages/Lyrics'
+import { NowPlaying } from './pages/NowPlaying'
+import { NowPlayingLyrics } from './pages/NowPlayingLyrics'
 import { Playlist } from './pages/Playlist'
 import { Queue } from './pages/Queue'
 import { RecentlyPlayed } from './pages/RecentlyPlayed'
@@ -171,7 +173,8 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
 
     return (
         <Routes>
-            <Route path="/bla" element={<div>bla</div>} />
+            <Route path="/nowplaying" element={<NowPlaying />} />
+            <Route path="/nowplaying/lyrics" element={<NowPlayingLyrics />} />
 
             <Route
                 path="*"

@@ -1,5 +1,5 @@
 import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client'
-import { BookmarkFillIcon, GearIcon } from '@primer/octicons-react'
+import { BookmarkFillIcon, BrowserIcon, GearIcon } from '@primer/octicons-react'
 import { ChangeEvent, useCallback, useEffect, useRef, useState, WheelEvent } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
@@ -406,6 +406,15 @@ export const Sidenav = (props: { username: string }) => {
                                     <DownloadingIcon width={16} height={16} />
                                 </NavLink>
                             )}
+
+                            <NavLink
+                                to="/nowplaying"
+                                className="icon nowplaying"
+                                onClick={closeSidenav}
+                                title="Now Playing"
+                            >
+                                <BrowserIcon size={16} />
+                            </NavLink>
 
                             <NavLink to="/settings" className="icon settings" onClick={closeSidenav} title="Settings">
                                 <GearIcon size={16} />
