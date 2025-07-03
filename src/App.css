@@ -1138,7 +1138,7 @@ body.lockscroll {
 
     html.iOS .main > .main_footer > .playback > .container {
         max-height: 90px;
-        padding-bottom: max(14px, env(safe-area-inset-bottom));
+        padding-bottom: min(24px, env(safe-area-inset-bottom));
     }
 }
 
@@ -1247,16 +1247,26 @@ body.lockscroll {
         max-width: calc(100% - 208px);
     }
 
-    .main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon {
+    .main
+        > .main_header:has(.sorting > .sort):has(.sorting.links > .filter)
+        > .secondary
+        > .sorting.links
+        > .filter
+        > .responsive-icon {
         position: absolute;
         left: 6px;
         display: block;
         fill: var(--brand-color);
     }
 
-    .main > .main_header > .secondary > .sorting.links > .filter > select {
+    .main
+        > .main_header:has(.sorting > .sort):has(.sorting.links > .filter)
+        > .secondary
+        > .sorting.links
+        > .filter
+        > select {
         opacity: 0;
-        width: 44px;
+        width: 42px;
     }
 
     .main > .main_footer > .playback > .container > .track-info {

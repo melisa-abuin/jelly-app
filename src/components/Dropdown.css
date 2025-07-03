@@ -189,8 +189,17 @@
         transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    html.iOS .dropdown {
+        left: calc(16px + min(30px, env(safe-area-inset-left))) !important;
+        width: calc(100% - 32px - min(30px, env(safe-area-inset-left)) - min(30px, env(safe-area-inset-right)));
+    }
+
     .dropdown.active {
         transform: scale(1) translateY(0);
+    }
+
+    html.iOS .dropdown.active {
+        transform: scale(1) translateY(calc(-1 * min(8px, env(safe-area-inset-bottom))));
     }
 
     .dropdown > .dropdown-menu {
