@@ -49,7 +49,9 @@ export const NowPlaying = () => {
                     </div>
                     <div className="secondary">
                         <div className="title">Playing From</div>
-                        <div className="desc">{playlistTitle || 'Unknown Playlist'}</div>
+                        <div className="desc" title={playlistTitle || 'Unknown Playlist'}>
+                            {playlistTitle || 'Unknown Playlist'}
+                        </div>
                     </div>
                     <div className="tertiary">
                         <div className="more" title="More">
@@ -70,8 +72,17 @@ export const NowPlaying = () => {
                         </Squircle>
                     </div>
                     <div className="playing-info">
-                        <div className="song-name">{currentTrack?.Name || 'Unknown Track'}</div>
-                        <div className="artist">
+                        <div className="song-name" title={currentTrack?.Name || 'Unknown Track'}>
+                            {currentTrack?.Name || 'Unknown Track'}
+                        </div>
+                        <div
+                            className="artist"
+                            title={
+                                currentTrack?.Artists && currentTrack.Artists.length > 0
+                                    ? currentTrack.Artists.join(', ')
+                                    : 'Unknown Artist'
+                            }
+                        >
                             {currentTrack?.Artists && currentTrack.Artists.length > 0
                                 ? currentTrack.Artists.join(', ')
                                 : 'Unknown Artist'}

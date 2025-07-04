@@ -50,12 +50,21 @@ export const NowPlayingLyrics = () => {
                                 </Squircle>
                             </div>
                             <div className="secondary">
-                                <div className="artist">
+                                <div
+                                    className="artist"
+                                    title={
+                                        currentTrack?.Artists && currentTrack.Artists.length > 0
+                                            ? currentTrack.Artists.join(', ')
+                                            : 'Unknown Artist'
+                                    }
+                                >
                                     {currentTrack?.Artists && currentTrack.Artists.length > 0
                                         ? currentTrack.Artists.join(', ')
                                         : 'Unknown Artist'}
                                 </div>
-                                <div className="song-name">{currentTrack?.Name || 'Unknown Track'}</div>
+                                <div className="song-name" title={currentTrack?.Name || 'Unknown Track'}>
+                                    {currentTrack?.Name || 'Unknown Track'}
+                                </div>
                             </div>
                             <div className="tertiary">
                                 <div className="more" title="More">
