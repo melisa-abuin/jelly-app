@@ -792,7 +792,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 /* Responsive */
 @media only screen and (pointer: coarse) {
-    html.iOS .sidenav > .sidenav_wrapper > .sidenav_footer {
+    .sidenav > .sidenav_wrapper > .sidenav_footer {
         padding-bottom: min(24px, env(safe-area-inset-bottom));
     }
 }

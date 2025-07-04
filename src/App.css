@@ -1136,8 +1136,8 @@ body.lockscroll {
         height: 14px;
     }
 
-    html.iOS .main > .main_footer > .playback > .container {
-        max-height: 90px;
+    .main > .main_footer > .playback > .container {
+        max-height: 86px;
         padding-bottom: min(24px, env(safe-area-inset-bottom));
     }
 }
