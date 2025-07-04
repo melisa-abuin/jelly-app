@@ -10,6 +10,7 @@ export const Login = ({
             <div className="login_header">
                 <div className="logo"></div>
             </div>
+            <div className="login_header_spacer" />
             <AuthForm onLogin={onLogin} />
             <div className="disclaimer">Jelly Music App - Version {__VERSION__}</div>
         </div>
