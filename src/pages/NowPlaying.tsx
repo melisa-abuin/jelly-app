@@ -5,8 +5,11 @@ import { JellyImg } from '../components/JellyImg'
 import { Progressbar } from '../components/Main'
 import { Squircle } from '../components/Squircle'
 import { LyricsIcon, MoreIcon, QueueIcon, TracksIcon } from '../components/SvgIcons'
+import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
+import { useJellyfinTrackInfo } from '../hooks/Jellyfin/useJellyfinTrackInfo'
+import { useDuration } from '../hooks/useDuration'
 import './NowPlayingLyrics.css'
 
 export const NowPlaying = () => {
@@ -14,6 +17,9 @@ export const NowPlaying = () => {
     const { playlistTitle, currentTrack, bitrate } = usePlaybackContext()
 
     const playback = usePlaybackContext()
+    const duration = useDuration()
+    const { isOpen, selectedItem, onContextMenu } = useDropdownContext()
+
     const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(e.target.value)
         playback.setVolume(newVolume)
@@ -29,6 +35,15 @@ export const NowPlaying = () => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
     }, [location.pathname])
+
+    const handleMoreClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!currentTrack) {
+            return
+        }
+
+        e.stopPropagation()
+        onContextMenu(e, { item: currentTrack }, true)
+    }
 
     return (
         <div
@@ -54,7 +69,11 @@ export const NowPlaying = () => {
                         </div>
                     </div>
                     <div className="tertiary">
-                        <div className="more" title="More">
+                        <div
+                            className={`more ${isOpen && selectedItem?.Id === currentTrack?.Id ? 'active' : ''}`}
+                            onClick={handleMoreClick}
+                            title="More"
+                        >
                             <MoreIcon width={14} height={14} />
                         </div>
                     </div>
@@ -90,7 +109,7 @@ export const NowPlaying = () => {
                     </div>
                     <div className="playing-progress noSelect">
                         <div className="info">
-                            <div className="duration">0:00</div>
+                            <div className="duration">{playback.formatTime(duration.progress)}</div>
                             <div className="quality">
                                 <div className="text">
                                     {bitrate === 320000
@@ -105,18 +124,20 @@ export const NowPlaying = () => {
                                 </div>
                                 <div className="divider" />
                                 <div className="bitrate">
-                                    {bitrate === 320000
-                                        ? '320 kbps'
-                                        : bitrate === 256000
-                                        ? '256 kbps'
-                                        : bitrate === 192000
-                                        ? '192 kbps'
-                                        : bitrate === 128000
-                                        ? '128 kbps'
-                                        : '0 kbps'}
+                                    {bitrate === 320000 ? (
+                                        '320 kbps'
+                                    ) : bitrate === 256000 ? (
+                                        '256 kbps'
+                                    ) : bitrate === 192000 ? (
+                                        '192 kbps'
+                                    ) : bitrate === 128000 ? (
+                                        '128 kbps'
+                                    ) : (
+                                        <TrackBitrate trackId={currentTrack?.Id || ''} />
+                                    )}
                                 </div>
                             </div>
-                            <div className="duration">2:54</div>
+                            <div className="duration">{playback.formatTime(duration.duration)}</div>
                         </div>
                         <Progressbar />
                     </div>
@@ -186,4 +207,11 @@ export const NowPlaying = () => {
             </div>
         </div>
     )
+}
+
+const TrackBitrate = ({ trackId }: { trackId: string }) => {
+    const trackInfo = useJellyfinTrackInfo(trackId)
+    const bitrate = Math.round((trackInfo.MediaSources?.[0].Bitrate || 0) / 1000)
+
+    return <>{bitrate} kbps</>
 }

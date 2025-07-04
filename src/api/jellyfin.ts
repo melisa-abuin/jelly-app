@@ -1,5 +1,5 @@
 import { Jellyfin } from '@jellyfin/sdk'
-import { InstantMixApi, LyricsApi, PlaylistsApi } from '@jellyfin/sdk/lib/generated-client'
+import { InstantMixApi, LyricsApi, MediaInfoApi, PlaylistsApi } from '@jellyfin/sdk/lib/generated-client'
 import { ArtistsApi } from '@jellyfin/sdk/lib/generated-client/api/artists-api'
 import { GenresApi } from '@jellyfin/sdk/lib/generated-client/api/genres-api'
 import { ItemsApi } from '@jellyfin/sdk/lib/generated-client/api/items-api'
@@ -488,7 +488,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                         includeItemTypes: [BaseItemKind.Audio],
                         recursive: true,
                         limit: 0, // No items, just metadata
-                        fields: ['MediaSources'],
                     },
                     { signal: AbortSignal.timeout(20000) }
                 ),
@@ -498,7 +497,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                         artistIds: [artistId],
                         includeItemTypes: [BaseItemKind.Audio],
                         recursive: true,
-                        fields: ['MediaSources'],
                         limit: maxLimit,
                     },
                     { signal: AbortSignal.timeout(20000) }
@@ -687,7 +685,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                 includeItemTypes: [BaseItemKind.Audio],
                 recursive: true,
                 limit: 0, // No items, just metadata
-                fields: ['MediaSources'], // Ensure RunTimeTicks is included
             },
             { signal: AbortSignal.timeout(20000) }
         )
@@ -704,7 +701,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
                     parentId: playlistId,
                     includeItemTypes: [BaseItemKind.Audio],
                     recursive: true,
-                    fields: ['MediaSources'],
                     limit: maxLimit,
                 },
                 { signal: AbortSignal.timeout(20000) }
@@ -1002,6 +998,19 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return response.ok
     }
 
+    const getTrackInfo = async (trackId: string) => {
+        const mediaInfoApi = new MediaInfoApi(api.configuration)
+        const response = await mediaInfoApi.getPlaybackInfo(
+            {
+                userId,
+                itemId: trackId,
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+
+        return response.data
+    }
+
     return {
         loginToJellyfin,
         searchItems,
@@ -1049,5 +1058,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         removeFromPlaylist,
         createPlaylist,
         deletePlaylist,
+        getTrackInfo,
     }
 }

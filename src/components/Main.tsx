@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
-import { JSX, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { JSX, memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
 import { FilterContextProvider } from '../context/FilterContext/FilterContextProvider'
@@ -7,6 +7,7 @@ import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useSidenavContext } from '../context/SidenavContext/SidenavContext'
+import { useDuration } from '../hooks/useDuration'
 import { getPageTitle } from '../utils/titleUtils'
 import { AlbumIcon, ArtistsIcon, PlaylistIcon, SortingIcon, TrackIcon, TracksIcon } from './SvgIcons'
 
@@ -492,33 +493,13 @@ export const Progressbar = () => {
 
 const Duration = memo(() => {
     const playback = usePlaybackContext()
-    const audio = playback.audioRef.current
-
-    const [progress, setProgress] = useState(audio.currentTime || 0)
-    const [duration, setDuration] = useState(audio.duration || 0)
-
-    useEffect(() => {
-        if (!audio) return
-
-        const updateProgress = () => {
-            setProgress(audio.currentTime)
-            setDuration(audio.duration)
-        }
-
-        audio.addEventListener('timeupdate', updateProgress)
-        audio.addEventListener('loadedmetadata', updateProgress)
-
-        return () => {
-            audio.removeEventListener('timeupdate', updateProgress)
-            audio.removeEventListener('loadedmetadata', updateProgress)
-        }
-    }, [audio])
+    const duration = useDuration()
 
     return (
         <div className="duration noSelect">
-            <div className="current">{playback.formatTime(progress)}</div>
+            <div className="current">{playback.formatTime(duration.progress)}</div>
             <div className="divider">/</div>
-            <div className="total">{playback.formatTime(duration)}</div>
+            <div className="total">{playback.formatTime(duration.duration)}</div>
         </div>
     )
 })
