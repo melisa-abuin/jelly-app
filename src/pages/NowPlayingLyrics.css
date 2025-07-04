@@ -50,6 +50,9 @@
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .thumbnail {
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
     margin-right: 12px;
 }
 
@@ -65,6 +68,17 @@
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .thumbnail > .fallback-thumbnail > svg {
     fill: var(--font-color-tertiary);
     opacity: 0.4;
+    margin-left: -4%;
+}
+
+.now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .thumbnail > .shadow-border {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    box-shadow: var(--playing-border-color) 0px 0px 0px 1px inset;
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .secondary {
@@ -93,6 +107,7 @@
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .tertiary {
     margin-left: 20px;
+    margin-right: 6px;
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .tertiary > .more {
@@ -124,6 +139,10 @@
     width: 600px;
     max-width: 100%;
     margin: 0 auto;
+}
+
+.now-playing-lyrics > .ui > .playing-content > .lyrics-page > .empty {
+    margin: 4px 38px;
 }
 
 .now-playing-lyrics > .ui > .playing-content > .lyrics-page > .lyrics-line {
@@ -620,15 +639,19 @@
 /* Responsive */
 @media only screen and (max-width: 500px) {
     .now-playing-lyrics > .ui > .playing-header {
-        padding-top: 20px;
+        padding-top: 17px;
     }
 
     .now-playing-lyrics > .ui > .playing-footer {
         padding-bottom: 20px;
     }
 
-    html.iOS .now-playing-lyrics > .ui > .playing-footer {
+    .now-playing-lyrics > .ui > .playing-footer {
         padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+
+    .now-playing-lyrics > .ui > .playing-content > .lyrics-page > .empty {
+        margin: 4px 8px;
     }
 
     .now-playing-lyrics > .ui > .playing-content > .lyrics-page > .lyrics-line {

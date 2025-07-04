@@ -46,6 +46,7 @@ export const NowPlayingLyrics = () => {
                                             <TracksIcon width="50%" height="50%" />
                                         </div>
                                     )}
+                                    <div className="shadow-border" />
                                 </Squircle>
                             </div>
                             <div className="secondary">

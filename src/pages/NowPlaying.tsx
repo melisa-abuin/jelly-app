@@ -3,6 +3,7 @@ import { ChangeEvent, useEffect, WheelEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
 import { Progressbar } from '../components/Main'
+import { Squircle } from '../components/Squircle'
 import { LyricsIcon, MoreIcon, QueueIcon, TracksIcon } from '../components/SvgIcons'
 import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
@@ -58,7 +59,7 @@ export const NowPlaying = () => {
                 </div>
                 <div className="playing-content">
                     <div className="playing-artwork noSelect">
-                        <div className="thumbnail">
+                        <Squircle width={360} height={360} cornerRadius={14} isResponsive={true} className="thumbnail">
                             {currentTrack && <JellyImg item={currentTrack} type={'Primary'} width={360} height={360} />}
                             {!currentTrack && (
                                 <div className="fallback-thumbnail">
@@ -66,7 +67,7 @@ export const NowPlaying = () => {
                                 </div>
                             )}
                             <div className="shadow-border" />
-                        </div>
+                        </Squircle>
                     </div>
                     <div className="playing-info">
                         <div className="song-name">{currentTrack?.Name || 'Unknown Track'}</div>
