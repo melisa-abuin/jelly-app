@@ -202,6 +202,10 @@
         transform: scale(1) translateY(calc(-1 * min(8px, env(safe-area-inset-bottom))));
     }
 
+    html.safeAreaFallback .dropdown.active {
+        transform: scale(1) translateY(0);
+    }
+
     .dropdown > .dropdown-menu {
         min-width: 100%;
         max-width: 100%;

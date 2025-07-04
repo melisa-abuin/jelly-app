@@ -1138,7 +1138,12 @@ body.lockscroll {
 
     .main > .main_footer > .playback > .container {
         max-height: 86px;
-        padding-bottom: min(24px, env(safe-area-inset-bottom));
+        padding-bottom: min(24px, env(safe-area-inset-bottom, 14px));
+    }
+
+    html.safeAreaFallback .main > .main_footer > .playback > .container {
+        max-height: 76px;
+        padding-bottom: 14px;
     }
 }
 
