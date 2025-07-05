@@ -6,6 +6,7 @@ import { MediaItem } from '../api/jellyfin'
 import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { IJellyfinInfiniteProps, useJellyfinInfiniteData } from '../hooks/Jellyfin/Infinite/useJellyfinInfiniteData'
+import { isMediaItem } from '../hooks/usePatchQueries'
 
 export type IReviver = {
     queryKey: unknown[]
@@ -183,10 +184,31 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         // We ignore 'currentTrackIndex.index' here because we only want to shuffle once, not on every render.
     }, [_items, addQueueId, isManualShuffle]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    const _pages = useMemo(
-        () => infiniteData?.pages.map(page => page.map(addQueueId)) || [],
-        [addQueueId, infiniteData?.pages]
-    )
+    const _pages = useMemo(() => {
+        return (
+            infiniteData?.pages.map(page => {
+                if (!page) {
+                    console.error('_pages: Page is undefined or null', infiniteData)
+                    console.trace()
+                    return []
+                }
+
+                if (!Array.isArray(page)) {
+                    console.error('_pages: Page is not an array', infiniteData)
+                    console.trace()
+                    return []
+                }
+
+                if (page[0] && !isMediaItem(page[0])) {
+                    console.error('_pages: Page does not contain MediaItem objects', infiniteData)
+                    console.trace()
+                    return []
+                }
+
+                return page.map(addQueueId)
+            }) || []
+        )
+    }, [addQueueId, infiniteData])
 
     const updateCurrentPlaylist = useCallback(
         async (cb: (pages: MediaItem[][]) => Promise<MediaItem[][]>) => {
