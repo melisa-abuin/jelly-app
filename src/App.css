@@ -193,7 +193,7 @@ html.light {
     --playing-bg-color-secondary: rgba(0, 0, 0, 0.06);
     --playing-bg-color-tertiary: rgba(0, 0, 0, 0.12);
     --playing-bg-color-quaternary: rgba(0, 0, 0, 0.18);
-    --playing-border-color: rgba(0, 0, 0, 0.08);
+    --playing-border-color: rgba(0, 0, 0, 0.1);
     --playing-font-color: rgba(0, 0, 0, 0.5);
 }
 
@@ -235,7 +235,7 @@ html.dark {
     --playing-bg-color-secondary: rgba(255, 255, 255, 0.08);
     --playing-bg-color-tertiary: rgba(255, 255, 255, 0.16);
     --playing-bg-color-quaternary: rgba(255, 255, 255, 0.32);
-    --playing-border-color: rgba(255, 255, 255, 0.1);
+    --playing-border-color: rgba(255, 255, 255, 0.08);
     --playing-font-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -653,7 +653,7 @@ body.lockscroll {
 .main > .main_footer > .playback > .progress {
     position: relative;
     display: flex;
-    height: 8px;
+    height: 10px;
     margin-top: -4px;
     transform: scaleY(0.6);
     transition: transform 0.1s linear;
@@ -1137,7 +1137,7 @@ body.lockscroll {
     }
 
     .main > .main_footer > .playback > .progress {
-        height: 14px;
+        height: 16px;
     }
 
     .main > .main_footer > .playback > .container {
@@ -1177,11 +1177,11 @@ body.lockscroll {
     }
 
     .dimmer.active ~ .sidenav {
-        filter: blur(8px);
+        filter: blur(12px);
     }
 
     .dimmer.active ~ .main {
-        filter: blur(8px);
+        filter: blur(12px);
     }
 }
 

@@ -1,8 +1,13 @@
+.dimmer {
+    display: none;
+}
+
 .now-playing {
     position: relative;
     width: 400px;
     max-width: 100%;
     margin: 0 auto;
+    transition: filter 0.2s ease;
 }
 
 /* Playing interface */
@@ -23,8 +28,13 @@
     margin-bottom: 20px;
 }
 
+.now-playing > .ui > .playing-header > .primary {
+    flex: 0 1 78px;
+}
+
 .now-playing > .ui > .playing-header > .primary > .return_icon {
     cursor: pointer;
+    width: 28px;
     padding: 6px;
     margin-right: 10px;
     border-radius: 20px;
@@ -36,14 +46,16 @@
 }
 
 .now-playing > .ui > .playing-header > .secondary {
-    overflow: hidden;
-    max-width: 100%;
+    max-width: calc(100% - 116px);
 }
 
 .now-playing > .ui > .playing-header > .secondary > .title {
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--font-color-tertiary);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .now-playing > .ui > .playing-header > .secondary > .desc {
@@ -55,8 +67,26 @@
 }
 
 .now-playing > .ui > .playing-header > .tertiary {
-    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 10px;
     margin-right: 6px;
+}
+
+.now-playing > .ui > .playing-header > .tertiary > .favorite-state {
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 20px;
+    transition: background-color 0.2s ease-out;
+}
+
+.now-playing > .ui > .playing-header > .tertiary > .favorite-state:hover {
+    background-color: var(--playing-bg-color-secondary);
+}
+
+.now-playing > .ui > .playing-header > .tertiary > .favorite-state > svg {
+    color: var(--brand-color);
 }
 
 .now-playing > .ui > .playing-header > .tertiary > .more {
@@ -204,6 +234,10 @@
     margin-left: 5px;
     border-radius: 50%;
     background-color: var(--font-color-secondary);
+}
+
+.now-playing > .ui > .playing-content > .playing-progress > .info > .quality > .bitrate > .number {
+    font-variant-numeric: tabular-nums;
 }
 
 /* Progress bar */
@@ -583,6 +617,32 @@
 }
 
 /* Responsive */
+@media only screen and (pointer: coarse) {
+    .dimmer {
+        display: block;
+        position: fixed;
+        z-index: 4;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        opacity: 0;
+        visibility: hidden;
+        background-color: var(--bg-color-dimmer);
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .music-app:has(.now-playing):has(.dropdown.active) > .dimmer {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .music-app:has(.now-playing):has(.dropdown.active) > .now-playing {
+        filter: blur(12px);
+    }
+}
+
 @media only screen and (max-width: 500px) {
     .now-playing > .ui > .playing-header {
         margin-top: 20px;

@@ -1,3 +1,7 @@
+.dimmer {
+    display: none;
+}
+
 .now-playing-lyrics {
     position: relative;
     width: 100%;
@@ -18,13 +22,14 @@
     z-index: 1;
     padding: 12px;
     padding-top: 40px;
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(12px);
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper {
     width: 600px;
     max-width: 100%;
     margin: 0 auto;
+    transition: filter 0.2s ease;
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner {
@@ -40,7 +45,7 @@
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .return_icon {
     cursor: pointer;
     padding: 6px;
-    margin-right: 10px;
+    margin-right: 14px;
     border-radius: 20px;
     transition: background-color 0.2s ease-out;
 }
@@ -106,8 +111,26 @@
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .tertiary {
-    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 10px;
     margin-right: 6px;
+}
+
+.now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .tertiary > .favorite-state {
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 20px;
+    transition: background-color 0.2s ease-out;
+}
+
+.now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .tertiary > .favorite-state:hover {
+    background-color: var(--playing-bg-color-secondary);
+}
+
+.now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .tertiary > .favorite-state > svg {
+    color: var(--brand-color);
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .tertiary > .more {
@@ -132,6 +155,7 @@
 
 .now-playing-lyrics > .ui > .playing-content {
     padding: 12px;
+    transition: filter 0.2s ease;
 }
 
 /* Lyrics changes for now playing */
@@ -142,11 +166,11 @@
 }
 
 .now-playing-lyrics > .ui > .playing-content > .lyrics-page > .empty {
-    margin: 4px 38px;
+    margin: 4px 42px;
 }
 
 .now-playing-lyrics > .ui > .playing-content > .lyrics-page > .lyrics-line {
-    margin: 0;
+    margin: 0 4px;
 }
 
 .now-playing-lyrics > .ui > .playing-content > .lyrics-page.synced > .lyrics-line {
@@ -169,17 +193,18 @@
     padding: 12px;
     padding-bottom: 40px;
     margin-top: auto;
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(12px);
 }
 
 .now-playing-lyrics > .ui > .playing-footer > .wrapper {
     width: 600px;
     max-width: 100%;
     margin: 0 auto;
+    transition: filter 0.2s ease;
 }
 
 .now-playing-lyrics > .ui > .playing-footer > .wrapper > .inner {
-    margin: 0 36px;
+    margin: 0 40px;
 }
 
 .now-playing-lyrics > .ui > .playing-footer > .wrapper > .inner > .playing-progress {
@@ -224,6 +249,19 @@
     margin-left: 5px;
     border-radius: 50%;
     background-color: var(--font-color-secondary);
+}
+
+.now-playing-lyrics
+    > .ui
+    > .playing-footer
+    > .wrapper
+    > .inner
+    > .playing-progress
+    > .info
+    > .quality
+    > .bitrate
+    > .number {
+    font-variant-numeric: tabular-nums;
 }
 
 /* Progress bar */
@@ -637,9 +675,51 @@
 }
 
 /* Responsive */
+@media only screen and (pointer: coarse) {
+    .dimmer {
+        display: block;
+        position: fixed;
+        z-index: 4;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        opacity: 0;
+        visibility: hidden;
+        background-color: var(--bg-color-dimmer);
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .dimmer {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .now-playing-lyrics > .ui > .playing-content {
+        filter: blur(12px);
+    }
+
+    .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .now-playing-lyrics > .ui > .playing-header > .wrapper {
+        filter: blur(12px);
+    }
+
+    .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .now-playing-lyrics > .ui > .playing-footer > .wrapper {
+        filter: blur(12px);
+    }
+}
+
 @media only screen and (max-width: 500px) {
     .now-playing-lyrics > .ui > .playing-header {
         padding-top: 17px;
+    }
+
+    .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .return_icon {
+        margin-right: 10px;
+    }
+
+    .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .thumbnail {
+        margin-right: 10px;
     }
 
     .now-playing-lyrics > .ui > .playing-footer {
