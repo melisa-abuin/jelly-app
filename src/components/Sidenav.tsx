@@ -396,9 +396,9 @@ export const Sidenav = (props: { username: string }) => {
                         </div>
                         <div className="actions">
                             {(playback.currentTrackLyrics?.Lyrics?.length || 0) > 0 && (
-                                <NavLink to="/lyrics" className="icon lyrics" onClick={toggleLyrics} title="Lyrics">
+                                <div className="icon lyrics" onClick={toggleLyrics} title="Lyrics">
                                     <LyricsIcon width={16} height={16} />
-                                </NavLink>
+                                </div>
                             )}
 
                             {storageStats.trackCount > 0 && (
