@@ -1,11 +1,11 @@
 import { ArrowLeftIcon, HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
 import { Progressbar } from '../components/Main'
 import { Squircle } from '../components/Squircle'
 import { MoreIcon, TracksIcon } from '../components/SvgIcons'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
+import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinTrackInfo } from '../hooks/Jellyfin/useJellyfinTrackInfo'
 import { useDuration } from '../hooks/useDuration'
@@ -14,6 +14,7 @@ import { Lyrics } from './Lyrics'
 import './NowPlaying.css'
 
 export const NowPlayingLyrics = () => {
+    const { goBack: previousPage } = useHistoryContext()
     const { currentTrack, bitrate } = usePlaybackContext()
 
     const playback = usePlaybackContext()
@@ -51,9 +52,9 @@ export const NowPlayingLyrics = () => {
                         <div className="wrapper">
                             <div className="inner">
                                 <div className="primary">
-                                    <Link to="/nowplaying" className="return_icon" title="Back">
+                                    <div onClick={previousPage} className="return_icon" title="Back">
                                         <ArrowLeftIcon size={16}></ArrowLeftIcon>
-                                    </Link>
+                                    </div>
                                     <Squircle width={40} height={40} cornerRadius={6} className="thumbnail">
                                         {currentTrack && (
                                             <JellyImg item={currentTrack} type={'Primary'} width={40} height={40} />

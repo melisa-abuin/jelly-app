@@ -121,3 +121,14 @@
     color: var(--font-color-tertiary);
     text-align: center;
 }
+
+/* Responsive */
+@media only screen and (pointer: coarse) {
+    .error-page > .disclaimer {
+        padding-bottom: min(34px, env(safe-area-inset-bottom, 20px));
+    }
+
+    html.safeAreaFallback .error-page > .disclaimer {
+        padding-bottom: 12px;
+    }
+}

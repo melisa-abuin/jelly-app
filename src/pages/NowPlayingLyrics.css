@@ -22,7 +22,7 @@
     z-index: 1;
     padding: 12px;
     padding-top: 40px;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper {
@@ -95,6 +95,8 @@
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .secondary > .artist {
     font-size: 0.75rem;
     font-weight: 600;
+    /* Help with CJK letter spacing */
+    line-height: 0.9375rem;
     color: var(--font-color-tertiary);
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -105,6 +107,8 @@
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .secondary > .song-name {
     font-size: 1rem;
     font-weight: 700;
+    /* Help with CJK letter spacing */
+    line-height: 1.25rem;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -193,7 +197,7 @@
     padding: 12px;
     padding-bottom: 40px;
     margin-top: auto;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
 }
 
 .now-playing-lyrics > .ui > .playing-footer > .wrapper {
@@ -672,6 +676,7 @@
     height: 100%;
     object-fit: cover;
     object-position: center;
+    transform: scale(1.2);
 }
 
 /* Responsive */

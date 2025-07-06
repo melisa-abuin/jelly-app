@@ -235,7 +235,7 @@ html.dark {
     --playing-bg-color-secondary: rgba(255, 255, 255, 0.08);
     --playing-bg-color-tertiary: rgba(255, 255, 255, 0.16);
     --playing-bg-color-quaternary: rgba(255, 255, 255, 0.32);
-    --playing-border-color: rgba(255, 255, 255, 0.08);
+    --playing-border-color: rgba(255, 255, 255, 0.06);
     --playing-font-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -1134,6 +1134,14 @@ body.lockscroll {
     html.iOS .music-app:not(:has(.login)) {
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
+    }
+
+    .music-app:has(.login) {
+        padding-bottom: min(12px, env(safe-area-inset-bottom, 6px));
+    }
+
+    html.safeAreaFallback .music-app:has(.login) {
+        padding-bottom: 6px;
     }
 
     .main > .main_footer > .playback > .progress {

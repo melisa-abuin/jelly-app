@@ -61,6 +61,8 @@
 .now-playing > .ui > .playing-header > .secondary > .desc {
     font-size: 0.95rem;
     font-weight: 700;
+    /* Help with CJK letter spacing */
+    line-height: 1.1875rem;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -176,6 +178,8 @@
 .now-playing > .ui > .playing-content > .playing-info > .song-name {
     font-size: 1rem;
     font-weight: 700;
+    /* Help with CJK letter spacing */
+    line-height: 1.25rem;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -185,6 +189,8 @@
 .now-playing > .ui > .playing-content > .playing-info > .artist {
     font-size: 0.75rem;
     font-weight: 600;
+    /* Help with CJK letter spacing */
+    line-height: 0.9375rem;
     color: var(--font-color-tertiary);
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -614,6 +620,7 @@
     height: 100%;
     object-fit: cover;
     object-position: center;
+    transform: scale(1.2);
 }
 
 /* Responsive */
