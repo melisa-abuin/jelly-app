@@ -45,7 +45,9 @@ export const InstantMix = () => {
                 </Squircle>
                 <div className="instant-mix-details">
                     <div className="title">Instant Mix</div>
-                    <div className="subtitle">Based on {sourceSong?.Name || 'Unknown Song'}</div>
+                    <div className="subtitle">
+                        Based on <span className="highlight">{sourceSong?.Name || 'Unknown Song'}</span>
+                    </div>
                     <div className="stats">
                         <div className="track-amount">
                             <span className="number">{items.length}</span>{' '}

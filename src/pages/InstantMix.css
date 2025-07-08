@@ -1,7 +1,3 @@
-.instant-mix-page {
-    margin-top: 4px;
-}
-
 .instant-mix-page > .instant-mix-header {
     display: flex;
     align-items: center;
@@ -39,6 +35,10 @@
     font-weight: 500;
     color: var(--font-color-tertiary);
     margin-bottom: 4px;
+}
+
+.instant-mix-page > .instant-mix-header > .instant-mix-details > .subtitle > .highlight {
+    font-weight: 600;
 }
 
 .instant-mix-page > .instant-mix-header > .instant-mix-details > .stats {

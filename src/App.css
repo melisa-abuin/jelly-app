@@ -555,11 +555,11 @@ body.lockscroll {
     align-items: center;
     flex-shrink: 0;
     border-left: 1px solid var(--border-color);
+    cursor: pointer;
 }
 
 .main > .main_header > .secondary > .sorting > .sort > .icon {
     padding: 7px;
-    cursor: pointer;
 }
 
 .main > .main_header > .secondary > .sorting > .sort > .icon > svg {
@@ -1011,8 +1011,14 @@ body.lockscroll {
     background-color: var(--brand-color);
 }
 
+.main > .main_footer > .playback > .container > .controls > .container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 /* Duration */
-.main > .main_footer > .playback > .container > .controls > .duration {
+.main > .main_footer > .playback > .container > .controls > .container > .duration {
     display: flex;
     font-size: 0.725rem;
     font-weight: 500;
@@ -1020,8 +1026,30 @@ body.lockscroll {
     color: var(--font-color-tertiary);
 }
 
-.main > .main_footer > .playback > .container > .controls > .duration > .divider {
+.main > .main_footer > .playback > .container > .controls > .container > .duration > .divider {
     margin: 0 4px;
+}
+
+.main > .main_footer > .playback > .container > .controls > .container > .expand {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--brand-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: var(--bg-color-secondary);
+    transition: background-color 0.2s ease-out;
+}
+
+.main > .main_footer > .playback > .container > .controls > .container > .expand:hover {
+    background-color: var(--bg-color-tertiary);
+}
+
+.main > .main_footer > .playback > .container > .controls > .container > .expand > svg {
+    margin-left: 2px;
+    margin-right: -3px;
 }
 
 /* Home page specific */
@@ -1038,7 +1066,7 @@ body.lockscroll {
     align-items: flex-start;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 10px;
+    column-gap: 12px;
 }
 
 .home-page > .section > .section-header > .container > .section_title {
@@ -1063,6 +1091,7 @@ body.lockscroll {
     cursor: pointer;
     padding: 6px 11px;
     border-radius: 6px;
+    margin-bottom: 10px;
     background-color: var(--bg-color-secondary);
     transition: background-color 0.2s ease-out;
 }
@@ -1150,12 +1179,24 @@ body.lockscroll {
 
     .main > .main_footer > .playback > .container {
         max-height: 86px;
-        padding-bottom: min(24px, env(safe-area-inset-bottom, 14px));
+        padding-bottom: min(28px, env(safe-area-inset-bottom, 20px));
     }
 
     html.safeAreaFallback .main > .main_footer > .playback > .container {
         max-height: 76px;
         padding-bottom: 14px;
+    }
+
+    .main > .main_footer > .playback > .container > .track-info > .track-name {
+        margin-bottom: 5px;
+    }
+
+    .main > .main_footer > .playback > .container > .track-info > .artist {
+        margin-bottom: 3px;
+    }
+
+    .main > .main_footer > .playback > .container > .controls > .container > .expand {
+        padding: 3px 7px;
     }
 }
 
@@ -1257,6 +1298,16 @@ body.lockscroll {
     .main > .main_footer > .playback > .container > .controls > .knobs > .primary {
         gap: 4px;
     }
+
+    .main > .main_footer > .playback > .container > .controls > .container {
+        align-items: center;
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .main > .main_footer > .playback > .container > .controls > .container > .expand {
+        padding: 3px 7px;
+    }
 }
 
 @media only screen and (max-width: 390px) {
@@ -1297,5 +1348,22 @@ body.lockscroll {
     .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle,
     .main > .main_footer > .playback > .container > .controls > .knobs > .repeat {
         display: none;
+    }
+
+    .main > .main_footer > .playback > .container > .controls > .container {
+        gap: 6px;
+    }
+
+    .main > .main_footer > .playback > .container > .controls > .container > .expand {
+        padding: 4px;
+    }
+
+    .main > .main_footer > .playback > .container > .controls > .container > .expand > .text {
+        display: none;
+    }
+
+    .main > .main_footer > .playback > .container > .controls > .container > .expand > svg {
+        margin-left: 0;
+        margin-right: 0;
     }
 }

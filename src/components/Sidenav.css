@@ -799,6 +799,10 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     html.safeAreaFallback .sidenav > .sidenav_wrapper > .sidenav_footer {
         padding-bottom: 12px;
     }
+
+    .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions {
+        gap: 2px;
+    }
 }
 
 @media only screen and (max-width: 700px) {

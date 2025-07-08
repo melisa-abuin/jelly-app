@@ -1,4 +1,10 @@
-import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
+import {
+    ArrowLeftIcon,
+    ArrowUpRightIcon,
+    BookmarkFillIcon,
+    ChevronDownIcon,
+    HeartFillIcon,
+} from '@primer/octicons-react'
 import { JSX, memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
@@ -309,7 +315,13 @@ export const MainContent = ({
                                 </div>
                             </div>
 
-                            <Duration />
+                            <div className="container">
+                                <Duration />
+                                <Link to="/nowplaying" className="expand" title="Expand into Now Playing">
+                                    <div className="text">Expand</div>
+                                    <ArrowUpRightIcon size={14} />
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
