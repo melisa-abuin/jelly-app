@@ -1,10 +1,4 @@
-import {
-    ArrowLeftIcon,
-    ArrowUpRightIcon,
-    BookmarkFillIcon,
-    ChevronDownIcon,
-    HeartFillIcon,
-} from '@primer/octicons-react'
+import { ArrowLeftIcon, ArrowUpIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
 import { JSX, memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
@@ -314,15 +308,12 @@ export const MainContent = ({
                                     <div className={`repeat-icon${playback.repeat === 'one' ? '-one' : ''}`}></div>
                                 </div>
                             </div>
-
-                            <div className="container">
-                                <Duration />
-                                <Link to="/nowplaying" className="expand" title="Expand into Now Playing">
-                                    <div className="text">Expand</div>
-                                    <ArrowUpRightIcon size={14} />
-                                </Link>
-                            </div>
+                            <Duration />
                         </div>
+                        <Link to="/nowplaying" className="expand" title="Now Playing">
+                            <ArrowUpIcon size={12} className="icon float" />
+                            <TracksIcon width={12} height={12} className="icon" />
+                        </Link>
                     </div>
                 </div>
             </div>

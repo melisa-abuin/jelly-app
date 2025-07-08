@@ -652,6 +652,7 @@ body.lockscroll {
 /* Progress bar */
 .main > .main_footer > .playback > .progress {
     position: relative;
+    z-index: 1;
     display: flex;
     height: 10px;
     margin-top: -4px;
@@ -756,7 +757,9 @@ body.lockscroll {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
     padding: 14px 20px;
+    padding-right: 30px;
     /* Help with CJK letter spacing */
     max-height: 76px;
 }
@@ -1011,14 +1014,8 @@ body.lockscroll {
     background-color: var(--brand-color);
 }
 
-.main > .main_footer > .playback > .container > .controls > .container {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
 /* Duration */
-.main > .main_footer > .playback > .container > .controls > .container > .duration {
+.main > .main_footer > .playback > .container > .controls > .duration {
     display: flex;
     font-size: 0.725rem;
     font-weight: 500;
@@ -1026,30 +1023,45 @@ body.lockscroll {
     color: var(--font-color-tertiary);
 }
 
-.main > .main_footer > .playback > .container > .controls > .container > .duration > .divider {
+.main > .main_footer > .playback > .container > .controls > .duration > .divider {
     margin: 0 4px;
 }
 
-.main > .main_footer > .playback > .container > .controls > .container > .expand {
+.main > .main_footer > .playback > .container > .expand {
     font-size: 0.6875rem;
     font-weight: 500;
     color: var(--brand-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background-color: var(--bg-color-secondary);
+    position: absolute;
+    top: -2px;
+    right: 0;
+    width: 26px;
+    height: calc(100% + 2px);
+    background-color: var(--bg-color);
     transition: background-color 0.2s ease-out;
 }
 
-.main > .main_footer > .playback > .container > .controls > .container > .expand:hover {
+.main > .main_footer > .playback > .container > .expand:hover {
     background-color: var(--bg-color-tertiary);
 }
 
-.main > .main_footer > .playback > .container > .controls > .container > .expand > svg {
-    margin-left: 2px;
-    margin-right: -3px;
+.main > .main_footer > .playback > .container > .expand > .icon {
+    fill: var(--brand-color);
+}
+
+.main > .main_footer > .playback > .container > .expand > .icon.float {
+    position: absolute;
+    top: 0;
+    margin-top: 10px;
+    opacity: 0;
+    transition: opacity 0.2s ease-out, transform 0.2s linear;
+}
+
+.main > .main_footer > .playback > .container > .expand:hover > .icon.float {
+    opacity: 1;
+    transform: translateY(-2px);
 }
 
 /* Home page specific */
@@ -1180,6 +1192,7 @@ body.lockscroll {
     .main > .main_footer > .playback > .container {
         max-height: 86px;
         padding-bottom: min(28px, env(safe-area-inset-bottom, 20px));
+        padding-right: 44px;
     }
 
     html.safeAreaFallback .main > .main_footer > .playback > .container {
@@ -1195,8 +1208,10 @@ body.lockscroll {
         margin-bottom: 3px;
     }
 
-    .main > .main_footer > .playback > .container > .controls > .container > .expand {
-        padding: 3px 7px;
+    .main > .main_footer > .playback > .container > .expand {
+        top: -3px;
+        height: calc(100% + 3px);
+        width: 36px;
     }
 }
 
@@ -1291,22 +1306,12 @@ body.lockscroll {
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs {
-        margin-top: 8px;
+        margin-top: 6px;
         margin-right: -6px;
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs > .primary {
         gap: 4px;
-    }
-
-    .main > .main_footer > .playback > .container > .controls > .container {
-        align-items: center;
-        flex-direction: row;
-        gap: 8px;
-    }
-
-    .main > .main_footer > .playback > .container > .controls > .container > .expand {
-        padding: 3px 7px;
     }
 }
 
@@ -1348,22 +1353,5 @@ body.lockscroll {
     .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle,
     .main > .main_footer > .playback > .container > .controls > .knobs > .repeat {
         display: none;
-    }
-
-    .main > .main_footer > .playback > .container > .controls > .container {
-        gap: 6px;
-    }
-
-    .main > .main_footer > .playback > .container > .controls > .container > .expand {
-        padding: 4px;
-    }
-
-    .main > .main_footer > .playback > .container > .controls > .container > .expand > .text {
-        display: none;
-    }
-
-    .main > .main_footer > .playback > .container > .controls > .container > .expand > svg {
-        margin-left: 0;
-        margin-right: 0;
     }
 }
