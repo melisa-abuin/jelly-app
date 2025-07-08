@@ -1,4 +1,4 @@
-.dimmer {
+.now-playing-dimmer {
     display: none;
 }
 
@@ -244,6 +244,12 @@
 
 .now-playing > .ui > .playing-content > .playing-progress > .info > .quality > .bitrate > .number {
     font-variant-numeric: tabular-nums;
+}
+
+.now-playing > .ui > .playing-content > .playing-progress > .info > .quality > .download-state {
+    fill: var(--font-color-secondary);
+    margin-left: 6px;
+    margin-right: -4px;
 }
 
 /* Progress bar */
@@ -625,7 +631,7 @@
 
 /* Responsive */
 @media only screen and (pointer: coarse) {
-    .dimmer {
+    .now-playing-dimmer {
         display: block;
         position: fixed;
         z-index: 4;
@@ -640,7 +646,7 @@
         transition: opacity 0.2s ease, visibility 0.2s ease;
     }
 
-    .music-app:has(.now-playing):has(.dropdown.active) > .dimmer {
+    .music-app:has(.now-playing):has(.dropdown.active) > .now-playing-dimmer {
         opacity: 1;
         visibility: visible;
     }
@@ -653,6 +659,10 @@
 @media only screen and (max-width: 500px) {
     .now-playing > .ui > .playing-header {
         margin-top: 20px;
+    }
+
+    .now-playing > .ui > .playing-footer {
+        margin-bottom: 34px;
     }
 }
 

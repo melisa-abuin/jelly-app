@@ -4,7 +4,15 @@ import { Link } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
 import { Progressbar } from '../components/Main'
 import { Squircle } from '../components/Squircle'
-import { LyricsIcon, MoreIcon, QueueIcon, TracksIcon } from '../components/SvgIcons'
+import {
+    DeletingIcon,
+    DownloadedIcon,
+    DownloadingIcon,
+    LyricsIcon,
+    MoreIcon,
+    QueueIcon,
+    TracksIcon,
+} from '../components/SvgIcons'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
@@ -49,7 +57,7 @@ export const NowPlaying = () => {
 
     return (
         <>
-            <div className="dimmer noSelect" />
+            <div className="now-playing-dimmer noSelect" />
             <div
                 className={
                     playback.isPlaying
@@ -176,6 +184,27 @@ export const NowPlaying = () => {
                                         </span>{' '}
                                         kbps
                                     </div>
+                                    {currentTrack?.offlineState && (
+                                        <div className="download-state">
+                                            {currentTrack?.offlineState === 'downloading' && (
+                                                <div className="icon downloading" title="Syncing...">
+                                                    <DownloadingIcon width={12} height={12} />
+                                                </div>
+                                            )}
+
+                                            {currentTrack?.offlineState === 'downloaded' && (
+                                                <div className="icon downloaded" title="Synced">
+                                                    <DownloadedIcon width={12} height={12} />
+                                                </div>
+                                            )}
+
+                                            {currentTrack?.offlineState === 'deleting' && (
+                                                <div className="icon deleting" title="Unsyncing...">
+                                                    <DeletingIcon width={12} height={12} />
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="duration">{playback.formatTime(duration.duration)}</div>
                             </div>

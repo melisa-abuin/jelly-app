@@ -1,4 +1,4 @@
-.dimmer {
+.now-playing-dimmer {
     display: none;
 }
 
@@ -22,7 +22,9 @@
     z-index: 1;
     padding: 12px;
     padding-top: 40px;
-    backdrop-filter: blur(16px);
+    padding-bottom: 28px;
+    backdrop-filter: blur(20px);
+    mask-image: linear-gradient(to bottom, black 78%, transparent 100%);
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper {
@@ -159,6 +161,7 @@
 
 .now-playing-lyrics > .ui > .playing-content {
     padding: 12px;
+    margin: -12px 0;
     transition: filter 0.2s ease;
 }
 
@@ -195,9 +198,11 @@
     bottom: 0;
     z-index: 1;
     padding: 12px;
+    padding-top: 28px;
     padding-bottom: 40px;
     margin-top: auto;
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(20px);
+    mask-image: linear-gradient(to top, black 82%, transparent 100%);
 }
 
 .now-playing-lyrics > .ui > .playing-footer > .wrapper {
@@ -266,6 +271,20 @@
     > .bitrate
     > .number {
     font-variant-numeric: tabular-nums;
+}
+
+.now-playing-lyrics
+    > .ui
+    > .playing-footer
+    > .wrapper
+    > .inner
+    > .playing-progress
+    > .info
+    > .quality
+    > .download-state {
+    fill: var(--font-color-secondary);
+    margin-left: 6px;
+    margin-right: -4px;
 }
 
 /* Progress bar */
@@ -681,7 +700,7 @@
 
 /* Responsive */
 @media only screen and (pointer: coarse) {
-    .dimmer {
+    .now-playing-dimmer {
         display: block;
         position: fixed;
         z-index: 4;
@@ -696,7 +715,7 @@
         transition: opacity 0.2s ease, visibility 0.2s ease;
     }
 
-    .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .dimmer {
+    .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .now-playing-dimmer {
         opacity: 1;
         visibility: visible;
     }
@@ -717,6 +736,7 @@
 @media only screen and (max-width: 500px) {
     .now-playing-lyrics > .ui > .playing-header {
         padding-top: 17px;
+        mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
     }
 
     .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .return_icon {
@@ -728,15 +748,16 @@
     }
 
     .now-playing-lyrics > .ui > .playing-footer {
-        padding-bottom: 20px;
+        padding-bottom: 24px;
+        mask-image: linear-gradient(to top, black 80%, transparent 100%);
     }
 
     .now-playing-lyrics > .ui > .playing-footer {
-        padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
+        padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
     }
 
     html.safeAreaFallback .now-playing-lyrics > .ui > .playing-footer {
-        padding-bottom: 20px;
+        padding-bottom: 24px;
     }
 
     .now-playing-lyrics > .ui > .playing-content > .lyrics-page > .empty {
