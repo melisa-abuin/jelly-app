@@ -13,7 +13,7 @@ env:
   APP_IMAGE_NAME: jelly-music-app
 
 jobs:
-  build-and-push:
+  build-and-push-docker:
     runs-on: ubuntu-latest
     permissions:
       contents: read
