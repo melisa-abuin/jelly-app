@@ -16,6 +16,7 @@ import {
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
+import { useScrollContext } from '../context/ScrollContext/ScrollContext'
 import { useJellyfinTrackInfo } from '../hooks/Jellyfin/useJellyfinTrackInfo'
 import { useDuration } from '../hooks/useDuration'
 import { useFavorites } from '../hooks/useFavorites'
@@ -29,6 +30,7 @@ export const NowPlaying = () => {
     const duration = useDuration()
     const { isOpen, selectedItem, onContextMenu } = useDropdownContext()
     const { addToFavorites, removeFromFavorites } = useFavorites()
+    const { setDisabled } = useScrollContext()
 
     const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(e.target.value)
@@ -265,6 +267,8 @@ export const NowPlaying = () => {
                                     value={playback.volume}
                                     onChange={handleVolumeChange}
                                     onWheel={handleVolumeScroll}
+                                    onMouseEnter={() => setDisabled(true)}
+                                    onMouseLeave={() => setDisabled(false)}
                                 />
                             </div>
                         </div>

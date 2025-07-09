@@ -292,6 +292,7 @@
     position: relative;
     display: flex;
     height: 8px;
+    touch-action: none;
 }
 
 /* Progress loading */

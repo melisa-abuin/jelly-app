@@ -343,6 +343,7 @@ export const Progressbar = () => {
     const playback = usePlaybackContext()
     const audio = playback.audioRef.current as HTMLAudioElement | undefined
     const progressRef = useRef<HTMLInputElement>(null)
+    const trackRef = useRef<HTMLDivElement>(null)
     const bufferRef = useRef(false)
 
     const calcDuration = useCallback(() => {
@@ -466,8 +467,20 @@ export const Progressbar = () => {
         }
     }, [audio, calcBuffered, calcDuration, calcProgress, restoreProgress])
 
+    // better progress bar support iOS
+    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+        e.preventDefault()
+        if (!audio || !progressRef.current || !trackRef.current) return
+        const rect = trackRef.current.getBoundingClientRect()
+        const percent = Math.min(Math.max((e.touches[0].clientX - rect.left) / rect.width, 0), 1)
+        const newTime = percent * calcDuration()
+        audio.currentTime = newTime
+        progressRef.current.value = newTime.toString()
+        restoreProgress()
+    }
+
     return (
-        <div className="progress">
+        <div className="progress" ref={trackRef} onTouchMove={handleTouchMove}>
             <input
                 ref={progressRef}
                 type="range"
