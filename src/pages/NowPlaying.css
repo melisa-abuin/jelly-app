@@ -574,7 +574,7 @@
 .now-playing > .ui > .playing-footer > .playing-volume > .control > input {
     cursor: pointer;
     width: 160px;
-    height: 9px;
+    height: 8px;
     border-radius: 20px;
     background-color: var(--playing-bg-color);
     border: 1px solid var(--playing-border-color);
