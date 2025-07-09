@@ -2,7 +2,7 @@
 
 # Get root directory
 ROOT_DIR=$(git rev-parse --show-toplevel)
-cd $ROOT_DIR
+cd "${ROOT_DIR}"
 
 yarn && yarn build:desktop -v
 
@@ -10,13 +10,13 @@ yarn && yarn build:desktop -v
 mkdir -p ./release
 
 # Copy deb executable
-cp ${ROOT_DIR}/src-tauri/target/release/bundle/deb/*.deb ./release
+cp "${ROOT_DIR}"/src-tauri/target/release/bundle/deb/*.deb ./release
 
 # Copy rpm executable
-cp ${ROOT_DIR}/src-tauri/target/release/bundle/rpm/*.rpm ./release
+cp "${ROOT_DIR}"/src-tauri/target/release/bundle/rpm/*.rpm ./release
 
 # Copy appimage executable
-cp ${ROOT_DIR}/src-tauri/target/release/bundle/appimage/*.AppImage ./release
+cp "${ROOT_DIR}"/src-tauri/target/release/bundle/appimage/*.AppImage ./release
 
 # Prepend 'desktop-' to all package files in ./release
 for file in ./release/*.{deb,rpm,AppImage}; do

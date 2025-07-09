@@ -2,7 +2,7 @@
 
 # Get root directory
 ROOT_DIR=$(git rev-parse --show-toplevel)
-cd $ROOT_DIR
+cd "${ROOT_DIR}"
 
 # Clean dist
 rm -rf ./dist
