@@ -85,6 +85,8 @@ It's also available as a **docker image** for easy deployment, see docker detail
 
 Alternatively, you can run the development server directly: `yarn dev` or `yarn dev:nocache`
 
+If you wish to use a base path for the application other than root (`/`), you must build it manually while setting `URL_BASE_PATH` to your preferred base path.
+
 Leave the configuration as the default, or change [`config.json`](public/config.json) as needed. Configurations are explained on the [App Configuration Section](#app-configuration).
 The `config.json` file can be changed directly in the built application afterwards. There is no need to rebuild if only changing a configuration variable.
 
