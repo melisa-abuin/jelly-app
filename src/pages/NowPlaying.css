@@ -136,6 +136,7 @@
     max-width: 100%;
     max-height: 100%;
     aspect-ratio: 1 / 1;
+    object-fit: cover;
 }
 
 .now-playing > .ui > .playing-content > .playing-artwork > .thumbnail > .fallback-thumbnail {
@@ -147,6 +148,7 @@
     max-width: 100%;
     max-height: 100%;
     aspect-ratio: 1 / 1;
+    object-fit: cover;
     background-color: var(--bg-color-tertiary);
 }
 
