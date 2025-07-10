@@ -59,7 +59,7 @@ A lightweight & elegant music interface for Jellyfin. Made to be intuitive and m
 
 ### Installation
 
-Jelly Music App offers dedicated desktop apps, available on our [GitHub release page](https://github.com/Stannnnn/jelly-app/releases). You can also get the latest production build from there and deploy it on your web server by placing the archived folder's contents in a web-accessible directory.
+Jelly Music App can be installed as a dedicated desktop app, available on our [GitHub release page](https://github.com/Stannnnn/jelly-app/releases). You can also get the latest production build from there and deploy it on your web server by placing the archived folder's contents in a web-accessible directory.
 <br/>
 It's also available as a **docker image** for easy deployment, see docker details below.
 <br/>
