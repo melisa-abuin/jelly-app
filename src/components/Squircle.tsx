@@ -61,17 +61,19 @@ export const Squircle = ({
 
     // ResizeObserver for responsive squircle
     useEffect(() => {
-        if (!isResponsive || !ref.current) return
+        const current = ref.current
+
+        if (!isResponsive || !current) return
 
         const resizeObserver = new ResizeObserver(entries => {
             const { width, height } = entries[0].contentRect
             setDimensions({ width: Math.round(width), height: Math.round(height) })
         })
 
-        resizeObserver.observe(ref.current)
+        resizeObserver.observe(current)
 
         return () => {
-            if (ref.current) resizeObserver.unobserve(ref.current)
+            if (current) resizeObserver.unobserve(current)
         }
     }, [isResponsive])
 

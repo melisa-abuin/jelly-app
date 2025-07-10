@@ -1,5 +1,6 @@
 import { ArrowLeftIcon, HeartFillIcon, HeartIcon } from '@primer/octicons-react'
 import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { JellyImg } from '../components/JellyImg'
 import { Progressbar } from '../components/Main'
 import { Squircle } from '../components/Squircle'
@@ -16,6 +17,7 @@ import './NowPlaying.css'
 export const NowPlayingLyrics = () => {
     const { goBack: previousPage } = useHistoryContext()
     const { currentTrack, bitrate } = usePlaybackContext()
+    const location = useLocation()
 
     const playback = usePlaybackContext()
     const duration = useDuration()
