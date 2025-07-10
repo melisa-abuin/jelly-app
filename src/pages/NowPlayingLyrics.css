@@ -63,6 +63,10 @@
     margin-right: 12px;
 }
 
+.now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .thumbnail > img {
+    object-fit: cover;
+}
+
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .thumbnail > .fallback-thumbnail {
     display: flex;
     align-items: center;

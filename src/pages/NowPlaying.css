@@ -654,7 +654,7 @@
         visibility: visible;
     }
 
-    .music-app:has(.now-playing):has(.dropdown.active) > .now-playing {
+    .music-app:has(.now-playing):has(.dropdown.active) > .now-playing > .ui {
         filter: blur(12px);
     }
 }
