@@ -5,13 +5,13 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 cd "${ROOT_DIR}"
 
 # Install dependencies and build desktop app
-yarn && yarn build:desktop -v
+yarn && yarn build:desktop --target universal-apple-darwin -v
 
 # Make release dir
 mkdir -p ./release
 
 # Copy DMG executable
-cp "${ROOT_DIR}"/src-tauri/target/release/bundle/dmg/*.dmg ./release
+cp "${ROOT_DIR}"/src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg ./release
 
 # Prepend 'desktop-' to all package files in ./release
 for file in ./release/*.dmg; do
