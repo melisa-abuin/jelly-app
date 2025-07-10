@@ -29,6 +29,7 @@
         "@tanstack/query-sync-storage-persister": "^5.81.5",
         "@tanstack/react-query": "^5.81.5",
         "@tanstack/react-query-persist-client": "^5.81.5",
+        "@tauri-apps/plugin-window-state": "~2",
         "@types/m3u8-parser": "^7.2.2",
         "@types/node": "^24.0.6",
         "axios": "^1.10.0",
