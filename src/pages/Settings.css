@@ -31,8 +31,13 @@
     transition: background-color 0.2s ease-out;
 }
 
-.settings-page > .section .btn:hover {
+.settings-page > .section .btn:hover:not(:disabled) {
     background-color: var(--btn-brand-color-hover);
+}
+
+.settings-page > .section .btn:disabled {
+    background-color: var(--btn-brand-color-disabled);
+    cursor: not-allowed;
 }
 
 /* Appearance */

@@ -6,6 +6,7 @@ import { MediaItem } from '../api/jellyfin'
 import { useAudioStorageContext } from '../context/AudioStorageContext/AudioStorageContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { IJellyfinInfiniteProps, useJellyfinInfiniteData } from '../hooks/Jellyfin/Infinite/useJellyfinInfiniteData'
+import { isMediaItem } from '../hooks/usePatchQueries'
 
 export type IReviver = {
     queryKey: unknown[]
@@ -110,27 +111,33 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return {
             queryKey: ['reviver', ...(shuffle && !isManualShuffle ? ['shuffle'] : []), ...(reviver.queryKey || [])],
             queryFn: async ({ pageParam = 0 }) => {
-                const itemsPerPage = params[pageParamIndex + 1]
-                const startIndex = (pageParam as number) * (itemsPerPage as number)
+                try {
+                    const itemsPerPage = params[pageParamIndex + 1]
+                    const startIndex = (pageParam as number) * (itemsPerPage as number)
 
-                params[pageParamIndex] = startIndex
+                    params[pageParamIndex] = startIndex
 
-                // When shuffle is enabled, we set the pageParam to 'Random' to fetch random items
-                // Note; Hardcoded it to 2 params after the pageParam, should improve this
-                if (shuffle && !isManualShuffle) {
-                    params[pageParamIndex + 2] = 'Random'
+                    // When shuffle is enabled, we set the pageParam to 'Random' to fetch random items
+                    // Note; Hardcoded it to 2 params after the pageParam, should improve this
+                    if (shuffle && !isManualShuffle) {
+                        params[pageParamIndex + 2] = 'Random'
+                    }
+
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const response: MediaItem[] = (await (api as any)[queryFn]?.(...params)) || []
+
+                    if (shuffle && !isManualShuffle && tmpShuffleTrackRef.current) {
+                        response.splice(currentTrackIndex.index, 0, tmpShuffleTrackRef.current)
+                    }
+
+                    tmpShuffleTrackRef.current = undefined
+
+                    return response
+                } catch (e) {
+                    console.error('Error in reviver queryFn:', e)
+                    console.trace()
+                    return []
                 }
-
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const response: MediaItem[] = (await (api as any)[queryFn]?.(...params)) || []
-
-                if (shuffle && !isManualShuffle && tmpShuffleTrackRef.current) {
-                    response.splice(currentTrackIndex.index, 0, tmpShuffleTrackRef.current)
-                }
-
-                tmpShuffleTrackRef.current = undefined
-
-                return response
             },
             queryFnReviver: undefined,
             // NOTE; The reviverPageIndex is probably wrong but its not really an issue for now
@@ -177,10 +184,31 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         // We ignore 'currentTrackIndex.index' here because we only want to shuffle once, not on every render.
     }, [_items, addQueueId, isManualShuffle]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    const _pages = useMemo(
-        () => infiniteData?.pages.map(page => page.map(addQueueId)) || [],
-        [addQueueId, infiniteData?.pages]
-    )
+    const _pages = useMemo(() => {
+        return (
+            infiniteData?.pages.map(page => {
+                if (!page) {
+                    console.error('_pages: Page is undefined or null', infiniteData)
+                    console.trace()
+                    return []
+                }
+
+                if (!Array.isArray(page)) {
+                    console.error('_pages: Page is not an array', infiniteData)
+                    console.trace()
+                    return []
+                }
+
+                if (page[0] && !isMediaItem(page[0])) {
+                    console.error('_pages: Page does not contain MediaItem objects', infiniteData)
+                    console.trace()
+                    return []
+                }
+
+                return page.map(addQueueId)
+            }) || []
+        )
+    }, [addQueueId, infiniteData])
 
     const updateCurrentPlaylist = useCallback(
         async (cb: (pages: MediaItem[][]) => Promise<MediaItem[][]>) => {

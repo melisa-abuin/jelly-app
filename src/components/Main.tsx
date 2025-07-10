@@ -1,5 +1,5 @@
-import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
-import { JSX, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowLeftIcon, ArrowUpIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
+import { JSX, memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
 import { FilterContextProvider } from '../context/FilterContext/FilterContextProvider'
@@ -7,6 +7,7 @@ import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useSidenavContext } from '../context/SidenavContext/SidenavContext'
+import { useDuration } from '../hooks/useDuration'
 import { getPageTitle } from '../utils/titleUtils'
 import { AlbumIcon, ArtistsIcon, PlaylistIcon, SortingIcon, TrackIcon, TracksIcon } from './SvgIcons'
 
@@ -307,9 +308,12 @@ export const MainContent = ({
                                     <div className={`repeat-icon${playback.repeat === 'one' ? '-one' : ''}`}></div>
                                 </div>
                             </div>
-
                             <Duration />
                         </div>
+                        <Link to="/nowplaying" className="expand" title="Now Playing">
+                            <ArrowUpIcon size={12} className="icon float" />
+                            <TracksIcon width={12} height={12} className="icon" />
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -335,10 +339,11 @@ export const MainContent = ({
     )
 }
 
-const Progressbar = () => {
+export const Progressbar = () => {
     const playback = usePlaybackContext()
     const audio = playback.audioRef.current as HTMLAudioElement | undefined
     const progressRef = useRef<HTMLInputElement>(null)
+    const trackRef = useRef<HTMLDivElement>(null)
     const bufferRef = useRef(false)
 
     const calcDuration = useCallback(() => {
@@ -462,8 +467,20 @@ const Progressbar = () => {
         }
     }, [audio, calcBuffered, calcDuration, calcProgress, restoreProgress])
 
+    // better progress bar support iOS
+    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+        e.preventDefault()
+        if (!audio || !progressRef.current || !trackRef.current) return
+        const rect = trackRef.current.getBoundingClientRect()
+        const percent = Math.min(Math.max((e.touches[0].clientX - rect.left) / rect.width, 0), 1)
+        const newTime = percent * calcDuration()
+        audio.currentTime = newTime
+        progressRef.current.value = newTime.toString()
+        restoreProgress()
+    }
+
     return (
-        <div className="progress">
+        <div className="progress" ref={trackRef} onTouchMove={handleTouchMove}>
             <input
                 ref={progressRef}
                 type="range"
@@ -492,33 +509,13 @@ const Progressbar = () => {
 
 const Duration = memo(() => {
     const playback = usePlaybackContext()
-    const audio = playback.audioRef.current
-
-    const [progress, setProgress] = useState(audio.currentTime || 0)
-    const [duration, setDuration] = useState(audio.duration || 0)
-
-    useEffect(() => {
-        if (!audio) return
-
-        const updateProgress = () => {
-            setProgress(audio.currentTime)
-            setDuration(audio.duration)
-        }
-
-        audio.addEventListener('timeupdate', updateProgress)
-        audio.addEventListener('loadedmetadata', updateProgress)
-
-        return () => {
-            audio.removeEventListener('timeupdate', updateProgress)
-            audio.removeEventListener('loadedmetadata', updateProgress)
-        }
-    }, [audio])
+    const duration = useDuration()
 
     return (
         <div className="duration noSelect">
-            <div className="current">{playback.formatTime(progress)}</div>
+            <div className="current">{playback.formatTime(duration.progress)}</div>
             <div className="divider">/</div>
-            <div className="total">{playback.formatTime(duration)}</div>
+            <div className="total">{playback.formatTime(duration.duration)}</div>
         </div>
     )
 })

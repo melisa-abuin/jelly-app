@@ -59,7 +59,7 @@ A lightweight & elegant music interface for Jellyfin. Made to be intuitive and m
 
 ### Installation
 
-Jelly Music App is available as a production build, ready to deploy on an existing web server. Download the latest release from our project's [GitHub release page](https://github.com/Stannnnn/jelly-app/releases) and place the contents of the archived folder in a web-accessible directory.
+Jelly Music App can be installed as a dedicated desktop app, available on our [GitHub release page](https://github.com/Stannnnn/jelly-app/releases). You can also get the latest production build from there and deploy it on your web server by placing the archived folder's contents in a web-accessible directory.
 <br/>
 It's also available as a **docker image** for easy deployment, see docker details below.
 <br/>
@@ -77,16 +77,18 @@ It's also available as a **docker image** for easy deployment, see docker detail
     ```bash
     yarn
     ```
-3. Leave the configuration as the default, or change [`config.json`](public/config.json) as needed. Configurations are explained on the [App Configuration Section](#app-configuration) \
-   The `config.json` file can be changed directly in the built application afterwards. There is no need to rebuild if only changing a configuration variable.
-4. Build the production files:
+3. Build the production files:
     ```bash
     yarn build
     ```
-5. Deploy the contents of the `dist` folder to a web-accessible directory.
-   <br/>
+4. Deploy the contents of the `dist` folder to a web-accessible directory.
 
 Alternatively, you can run the development server directly: `yarn dev` or `yarn dev:nocache`
+
+If you wish to use a base path for the application other than root (`/`), you must build it manually while setting `URL_BASE_PATH` to your preferred base path.
+
+Leave the configuration as the default, or change [`config.json`](public/config.json) as needed. Configurations are explained on the [App Configuration Section](#app-configuration).
+The `config.json` file can be changed directly in the built application afterwards. There is no need to rebuild if only changing a configuration variable.
 
 ### Docker
 

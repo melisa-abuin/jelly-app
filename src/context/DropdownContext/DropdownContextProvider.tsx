@@ -229,7 +229,13 @@ const useInitialState = () => {
     }, [])
 
     const openDropdown = useCallback(
-        (context: IContext, x: number, y: number, ignoreMargin: boolean) => {
+        (
+            e: React.MouseEvent<HTMLElement, MouseEvent> | React.TouchEvent<HTMLElement>,
+            context: IContext,
+            x: number,
+            y: number,
+            ignoreMargin: boolean
+        ) => {
             let adjustedX = x
             let adjustedY = y
             if (isTouchDevice) {
@@ -249,16 +255,12 @@ const useInitialState = () => {
                 adjustedX = x < margin ? margin : adjustedX // Prevent left overflow
             } else {
                 // Position dropdown below the toggle, aligned left with offsets
-                let triggerElement = document.elementFromPoint(x, y)
+                const triggerElement = e.currentTarget.closest('.more')
+
                 if (triggerElement) {
-                    while (triggerElement && !triggerElement.classList.contains('more')) {
-                        triggerElement = triggerElement.parentElement
-                    }
-                    if (triggerElement) {
-                        const rect = triggerElement.getBoundingClientRect()
-                        adjustedX = rect.left - window.pageXOffset - 142
-                        adjustedY = rect.bottom + window.pageYOffset + 8
-                    }
+                    const rect = triggerElement.getBoundingClientRect()
+                    adjustedX = rect.left - window.pageXOffset - 142
+                    adjustedY = rect.bottom + window.pageYOffset + 8
                 }
             }
             setIsOpen(true)
@@ -586,7 +588,7 @@ const useInitialState = () => {
                                     </div>
                                 </div>
 
-                                <div className="dropdown-separator" />
+                                {playlists.length > 0 && <div className="dropdown-separator" />}
 
                                 {playlists.map(playlist => (
                                     <div
@@ -948,7 +950,7 @@ const useInitialState = () => {
                 const touch = e.touches[0]
                 const x = touch.clientX
                 const y = touch.clientY + window.pageYOffset
-                openDropdown(context, x, y, ignoreMargin)
+                openDropdown(e, context, x, y, ignoreMargin)
                 setHidden(hidden)
             }, 400)
         },
@@ -962,7 +964,6 @@ const useInitialState = () => {
         menuItems,
         subDropdown,
         isTouchDevice,
-        openDropdown,
         closeDropdown,
         openSubDropdown,
         closeSubDropdown,
@@ -979,7 +980,7 @@ const useInitialState = () => {
             e.preventDefault()
             const x = e.clientX
             const y = e.clientY + window.pageYOffset
-            openDropdown(context, x, y, ignoreMargin)
+            openDropdown(e, context, x, y, ignoreMargin)
             setHidden(hidden)
         },
         onTouchStart: handleTouchStart,

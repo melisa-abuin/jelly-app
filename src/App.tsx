@@ -36,6 +36,8 @@ import { Home } from './pages/Home'
 import { InstantMix } from './pages/InstantMix'
 import { Login } from './pages/Login'
 import { Lyrics } from './pages/Lyrics'
+import { NowPlaying } from './pages/NowPlaying'
+import { NowPlayingLyrics } from './pages/NowPlayingLyrics'
 import { Playlist } from './pages/Playlist'
 import { Queue } from './pages/Queue'
 import { RecentlyPlayed } from './pages/RecentlyPlayed'
@@ -94,15 +96,46 @@ const RoutedApp = () => {
         const isChromium = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
         const isEdge = /Edg/.test(navigator.userAgent) && /Microsoft Corporation/.test(navigator.vendor)
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream // eslint-disable-line @typescript-eslint/no-explicit-any
+        const isAndroidPWA =
+            /Android/.test(navigator.userAgent) &&
+            (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone) // eslint-disable-line @typescript-eslint/no-explicit-any
 
         if (isWindows && (isChromium || isEdge)) {
             document.getElementsByTagName('html')[0].classList.add('winOS')
-        } else {
-            document.getElementsByTagName('html')[0].classList.add('otherOS')
         }
 
         if (isIOS) {
             document.getElementsByTagName('html')[0].classList.add('iOS')
+        }
+
+        // env safe area inset not supported or unreliable in android pwa?
+        if (isAndroidPWA) {
+            document.getElementsByTagName('html')[0].classList.add('safeAreaFallback')
+        }
+
+        // Needed for iOS, else you need to refresh page after changing orientation mode
+        const updateOrientation = () => {
+            const isIOSSafariNonPWA =
+                isIOS &&
+                !window.matchMedia('(display-mode: standalone)').matches &&
+                !(navigator as any).standalone && // eslint-disable-line @typescript-eslint/no-explicit-any
+                !window.matchMedia('(orientation: landscape)').matches
+            const htmlElement = document.getElementsByTagName('html')[0]
+
+            if (isIOS) {
+                if (isIOSSafariNonPWA) {
+                    htmlElement.classList.add('safeAreaFallback')
+                } else {
+                    htmlElement.classList.remove('safeAreaFallback')
+                }
+            }
+        }
+
+        updateOrientation()
+        window.matchMedia('(orientation: landscape)').addEventListener('change', updateOrientation)
+
+        return () => {
+            window.matchMedia('(orientation: landscape)').removeEventListener('change', updateOrientation)
         }
     }, [])
 
@@ -171,7 +204,8 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
 
     return (
         <Routes>
-            <Route path="/bla" element={<div>bla</div>} />
+            <Route path="/nowplaying" element={<NowPlaying />} />
+            <Route path="/nowplaying/lyrics" element={<NowPlayingLyrics />} />
 
             <Route
                 path="*"

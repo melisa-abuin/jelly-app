@@ -1,32 +1,31 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useNavigationType } from 'react-router-dom'
 import { HistoryContext } from './HistoryContext'
 
 export type IHistoryContext = ReturnType<typeof useInitialState>
 
 const useInitialState = () => {
-    const [historyStack, setHistoryStack] = useState<string[]>([])
     const navigate = useNavigate()
     const location = useLocation()
+    const navType = useNavigationType()
     const currentLocation = location.pathname + location.search
 
-    useEffect(() => {
-        if (historyStack[historyStack.length - 1] === currentLocation) return
+    const [canGoBackCount, setCanGoBackCount] = useState(0)
 
-        setHistoryStack(prev => [...prev, currentLocation])
-    }, [currentLocation]) // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        if (navType === 'PUSH') {
+            setCanGoBackCount(prev => prev + 1)
+        } else if (navType === 'POP') {
+            setCanGoBackCount(prev => Math.max(prev - 1, 0))
+        }
+    }, [currentLocation, navType])
 
     const goBack = () => {
-        if (historyStack.length <= 1) {
-            navigate('/')
-            return
+        if (canGoBackCount > 0) {
+            navigate(-1)
+        } else {
+            navigate('/', { replace: true })
         }
-
-        setHistoryStack(prev => {
-            const newStack = prev.slice(0, -1)
-            navigate(newStack[newStack.length - 1])
-            return newStack
-        })
     }
 
     return { goBack }

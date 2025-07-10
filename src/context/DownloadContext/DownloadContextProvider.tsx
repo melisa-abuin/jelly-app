@@ -168,6 +168,7 @@ const useInitialState = () => {
                                 const { playlist, ts } = await downloadTranscodedTrack(streamUrl, signal)
                                 await audioStorage.saveTrack(mediaItem.Id, {
                                     type: 'm3u8',
+                                    timestamp: Date.now(),
                                     mediaItem,
                                     bitrate: playback.bitrate,
                                     playlist,
@@ -180,6 +181,7 @@ const useInitialState = () => {
                                 const blob = await response.blob()
                                 await audioStorage.saveTrack(mediaItem.Id, {
                                     type: 'song',
+                                    timestamp: Date.now(),
                                     bitrate: playback.bitrate,
                                     mediaItem,
                                     blob,
@@ -189,6 +191,7 @@ const useInitialState = () => {
                         } else {
                             await audioStorage.saveTrack(mediaItem.Id, {
                                 type: 'container',
+                                timestamp: Date.now(),
                                 bitrate: playback.bitrate,
                                 mediaItem,
                             })

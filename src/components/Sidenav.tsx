@@ -1,12 +1,11 @@
 import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client'
 import { BookmarkFillIcon, GearIcon } from '@primer/octicons-react'
-import { ChangeEvent, useCallback, useEffect, useRef, useState, WheelEvent } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { ChangeEvent, useEffect, useRef, useState, WheelEvent } from 'react'
+import { NavLink } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import '../App.css'
 import { useDownloadContext } from '../context/DownloadContext/DownloadContext'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
-import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../context/ScrollContext/ScrollContext'
@@ -41,8 +40,6 @@ export const Sidenav = (props: { username: string }) => {
     const [searchAttempted, setSearchAttempted] = useState(false)
     const dropdown = useDropdownContext()
     const { storageStats } = useDownloadContext()
-    const navigate = useNavigate()
-    const { goBack: previousPage } = useHistoryContext()
 
     const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(e.target.value)
@@ -133,13 +130,6 @@ export const Sidenav = (props: { username: string }) => {
         window.addEventListener('keydown', focusSearch)
         return () => window.removeEventListener('keydown', focusSearch)
     }, [])
-
-    const toggleLyrics = useCallback(() => {
-        closeSidenav()
-
-        if (location.pathname.startsWith('/lyrics')) previousPage()
-        else navigate('/lyrics')
-    }, [closeSidenav, navigate, previousPage])
 
     return (
         <aside className="sidenav">
@@ -396,7 +386,7 @@ export const Sidenav = (props: { username: string }) => {
                         </div>
                         <div className="actions">
                             {(playback.currentTrackLyrics?.Lyrics?.length || 0) > 0 && (
-                                <NavLink to="/lyrics" className="icon lyrics" onClick={toggleLyrics} title="Lyrics">
+                                <NavLink to="/lyrics" className="icon lyrics" title="Lyrics">
                                     <LyricsIcon width={16} height={16} />
                                 </NavLink>
                             )}

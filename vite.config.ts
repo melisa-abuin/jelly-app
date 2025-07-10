@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 const version = (process.env.npm_package_version || 'unknown').split('.').slice(0, 2).join('.')
 
 export default defineConfig({
-    base: process.env.npm_lifecycle_event === 'deploy' ? '/jelly-app/' : '/',
+    base: process.env.URL_BASE_PATH || '/',
     plugins: [
         react(),
         VitePWA({

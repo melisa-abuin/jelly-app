@@ -87,6 +87,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: background-color 0.2s ease-out, opacity 0.2s ease-out;
 }
 
 .dropdown > .dropdown-menu > .dropdown-item:hover,
@@ -114,10 +115,6 @@
 
 .dropdown > .dropdown-menu > .dropdown-item > .icon {
     margin-right: -4px;
-}
-
-.sub-dropdown > .dropdown-menu > .dropdown-item {
-    transition: opacity 0.2s ease-out;
 }
 
 .sub-dropdown > .dropdown-menu > .dropdown-item:has(.playlist-input.has-text) ~ .dropdown-item {
@@ -192,7 +189,20 @@
         transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    html.iOS .dropdown {
+        left: calc(16px + min(30px, env(safe-area-inset-left))) !important;
+        width: calc(100% - 32px - min(30px, env(safe-area-inset-left)) - min(30px, env(safe-area-inset-right)));
+    }
+
     .dropdown.active {
+        transform: scale(1) translateY(0);
+    }
+
+    .dropdown.active {
+        transform: scale(1) translateY(calc(-1 * min(8px, env(safe-area-inset-bottom))));
+    }
+
+    html.safeAreaFallback .dropdown.active {
         transform: scale(1) translateY(0);
     }
 
@@ -221,7 +231,6 @@
         font-size: 0.825rem;
         padding: 8px 12px;
         border-radius: 6px;
-        transition: opacity 0.2s ease-out;
     }
 
     .dropdown > .dropdown-menu > .dropdown-item:hover {
