@@ -33,8 +33,8 @@ jobs:
 
       - name: Set image name
         run: |
-          ACTOR_LC=$(echo "${GITHUB_ACTOR}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_NAME="${ACTOR_LC}/${APP_IMAGE_NAME}"
+          OWNER_LC=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME="${OWNER_LC}/${APP_IMAGE_NAME}"
           echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
 
       - name: Log in to GHCR
