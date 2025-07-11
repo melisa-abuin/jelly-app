@@ -12,6 +12,9 @@ export default defineConfig({
             registerType: 'autoUpdate',
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,webp,svg}'],
+                cleanupOutdatedCaches: true,
+                skipWaiting: true,
+                clientsClaim: true,
             },
             manifest: {
                 name: 'Jelly Music App',
