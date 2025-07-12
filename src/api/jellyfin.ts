@@ -737,22 +737,35 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         playlistId: string,
         startIndex = 0,
         limit = 40,
-        sortBy: ItemSortBy[] = [ItemSortBy.DateCreated],
+        sortBy: 'Inherit' | ItemSortBy[] = [ItemSortBy.DateCreated],
         sortOrder: SortOrder[] = [SortOrder.Descending]
     ) => {
         const itemsApi = new ItemsApi(api.configuration)
-        const response = await itemsApi.getItems(
-            {
-                userId,
-                parentId: playlistId,
-                includeItemTypes: [BaseItemKind.Audio],
-                sortBy,
-                sortOrder,
-                startIndex,
-                limit: Math.min(limit, maxLimit),
-            },
-            { signal: AbortSignal.timeout(20000) }
-        )
+        const playlistsApi = new PlaylistsApi(api.configuration)
+
+        const response =
+            sortBy === 'Inherit'
+                ? await playlistsApi.getPlaylistItems(
+                      {
+                          userId,
+                          playlistId,
+                          startIndex,
+                          limit: Math.min(limit, maxLimit),
+                      },
+                      { signal: AbortSignal.timeout(20000) }
+                  )
+                : await itemsApi.getItems(
+                      {
+                          userId,
+                          parentId: playlistId,
+                          includeItemTypes: [BaseItemKind.Audio],
+                          sortBy,
+                          sortOrder,
+                          startIndex,
+                          limit: Math.min(limit, maxLimit),
+                      },
+                      { signal: AbortSignal.timeout(20000) }
+                  )
 
         const items = await parseItemDtos(response.data.Items)
 

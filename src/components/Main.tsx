@@ -24,7 +24,7 @@ export const MainContent = ({
     filterType,
 }: {
     content: () => JSX.Element
-    filterType?: 'mediaItems' | 'favorites' | 'kind'
+    filterType?: 'mediaItems' | 'favorites' | 'kind' | 'mediaItemsPlaylist'
 }) => {
     const playback = usePlaybackContext()
     const { pageTitle } = usePageTitle()
@@ -78,7 +78,7 @@ export const MainContent = ({
                     </div>
                 </div>
                 <div className="secondary noSelect">
-                    {filterType === 'mediaItems' && (
+                    {(filterType === 'mediaItems' || filterType === 'mediaItemsPlaylist') && (
                         <div className="sorting">
                             <div className="filter">
                                 <select
@@ -90,25 +90,29 @@ export const MainContent = ({
                                     <option value="Runtime">Runtime</option>
                                     <option value="Random">Random</option>
                                     <option value="Name">Name</option>
+                                    {filterType === 'mediaItemsPlaylist' && <option value="Jellyfin">Jellyfin</option>}
                                 </select>
                                 <div className="icon">
                                     <ChevronDownIcon size={12} />
                                 </div>
                             </div>
-                            <div
-                                className="sort"
-                                onClick={() => {
-                                    setFilter(c => ({
-                                        ...c,
-                                        order: c.order === 'Ascending' ? 'Descending' : 'Ascending',
-                                    }))
-                                }}
-                                title={filter.order === 'Ascending' ? 'Ascending' : 'Descending'}
-                            >
-                                <div className={'icon' + (filter.order === 'Ascending' ? ' active' : '')}>
-                                    <SortingIcon width={12} height={12} />
+
+                            {filter.sort !== 'Inherit' && (
+                                <div
+                                    className="sort"
+                                    onClick={() => {
+                                        setFilter(c => ({
+                                            ...c,
+                                            order: c.order === 'Ascending' ? 'Descending' : 'Ascending',
+                                        }))
+                                    }}
+                                    title={filter.order === 'Ascending' ? 'Ascending' : 'Descending'}
+                                >
+                                    <div className={'icon' + (filter.order === 'Ascending' ? ' active' : '')}>
+                                        <SortingIcon width={12} height={12} />
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     )}
 

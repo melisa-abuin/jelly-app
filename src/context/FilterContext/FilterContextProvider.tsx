@@ -12,6 +12,7 @@ enum SortState {
     Random = 'Random',
     Name = 'Name',
     None = '',
+    Inherit = 'Inherit',
 }
 
 enum OrderState {
@@ -149,6 +150,9 @@ const useInitialState = () => {
                 break
             case SortState.Name:
                 newSortBy = [ItemSortBy.Name]
+                break
+            case SortState.Inherit:
+                newSortBy = 'Inherit' as unknown as ItemSortBy[] // This is a special case to use a different endpoint for the playlist tracks
                 break
             default:
                 newSortBy = [ItemSortBy.DateCreated]
