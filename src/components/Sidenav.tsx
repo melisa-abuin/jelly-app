@@ -6,6 +6,7 @@ import { MediaItem } from '../api/jellyfin'
 import '../App.css'
 import { useDownloadContext } from '../context/DownloadContext/DownloadContext'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
+import { buildUrlWithSavedFilters } from '../context/FilterContext/FilterContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../context/ScrollContext/ScrollContext'
@@ -145,22 +146,22 @@ export const Sidenav = (props: { username: string }) => {
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/tracks" onClick={closeSidenav}>
+                            <NavLink to={buildUrlWithSavedFilters('/tracks')} onClick={closeSidenav}>
                                 Tracks
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/albums" onClick={closeSidenav}>
+                            <NavLink to={buildUrlWithSavedFilters('/albums')} onClick={closeSidenav}>
                                 Albums
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/artists" onClick={closeSidenav}>
+                            <NavLink to={buildUrlWithSavedFilters('/artists')} onClick={closeSidenav}>
                                 Artists
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/favorites" onClick={closeSidenav}>
+                            <NavLink to={buildUrlWithSavedFilters('/favorites')} onClick={closeSidenav}>
                                 Favorites
                             </NavLink>
                         </li>
@@ -346,7 +347,7 @@ export const Sidenav = (props: { username: string }) => {
                             <div className="container noSelect">
                                 {playlists.map(playlist => (
                                     <NavLink
-                                        to={`/playlist/${playlist.Id}`}
+                                        to={buildUrlWithSavedFilters(`/playlist/${playlist.Id}`)}
                                         key={playlist.Id}
                                         onClick={closeSidenav}
                                         className={({ isActive }) => (isActive ? 'playlist active' : 'playlist')}

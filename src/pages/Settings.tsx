@@ -329,6 +329,27 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                     </div>
                 </div>
             </div>
+            <div className="section ui-settings">
+                <div className="title">UI Settings</div>
+                <div className="inner row">
+                    <div className="container">
+                        <div className="desc">
+                            <div className="subtitle">Filter state</div>
+                            <div className="subdesc">
+                                Remember selected filters across sessions for a consistent experience
+                            </div>
+                        </div>
+                        <label className="switch">
+                            <input
+                                type="checkbox"
+                                checked={playback.rememberFilters}
+                                onChange={e => playback.setRememberFilters(e.target.checked)}
+                            ></input>
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
             <div className="section about">
                 <div className="title">About</div>
                 <div className="desc">

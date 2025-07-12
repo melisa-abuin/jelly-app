@@ -378,6 +378,26 @@
     gap: 8px;
 }
 
+/* UI Settings */
+.settings-page > .section.ui-settings > .inner:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+.settings-page > .section.ui-settings .desc > .subtitle {
+    margin-bottom: 0;
+}
+
+.settings-page > .section.ui-settings .desc > .subdesc {
+    color: var(--font-color-tertiary);
+}
+
+.settings-page > .section.ui-settings > .inner > .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
 /* About and Session */
 .settings-page > .section .desc {
     font-size: 0.75rem;
