@@ -90,7 +90,7 @@ export const MainContent = ({
                                     <option value="Runtime">Runtime</option>
                                     <option value="Random">Random</option>
                                     <option value="Name">Name</option>
-                                    {filterType === 'mediaItemsPlaylist' && <option value="Jellyfin">Jellyfin</option>}
+                                    {filterType === 'mediaItemsPlaylist' && <option value="Inherit">Inherit</option>}
                                 </select>
                                 <div className="icon">
                                     <ChevronDownIcon size={12} />
