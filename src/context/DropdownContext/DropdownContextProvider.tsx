@@ -63,7 +63,7 @@ const useInitialState = () => {
         const handleResize = () => {
             const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 480
             setIsTouchDevice(isTouch)
-            if (isOpen) {
+            if (isOpen && document.activeElement?.tagName !== 'INPUT') {
                 setIsOpen(false)
                 setSubDropdown({
                     isOpen: false,

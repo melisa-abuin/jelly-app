@@ -247,7 +247,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                         <Link to="/synced" className="textlink">
                             Browse music library
                         </Link>
-                        , officially available once tracks are synced
+                        , available once tracks are synced
                     </div>
                 </div>
             </div>
@@ -330,7 +330,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                 </div>
             </div>
             <div className="section ui-settings">
-                <div className="title">UI Settings</div>
+                <div className="title">Interface</div>
                 <div className="inner row">
                     <div className="container">
                         <div className="desc">
@@ -413,8 +413,9 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                             window.location.reload()
                         }}
                         className="btn reload"
+                        title="Reloading can help with issues like outdated cache or version conflicts."
                     >
-                        Reload app
+                        Reload App
                     </button>
                 </div>
             </div>
