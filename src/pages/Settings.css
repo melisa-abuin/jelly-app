@@ -422,6 +422,10 @@
     margin-top: 14px;
 }
 
+.settings-page > .section > .actions .btn.reload {
+    margin-left: 8px;
+}
+
 .settings-page > .section .desc > .info {
     color: var(--font-color-tertiary);
 }

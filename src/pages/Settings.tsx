@@ -405,6 +405,17 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                     <button onClick={handleLogout} className="btn logout">
                         Logout
                     </button>
+
+                    <button
+                        onClick={async () => {
+                            queryClient.clear()
+                            await persister.removeClient()
+                            window.location.reload()
+                        }}
+                        className="btn reload"
+                    >
+                        Reload app
+                    </button>
                 </div>
             </div>
         </div>
