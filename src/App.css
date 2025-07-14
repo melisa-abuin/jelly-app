@@ -758,10 +758,8 @@ body.lockscroll {
 .main > .main_footer > .playback > .container {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     position: relative;
     padding: 14px 20px;
-    padding-right: 30px;
     /* Help with CJK letter spacing */
     max-height: 76px;
 }
@@ -769,7 +767,8 @@ body.lockscroll {
 /* Track details */
 .main > .main_footer > .playback > .container > .track-info {
     position: relative;
-    max-width: calc(100% - 264px);
+    max-width: calc(100% - 242px);
+    flex-grow: 1;
 }
 
 .main > .main_footer > .playback > .container > .track-info > .track-name {
@@ -831,14 +830,16 @@ body.lockscroll {
 /* Player controls */
 .main > .main_footer > .playback > .container > .controls {
     display: flex;
-    align-items: center;
+    flex-direction: column-reverse;
+    align-items: end;
+    margin-left: 8px;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-right: 8px;
+    margin-top: 6px;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle {
@@ -1021,51 +1022,80 @@ body.lockscroll {
     display: flex;
     font-size: 0.725rem;
     font-weight: 500;
-    font-variant-numeric: tabular-nums; /* Don't like how the font looks, but needed to prevent layout shift when numbers change */
+    font-variant-numeric: tabular-nums;
     color: var(--font-color-tertiary);
+    margin-right: 6px;
 }
 
 .main > .main_footer > .playback > .container > .controls > .duration > .divider {
     margin: 0 4px;
 }
 
-.main > .main_footer > .playback > .container > .expand {
-    font-size: 0.6875rem;
-    font-weight: 500;
-    color: var(--brand-color);
+.main > .main_footer > .playback > .container > .artwork {
+    position: relative;
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 6px;
+    margin-left: 8px;
+}
+
+.main > .main_footer > .playback > .container > .artwork > .thumbnail {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+}
+
+.main > .main_footer > .playback > .container > .artwork > .thumbnail > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+}
+
+.main > .main_footer > .playback > .container > .artwork > .thumbnail > .fallback-thumbnail {
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    top: -2px;
-    right: 0;
-    width: 26px;
-    height: calc(100% + 2px);
-    background-color: var(--bg-color);
-    transition: background-color 0.2s ease-out;
-}
-
-.main > .main_footer > .playback > .container > .expand:hover {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
     background-color: var(--bg-color-tertiary);
 }
 
-.main > .main_footer > .playback > .container > .expand > .icon {
-    fill: var(--brand-color);
-    margin-left: -2px;
+.main > .main_footer > .playback > .container > .artwork > .thumbnail > .fallback-thumbnail > svg {
+    fill: var(--font-color-tertiary);
+    opacity: 0.6;
+    margin-left: -4%;
 }
 
-.main > .main_footer > .playback > .container > .expand > .icon.float {
+.main > .main_footer > .playback > .container > .artwork > .thumbnail > .overlay {
     position: absolute;
     top: 0;
-    margin-top: 10px;
-    margin-left: 0;
+    left: 0;
     opacity: 0;
-    transition: opacity 0.2s ease-out, transform 0.2s linear;
+    visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background-color: var(--overlay-bg);
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
 }
 
-.main > .main_footer > .playback > .container > .expand:hover > .icon.float {
+.main > .main_footer > .playback > .container > .artwork:hover > .thumbnail > .overlay,
+.main > .main_footer > .playback > .container > .artwork:active > .thumbnail > .overlay {
     opacity: 1;
-    transform: translateY(-2px);
+    visibility: visible;
+}
+
+.main > .main_footer > .playback > .container > .artwork > .thumbnail > .overlay > .icon {
+    fill: var(--font-color-inverted);
 }
 
 /* Home page specific */
@@ -1196,7 +1226,6 @@ body.lockscroll {
     .main > .main_footer > .playback > .container {
         max-height: 86px;
         padding-bottom: min(28px, env(safe-area-inset-bottom, 20px));
-        padding-right: 44px;
     }
 
     html.safeAreaFallback .main > .main_footer > .playback > .container {
@@ -1210,12 +1239,6 @@ body.lockscroll {
 
     .main > .main_footer > .playback > .container > .track-info > .artist {
         margin-bottom: 3px;
-    }
-
-    .main > .main_footer > .playback > .container > .expand {
-        top: -3px;
-        height: calc(100% + 3px);
-        width: 36px;
     }
 }
 
@@ -1301,21 +1324,26 @@ body.lockscroll {
 
 @media only screen and (max-width: 500px) {
     .main > .main_footer > .playback > .container > .track-info {
-        max-width: calc(100% - 190px);
-    }
-
-    .main > .main_footer > .playback > .container > .controls {
-        align-items: end;
-        flex-direction: column-reverse;
-    }
-
-    .main > .main_footer > .playback > .container > .controls > .knobs {
-        margin-top: 6px;
-        margin-right: -6px;
+        max-width: calc(100% - 246px);
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs > .primary {
         gap: 4px;
+    }
+}
+
+@media only screen and (max-width: 420px) {
+    .main > .main_footer > .playback > .container > .track-info {
+        max-width: calc(100% - 168px);
+    }
+
+    .main > .main_footer > .playback > .container > .controls > .knobs {
+        margin-right: 6px;
+    }
+
+    .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle,
+    .main > .main_footer > .playback > .container > .controls > .knobs > .repeat {
+        display: none;
     }
 }
 
@@ -1345,17 +1373,14 @@ body.lockscroll {
         opacity: 0;
         width: 42px;
     }
+}
 
+@media only screen and (max-width: 320px) {
     .main > .main_footer > .playback > .container > .track-info {
-        max-width: calc(100% - 110px);
+        max-width: calc(100% - 136px);
     }
 
-    .main > .main_footer > .playback > .container > .controls > .knobs {
-        margin-right: -1px;
-    }
-
-    .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle,
-    .main > .main_footer > .playback > .container > .controls > .knobs > .repeat {
+    .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous {
         display: none;
     }
 }
