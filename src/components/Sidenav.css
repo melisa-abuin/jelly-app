@@ -190,7 +190,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     > .input_container
     > input.focused
     ~ .search-clear {
-    box-shadow: -12px 0 12px var(--bg-color), -12px 0 12px var(--bg-color);
+    box-shadow: -8px 0 12px 6px var(--bg-color);
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_header > .input_container > .search-loading {
@@ -205,7 +205,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     > .input_container
     > input.focused
     ~ .search-loading {
-    box-shadow: -12px 0 12px var(--bg-color), -12px 0 12px var(--bg-color);
+    box-shadow: -8px 0 12px 6px var(--bg-color);
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results {
