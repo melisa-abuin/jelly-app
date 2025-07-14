@@ -35,6 +35,10 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const [centeredLyrics, setCenteredLyrics] = useState(localStorage.getItem('centeredLyrics') === 'on')
     useEffect(() => localStorage.setItem('centeredLyrics', centeredLyrics ? 'on' : 'off'), [centeredLyrics])
 
+    // UI Settings
+    const [rememberFilters, setRememberFilters] = useState(localStorage.getItem('rememberFilters') === 'on')
+    useEffect(() => localStorage.setItem('rememberFilters', rememberFilters ? 'on' : 'off'), [rememberFilters])
+
     const [currentTrackIndex, setCurrentTrackIndex] = useState({
         index: localStorage.getItem('currentTrackIndex') ? Number(localStorage.getItem('currentTrackIndex')) : -1,
     })
@@ -925,5 +929,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         setIsCrossfadeActive,
         crossfadeDuration,
         setCrossfadeDuration,
+        rememberFilters,
+        setRememberFilters,
     }
 }

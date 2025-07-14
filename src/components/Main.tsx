@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, ArrowUpIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
+import { ArrowLeftIcon, BookmarkFillIcon, ChevronDownIcon, HeartFillIcon } from '@primer/octicons-react'
 import { JSX, memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useFilterContext } from '../context/FilterContext/FilterContext'
@@ -9,7 +9,9 @@ import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useSidenavContext } from '../context/SidenavContext/SidenavContext'
 import { useDuration } from '../hooks/useDuration'
 import { getPageTitle } from '../utils/titleUtils'
-import { AlbumIcon, ArtistsIcon, PlaylistIcon, SortingIcon, TrackIcon, TracksIcon } from './SvgIcons'
+import { JellyImg } from './JellyImg'
+import { Squircle } from './Squircle'
+import { AlbumIcon, ArtistsIcon, ExpandIcon, PlaylistIcon, SortingIcon, TrackIcon, TracksIcon } from './SvgIcons'
 
 export const Main = (props: Parameters<typeof MainContent>[0]) => {
     return (
@@ -24,7 +26,7 @@ export const MainContent = ({
     filterType,
 }: {
     content: () => JSX.Element
-    filterType?: 'mediaItems' | 'favorites' | 'kind'
+    filterType?: 'mediaItems' | 'favorites' | 'kind' | 'mediaItemsPlaylist'
 }) => {
     const playback = usePlaybackContext()
     const { pageTitle } = usePageTitle()
@@ -32,6 +34,7 @@ export const MainContent = ({
     const location = useLocation()
     const { toggleSidenav } = useSidenavContext()
     const { filter, setFilter } = useFilterContext()
+    const { currentTrack } = usePlaybackContext()
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'instant' })
@@ -78,7 +81,7 @@ export const MainContent = ({
                     </div>
                 </div>
                 <div className="secondary noSelect">
-                    {filterType === 'mediaItems' && (
+                    {(filterType === 'mediaItems' || filterType === 'mediaItemsPlaylist') && (
                         <div className="sorting">
                             <div className="filter">
                                 <select
@@ -90,25 +93,29 @@ export const MainContent = ({
                                     <option value="Runtime">Runtime</option>
                                     <option value="Random">Random</option>
                                     <option value="Name">Name</option>
+                                    {filterType === 'mediaItemsPlaylist' && <option value="Inherit">Inherit</option>}
                                 </select>
                                 <div className="icon">
                                     <ChevronDownIcon size={12} />
                                 </div>
                             </div>
-                            <div
-                                className="sort"
-                                onClick={() => {
-                                    setFilter(c => ({
-                                        ...c,
-                                        order: c.order === 'Ascending' ? 'Descending' : 'Ascending',
-                                    }))
-                                }}
-                                title={filter.order === 'Ascending' ? 'Ascending' : 'Descending'}
-                            >
-                                <div className={'icon' + (filter.order === 'Ascending' ? ' active' : '')}>
-                                    <SortingIcon width={12} height={12} />
+
+                            {filter.sort !== 'Inherit' && (
+                                <div
+                                    className="sort"
+                                    onClick={() => {
+                                        setFilter(c => ({
+                                            ...c,
+                                            order: c.order === 'Ascending' ? 'Descending' : 'Ascending',
+                                        }))
+                                    }}
+                                    title={filter.order === 'Ascending' ? 'Ascending' : 'Descending'}
+                                >
+                                    <div className={'icon' + (filter.order === 'Ascending' ? ' active' : '')}>
+                                        <SortingIcon width={12} height={12} />
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     )}
 
@@ -310,9 +317,20 @@ export const MainContent = ({
                             </div>
                             <Duration />
                         </div>
-                        <Link to="/nowplaying" className="expand" title="Now Playing">
-                            <ArrowUpIcon size={12} className="icon float" />
-                            <TracksIcon width={12} height={12} className="icon" />
+                        <Link to="/nowplaying" className="artwork" title="Now Playing">
+                            <Squircle width={46} height={46} cornerRadius={6} className="thumbnail">
+                                {currentTrack && (
+                                    <JellyImg item={currentTrack} type={'Primary'} width={46} height={46} />
+                                )}
+                                {!currentTrack && (
+                                    <div className="fallback-thumbnail">
+                                        <TracksIcon width="50%" height="50%" />
+                                    </div>
+                                )}
+                                <div className="overlay">
+                                    <ExpandIcon width={14} height={14} className="icon" />
+                                </div>
+                            </Squircle>
                         </Link>
                     </div>
                 </div>

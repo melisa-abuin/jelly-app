@@ -236,7 +236,10 @@ const MainLayout = ({ auth, handleLogout }: { auth: AuthData; handleLogout: () =
                                 element={<Main content={AlbumArtists} filterType={'mediaItems'} />}
                             />
                             <Route path="/genre/:genre" element={<Main content={Genre} filterType={'mediaItems'} />} />
-                            <Route path="/playlist/:playlistId" element={<Main content={Playlist} />} />
+                            <Route
+                                path="/playlist/:playlistId"
+                                element={<Main content={Playlist} filterType={'mediaItemsPlaylist'} />}
+                            />
                             <Route path="/queue" element={<Main content={Queue} />} />
                             <Route path="/favorites" element={<Main content={Favorites} filterType={'favorites'} />} />
                             <Route path="/recently" element={<Main content={RecentlyPlayed} />} />

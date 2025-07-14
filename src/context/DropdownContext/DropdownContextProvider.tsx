@@ -54,11 +54,36 @@ const useInitialState = () => {
     const { addToDownloads, removeFromDownloads } = useDownloadContext()
     const { addToPlaylist, addItemsToPlaylist, removeFromPlaylist, createPlaylist, deletePlaylist } = usePlaylists()
 
-    const subMenuRef = useRef<HTMLDivElement>(null)
-
     const menuRef = useRef<HTMLDivElement>(null)
-
+    const subMenuRef = useRef<HTMLDivElement>(null)
     const [playlistName, setPlaylistName] = useState<string>('')
+
+    // Resize handler to update isTouchDevice and reset dropdown on viewport changes
+    useEffect(() => {
+        const handleResize = () => {
+            const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 480
+            setIsTouchDevice(isTouch)
+            if (isOpen && document.activeElement?.tagName !== 'INPUT') {
+                setIsOpen(false)
+                setSubDropdown({
+                    isOpen: false,
+                    type: '',
+                    flipX: false,
+                    flipY: false,
+                    width: 0,
+                    height: 0,
+                    top: 0,
+                    measured: false,
+                    triggerRect: null,
+                })
+                setPosition({ x: 0, y: 0 })
+                setDisabled(false)
+            }
+        }
+
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [isOpen, setDisabled])
 
     const closeSubDropdown = useCallback(() => {
         setSubDropdown(prev => ({ ...prev, isOpen: false, type: '', measured: false, triggerRect: null }))

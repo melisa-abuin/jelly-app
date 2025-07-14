@@ -2,7 +2,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const version = (process.env.npm_package_version || 'unknown').split('.').slice(0, 2).join('.')
+const version = process.env.npm_package_version || 'unknown'
 
 export default defineConfig({
     base: process.env.URL_BASE_PATH || '/',
@@ -12,6 +12,9 @@ export default defineConfig({
             registerType: 'autoUpdate',
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,webp,svg}'],
+                cleanupOutdatedCaches: true,
+                skipWaiting: true,
+                clientsClaim: true,
             },
             manifest: {
                 name: 'Jelly Music App',

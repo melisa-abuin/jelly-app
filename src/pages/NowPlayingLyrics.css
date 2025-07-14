@@ -64,6 +64,9 @@
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .thumbnail > img {
+    width: 40px;
+    height: 40px;
+    border-radius: inherit;
     object-fit: cover;
 }
 
@@ -73,6 +76,7 @@
     justify-content: center;
     width: 40px;
     height: 40px;
+    border-radius: inherit;
     background-color: var(--bg-color-tertiary);
 }
 

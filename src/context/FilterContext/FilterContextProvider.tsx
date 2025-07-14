@@ -1,66 +1,26 @@
 import { BaseItemKind, ItemSortBy, SortOrder } from '@jellyfin/sdk/lib/generated-client'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
-import { FilterContext } from './FilterContext'
+import { usePlaybackContext } from '../PlaybackContext/PlaybackContext'
+import {
+    FilterContext,
+    FilterState,
+    getSavedFilterPath,
+    initialSortMap,
+    isValidKindValue,
+    isValidOrderValue,
+    isValidSortValue,
+    KindState,
+    OrderState,
+    SortState,
+} from './FilterContext'
 
 export type IFilterContext = ReturnType<typeof useInitialState>
-
-enum SortState {
-    Added = 'Added',
-    Released = 'Released',
-    Runtime = 'Runtime',
-    Random = 'Random',
-    Name = 'Name',
-    None = '',
-}
-
-enum OrderState {
-    Ascending = 'Ascending',
-    Descending = 'Descending',
-    None = '',
-}
-
-enum KindState {
-    Tracks = 'Tracks',
-    Albums = 'Albums',
-    Artists = 'Artists',
-    None = '',
-}
-
-const initialSortMap: Record<string, SortState> = {
-    '/tracks': SortState.Added,
-    '/albums': SortState.Added,
-    '/genre': SortState.Added,
-    '/favorites': SortState.Added,
-}
-
-const isValidSortValue = (val: string): val is SortState => {
-    return Object.values(SortState)
-        .map(v => v.toLowerCase())
-        .includes(val.toLowerCase())
-}
-
-const isValidOrderValue = (val: string): val is OrderState => {
-    return Object.values(OrderState)
-        .map(v => v.toLowerCase())
-        .includes(val.toLowerCase())
-}
-
-const isValidKindValue = (val: string): val is KindState => {
-    return Object.values(KindState)
-        .map(v => v.toLowerCase())
-        .includes(val.toLowerCase())
-}
-
-type FilterState = {
-    sort: string
-    order: string
-    kind: string
-}
 
 const useInitialState = () => {
     const location = useLocation()
     const [searchParams, setSearchParams] = useSearchParams()
+    const playback = usePlaybackContext()
     const querySort = searchParams.get('sort')
     const queryOrder = searchParams.get('order')
     const queryKind = searchParams.get('kind')
@@ -99,6 +59,13 @@ const useInitialState = () => {
         (updater: (prev: FilterState) => FilterState) => {
             const newState = updater(filter)
 
+            if (playback.rememberFilters) {
+                localStorage.setItem(
+                    `rememberFilters_${getSavedFilterPath(location.pathname)}`,
+                    JSON.stringify(newState)
+                )
+            }
+
             const params = new URLSearchParams()
 
             if (initialSortMap[location.pathname] !== newState.sort && newState.sort) {
@@ -116,7 +83,7 @@ const useInitialState = () => {
             setSearchParams(params)
             _setFilter(newState)
         },
-        [filter, location.pathname, orderFallback, setSearchParams, kindFallback]
+        [filter, playback.rememberFilters, location.pathname, orderFallback, kindFallback, setSearchParams]
     )
 
     useEffect(() => {
@@ -149,6 +116,9 @@ const useInitialState = () => {
                 break
             case SortState.Name:
                 newSortBy = [ItemSortBy.Name]
+                break
+            case SortState.Inherit:
+                newSortBy = 'Inherit' as unknown as ItemSortBy[] // This is a special case to use a different endpoint for the playlist tracks
                 break
             default:
                 newSortBy = [ItemSortBy.DateCreated]
