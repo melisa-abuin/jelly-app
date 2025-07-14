@@ -182,8 +182,30 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     visibility: visible;
 }
 
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_header
+    > .input_container
+    > input.focused
+    ~ .search-clear {
+    box-shadow: -12px 0 12px var(--bg-color), -12px 0 12px var(--bg-color);
+}
+
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_header > .input_container > .search-loading {
     padding: 8px;
+}
+
+.sidenav
+    > .sidenav_wrapper
+    > .sidenav_content
+    > .search
+    > .search_header
+    > .input_container
+    > input.focused
+    ~ .search-loading {
+    box-shadow: -12px 0 12px var(--bg-color), -12px 0 12px var(--bg-color);
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results {
