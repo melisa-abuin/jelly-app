@@ -317,7 +317,7 @@ export const MainContent = ({
                             </div>
                             <Duration />
                         </div>
-                        <Link to="/nowplaying" className="artwork" title="Now Playing">
+                        <Link to="/nowplaying" className="artwork noSelect" title="Now Playing">
                             <Squircle width={48} height={48} cornerRadius={6} className="thumbnail">
                                 {currentTrack && (
                                     <JellyImg item={currentTrack} type={'Primary'} width={48} height={48} />
