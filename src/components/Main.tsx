@@ -318,9 +318,9 @@ export const MainContent = ({
                             <Duration />
                         </div>
                         <Link to="/nowplaying" className="artwork" title="Now Playing">
-                            <Squircle width={46} height={46} cornerRadius={6} className="thumbnail">
+                            <Squircle width={48} height={48} cornerRadius={6} className="thumbnail">
                                 {currentTrack && (
-                                    <JellyImg item={currentTrack} type={'Primary'} width={46} height={46} />
+                                    <JellyImg item={currentTrack} type={'Primary'} width={48} height={48} />
                                 )}
                                 {!currentTrack && (
                                     <div className="fallback-thumbnail">

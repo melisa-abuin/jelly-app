@@ -760,8 +760,9 @@ body.lockscroll {
     align-items: center;
     position: relative;
     padding: 14px 20px;
+    padding-top: 12px;
     /* Help with CJK letter spacing */
-    max-height: 76px;
+    max-height: 78px;
 }
 
 /* Track details */
@@ -1034,8 +1035,8 @@ body.lockscroll {
 .main > .main_footer > .playback > .container > .artwork {
     position: relative;
     flex-shrink: 0;
-    width: 46px;
-    height: 46px;
+    width: 48px;
+    height: 48px;
     border-radius: 6px;
     margin-left: 8px;
 }
@@ -1224,12 +1225,14 @@ body.lockscroll {
     }
 
     .main > .main_footer > .playback > .container {
-        max-height: 86px;
+        max-height: 90px;
+        padding-top: 14px;
         padding-bottom: min(28px, env(safe-area-inset-bottom, 20px));
     }
 
     html.safeAreaFallback .main > .main_footer > .playback > .container {
-        max-height: 76px;
+        max-height: 80px;
+        padding-top: 14px;
         padding-bottom: 14px;
     }
 
@@ -1268,11 +1271,11 @@ body.lockscroll {
     }
 
     .dimmer.active ~ .sidenav {
-        filter: blur(12px);
+        filter: blur(16px);
     }
 
     .dimmer.active ~ .main {
-        filter: blur(12px);
+        filter: blur(16px);
     }
 }
 

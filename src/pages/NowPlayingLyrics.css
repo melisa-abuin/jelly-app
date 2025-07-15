@@ -730,15 +730,15 @@
     }
 
     .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .now-playing-lyrics > .ui > .playing-content {
-        filter: blur(12px);
+        filter: blur(16px);
     }
 
     .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .now-playing-lyrics > .ui > .playing-header > .wrapper {
-        filter: blur(12px);
+        filter: blur(16px);
     }
 
     .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .now-playing-lyrics > .ui > .playing-footer > .wrapper {
-        filter: blur(12px);
+        filter: blur(16px);
     }
 }
 

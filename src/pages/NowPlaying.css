@@ -656,7 +656,7 @@
     }
 
     .music-app:has(.now-playing):has(.dropdown.active) > .now-playing > .ui {
-        filter: blur(12px);
+        filter: blur(16px);
     }
 }
 
