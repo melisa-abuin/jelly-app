@@ -1313,7 +1313,7 @@ body.lockscroll {
     }
 }
 
-@media (pointer: coarse) {
+@media only screen and (max-width: 480px), (pointer: coarse) {
     .music-app:has(.dropdown.active) .dimmer {
         z-index: 5;
     }
