@@ -179,8 +179,6 @@ export const Sidenav = (props: { username: string }) => {
                                     value={searchQuery}
                                     onChange={handleSearchChange}
                                     ref={searchInputRef}
-                                    onFocus={e => e.target.classList.add('focused')}
-                                    onBlur={e => e.target.classList.remove('focused')}
                                 />
                                 {!searchLoading && (
                                     <div className="search-clear" onClick={handleClearSearch}>
