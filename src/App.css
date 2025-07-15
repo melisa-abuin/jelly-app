@@ -1246,10 +1246,6 @@ body.lockscroll {
 }
 
 @media only screen and (max-width: 700px), (pointer: coarse) {
-    .music-app:has(.dropdown.active) .dimmer {
-        z-index: 5;
-    }
-
     .dimmer {
         display: block;
         position: fixed;
@@ -1270,20 +1266,12 @@ body.lockscroll {
         visibility: visible;
     }
 
-    .dimmer.active ~ .sidenav {
-        filter: blur(16px);
-    }
-
     .dimmer.active ~ .main {
         filter: blur(16px);
     }
 }
 
 @media only screen and (max-width: 700px) {
-    .dimmer.active ~ .sidenav {
-        filter: none;
-    }
-
     body.lockscroll,
     body:has(.sidenav_wrapper.active) {
         overflow: hidden !important;
@@ -1322,6 +1310,16 @@ body.lockscroll {
         transform: translateZ(0);
         border-radius: 2px;
         background-color: var(--font-color);
+    }
+}
+
+@media (pointer: coarse) {
+    .music-app:has(.dropdown.active) .dimmer {
+        z-index: 5;
+    }
+
+    .music-app:has(.dropdown.active) .dimmer.active ~ .sidenav > .sidenav_wrapper {
+        filter: blur(16px);
     }
 }
 
