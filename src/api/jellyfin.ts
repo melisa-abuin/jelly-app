@@ -1024,6 +1024,19 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return response.data
     }
 
+    const getMediaItem = async (itemId: string) => {
+        const userLibraryApi = new UserLibraryApi(api.configuration)
+        const response = await userLibraryApi.getItem(
+            {
+                userId,
+                itemId,
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+
+        return parseItemDto(response.data)
+    }
+
     return {
         loginToJellyfin,
         searchItems,
@@ -1072,5 +1085,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         createPlaylist,
         deletePlaylist,
         getTrackInfo,
+        getMediaItem,
     }
 }
