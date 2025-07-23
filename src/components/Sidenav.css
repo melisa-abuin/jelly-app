@@ -93,6 +93,8 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > ul {
+    position: relative;
+    z-index: 2;
     list-style: none;
 }
 

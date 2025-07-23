@@ -24,7 +24,7 @@
     padding-top: 40px;
     padding-bottom: 28px;
     backdrop-filter: blur(20px);
-    mask-image: linear-gradient(to bottom, black 78%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 76%, transparent 100%);
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper {
@@ -745,7 +745,7 @@
 @media only screen and (max-width: 500px) {
     .now-playing-lyrics > .ui > .playing-header {
         padding-top: 17px;
-        mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+        mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
     }
 
     .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .return_icon {
