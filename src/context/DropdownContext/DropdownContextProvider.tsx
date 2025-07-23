@@ -1,8 +1,11 @@
 import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models'
-import { ArrowLeftIcon, ChevronRightIcon } from '@primer/octicons-react'
+import { ArrowLeftIcon, ChevronRightIcon, HeartFillIcon, XIcon } from '@primer/octicons-react'
 import { Fragment, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MediaItem } from '../../api/jellyfin'
+import { JellyImg } from '../../components/JellyImg'
+import { Squircle } from '../../components/Squircle'
+import { TracksIcon } from '../../components/SvgIcons'
 import { useJellyfinPlaylistsList } from '../../hooks/Jellyfin/useJellyfinPlaylistsList'
 import { useFavorites } from '../../hooks/useFavorites'
 import { usePlaylists } from '../../hooks/usePlaylists'
@@ -729,13 +732,6 @@ const useInitialState = () => {
 
     const dropdownNode = useMemo(() => {
         const renderMobileSubMenuItems = () => {
-            const backButton = (
-                <div key="back-button" className="dropdown-item return-item" onClick={closeSubDropdown}>
-                    <ArrowLeftIcon size={16} className="return-icon" />
-                    <span>Back</span>
-                </div>
-            )
-
             let items: ReactNode[] = []
 
             if (subDropdown.type === 'view-artists') {
@@ -771,7 +767,7 @@ const useInitialState = () => {
                             </button>
                         </div>
                     </div>,
-                    <div key="playlist-separator" className="dropdown-separator" />,
+                    ...(playlists.length > 0 ? [<div key="playlist-separator" className="dropdown-separator" />] : []),
                     ...playlists.map(playlist => (
                         <div
                             key={playlist.Id}
@@ -789,7 +785,7 @@ const useInitialState = () => {
                     )),
                 ]
             }
-            return [backButton, <div key="back-separator" className="dropdown-separator" />, ...items]
+            return items
         }
 
         const renderDropdownItems = () => {
@@ -905,7 +901,83 @@ const useInitialState = () => {
                 ref={menuRef}
             >
                 <div className="dropdown-menu">
-                    {isTouchDevice && subDropdown.isOpen ? renderMobileSubMenuItems() : renderDropdownItems()}
+                    {isTouchDevice && context?.item && (
+                        <div className="dropdown-header">
+                            <div
+                                className={`container ${
+                                    context.item.Type === BaseItemKind.Audio
+                                        ? 'track'
+                                        : context.item.Type === BaseItemKind.MusicAlbum
+                                        ? 'album'
+                                        : context.item.Type === BaseItemKind.MusicArtist
+                                        ? 'artist'
+                                        : context.item.Type === BaseItemKind.Playlist
+                                        ? 'playlist'
+                                        : 'unknown'
+                                }`}
+                            >
+                                <Squircle
+                                    width={36}
+                                    height={36}
+                                    cornerRadius={6}
+                                    className="thumbnail"
+                                    useSquircle={context.item.Type !== BaseItemKind.MusicArtist}
+                                >
+                                    {context.item && (
+                                        <JellyImg item={context.item} type={'Primary'} width={36} height={36} />
+                                    )}
+                                    {!context.item && (
+                                        <div className="fallback-thumbnail">
+                                            <TracksIcon width="50%" height="50%" />
+                                        </div>
+                                    )}
+                                </Squircle>
+                                <div className="info">
+                                    <div className="title">
+                                        <div className="text" title={context.item.Name || 'Unknown'}>
+                                            {context.item.Name || 'Unknown'}
+                                        </div>
+                                        {context.item.UserData?.IsFavorite && (
+                                            <span className="favorited" title="Favorited">
+                                                <HeartFillIcon size={12} />
+                                            </span>
+                                        )}
+                                    </div>
+                                    {context.item.Type !== BaseItemKind.MusicArtist && (
+                                        <div className="desc">
+                                            {context.item.Type === BaseItemKind.Audio
+                                                ? context.item.Artists?.join(', ') || 'Unknown Artist'
+                                                : context.item.Type === BaseItemKind.MusicAlbum
+                                                ? context.item.AlbumArtist || 'Unknown Artist'
+                                                : context.item.Type === BaseItemKind.Playlist
+                                                ? `${context.item.ChildCount || 0} Track${
+                                                      context.item.ChildCount === 1 ? '' : 's'
+                                                  }`
+                                                : 'Unknown'}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="actions">
+                                {subDropdown.isOpen && (
+                                    <div className="back icon" onClick={closeSubDropdown}>
+                                        <ArrowLeftIcon size={16} />
+                                    </div>
+                                )}
+                                <div className="close icon" onClick={closeDropdown}>
+                                    <XIcon size={16} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {isTouchDevice && subDropdown.isOpen ? (
+                        <>
+                            <div className="dropdown-separator" />
+                            {renderMobileSubMenuItems()}
+                        </>
+                    ) : (
+                        renderDropdownItems()
+                    )}
                 </div>
             </div>
         )
