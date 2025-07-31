@@ -109,17 +109,6 @@ const useInitialState = () => {
     const closeDropdown = useCallback(() => {
         setIsOpen(false)
         setDisabled(false)
-        setSubDropdown({
-            isOpen: false,
-            type: '',
-            flipX: false,
-            flipY: false,
-            width: 0,
-            height: 0,
-            top: 0,
-            measured: false,
-            triggerRect: null,
-        })
     }, [setDisabled])
 
     const handleInputChange = useCallback(
