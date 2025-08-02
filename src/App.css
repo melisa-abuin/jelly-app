@@ -759,10 +759,10 @@ body.lockscroll {
     display: flex;
     align-items: center;
     position: relative;
-    padding: 16px 20px;
-    padding-top: 14px;
+    padding: 14px 20px;
+    padding-bottom: 18px;
     /* Help with CJK letter spacing */
-    max-height: 80px;
+    max-height: 82px;
 }
 
 /* Track details */
@@ -1227,13 +1227,11 @@ body.lockscroll {
 
     .main > .main_footer > .playback > .container {
         max-height: 90px;
-        padding-bottom: min(28px, env(safe-area-inset-bottom, 20px));
+        padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
     }
 
     html.safeAreaFallback .main > .main_footer > .playback > .container {
-        max-height: 90px;
-        padding-top: 14px;
-        padding-bottom: 16px;
+        padding-bottom: 20px;
     }
 
     .main > .main_footer > .playback > .container > .track-info > .track-name {
