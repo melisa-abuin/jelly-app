@@ -339,7 +339,9 @@ export const Sidenav = (props: { username: string }) => {
 
                     {!searchQuery && (
                         <div className="playlists">
-                            {loading && <div className="indicator loading">Loading playlists...</div>}
+                            {loading && playlists.length === 0 && (
+                                <div className="indicator loading">Loading playlists...</div>
+                            )}
                             {error && <div className="indicator error">{error}</div>}
                             {!loading && !error && playlists.length === 0 && (
                                 <div className="indicator info">No playlists found</div>
