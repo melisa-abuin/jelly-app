@@ -15,7 +15,7 @@ export const Downloads = () => {
                 isLoading={isLoading}
                 type={jellyItemKind === 'Audio' ? 'song' : jellyItemKind === 'MusicAlbum' ? 'album' : 'artist'}
                 loadMore={loadMore}
-                title={'Favorites'}
+                title={'Synced'}
                 disableActions={true}
             />
         </div>

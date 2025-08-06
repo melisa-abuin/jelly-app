@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { MediaList } from '../components/MediaList'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
@@ -6,7 +7,7 @@ import './Queue.css'
 
 export const Queue = () => {
     const { setPageTitle } = usePageTitle()
-    const { currentTrack, currentPlaylist, currentTrackIndex, playlistTitle, isLoading, loadMore } =
+    const { currentTrack, currentPlaylist, currentTrackIndex, playlistTitle, playlistUrl, isLoading, loadMore } =
         usePlaybackContext()
 
     useEffect(() => {
@@ -38,7 +39,14 @@ export const Queue = () => {
                     <div className="queue-title">Playing Next</div>
                     <div className="queue-desc">
                         <span className="text">
-                            From <span className="highlight">{playlistTitle}</span>
+                            From{' '}
+                            {playlistUrl ? (
+                                <Link to={playlistUrl} className="highlight">
+                                    {playlistTitle}
+                                </Link>
+                            ) : (
+                                <span className="highlight">{playlistTitle}</span>
+                            )}
                         </span>
                     </div>
                     <MediaList
