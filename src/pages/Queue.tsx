@@ -41,7 +41,7 @@ export const Queue = () => {
                         <span className="text">
                             From{' '}
                             {playlistUrl ? (
-                                <Link to={playlistUrl} className="highlight">
+                                <Link to={playlistUrl} className="textlink">
                                     {playlistTitle}
                                 </Link>
                             ) : (

@@ -81,7 +81,7 @@ export const NowPlaying = () => {
                             <div className="title">Playing From</div>
                             <div className="desc" title={playlistTitle || 'No Playlist'}>
                                 {playlistUrl ? (
-                                    <Link to={playlistUrl} className="highlight">
+                                    <Link to={playlistUrl} className="textlink">
                                         {playlistTitle}
                                     </Link>
                                 ) : (
