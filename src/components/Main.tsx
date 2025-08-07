@@ -337,6 +337,7 @@ export const MainContent = ({
             </div>
         )
     }, [
+        currentTrack,
         playback.currentTrack,
         playback.isPlaying,
         playback.nextTrack,

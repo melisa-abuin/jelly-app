@@ -83,6 +83,7 @@ export const InstantMix = () => {
                 infiniteData={{ pageParams: [1], pages: [items] }}
                 isLoading={loading}
                 title={sourceSong ? `Instant Mix - ${sourceSong.Name}` : 'Instant Mix'}
+                disableUrl={true}
             />
         </div>
     )

@@ -228,7 +228,12 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     )
 
     const setCurrentPlaylist = useCallback(
-        (props: { pages: InfiniteData<MediaItem[], unknown>; title: string; reviver?: IReviver | 'persistAll' }) => {
+        (props: {
+            pages: InfiniteData<MediaItem[], unknown>
+            title: string
+            disableUrl?: boolean
+            reviver?: IReviver | 'persistAll'
+        }) => {
             if (props.reviver !== 'persistAll') {
                 const queryKey = ['reviver', ...(props.reviver?.queryKey || [])]
 
@@ -244,9 +249,12 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
 
                 const url = location.href
 
-                if (url !== '/') {
+                if (url !== '/' && !props.disableUrl) {
                     localStorage.setItem('playlistUrl', url)
                     setPlaylistUrl(url)
+                } else {
+                    localStorage.removeItem('playlistUrl')
+                    setPlaylistUrl('')
                 }
             }
 
@@ -256,10 +264,11 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     )
 
     const setCurrentPlaylistSimple = useCallback(
-        (props: { playlist: MediaItem[]; title: string }) => {
+        (props: { playlist: MediaItem[]; title: string; disableUrl?: boolean }) => {
             setCurrentPlaylist({
                 pages: { pageParams: [1], pages: [props.playlist] },
                 title: props.title,
+                disableUrl: props.disableUrl,
             })
         },
         [setCurrentPlaylist]
