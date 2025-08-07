@@ -356,6 +356,15 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         [api]
     )
 
+    const handleSeekTo = useCallback(
+        (details: MediaSessionActionDetails) => {
+            if (audioRef.current && details.seekTime !== undefined) {
+                audioRef.current.currentTime = details.seekTime
+            }
+        },
+        [audioRef]
+    )
+
     useEffect(() => {
         if (!isPlaying || !currentTrack) return
 
@@ -829,15 +838,17 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             navigator.mediaSession.setActionHandler('previoustrack', previousTrack)
             navigator.mediaSession.setActionHandler('play', protectedPlay)
             navigator.mediaSession.setActionHandler('pause', togglePlayPause)
+            navigator.mediaSession.setActionHandler('seekto', handleSeekTo)
 
             return () => {
                 navigator.mediaSession.setActionHandler('nexttrack', null)
                 navigator.mediaSession.setActionHandler('previoustrack', null)
                 navigator.mediaSession.setActionHandler('play', null)
                 navigator.mediaSession.setActionHandler('pause', null)
+                navigator.mediaSession.setActionHandler('seekto', null)
             }
         }
-    }, [nextTrack, previousTrack, protectedPlay, togglePlayPause])
+    }, [nextTrack, previousTrack, protectedPlay, togglePlayPause, handleSeekTo])
 
     useEffect(() => {
         localStorage.setItem('volume', volume.toString())
