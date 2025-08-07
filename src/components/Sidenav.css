@@ -18,7 +18,7 @@
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     transform: translate(0);
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease;
 }
 
 /* Isolate volume scroll */
@@ -93,6 +93,8 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > ul {
+    position: relative;
+    z-index: 2;
     list-style: none;
 }
 
@@ -182,30 +184,8 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     visibility: visible;
 }
 
-.sidenav
-    > .sidenav_wrapper
-    > .sidenav_content
-    > .search
-    > .search_header
-    > .input_container
-    > input.focused
-    ~ .search-clear {
-    box-shadow: -8px 0 12px 6px var(--bg-color);
-}
-
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_header > .input_container > .search-loading {
     padding: 8px;
-}
-
-.sidenav
-    > .sidenav_wrapper
-    > .sidenav_content
-    > .search
-    > .search_header
-    > .input_container
-    > input.focused
-    ~ .search-loading {
-    box-shadow: -8px 0 12px 6px var(--bg-color);
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > .search > .search_results {

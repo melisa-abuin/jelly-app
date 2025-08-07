@@ -24,7 +24,7 @@ import './NowPlayingLyrics.css'
 
 export const NowPlaying = () => {
     const { goBack: previousPage } = useHistoryContext()
-    const { playlistTitle, currentTrack, bitrate } = usePlaybackContext()
+    const { playlistTitle, playlistUrl, currentTrack, bitrate } = usePlaybackContext()
     const location = useLocation()
 
     const playback = usePlaybackContext()
@@ -80,7 +80,13 @@ export const NowPlaying = () => {
                         <div className="secondary">
                             <div className="title">Playing From</div>
                             <div className="desc" title={playlistTitle || 'No Playlist'}>
-                                {playlistTitle || 'No Playlist'}
+                                {playlistUrl ? (
+                                    <Link to={playlistUrl} className="textlink">
+                                        {playlistTitle}
+                                    </Link>
+                                ) : (
+                                    <>{playlistTitle || 'No Playlist'}</>
+                                )}
                             </div>
                         </div>
                         <div className="tertiary">

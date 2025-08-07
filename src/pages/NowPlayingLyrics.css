@@ -24,7 +24,7 @@
     padding-top: 40px;
     padding-bottom: 28px;
     backdrop-filter: blur(20px);
-    mask-image: linear-gradient(to bottom, black 78%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 76%, transparent 100%);
 }
 
 .now-playing-lyrics > .ui > .playing-header > .wrapper {
@@ -694,6 +694,8 @@
     left: 0;
     width: 100%;
     height: 100%;
+    /* Fallback for systems with WebKit DMA-BUF renderer issues (https://github.com/Stannnnn/jelly-app/issues/33) */
+    filter: blur(60px) saturate(2.2);
     filter: blur(60px) saturate(1.6) contrast(200%);
     opacity: var(--playing-artwork-opacity);
     pointer-events: none;
@@ -730,22 +732,22 @@
     }
 
     .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .now-playing-lyrics > .ui > .playing-content {
-        filter: blur(12px);
+        filter: blur(16px);
     }
 
     .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .now-playing-lyrics > .ui > .playing-header > .wrapper {
-        filter: blur(12px);
+        filter: blur(16px);
     }
 
     .music-app:has(.now-playing-lyrics):has(.dropdown.active) > .now-playing-lyrics > .ui > .playing-footer > .wrapper {
-        filter: blur(12px);
+        filter: blur(16px);
     }
 }
 
 @media only screen and (max-width: 500px) {
     .now-playing-lyrics > .ui > .playing-header {
         padding-top: 17px;
-        mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+        mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
     }
 
     .now-playing-lyrics > .ui > .playing-header > .wrapper > .inner > .primary > .return_icon {

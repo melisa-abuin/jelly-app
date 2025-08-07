@@ -23,6 +23,7 @@ export const PlaylistTrackList = ({
     playlistId,
     showType,
     title,
+    disableUrl,
     reviver,
     loadMore,
 }: {
@@ -32,6 +33,7 @@ export const PlaylistTrackList = ({
     playlistId?: string
     showType?: 'artist' | 'album'
     title: string
+    disableUrl?: boolean
     reviver?: IReviver
     loadMore?: () => void
 }) => {
@@ -46,11 +48,11 @@ export const PlaylistTrackList = ({
             if (playback.currentTrack?.Id === track.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ pages: infiniteData, title, reviver })
+                playback.setCurrentPlaylist({ pages: infiniteData, title, disableUrl, reviver })
                 playback.playTrack(index)
             }
         },
-        [playback, infiniteData, reviver, title]
+        [playback, infiniteData, title, disableUrl, reviver]
     )
 
     const renderTrack = (index: number, item: MediaItem | { isPlaceholder: true }) => {

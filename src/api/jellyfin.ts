@@ -778,10 +778,8 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         const itemsApi = new ItemsApi(api.configuration)
         const response = await itemsApi.getItems(
             {
-                sortBy: ['PlayCount', 'DatePlayed'],
+                sortBy: [ItemSortBy.SortName, ItemSortBy.PlayCount, ItemSortBy.DatePlayed],
                 sortOrder: [SortOrder.Descending],
-                //sortBy: ['SortName', 'PlayCount', 'DatePlayed'],
-                //sortOrder: ['Ascending', 'Descending', 'Descending'],
                 userId,
                 includeItemTypes: [BaseItemKind.Playlist],
                 recursive: true,
@@ -1024,6 +1022,19 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         return response.data
     }
 
+    const getMediaItem = async (itemId: string) => {
+        const userLibraryApi = new UserLibraryApi(api.configuration)
+        const response = await userLibraryApi.getItem(
+            {
+                userId,
+                itemId,
+            },
+            { signal: AbortSignal.timeout(20000) }
+        )
+
+        return parseItemDto(response.data)
+    }
+
     return {
         loginToJellyfin,
         searchItems,
@@ -1072,5 +1083,6 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         createPlaylist,
         deletePlaylist,
         getTrackInfo,
+        getMediaItem,
     }
 }

@@ -760,14 +760,15 @@ body.lockscroll {
     align-items: center;
     position: relative;
     padding: 14px 20px;
+    padding-bottom: 18px;
     /* Help with CJK letter spacing */
-    max-height: 76px;
+    max-height: 82px;
 }
 
 /* Track details */
 .main > .main_footer > .playback > .container > .track-info {
     position: relative;
-    max-width: calc(100% - 242px);
+    max-width: calc(100% - 244px);
     flex-grow: 1;
 }
 
@@ -778,7 +779,7 @@ body.lockscroll {
     line-height: 1rem;
     display: flex;
     align-items: center;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
 }
 
 .main > .main_footer > .playback > .container > .track-info > .track-name > .text {
@@ -797,7 +798,7 @@ body.lockscroll {
     /* Help with CJK letter spacing */
     line-height: 0.875rem;
     color: var(--font-color-tertiary);
-    margin-bottom: 1px;
+    margin-bottom: 2px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -840,6 +841,7 @@ body.lockscroll {
     align-items: center;
     gap: 10px;
     margin-top: 6px;
+    margin-bottom: -2px;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle {
@@ -1034,10 +1036,10 @@ body.lockscroll {
 .main > .main_footer > .playback > .container > .artwork {
     position: relative;
     flex-shrink: 0;
-    width: 46px;
-    height: 46px;
-    border-radius: 6px;
-    margin-left: 8px;
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    margin-left: 6px;
 }
 
 .main > .main_footer > .playback > .container > .artwork > .thumbnail {
@@ -1224,13 +1226,12 @@ body.lockscroll {
     }
 
     .main > .main_footer > .playback > .container {
-        max-height: 86px;
-        padding-bottom: min(28px, env(safe-area-inset-bottom, 20px));
+        max-height: 90px;
+        padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
     }
 
     html.safeAreaFallback .main > .main_footer > .playback > .container {
-        max-height: 76px;
-        padding-bottom: 14px;
+        padding-bottom: 20px;
     }
 
     .main > .main_footer > .playback > .container > .track-info > .track-name {
@@ -1243,10 +1244,6 @@ body.lockscroll {
 }
 
 @media only screen and (max-width: 700px), (pointer: coarse) {
-    .music-app:has(.dropdown.active) .dimmer {
-        z-index: 5;
-    }
-
     .dimmer {
         display: block;
         position: fixed;
@@ -1267,20 +1264,12 @@ body.lockscroll {
         visibility: visible;
     }
 
-    .dimmer.active ~ .sidenav {
-        filter: blur(12px);
-    }
-
     .dimmer.active ~ .main {
-        filter: blur(12px);
+        filter: blur(16px);
     }
 }
 
 @media only screen and (max-width: 700px) {
-    .dimmer.active ~ .sidenav {
-        filter: none;
-    }
-
     body.lockscroll,
     body:has(.sidenav_wrapper.active) {
         overflow: hidden !important;
@@ -1322,9 +1311,19 @@ body.lockscroll {
     }
 }
 
+@media only screen and (max-width: 480px), (pointer: coarse) {
+    .music-app:has(.dropdown.active) .dimmer {
+        z-index: 5;
+    }
+
+    .music-app:has(.dropdown.active) .dimmer.active ~ .sidenav > .sidenav_wrapper {
+        filter: blur(16px);
+    }
+}
+
 @media only screen and (max-width: 500px) {
     .main > .main_footer > .playback > .container > .track-info {
-        max-width: calc(100% - 246px);
+        max-width: calc(100% - 248px);
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs > .primary {
@@ -1334,7 +1333,7 @@ body.lockscroll {
 
 @media only screen and (max-width: 420px) {
     .main > .main_footer > .playback > .container > .track-info {
-        max-width: calc(100% - 168px);
+        max-width: calc(100% - 170px);
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs {
@@ -1377,7 +1376,7 @@ body.lockscroll {
 
 @media only screen and (max-width: 320px) {
     .main > .main_footer > .playback > .container > .track-info {
-        max-width: calc(100% - 136px);
+        max-width: calc(100% - 138px);
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous {

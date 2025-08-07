@@ -113,7 +113,7 @@ export const Sidenav = (props: { username: string }) => {
             if (song.Id === playback.currentTrack?.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylistSimple({ playlist: [song], title: 'Sidenav Track' })
+                playback.setCurrentPlaylistSimple({ playlist: [song], title: 'Sidenav Track', disableUrl: true })
                 playback.playTrack(0)
             }
 
@@ -179,8 +179,6 @@ export const Sidenav = (props: { username: string }) => {
                                     value={searchQuery}
                                     onChange={handleSearchChange}
                                     ref={searchInputRef}
-                                    onFocus={e => e.target.classList.add('focused')}
-                                    onBlur={e => e.target.classList.remove('focused')}
                                 />
                                 {!searchLoading && (
                                     <div className="search-clear" onClick={handleClearSearch}>
@@ -341,7 +339,9 @@ export const Sidenav = (props: { username: string }) => {
 
                     {!searchQuery && (
                         <div className="playlists">
-                            {loading && <div className="indicator loading">Loading playlists...</div>}
+                            {loading && playlists.length === 0 && (
+                                <div className="indicator loading">Loading playlists...</div>
+                            )}
                             {error && <div className="indicator error">{error}</div>}
                             {!loading && !error && playlists.length === 0 && (
                                 <div className="indicator info">No playlists found</div>

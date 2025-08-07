@@ -317,10 +317,10 @@ export const MainContent = ({
                             </div>
                             <Duration />
                         </div>
-                        <Link to="/nowplaying" className="artwork" title="Now Playing">
-                            <Squircle width={46} height={46} cornerRadius={6} className="thumbnail">
+                        <Link to="/nowplaying" className="artwork noSelect" title="Now Playing">
+                            <Squircle width={50} height={50} cornerRadius={8} className="thumbnail">
                                 {currentTrack && (
-                                    <JellyImg item={currentTrack} type={'Primary'} width={46} height={46} />
+                                    <JellyImg item={currentTrack} type={'Primary'} width={50} height={50} />
                                 )}
                                 {!currentTrack && (
                                     <div className="fallback-thumbnail">
@@ -337,6 +337,7 @@ export const MainContent = ({
             </div>
         )
     }, [
+        currentTrack,
         playback.currentTrack,
         playback.isPlaying,
         playback.nextTrack,

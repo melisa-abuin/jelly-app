@@ -38,6 +38,7 @@ export const MediaList = ({
     isLoading,
     type,
     title,
+    disableUrl,
     reviver,
     loadMore,
     hidden: _hidden = {},
@@ -51,6 +52,7 @@ export const MediaList = ({
     isLoading: boolean
     type: 'song' | 'album' | 'artist' | 'playlist'
     title: string
+    disableUrl?: boolean
     reviver?: IReviver | 'persistAll'
     loadMore?: () => void
     hidden?: IMenuItems
@@ -115,7 +117,7 @@ export const MediaList = ({
             if (isEqual(playback.currentTrack, item)) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ pages: infiniteData, title, reviver })
+                playback.setCurrentPlaylist({ pages: infiniteData, title, disableUrl, reviver })
                 playback.playTrack(indexOffset + index)
             }
         }

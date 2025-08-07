@@ -7,16 +7,16 @@ import { Squircle } from '../components/Squircle'
 import { usePageTitle } from '../context/PageTitleContext/PageTitleContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useJellyfinInstantMixData } from '../hooks/Jellyfin/useJellyfinInstantMixData'
+import { useJellyfinMediaItem } from '../hooks/Jellyfin/useJellyfinMediaItem'
 import { formatDurationReadable } from '../utils/formatDurationReadable'
 import './InstantMix.css'
 
 export const InstantMix = () => {
     const { songId } = useParams<{ songId: string }>()
     const { items, loading, error } = useJellyfinInstantMixData({ songId })
+    const { mediaItem: sourceSong } = useJellyfinMediaItem(songId)
     const playback = usePlaybackContext()
     const { setPageTitle } = usePageTitle()
-
-    const sourceSong = items.find(item => item.Id === songId)
 
     useEffect(() => {
         if (sourceSong) {
@@ -40,9 +40,12 @@ export const InstantMix = () => {
     return (
         <div className="instant-mix-page">
             <div className="instant-mix-header">
-                <Squircle width={100} height={100} cornerRadius={8} className="thumbnail">
-                    <JellyImg item={sourceSong || items[0]} type={'Primary'} width={100} height={100} />
-                </Squircle>
+                {sourceSong && (
+                    <Squircle width={100} height={100} cornerRadius={8} className="thumbnail">
+                        <JellyImg item={sourceSong} type={'Primary'} width={100} height={100} />
+                    </Squircle>
+                )}
+
                 <div className="instant-mix-details">
                     <div className="title">Instant Mix</div>
                     <div className="subtitle">
@@ -80,6 +83,7 @@ export const InstantMix = () => {
                 infiniteData={{ pageParams: [1], pages: [items] }}
                 isLoading={loading}
                 title={sourceSong ? `Instant Mix - ${sourceSong.Name}` : 'Instant Mix'}
+                disableUrl={true}
             />
         </div>
     )

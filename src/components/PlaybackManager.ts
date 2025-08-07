@@ -89,6 +89,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const queryClient = useQueryClient()
 
     const [playlistTitle, setPlaylistTitle] = useState(localStorage.getItem('playlistTitle') || '')
+    const [playlistUrl, setPlaylistUrl] = useState(localStorage.getItem('playlistUrl') || '')
     const [reviver, setReviver] = useState<IReviver>(JSON.parse(localStorage.getItem('reviver') || '{}') || {})
 
     const [bitrate, setBitrate] = useState(Number(localStorage.getItem('bitrate')))
@@ -227,7 +228,12 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     )
 
     const setCurrentPlaylist = useCallback(
-        (props: { pages: InfiniteData<MediaItem[], unknown>; title: string; reviver?: IReviver | 'persistAll' }) => {
+        (props: {
+            pages: InfiniteData<MediaItem[], unknown>
+            title: string
+            disableUrl?: boolean
+            reviver?: IReviver | 'persistAll'
+        }) => {
             if (props.reviver !== 'persistAll') {
                 const queryKey = ['reviver', ...(props.reviver?.queryKey || [])]
 
@@ -237,10 +243,20 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                 setReviver(props.reviver || ({} as IReviver))
 
                 setShuffle(false)
-            }
 
-            localStorage.setItem('playlistTitle', props.title)
-            setPlaylistTitle(props.title)
+                localStorage.setItem('playlistTitle', props.title)
+                setPlaylistTitle(props.title)
+
+                const url = location.href
+
+                if (url !== '/' && !props.disableUrl) {
+                    localStorage.setItem('playlistUrl', url)
+                    setPlaylistUrl(url)
+                } else {
+                    localStorage.removeItem('playlistUrl')
+                    setPlaylistUrl('')
+                }
+            }
 
             tmpShuffleTrackRef.current = undefined
         },
@@ -248,10 +264,11 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     )
 
     const setCurrentPlaylistSimple = useCallback(
-        (props: { playlist: MediaItem[]; title: string }) => {
+        (props: { playlist: MediaItem[]; title: string; disableUrl?: boolean }) => {
             setCurrentPlaylist({
                 pages: { pageParams: [1], pages: [props.playlist] },
                 title: props.title,
+                disableUrl: props.disableUrl,
             })
         },
         [setCurrentPlaylist]
@@ -282,6 +299,9 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const abortControllerRef = useRef<AbortController | null>(null)
 
     const [userInteracted, setUserInteracted] = useState(false)
+
+    // Track user-initiated pause to prevent unwanted auto-resume on devicechange
+    const lastUserPauseRef = useRef<number>(0)
 
     const currentTrack = useMemo<MediaItem | undefined>(() => {
         return tmpShuffleTrackRef.current || items[currentTrackIndex.index] || undefined
@@ -334,6 +354,15 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             }
         },
         [api]
+    )
+
+    const handleSeekTo = useCallback(
+        (details: MediaSessionActionDetails) => {
+            if (audioRef.current && details.seekTime !== undefined) {
+                audioRef.current.currentTime = details.seekTime
+            }
+        },
+        [audioRef]
     )
 
     useEffect(() => {
@@ -540,6 +569,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         if (audioRef.current && currentTrack) {
             const audio = audioRef.current
             if (isPlaying) {
+                lastUserPauseRef.current = Date.now()
+
                 audio.pause()
                 crossfadeRef.current.pause()
 
@@ -577,6 +608,17 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         setAudioSourceAndLoad,
         updateMediaSessionMetadata,
     ])
+
+    const protectedPlay = useCallback(async () => {
+        const timeSinceLastPause = Date.now() - lastUserPauseRef.current
+
+        if (timeSinceLastPause < 2000) {
+            console.info('Ignoring automatic play request - user recently paused')
+            return
+        }
+
+        await togglePlayPause()
+    }, [togglePlayPause])
 
     useEffect(() => {
         if (currentTrackIndex.index >= 0 && currentTrackIndex.index < items.length && items[currentTrackIndex.index]) {
@@ -773,22 +815,40 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         }
     }, [audioRef])
 
+    useEffect(() => {
+        const handleDeviceChange = () => {
+            if (!isPlaying && lastUserPauseRef.current > 0) {
+                lastUserPauseRef.current = Date.now()
+            }
+        }
+
+        if ('mediaDevices' in navigator) {
+            navigator.mediaDevices.addEventListener('devicechange', handleDeviceChange)
+
+            return () => {
+                navigator.mediaDevices.removeEventListener('devicechange', handleDeviceChange)
+            }
+        }
+    }, [isPlaying])
+
     // Set up Media Session API for next/previous actions
     useEffect(() => {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.setActionHandler('nexttrack', nextTrack)
             navigator.mediaSession.setActionHandler('previoustrack', previousTrack)
-            navigator.mediaSession.setActionHandler('play', togglePlayPause)
+            navigator.mediaSession.setActionHandler('play', protectedPlay)
             navigator.mediaSession.setActionHandler('pause', togglePlayPause)
+            navigator.mediaSession.setActionHandler('seekto', handleSeekTo)
 
             return () => {
                 navigator.mediaSession.setActionHandler('nexttrack', null)
                 navigator.mediaSession.setActionHandler('previoustrack', null)
                 navigator.mediaSession.setActionHandler('play', null)
                 navigator.mediaSession.setActionHandler('pause', null)
+                navigator.mediaSession.setActionHandler('seekto', null)
             }
         }
-    }, [nextTrack, previousTrack, togglePlayPause])
+    }, [nextTrack, previousTrack, protectedPlay, togglePlayPause, handleSeekTo])
 
     useEffect(() => {
         localStorage.setItem('volume', volume.toString())
@@ -920,6 +980,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         sessionPlayCount,
         resetSessionCount,
         playlistTitle,
+        playlistUrl,
         audioRef,
         crossfadeRef,
         bitrate,
