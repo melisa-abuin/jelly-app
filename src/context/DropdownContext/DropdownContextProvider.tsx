@@ -260,7 +260,7 @@ const useInitialState = () => {
                 adjustedY = window.innerHeight
             } else if (!ignoreMargin) {
                 const menuWidth = 210 // Approximate dropdown width
-                const menuHeight = 180 // Approximate dropdown height
+                const menuHeight = 220 // Approximate dropdown height
                 const margin = 20
                 const viewportWidth = window.innerWidth
                 const viewportHeight = window.innerHeight + window.pageYOffset
