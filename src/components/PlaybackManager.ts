@@ -149,6 +149,7 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             initialPageParam: Number(localStorage.getItem('reviverPageIndex')) || 0,
             allowDuplicates: true,
             enabled: params.length > 0,
+            staleTime: Infinity,
         } satisfies IJellyfinInfiniteProps
     }, [
         api,
