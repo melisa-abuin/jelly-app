@@ -39,6 +39,16 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
     const [rememberFilters, setRememberFilters] = useState(localStorage.getItem('rememberFilters') === 'on')
     useEffect(() => localStorage.setItem('rememberFilters', rememberFilters ? 'on' : 'off'), [rememberFilters])
 
+    // Queue Protection Setting
+    const [warnBeforeOverwriteQueue, setWarnBeforeOverwriteQueue] = useState(
+        localStorage.getItem('warnBeforeOverwriteQueue') === 'on'
+    )
+
+    useEffect(
+        () => localStorage.setItem('warnBeforeOverwriteQueue', warnBeforeOverwriteQueue ? 'on' : 'off'),
+        [warnBeforeOverwriteQueue]
+    )
+
     const [currentTrackIndex, setCurrentTrackIndex] = useState({
         index: localStorage.getItem('currentTrackIndex') ? Number(localStorage.getItem('currentTrackIndex')) : -1,
     })
@@ -174,6 +184,11 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         return a
     }, [])
 
+    // Mark items as manually added to queue
+    const markAsManuallyAdded = useCallback((items: MediaItem[]) => {
+        return items.map(item => ({ ...item, manuallyAdded: true }))
+    }, [])
+
     const { items: _items, hasNextPage, loadMore, isLoading, infiniteData } = useJellyfinInfiniteData(reviverFn)
 
     const items = useMemo(() => {
@@ -236,6 +251,24 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             reviver?: IReviver | 'persistAll'
         }) => {
             if (props.reviver !== 'persistAll') {
+                // Check for unplayed manually added items if warning is enabled
+                if (warnBeforeOverwriteQueue && items && items.length > 0 && currentTrackIndex.index >= 0) {
+                    const unplayedManualItems = items
+                        .slice(currentTrackIndex.index + 1)
+                        .filter(item => item.manuallyAdded)
+
+                    if (unplayedManualItems.length > 0) {
+                        const itemText = unplayedManualItems.length === 1 ? 'item' : 'items'
+                        const confirmed = confirm(
+                            `You have ${unplayedManualItems.length} manually added ${itemText} in your queue that haven't been played yet. Are you sure you want to overwrite your active queue?`
+                        )
+
+                        if (!confirmed) {
+                            return false
+                        }
+                    }
+                }
+
                 const queryKey = ['reviver', ...(props.reviver?.queryKey || [])]
 
                 queryClient.setQueryData(queryKey, props.pages)
@@ -260,13 +293,14 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
             }
 
             tmpShuffleTrackRef.current = undefined
+            return true
         },
-        [queryClient]
+        [queryClient, warnBeforeOverwriteQueue, items, currentTrackIndex.index]
     )
 
     const setCurrentPlaylistSimple = useCallback(
         (props: { playlist: MediaItem[]; title: string; disableUrl?: boolean }) => {
-            setCurrentPlaylist({
+            return setCurrentPlaylist({
                 pages: { pageParams: [1], pages: [props.playlist] },
                 title: props.title,
                 disableUrl: props.disableUrl,
@@ -993,5 +1027,8 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
         setCrossfadeDuration,
         rememberFilters,
         setRememberFilters,
+        warnBeforeOverwriteQueue,
+        setWarnBeforeOverwriteQueue,
+        markAsManuallyAdded,
     }
 }

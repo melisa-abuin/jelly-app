@@ -111,8 +111,9 @@ export const Artist = () => {
                             <div
                                 className="play-artist"
                                 onClick={() => {
-                                    playback.setCurrentPlaylistSimple({ playlist: tracks, title: artist.Name })
-                                    playback.playTrack(0)
+                                    if (playback.setCurrentPlaylistSimple({ playlist: tracks, title: artist.Name })) {
+                                        playback.playTrack(0)
+                                    }
                                 }}
                             >
                                 <div className="play-icon" />
