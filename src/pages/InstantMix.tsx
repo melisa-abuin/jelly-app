@@ -66,8 +66,9 @@ export const InstantMix = () => {
                             <div
                                 className="play-instant-mix"
                                 onClick={() => {
-                                    playback.setCurrentPlaylistSimple({ playlist: items, title: 'Instant Mix' })
-                                    playback.playTrack(0)
+                                    if (playback.setCurrentPlaylistSimple({ playlist: items, title: 'Instant Mix' })) {
+                                        playback.playTrack(0)
+                                    }
                                 }}
                             >
                                 <div className="play-icon" />

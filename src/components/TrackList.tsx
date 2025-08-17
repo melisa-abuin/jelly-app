@@ -57,13 +57,18 @@ export const TrackList = ({
                             if (isCurrentTrack) {
                                 playback.togglePlayPause()
                             } else {
-                                playback.setCurrentPlaylistSimple({ playlist: playlistItems || tracks || [], title })
+                                if (
+                                    playback.setCurrentPlaylistSimple({
+                                        playlist: playlistItems || tracks || [],
+                                        title,
+                                    })
+                                ) {
+                                    const playIndex = playlistItems
+                                        ? playlistItems.findIndex(t => t.Id === track.Id)
+                                        : index
 
-                                const playIndex = playlistItems
-                                    ? playlistItems.findIndex(t => t.Id === track.Id)
-                                    : index
-
-                                playback.playTrack(playIndex)
+                                    playback.playTrack(playIndex)
+                                }
                             }
                         }}
                         onContextMenu={e => dropdown.onContextMenu(e, { item: track }, false, hidden)}

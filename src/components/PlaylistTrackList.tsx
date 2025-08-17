@@ -48,8 +48,9 @@ export const PlaylistTrackList = ({
             if (playback.currentTrack?.Id === track.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ pages: infiniteData, title, disableUrl, reviver })
-                playback.playTrack(index)
+                if (playback.setCurrentPlaylist({ pages: infiniteData, title, disableUrl, reviver })) {
+                    playback.playTrack(index)
+                }
             }
         },
         [playback, infiniteData, title, disableUrl, reviver]

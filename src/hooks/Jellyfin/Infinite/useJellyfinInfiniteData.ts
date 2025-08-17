@@ -13,6 +13,7 @@ export const useJellyfinInfiniteData = ({
     queryFnReviver,
     allowDuplicates = false,
     enabled = true,
+    staleTime,
 }: {
     queryKey: unknown[]
     queryFn: QueryFunction<MediaItem[], readonly unknown[], unknown>
@@ -20,6 +21,7 @@ export const useJellyfinInfiniteData = ({
     queryFnReviver: IReviver['queryFn']
     allowDuplicates?: boolean
     enabled?: boolean
+    staleTime?: number
 }) => {
     const itemsPerPage = 40
 
@@ -32,6 +34,7 @@ export const useJellyfinInfiniteData = ({
         getNextPageParam: (lastPage, pages) => (lastPage.length >= itemsPerPage ? pages.length : undefined),
         initialPageParam,
         enabled,
+        staleTime,
     })
 
     useEffect(() => {

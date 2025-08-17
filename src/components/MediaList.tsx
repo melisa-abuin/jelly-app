@@ -117,8 +117,9 @@ export const MediaList = ({
             if (isEqual(playback.currentTrack, item)) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ pages: infiniteData, title, disableUrl, reviver })
-                playback.playTrack(indexOffset + index)
+                if (playback.setCurrentPlaylist({ pages: infiniteData, title, disableUrl, reviver })) {
+                    playback.playTrack(indexOffset + index)
+                }
             }
         }
     }

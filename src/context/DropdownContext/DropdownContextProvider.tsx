@@ -260,7 +260,7 @@ const useInitialState = () => {
                 adjustedY = window.innerHeight
             } else if (!ignoreMargin) {
                 const menuWidth = 210 // Approximate dropdown width
-                const menuHeight = 180 // Approximate dropdown height
+                const menuHeight = 250 // Approximate dropdown height
                 const margin = 20
                 const viewportWidth = window.innerWidth
                 const viewportHeight = window.innerHeight + window.pageYOffset
@@ -333,9 +333,12 @@ const useInitialState = () => {
 
                     for (let trackIndex = 0; trackIndex < page.length; trackIndex++) {
                         if (trackCounter === insertionPoint) {
+                            const expandedItems = await expandItems(item)
+                            const markedItems = playback.markAsManuallyAdded(expandedItems)
+
                             return [
                                 ...pages.slice(0, pageIndex),
-                                [...page.slice(0, trackIndex), ...(await expandItems(item)), ...page.slice(trackIndex)],
+                                [...page.slice(0, trackIndex), ...markedItems, ...page.slice(trackIndex)],
                                 ...pages.slice(pageIndex + 1),
                             ]
                         }
@@ -344,8 +347,11 @@ const useInitialState = () => {
                     }
                 }
 
+                const expandedItems = await expandItems(item)
+                const markedItems = playback.markAsManuallyAdded(expandedItems)
+
                 return [
-                    [...(pages[0]?.slice(0, 1) || []), ...(await expandItems(item)), ...(pages[0]?.slice(1) || [])],
+                    [...(pages[0]?.slice(0, 1) || []), ...markedItems, ...(pages[0]?.slice(1) || [])],
                     ...pages.slice(1),
                 ]
             })
@@ -361,9 +367,12 @@ const useInitialState = () => {
 
     const handleAddToQueue = useCallback(
         async (item: MediaItem) => {
+            const expandedItems = await expandItems(item)
+            const markedItems = playback.markAsManuallyAdded(expandedItems)
+
             await playback.updateCurrentPlaylist(async pages => [
                 ...pages.slice(0, pages.length - 1),
-                [...(pages[pages.length - 1] || []), ...(await expandItems(item))],
+                [...(pages[pages.length - 1] || []), ...markedItems],
             ])
 
             if (playback.currentTrackIndex === -1) {

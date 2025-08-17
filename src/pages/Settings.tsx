@@ -349,6 +349,24 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                         </label>
                     </div>
                 </div>
+                <div className="inner row">
+                    <div className="container">
+                        <div className="desc">
+                            <div className="subtitle">Queue protection</div>
+                            <div className="subdesc">
+                                Warn before overwriting the active queue if it includes manually added tracks
+                            </div>
+                        </div>
+                        <label className="switch">
+                            <input
+                                type="checkbox"
+                                checked={playback.warnBeforeOverwriteQueue}
+                                onChange={e => playback.setWarnBeforeOverwriteQueue(e.target.checked)}
+                            ></input>
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
             <div className="section about">
                 <div className="title">About</div>

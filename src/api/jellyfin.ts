@@ -43,6 +43,7 @@ export type MediaItem = BaseItemDto & {
     pageIndex?: number
     offlineState?: 'downloading' | 'downloaded' | 'deleting'
     queueId?: string
+    manuallyAdded?: boolean
 }
 
 export type IJellyfinAuth = Parameters<typeof initJellyfinApi>[0]
@@ -778,8 +779,8 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
         const itemsApi = new ItemsApi(api.configuration)
         const response = await itemsApi.getItems(
             {
-                sortBy: [ItemSortBy.SortName, ItemSortBy.PlayCount, ItemSortBy.DatePlayed],
-                sortOrder: [SortOrder.Descending],
+                sortBy: [ItemSortBy.SortName],
+                sortOrder: [SortOrder.Ascending],
                 userId,
                 includeItemTypes: [BaseItemKind.Playlist],
                 recursive: true,
@@ -923,7 +924,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             return `${serverUrl}/Items/${item.AlbumId}/Images/${type}?quality=100&fillWidth=${size.width}&fillHeight=${size.height}&format=webp&api_key=${token}`
         }
 
-        return import.meta.env.BASE_URL + 'default-thumbnail.png'
+        return undefined
     }
 
     const getStreamUrl = (trackId: string, bitrate: number) => {

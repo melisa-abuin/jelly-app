@@ -90,8 +90,14 @@ export const Playlist = () => {
                             <div
                                 className="play-playlist"
                                 onClick={() => {
-                                    playback.setCurrentPlaylistSimple({ playlist: tracks, title: playlistData.Name })
-                                    playback.playTrack(0)
+                                    if (
+                                        playback.setCurrentPlaylistSimple({
+                                            playlist: tracks,
+                                            title: playlistData.Name,
+                                        })
+                                    ) {
+                                        playback.playTrack(0)
+                                    }
                                 }}
                             >
                                 <div className="play-icon" />

@@ -106,8 +106,11 @@ export const Album = () => {
                             <div
                                 className="play-album"
                                 onClick={() => {
-                                    playback.setCurrentPlaylistSimple({ playlist: sortedTracks, title: album.Name })
-                                    playback.playTrack(0)
+                                    if (
+                                        playback.setCurrentPlaylistSimple({ playlist: sortedTracks, title: album.Name })
+                                    ) {
+                                        playback.playTrack(0)
+                                    }
                                 }}
                             >
                                 <div className="play-icon" />
