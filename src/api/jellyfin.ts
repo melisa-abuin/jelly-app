@@ -924,7 +924,7 @@ export const initJellyfinApi = ({ serverUrl, userId, token }: { serverUrl: strin
             return `${serverUrl}/Items/${item.AlbumId}/Images/${type}?quality=100&fillWidth=${size.width}&fillHeight=${size.height}&format=webp&api_key=${token}`
         }
 
-        return import.meta.env.BASE_URL + 'default-thumbnail.png'
+        return undefined
     }
 
     const getStreamUrl = (trackId: string, bitrate: number) => {

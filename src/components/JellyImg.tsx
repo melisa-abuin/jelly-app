@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { MediaItem } from '../api/jellyfin'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
+import { TracksIcon } from './SvgIcons'
 
 export const JellyImg = ({
     item,
@@ -15,17 +17,27 @@ export const JellyImg = ({
     imageProps?: React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>
 }) => {
     const api = useJellyfinContext()
+    const [hasError, setError] = useState(false)
+    const src = api.getImageUrl(item, type, { width, height })
 
     return (
-        <img
-            {...imageProps}
-            src={api.getImageUrl(item, type, { width, height })}
-            alt={item.Name}
-            className="thumbnail"
-            loading="lazy"
-            onError={e => {
-                ;(e.target as HTMLImageElement).src = import.meta.env.BASE_URL + 'default-thumbnail.png'
-            }}
-        />
+        <>
+            {!hasError && src && (
+                <img
+                    {...imageProps}
+                    src={src}
+                    alt={item.Name}
+                    className="thumbnail"
+                    loading="lazy"
+                    onError={() => setError(true)}
+                />
+            )}
+
+            {(hasError || !src) && (
+                <div className="fallback-thumbnail">
+                    <TracksIcon width="50%" height="50%" />
+                </div>
+            )}
+        </>
     )
 }

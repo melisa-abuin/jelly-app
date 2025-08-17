@@ -52,6 +52,28 @@
     border-radius: 20px;
 }
 
+.media-list .media-item > .media-state > .fallback-thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: inherit;
+    background-color: var(--bg-color-tertiary);
+}
+
+.media-list .media-item.artist-item > .media-state > .fallback-thumbnail {
+    width: 36px;
+    height: 36px;
+    border-radius: 20px;
+}
+
+.media-list .media-item > .media-state > .fallback-thumbnail > svg {
+    fill: var(--font-color-tertiary);
+    opacity: 0.6;
+    margin-left: -4%;
+}
+
 /* Hide thumbnail overlay by default */
 .media-list .media-item > .media-state > .overlay {
     position: absolute;
