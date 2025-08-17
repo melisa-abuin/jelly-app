@@ -258,9 +258,9 @@ export const usePlaybackManager = ({ initialVolume, clearOnLogout }: PlaybackMan
                         .filter(item => item.manuallyAdded)
 
                     if (unplayedManualItems.length > 0) {
-                        const itemText = unplayedManualItems.length === 1 ? 'item' : 'items'
+                        const itemText = unplayedManualItems.length === 1 ? 'track' : 'tracks'
                         const confirmed = confirm(
-                            `You have ${unplayedManualItems.length} manually added ${itemText} in your queue that haven't been played yet. Are you sure you want to overwrite your active queue?`
+                            `You've added ${unplayedManualItems.length} ${itemText} to your queue that haven't played yet. Are you sure you want to overwrite the active queue?`
                         )
 
                         if (!confirmed) {

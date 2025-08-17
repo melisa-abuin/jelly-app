@@ -354,7 +354,7 @@ export const Settings = ({ onLogout }: { onLogout: () => void }) => {
                         <div className="desc">
                             <div className="subtitle">Queue protection</div>
                             <div className="subdesc">
-                                Warn before overwriting active queue when it contains manually added items
+                                Warn before overwriting the active queue if it includes manually added tracks
                             </div>
                         </div>
                         <label className="switch">
