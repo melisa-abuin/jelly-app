@@ -5,10 +5,10 @@ import { JellyImg } from '../components/JellyImg'
 import { Progressbar } from '../components/Main'
 import { Squircle } from '../components/Squircle'
 import { DeletingIcon, DownloadedIcon, DownloadingIcon, MoreIcon, TracksIcon } from '../components/SvgIcons'
+import { TrackBitrate } from '../components/TrackBitrate'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
-import { useJellyfinTrackInfo } from '../hooks/Jellyfin/useJellyfinTrackInfo'
 import { useDuration } from '../hooks/useDuration'
 import { useFavorites } from '../hooks/useFavorites'
 import { Lyrics } from './Lyrics'
@@ -17,6 +17,7 @@ import './NowPlaying.css'
 export const NowPlayingLyrics = () => {
     const { goBack: previousPage } = useHistoryContext()
     const { currentTrack, bitrate } = usePlaybackContext()
+
     const location = useLocation()
 
     const playback = usePlaybackContext()
@@ -161,7 +162,7 @@ export const NowPlayingLyrics = () => {
                                                     ) : bitrate === 128000 ? (
                                                         '128'
                                                     ) : (
-                                                        <TrackBitrate trackId={currentTrack?.Id || ''} />
+                                                        <TrackBitrate currentTrack={currentTrack} />
                                                     )}
                                                 </span>{' '}
                                                 kbps
@@ -235,11 +236,4 @@ export const NowPlayingLyrics = () => {
             </div>
         </>
     )
-}
-
-const TrackBitrate = ({ trackId }: { trackId: string }) => {
-    const trackInfo = useJellyfinTrackInfo(trackId)
-    const bitrate = Math.round((trackInfo.MediaSources?.[0].Bitrate || 0) / 1000)
-
-    return <>{bitrate}</>
 }

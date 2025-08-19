@@ -178,6 +178,9 @@ const useInitialState = () => {
                             } else {
                                 const response = await fetch(streamUrl, { signal })
                                 if (!response.ok) throw new Error(`HTTP ${response.status}`)
+                                const trackInfo = await api.getTrackInfo(mediaItem.Id)
+                                if (!trackInfo) throw new Error(`Track info not found for ${mediaItem.Id}`)
+
                                 const blob = await response.blob()
                                 await audioStorage.saveTrack(mediaItem.Id, {
                                     type: 'song',
@@ -186,6 +189,7 @@ const useInitialState = () => {
                                     mediaItem,
                                     blob,
                                     containerId: next.containerId,
+                                    mediaSources: trackInfo.MediaSources,
                                 })
                             }
                         } else {
