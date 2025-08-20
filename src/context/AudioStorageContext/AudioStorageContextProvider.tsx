@@ -1,12 +1,21 @@
-import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models'
+import { BaseItemKind, MediaSourceInfo } from '@jellyfin/sdk/lib/generated-client/models'
 import { ReactNode, useCallback, useRef } from 'react'
 import { MediaItem } from '../../api/jellyfin'
 import { AudioStorageContext } from './AudioStorageContext'
 
 export type IAudioStorageContext = ReturnType<typeof useInitialState>
 export type IStorageTrack =
-    | { type: 'container'; timestamp: number; mediaItem: MediaItem; bitrate: number }
-    | { type: 'song'; timestamp: number; mediaItem: MediaItem; bitrate: number; blob: Blob; containerId?: string }
+    | { type: 'container'; timestamp: number; mediaItem: MediaItem; bitrate: number; thumbnail?: Blob }
+    | {
+          type: 'song'
+          timestamp: number
+          mediaItem: MediaItem
+          bitrate: number
+          blob: Blob
+          containerId?: string
+          mediaSources?: MediaSourceInfo[]
+          thumbnail?: Blob
+      }
     | {
           type: 'm3u8'
           timestamp: number
@@ -15,6 +24,7 @@ export type IStorageTrack =
           playlist: Blob
           ts: Blob[]
           containerId?: string
+          thumbnail?: Blob
       }
 
 const useInitialState = () => {
@@ -243,11 +253,18 @@ const useInitialState = () => {
                     return
                 }
 
-                // Collect this record’s mediaItem
-                const record = cursor.value as { mediaItem: MediaItem }
+                const record = cursor.value as Partial<IStorageTrack>
 
                 // Legacy did not have `mediaItem` field, so we check if it exists
                 if (record.mediaItem) {
+                    if (record.type === 'song' && record.mediaItem && record.mediaSources) {
+                        record.mediaItem.MediaSources = record.mediaSources
+                    }
+
+                    if (record.thumbnail) {
+                        record.mediaItem.downloadedImageUrl = URL.createObjectURL(record.thumbnail)
+                    }
+
                     items.push(record.mediaItem)
                 }
 

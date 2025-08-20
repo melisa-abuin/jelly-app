@@ -13,11 +13,11 @@ import {
     QueueIcon,
     TracksIcon,
 } from '../components/SvgIcons'
+import { TrackBitrate } from '../components/TrackBitrate'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
 import { useHistoryContext } from '../context/HistoryContext/HistoryContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../context/ScrollContext/ScrollContext'
-import { useJellyfinTrackInfo } from '../hooks/Jellyfin/useJellyfinTrackInfo'
 import { useDuration } from '../hooks/useDuration'
 import { useFavorites } from '../hooks/useFavorites'
 import './NowPlayingLyrics.css'
@@ -188,7 +188,7 @@ export const NowPlaying = () => {
                                             ) : bitrate === 128000 ? (
                                                 '128'
                                             ) : (
-                                                <TrackBitrate trackId={currentTrack?.Id || ''} />
+                                                <TrackBitrate currentTrack={currentTrack} />
                                             )}
                                         </span>{' '}
                                         kbps
@@ -288,11 +288,4 @@ export const NowPlaying = () => {
             </div>
         </>
     )
-}
-
-const TrackBitrate = ({ trackId }: { trackId: string }) => {
-    const trackInfo = useJellyfinTrackInfo(trackId)
-    const bitrate = Math.round((trackInfo.MediaSources?.[0].Bitrate || 0) / 1000)
-
-    return <>{bitrate}</>
 }
