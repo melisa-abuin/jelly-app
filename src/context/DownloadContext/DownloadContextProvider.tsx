@@ -307,8 +307,8 @@ const downloadThumbnail = async (
     signal?: AbortSignal
 ): Promise<Blob | undefined> => {
     try {
-        // Download a minimal resolution thumbnail (150x150)
-        const thumbnailUrl = api.getImageUrl(mediaItem, 'Primary', { width: 150, height: 150 })
+        // Thumbnail
+        const thumbnailUrl = api.getImageUrl(mediaItem, 'Primary', { width: 360, height: 360 })
         if (!thumbnailUrl) return undefined
 
         const response = await fetch(thumbnailUrl, { signal })
