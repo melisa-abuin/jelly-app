@@ -18,7 +18,10 @@ export const JellyImg = ({
 }) => {
     const api = useJellyfinContext()
     const [hasError, setError] = useState(false)
-    const src = api.getImageUrl(item, type, { width, height })
+
+    const onlineImageUrl = api.getImageUrl(item, type, { width, height })
+
+    const src = item.downloadedImageUrl || onlineImageUrl
 
     return (
         <>

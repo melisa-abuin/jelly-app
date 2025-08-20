@@ -5,7 +5,7 @@ import { AudioStorageContext } from './AudioStorageContext'
 
 export type IAudioStorageContext = ReturnType<typeof useInitialState>
 export type IStorageTrack =
-    | { type: 'container'; timestamp: number; mediaItem: MediaItem; bitrate: number }
+    | { type: 'container'; timestamp: number; mediaItem: MediaItem; bitrate: number; thumbnail?: Blob }
     | {
           type: 'song'
           timestamp: number
@@ -14,6 +14,7 @@ export type IStorageTrack =
           blob: Blob
           containerId?: string
           mediaSources?: MediaSourceInfo[]
+          thumbnail?: Blob
       }
     | {
           type: 'm3u8'
@@ -23,6 +24,7 @@ export type IStorageTrack =
           playlist: Blob
           ts: Blob[]
           containerId?: string
+          thumbnail?: Blob
       }
 
 const useInitialState = () => {
@@ -257,6 +259,10 @@ const useInitialState = () => {
                 if (record.mediaItem) {
                     if (record.type === 'song' && record.mediaItem && record.mediaSources) {
                         record.mediaItem.MediaSources = record.mediaSources
+                    }
+
+                    if (record.thumbnail) {
+                        record.mediaItem.downloadedImageUrl = URL.createObjectURL(record.thumbnail)
                     }
 
                     items.push(record.mediaItem)
