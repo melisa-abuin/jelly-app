@@ -165,32 +165,51 @@ const useInitialState = () => {
                             const streamUrl = api.getStreamUrl(mediaItem.Id, playback.bitrate)
 
                             if (isTranscoded) {
-                                const { playlist, ts } = await downloadTranscodedTrack(streamUrl, signal)
+                                const [{ playlist, ts }, thumbnail] = await Promise.all([
+                                    downloadTranscodedTrack(streamUrl, signal),
+                                    downloadThumbnail(api, mediaItem, signal),
+                                ])
+
                                 await audioStorage.saveTrack(mediaItem.Id, {
                                     type: 'm3u8',
+                                    timestamp: Date.now(),
                                     mediaItem,
                                     bitrate: playback.bitrate,
                                     playlist,
                                     ts,
                                     containerId: next.containerId,
+                                    thumbnail,
                                 })
                             } else {
-                                const response = await fetch(streamUrl, { signal })
+                                const [response, trackInfo, thumbnail] = await Promise.all([
+                                    fetch(streamUrl, { signal }),
+                                    api.getTrackInfo(mediaItem.Id),
+                                    downloadThumbnail(api, mediaItem, signal),
+                                ])
+
                                 if (!response.ok) throw new Error(`HTTP ${response.status}`)
+                                if (!trackInfo) throw new Error(`Track info not found for ${mediaItem.Id}`)
+
                                 const blob = await response.blob()
                                 await audioStorage.saveTrack(mediaItem.Id, {
                                     type: 'song',
+                                    timestamp: Date.now(),
                                     bitrate: playback.bitrate,
                                     mediaItem,
                                     blob,
                                     containerId: next.containerId,
+                                    mediaSources: trackInfo.MediaSources,
+                                    thumbnail,
                                 })
                             }
                         } else {
+                            const thumbnail = await downloadThumbnail(api, mediaItem, signal)
                             await audioStorage.saveTrack(mediaItem.Id, {
                                 type: 'container',
+                                timestamp: Date.now(),
                                 bitrate: playback.bitrate,
                                 mediaItem,
+                                thumbnail,
                             })
                         }
 
@@ -280,4 +299,24 @@ const downloadTranscodedTrack = async (
 
     // 5. Return the media playlist and its TS segments
     return { playlist: playlistBlob, ts: tsBlobs }
+}
+
+const downloadThumbnail = async (
+    api: ReturnType<typeof useJellyfinContext>,
+    mediaItem: MediaItem,
+    signal?: AbortSignal
+): Promise<Blob | undefined> => {
+    try {
+        // Thumbnail
+        const thumbnailUrl = api.getImageUrl(mediaItem, 'Primary', { width: 360, height: 360 })
+        if (!thumbnailUrl) return undefined
+
+        const response = await fetch(thumbnailUrl, { signal })
+        if (!response.ok) return undefined
+
+        return await response.blob()
+    } catch (error) {
+        console.warn('Failed to download thumbnail for', mediaItem.Id, error)
+        return undefined
+    }
 }

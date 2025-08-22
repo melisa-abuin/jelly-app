@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { MediaItem } from '../api/jellyfin'
 import { JellyImg } from '../components/JellyImg'
 import { Loader } from '../components/Loader'
+import { Squircle } from '../components/Squircle'
 import { MoreIcon } from '../components/SvgIcons'
 import { TrackList } from '../components/TrackList'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
@@ -68,7 +69,9 @@ export const Album = () => {
     return (
         <div className="album-page">
             <div className="album-header">
-                <JellyImg item={album} type={'Primary'} width={100} height={100} />
+                <Squircle width={100} height={100} cornerRadius={8} className="thumbnail">
+                    <JellyImg item={album} type={'Primary'} width={100} height={100} />
+                </Squircle>
                 <div className="album-details">
                     <div className="artist">
                         {album.AlbumArtists && album.AlbumArtists.length > 0 ? (
@@ -103,8 +106,11 @@ export const Album = () => {
                             <div
                                 className="play-album"
                                 onClick={() => {
-                                    playback.setCurrentPlaylist({ playlist: sortedTracks, title: album.Name })
-                                    playback.playTrack(0)
+                                    if (
+                                        playback.setCurrentPlaylistSimple({ playlist: sortedTracks, title: album.Name })
+                                    ) {
+                                        playback.playTrack(0)
+                                    }
                                 }}
                             >
                                 <div className="play-icon" />
@@ -148,7 +154,7 @@ export const Album = () => {
                         {discCount > 1 && <div className={`disc ${index === 0 ? 'first' : ''}`}>Disc {discNumber}</div>}
                         <TrackList
                             tracks={tracksByDisc[Number(discNumber)]}
-                            playlist={sortedTracks}
+                            playlistItems={sortedTracks}
                             title={album.Name}
                             hidden={{ view_album: true }}
                         />

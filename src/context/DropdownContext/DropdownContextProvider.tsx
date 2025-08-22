@@ -1,8 +1,11 @@
 import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models'
-import { ArrowLeftIcon, ChevronRightIcon } from '@primer/octicons-react'
+import { ArrowLeftIcon, ChevronRightIcon, HeartFillIcon, XIcon } from '@primer/octicons-react'
 import { Fragment, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MediaItem } from '../../api/jellyfin'
+import { JellyImg } from '../../components/JellyImg'
+import { Squircle } from '../../components/Squircle'
+import { TracksIcon } from '../../components/SvgIcons'
 import { useJellyfinPlaylistsList } from '../../hooks/Jellyfin/useJellyfinPlaylistsList'
 import { useFavorites } from '../../hooks/useFavorites'
 import { usePlaylists } from '../../hooks/usePlaylists'
@@ -43,7 +46,7 @@ const useInitialState = () => {
         triggerRect: null,
     })
     const [isTouchDevice, setIsTouchDevice] = useState(false)
-    const scrollContext = useScrollContext()
+    const { setDisabled } = useScrollContext()
     type IMenuItems = { [x in keyof typeof menuItems]?: boolean }
     const [hidden, setHidden] = useState<IMenuItems>()
     const navigate = useNavigate()
@@ -54,11 +57,36 @@ const useInitialState = () => {
     const { addToDownloads, removeFromDownloads } = useDownloadContext()
     const { addToPlaylist, addItemsToPlaylist, removeFromPlaylist, createPlaylist, deletePlaylist } = usePlaylists()
 
-    const subMenuRef = useRef<HTMLDivElement>(null)
-
     const menuRef = useRef<HTMLDivElement>(null)
-
+    const subMenuRef = useRef<HTMLDivElement>(null)
     const [playlistName, setPlaylistName] = useState<string>('')
+
+    // Resize handler to update isTouchDevice and reset dropdown on viewport changes
+    useEffect(() => {
+        const handleResize = () => {
+            const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 480
+            setIsTouchDevice(isTouch)
+            if (isOpen && document.activeElement?.tagName !== 'INPUT') {
+                setIsOpen(false)
+                setSubDropdown({
+                    isOpen: false,
+                    type: '',
+                    flipX: false,
+                    flipY: false,
+                    width: 0,
+                    height: 0,
+                    top: 0,
+                    measured: false,
+                    triggerRect: null,
+                })
+                setPosition({ x: 0, y: 0 })
+                setDisabled(false)
+            }
+        }
+
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [isOpen, setDisabled])
 
     const closeSubDropdown = useCallback(() => {
         setSubDropdown(prev => ({ ...prev, isOpen: false, type: '', measured: false, triggerRect: null }))
@@ -80,18 +108,8 @@ const useInitialState = () => {
 
     const closeDropdown = useCallback(() => {
         setIsOpen(false)
-        setSubDropdown({
-            isOpen: false,
-            type: '',
-            flipX: false,
-            flipY: false,
-            width: 0,
-            height: 0,
-            top: 0,
-            measured: false,
-            triggerRect: null,
-        })
-    }, [])
+        setDisabled(false)
+    }, [setDisabled])
 
     const handleInputChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => setPlaylistName(e.target.value),
@@ -227,14 +245,14 @@ const useInitialState = () => {
         setIsTouchDevice(isTouch)
     }, [])
 
-    useEffect(() => {
-        if (scrollContext && isTouchDevice) {
-            scrollContext.setDisabled(isOpen)
-        }
-    }, [isOpen, isTouchDevice, scrollContext])
-
     const openDropdown = useCallback(
-        (context: IContext, x: number, y: number, ignoreMargin: boolean) => {
+        (
+            e: React.MouseEvent<HTMLElement, MouseEvent> | React.TouchEvent<HTMLElement>,
+            context: IContext,
+            x: number,
+            y: number,
+            ignoreMargin: boolean
+        ) => {
             let adjustedX = x
             let adjustedY = y
             if (isTouchDevice) {
@@ -242,7 +260,7 @@ const useInitialState = () => {
                 adjustedY = window.innerHeight
             } else if (!ignoreMargin) {
                 const menuWidth = 210 // Approximate dropdown width
-                const menuHeight = 180 // Approximate dropdown height
+                const menuHeight = 250 // Approximate dropdown height
                 const margin = 20
                 const viewportWidth = window.innerWidth
                 const viewportHeight = window.innerHeight + window.pageYOffset
@@ -254,19 +272,20 @@ const useInitialState = () => {
                 adjustedX = x < margin ? margin : adjustedX // Prevent left overflow
             } else {
                 // Position dropdown below the toggle, aligned left with offsets
-                let triggerElement = document.elementFromPoint(x, y)
+                const triggerElement = e.currentTarget.closest('.more')
+
                 if (triggerElement) {
-                    while (triggerElement && !triggerElement.classList.contains('more')) {
-                        triggerElement = triggerElement.parentElement
-                    }
-                    if (triggerElement) {
-                        const rect = triggerElement.getBoundingClientRect()
-                        adjustedX = rect.left - window.pageXOffset - 142
-                        adjustedY = rect.bottom + window.pageYOffset + 8
-                    }
+                    const rect = triggerElement.getBoundingClientRect()
+                    adjustedX = rect.left - window.pageXOffset - 142
+                    adjustedY = rect.bottom + window.pageYOffset + 8
                 }
             }
             setIsOpen(true)
+
+            if (isTouchDevice) {
+                setDisabled(true)
+            }
+
             setPosition({ x: adjustedX, y: adjustedY })
             setContext(context)
             setSubDropdown({
@@ -281,7 +300,7 @@ const useInitialState = () => {
                 triggerRect: null,
             })
         },
-        [isTouchDevice]
+        [isTouchDevice, setDisabled]
     )
 
     const expandItems = useCallback(
@@ -305,14 +324,37 @@ const useInitialState = () => {
     const handlePlayNext = useCallback(
         async (item: MediaItem) => {
             const insertionPoint = (playback.currentTrackIndex ?? -1) + 1
-            const playlist = playback.currentPlaylist
-            const newPlaylist = [
-                ...playlist.slice(0, insertionPoint),
-                ...(await expandItems(item)),
-                ...playlist.slice(insertionPoint),
-            ]
 
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
+            await playback.updateCurrentPlaylist(async pages => {
+                let trackCounter = 0
+
+                for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+                    const page = pages[pageIndex]
+
+                    for (let trackIndex = 0; trackIndex < page.length; trackIndex++) {
+                        if (trackCounter === insertionPoint) {
+                            const expandedItems = await expandItems(item)
+                            const markedItems = playback.markAsManuallyAdded(expandedItems)
+
+                            return [
+                                ...pages.slice(0, pageIndex),
+                                [...page.slice(0, trackIndex), ...markedItems, ...page.slice(trackIndex)],
+                                ...pages.slice(pageIndex + 1),
+                            ]
+                        }
+
+                        trackCounter++
+                    }
+                }
+
+                const expandedItems = await expandItems(item)
+                const markedItems = playback.markAsManuallyAdded(expandedItems)
+
+                return [
+                    [...(pages[0]?.slice(0, 1) || []), ...markedItems, ...(pages[0]?.slice(1) || [])],
+                    ...pages.slice(1),
+                ]
+            })
 
             if (playback.currentTrackIndex === -1) {
                 playback.playTrack(0)
@@ -325,9 +367,13 @@ const useInitialState = () => {
 
     const handleAddToQueue = useCallback(
         async (item: MediaItem) => {
-            const playlist = playback.currentPlaylist
-            const newPlaylist = [...playlist, ...(await expandItems(item))]
-            playback.setCurrentPlaylist({ playlist: newPlaylist, title: 'Direct Queue' })
+            const expandedItems = await expandItems(item)
+            const markedItems = playback.markAsManuallyAdded(expandedItems)
+
+            await playback.updateCurrentPlaylist(async pages => [
+                ...pages.slice(0, pages.length - 1),
+                [...(pages[pages.length - 1] || []), ...markedItems],
+            ])
 
             if (playback.currentTrackIndex === -1) {
                 playback.playTrack(0)
@@ -336,6 +382,17 @@ const useInitialState = () => {
             closeDropdown()
         },
         [closeDropdown, expandItems, playback]
+    )
+
+    const handleRemoveFromQueue = useCallback(
+        async (item: MediaItem) => {
+            await playback.updateCurrentPlaylist(async pages =>
+                pages.map(page => page.filter(i => i.queueId !== item.queueId))
+            )
+
+            closeDropdown()
+        },
+        [closeDropdown, playback]
     )
 
     // Actually working
@@ -384,14 +441,7 @@ const useInitialState = () => {
             remove_from_queue: (
                 <div
                     className="dropdown-item remove-queue has-removable"
-                    onClick={async () => {
-                        closeDropdown()
-
-                        if (context) {
-                            const playlist = playback.currentPlaylist.filter(item => item !== context.item)
-                            playback.setCurrentPlaylist({ playlist, title: 'Direct Queue' })
-                        }
-                    }}
+                    onClick={async () => handleRemoveFromQueue(context!.item)}
                     onMouseEnter={closeSubDropdown}
                 >
                     <span>Remove from queue</span>
@@ -404,18 +454,11 @@ const useInitialState = () => {
                         if (!context) return
 
                         closeDropdown()
-
-                        const r = await api.getInstantMixFromSong(context.item.Id)
-
-                        if (r) {
-                            playback.setCurrentPlaylist({ playlist: r, title: 'Instant Mix' })
-                            playback.playTrack(0)
-                            navigate('/queue')
-                        }
+                        navigate('/instantmix/' + context.item.Id)
                     }}
                     onMouseEnter={closeSubDropdown}
                 >
-                    <span>Play instant mix</span>
+                    <span>Go to instant mix</span>
                 </div>
             ),
             delete_playlist: (
@@ -571,7 +614,7 @@ const useInitialState = () => {
                                     </div>
                                 </div>
 
-                                <div className="dropdown-separator" />
+                                {playlists.length > 0 && <div className="dropdown-separator" />}
 
                                 {playlists.map(playlist => (
                                     <div
@@ -655,7 +698,6 @@ const useInitialState = () => {
         addItemsToPlaylist,
         addToDownloads,
         addToFavorites,
-        api,
         closeDropdown,
         closeSubDropdown,
         context,
@@ -666,12 +708,12 @@ const useInitialState = () => {
         handleInputChange,
         handleInputKeyDown,
         handlePlayNext,
+        handleRemoveFromQueue,
         handleViewAlbum,
         handleViewArtist,
         isTouchDevice,
         navigate,
         openSubDropdown,
-        playback,
         playlistName,
         playlists,
         removeFromDownloads,
@@ -688,13 +730,6 @@ const useInitialState = () => {
 
     const dropdownNode = useMemo(() => {
         const renderMobileSubMenuItems = () => {
-            const backButton = (
-                <div key="back-button" className="dropdown-item return-item" onClick={closeSubDropdown}>
-                    <ArrowLeftIcon size={16} className="return-icon" />
-                    <span>Back</span>
-                </div>
-            )
-
             let items: ReactNode[] = []
 
             if (subDropdown.type === 'view-artists') {
@@ -730,7 +765,7 @@ const useInitialState = () => {
                             </button>
                         </div>
                     </div>,
-                    <div key="playlist-separator" className="dropdown-separator" />,
+                    ...(playlists.length > 0 ? [<div key="playlist-separator" className="dropdown-separator" />] : []),
                     ...playlists.map(playlist => (
                         <div
                             key={playlist.Id}
@@ -748,7 +783,7 @@ const useInitialState = () => {
                     )),
                 ]
             }
-            return [backButton, <div key="back-separator" className="dropdown-separator" />, ...items]
+            return items
         }
 
         const renderDropdownItems = () => {
@@ -864,7 +899,83 @@ const useInitialState = () => {
                 ref={menuRef}
             >
                 <div className="dropdown-menu">
-                    {isTouchDevice && subDropdown.isOpen ? renderMobileSubMenuItems() : renderDropdownItems()}
+                    {isTouchDevice && context?.item && (
+                        <div className="dropdown-header">
+                            <div
+                                className={`container ${
+                                    context.item.Type === BaseItemKind.Audio
+                                        ? 'track'
+                                        : context.item.Type === BaseItemKind.MusicAlbum
+                                        ? 'album'
+                                        : context.item.Type === BaseItemKind.MusicArtist
+                                        ? 'artist'
+                                        : context.item.Type === BaseItemKind.Playlist
+                                        ? 'playlist'
+                                        : 'unknown'
+                                }`}
+                            >
+                                <Squircle
+                                    width={36}
+                                    height={36}
+                                    cornerRadius={6}
+                                    className="thumbnail"
+                                    useSquircle={context.item.Type !== BaseItemKind.MusicArtist}
+                                >
+                                    {context.item && (
+                                        <JellyImg item={context.item} type={'Primary'} width={36} height={36} />
+                                    )}
+                                    {!context.item && (
+                                        <div className="fallback-thumbnail">
+                                            <TracksIcon width="50%" height="50%" />
+                                        </div>
+                                    )}
+                                </Squircle>
+                                <div className="info">
+                                    <div className="title">
+                                        <div className="text" title={context.item.Name || 'Unknown'}>
+                                            {context.item.Name || 'Unknown'}
+                                        </div>
+                                        {context.item.UserData?.IsFavorite && (
+                                            <span className="favorited" title="Favorited">
+                                                <HeartFillIcon size={12} />
+                                            </span>
+                                        )}
+                                    </div>
+                                    {context.item.Type !== BaseItemKind.MusicArtist && (
+                                        <div className="desc">
+                                            {context.item.Type === BaseItemKind.Audio
+                                                ? context.item.Artists?.join(', ') || 'Unknown Artist'
+                                                : context.item.Type === BaseItemKind.MusicAlbum
+                                                ? context.item.AlbumArtist || 'Unknown Artist'
+                                                : context.item.Type === BaseItemKind.Playlist
+                                                ? `${context.item.ChildCount || 0} Track${
+                                                      context.item.ChildCount === 1 ? '' : 's'
+                                                  }`
+                                                : 'Unknown'}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="actions">
+                                {subDropdown.isOpen && (
+                                    <div className="back icon" onClick={closeSubDropdown}>
+                                        <ArrowLeftIcon size={16} />
+                                    </div>
+                                )}
+                                <div className="close icon" onClick={closeDropdown}>
+                                    <XIcon size={16} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {isTouchDevice && subDropdown.isOpen ? (
+                        <>
+                            <div className="dropdown-separator" />
+                            {renderMobileSubMenuItems()}
+                        </>
+                    ) : (
+                        renderDropdownItems()
+                    )}
                 </div>
             </div>
         )
@@ -915,26 +1026,31 @@ const useInitialState = () => {
 
     const touchTimeoutRef = useRef<number | null>(null)
 
-    const handleTouchStart = useCallback(
-        (e: React.TouchEvent<HTMLElement>, context: IContext, ignoreMargin = false, hidden: IMenuItems = {}) => {
-            e.preventDefault()
-            touchTimeoutRef.current = window.setTimeout(() => {
-                const touch = e.touches[0]
-                const x = touch.clientX
-                const y = touch.clientY + window.pageYOffset
-                openDropdown(context, x, y, ignoreMargin)
-                setHidden(hidden)
-            }, 400)
-        },
-        [openDropdown]
-    )
-
     const clearTouchTimer = useCallback(() => {
         if (touchTimeoutRef.current !== null) {
             clearTimeout(touchTimeoutRef.current)
             touchTimeoutRef.current = null
         }
     }, [])
+
+    const handleTouchStart = useCallback(
+        (e: React.TouchEvent<HTMLElement>, context: IContext, ignoreMargin = false, hidden: IMenuItems = {}) => {
+            if ((e.target as HTMLElement).closest('.draggable')) {
+                return
+            }
+
+            e.preventDefault()
+            clearTouchTimer()
+            touchTimeoutRef.current = window.setTimeout(() => {
+                const touch = e.touches[0]
+                const x = touch.clientX
+                const y = touch.clientY + window.pageYOffset
+                openDropdown(e, context, x, y, ignoreMargin)
+                setHidden(hidden)
+            }, 400)
+        },
+        [clearTouchTimer, openDropdown]
+    )
 
     return {
         isOpen,
@@ -943,7 +1059,6 @@ const useInitialState = () => {
         menuItems,
         subDropdown,
         isTouchDevice,
-        openDropdown,
         closeDropdown,
         openSubDropdown,
         closeSubDropdown,
@@ -953,10 +1068,14 @@ const useInitialState = () => {
             ignoreMargin = false,
             hidden: IMenuItems = {}
         ) => {
+            if ((e.target as HTMLElement).closest('.draggable')) {
+                return
+            }
+
             e.preventDefault()
             const x = e.clientX
             const y = e.clientY + window.pageYOffset
-            openDropdown(context, x, y, ignoreMargin)
+            openDropdown(e, context, x, y, ignoreMargin)
             setHidden(hidden)
         },
         onTouchStart: handleTouchStart,

@@ -2,14 +2,16 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { ApiError, MediaItem } from '../../../api/jellyfin'
 import { ___PAGE_PARAM_INDEX___ } from '../../../components/PlaybackManager'
+import { useFilterContext } from '../../../context/FilterContext/FilterContext'
 import { useJellyfinContext } from '../../../context/JellyfinContext/JellyfinContext'
 import { useJellyfinInfiniteData } from './useJellyfinInfiniteData'
 
 export const useJellyfinPlaylistData = (playlistId: string) => {
     const api = useJellyfinContext()
     const itemsPerPage = 40
+    const { jellySort } = useFilterContext()
 
-    const { data: playlist, error: playlistError } = useQuery<MediaItem, ApiError>({
+    const { data: playlistData, error: playlistError } = useQuery<MediaItem, ApiError>({
         queryKey: ['playlist', playlistId],
         queryFn: () => api.getPlaylist(playlistId),
     })
@@ -18,6 +20,7 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
         {
             totalTrackCount: number
             totalPlaytime: number
+            totalPlays: number
         },
         ApiError
     >({
@@ -36,24 +39,30 @@ export const useJellyfinPlaylistData = (playlistId: string) => {
     }, [playlistError, totalsError])
 
     const infiniteData = useJellyfinInfiniteData({
-        queryKey: ['playlistTracks', playlistId],
+        queryKey: ['playlistTracks', playlistId, jellySort.sortBy, jellySort.sortOrder],
         queryFn: async ({ pageParam = 0 }) => {
             const startIndex = (pageParam as number) * itemsPerPage
-            return await api.getPlaylistTracks(playlistId, startIndex, itemsPerPage)
+            return await api.getPlaylistTracks(
+                playlistId,
+                startIndex,
+                itemsPerPage,
+                jellySort.sortBy,
+                jellySort.sortOrder
+            )
         },
         queryFnReviver: {
             fn: 'getPlaylistTracks',
-            params: [playlistId, ___PAGE_PARAM_INDEX___, itemsPerPage],
+            params: [playlistId, ___PAGE_PARAM_INDEX___, itemsPerPage, jellySort.sortBy, jellySort.sortOrder],
         },
     })
 
     const totalPlaytime = totals?.totalPlaytime || 0
     const totalTrackCount = totals?.totalTrackCount || 0
-    const totalPlays = infiniteData.items.reduce((sum, track) => sum + (track.UserData?.PlayCount || 0), 0)
+    const totalPlays = totals?.totalPlays || 0
 
     return {
         ...infiniteData,
-        playlist,
+        playlistData,
         totalPlaytime,
         totalTrackCount,
         totalPlays,

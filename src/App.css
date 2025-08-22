@@ -102,11 +102,6 @@ input::placeholder {
     color: var(--font-color-tertiary);
 }
 
-/* Prevent page zoom for iOS devices */
-html.iOS input {
-    font-size: 1rem !important;
-}
-
 /*
 button:disabled {
     opacity: 0.3;
@@ -180,6 +175,7 @@ html.light {
     --error-font: #f15a5a;
     --error-border: #ffd6d6;
     --error-background: #fff0f0;
+    --error-background-hover: #ffe4e4;
     --brand-color: #947bee;
     --btn-brand-color: #b282e9;
     --btn-brand-color-hover: #9470e9;
@@ -192,6 +188,13 @@ html.light {
     --scrollbar-color: #a8a8a8;
     --scrollbar-color-hover: #8a8a8a;
     --dropdown-shadow: 0 0 4px rgba(0, 0, 0, 0.04);
+    --playing-artwork-opacity: 0.16;
+    --playing-bg-color: rgba(0, 0, 0, 0.04);
+    --playing-bg-color-secondary: rgba(0, 0, 0, 0.06);
+    --playing-bg-color-tertiary: rgba(0, 0, 0, 0.12);
+    --playing-bg-color-quaternary: rgba(0, 0, 0, 0.18);
+    --playing-border-color: rgba(0, 0, 0, 0.1);
+    --playing-font-color: rgba(0, 0, 0, 0.5);
 }
 
 html.dark {
@@ -213,7 +216,8 @@ html.dark {
     --link-color-active: #af9cdf;
     --error-font: #f76565;
     --error-border: #80241b;
-    --error-background: #200c08;
+    --error-background: #220f0c;
+    --error-background-hover: #301815;
     --brand-color: #a381f3;
     --btn-brand-color: #834ec0;
     --btn-brand-color-hover: #9e53f3;
@@ -226,6 +230,13 @@ html.dark {
     --scrollbar-color: #78767c;
     --scrollbar-color-hover: #aba9af;
     --dropdown-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    --playing-artwork-opacity: 0.08;
+    --playing-bg-color: rgba(255, 255, 255, 0.04);
+    --playing-bg-color-secondary: rgba(255, 255, 255, 0.08);
+    --playing-bg-color-tertiary: rgba(255, 255, 255, 0.16);
+    --playing-bg-color-quaternary: rgba(255, 255, 255, 0.32);
+    --playing-border-color: rgba(255, 255, 255, 0.06);
+    --playing-font-color: rgba(255, 255, 255, 0.4);
 }
 
 html,
@@ -306,6 +317,11 @@ body.lockscroll {
     justify-content: center;
     margin-top: 40px;
     margin-bottom: 80px;
+}
+
+.login > .login_header_spacer {
+    flex: 1;
+    max-height: 80px;
 }
 
 .login > .login_header > .logo {
@@ -426,12 +442,16 @@ body.lockscroll {
 .main > .main_header > .primary {
     display: flex;
     align-items: center;
-    width: 100%;
+    flex-grow: 1;
     max-width: calc(100% - 30px);
 }
 
 .main > .main_header:has(.sorting > .sort) > .primary {
     max-width: calc(100% - 160px);
+}
+
+.main > .main_header:has(.sorting > .sort):has(.sorting.links > .filter) > .primary {
+    max-width: calc(100% - 236px);
 }
 
 .main > .main_header > .primary > .container {
@@ -505,6 +525,10 @@ body.lockscroll {
     flex-shrink: 0;
 }
 
+.main > .main_header > .secondary > .sorting.links > .filter > .responsive-icon {
+    display: none;
+}
+
 .main > .main_header > .secondary > .sorting > .filter > select {
     font-size: 0.725rem;
     font-weight: 500;
@@ -532,11 +556,11 @@ body.lockscroll {
     align-items: center;
     flex-shrink: 0;
     border-left: 1px solid var(--border-color);
+    cursor: pointer;
 }
 
 .main > .main_header > .secondary > .sorting > .sort > .icon {
     padding: 7px;
-    cursor: pointer;
 }
 
 .main > .main_header > .secondary > .sorting > .sort > .icon > svg {
@@ -613,12 +637,12 @@ body.lockscroll {
 .main > .main_footer {
     position: sticky;
     bottom: 0;
-    z-index: 1;
+    z-index: 2;
     width: 100%;
     margin-top: auto;
     background-color: var(--bg-color);
-    /* Attempted fix to subpixel rendering that causes 1px content bleed at bottom */
-    will-change: transform;
+    /* Attempted fix to subpixel rendering that causes 1px content bleed at bottom
+    will-change: transform;*/
 }
 
 /* Playback area */
@@ -629,8 +653,10 @@ body.lockscroll {
 /* Progress bar */
 .main > .main_footer > .playback > .progress {
     position: relative;
+    z-index: 1;
+    touch-action: none;
     display: flex;
-    height: 8px;
+    height: 10px;
     margin-top: -4px;
     transform: scaleY(0.6);
     transition: transform 0.1s linear;
@@ -732,16 +758,18 @@ body.lockscroll {
 .main > .main_footer > .playback > .container {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    position: relative;
     padding: 14px 20px;
+    padding-bottom: 18px;
     /* Help with CJK letter spacing */
-    max-height: 76px;
+    max-height: 82px;
 }
 
 /* Track details */
 .main > .main_footer > .playback > .container > .track-info {
     position: relative;
-    max-width: calc(100% - 264px);
+    max-width: calc(100% - 244px);
+    flex-grow: 1;
 }
 
 .main > .main_footer > .playback > .container > .track-info > .track-name {
@@ -751,7 +779,7 @@ body.lockscroll {
     line-height: 1rem;
     display: flex;
     align-items: center;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
 }
 
 .main > .main_footer > .playback > .container > .track-info > .track-name > .text {
@@ -770,7 +798,7 @@ body.lockscroll {
     /* Help with CJK letter spacing */
     line-height: 0.875rem;
     color: var(--font-color-tertiary);
-    margin-bottom: 1px;
+    margin-bottom: 2px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -803,14 +831,17 @@ body.lockscroll {
 /* Player controls */
 .main > .main_footer > .playback > .container > .controls {
     display: flex;
-    align-items: center;
+    flex-direction: column-reverse;
+    align-items: end;
+    margin-left: 8px;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-right: 8px;
+    margin-top: 6px;
+    margin-bottom: -2px;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle {
@@ -844,6 +875,7 @@ body.lockscroll {
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous {
     cursor: pointer;
+    padding: 2px 0;
     transform: rotate(180deg);
 }
 
@@ -935,6 +967,7 @@ body.lockscroll {
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next {
     cursor: pointer;
+    padding: 2px 0;
 }
 
 .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .next > .next-icon {
@@ -991,12 +1024,80 @@ body.lockscroll {
     display: flex;
     font-size: 0.725rem;
     font-weight: 500;
-    font-variant-numeric: tabular-nums; /* Don't like how the font looks, but needed to prevent layout shift when numbers change */
+    font-variant-numeric: tabular-nums;
     color: var(--font-color-tertiary);
+    margin-right: 6px;
 }
 
 .main > .main_footer > .playback > .container > .controls > .duration > .divider {
     margin: 0 4px;
+}
+
+.main > .main_footer > .playback > .container > .artwork {
+    position: relative;
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    margin-left: 6px;
+}
+
+.main > .main_footer > .playback > .container > .artwork > .thumbnail {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+}
+
+.main > .main_footer > .playback > .container > .artwork > .thumbnail > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+}
+
+.main > .main_footer > .playback > .container > .artwork > .thumbnail > .fallback-thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background-color: var(--bg-color-tertiary);
+}
+
+.main > .main_footer > .playback > .container > .artwork > .thumbnail > .fallback-thumbnail > svg {
+    fill: var(--font-color-tertiary);
+    opacity: 0.6;
+    margin-left: -4%;
+}
+
+.main > .main_footer > .playback > .container > .artwork > .thumbnail > .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background-color: var(--overlay-bg);
+    transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
+}
+
+.main > .main_footer > .playback > .container > .artwork:hover > .thumbnail > .overlay,
+.main > .main_footer > .playback > .container > .artwork:active > .thumbnail > .overlay {
+    opacity: 1;
+    visibility: visible;
+}
+
+.main > .main_footer > .playback > .container > .artwork > .thumbnail > .overlay > .icon {
+    fill: var(--font-color-inverted);
 }
 
 /* Home page specific */
@@ -1013,7 +1114,7 @@ body.lockscroll {
     align-items: flex-start;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 10px;
+    column-gap: 12px;
 }
 
 .home-page > .section > .section-header > .container > .section_title {
@@ -1038,6 +1139,7 @@ body.lockscroll {
     cursor: pointer;
     padding: 6px 11px;
     border-radius: 6px;
+    margin-bottom: 10px;
     background-color: var(--bg-color-secondary);
     transition: background-color 0.2s ease-out;
 }
@@ -1053,7 +1155,9 @@ body.lockscroll {
 .recently-page,
 .frequently-page,
 .genre-page,
-.artist-tracks-page {
+.artist-tracks-page,
+.artists-page,
+.lyrics-page {
     margin-top: -4px;
 }
 
@@ -1063,13 +1167,27 @@ body.lockscroll {
 .recently-page > .empty,
 .frequently-page > .empty,
 .genre-page > .empty,
-.playlist-page > .empty {
+.playlist-page > .empty,
+.lyrics-page > .empty {
     font-size: 0.85rem;
     margin: 4px 0;
 }
 
 .main > .main_content > .empty-queue {
     font-size: 0.85rem;
+}
+
+/* Artists page */
+.main > .main_content > .artists-page > .album-artists {
+    font-size: 0.725rem;
+    font-weight: 500;
+    text-align: right;
+    margin-right: -4px;
+    margin-bottom: 8px;
+}
+
+.main > .main_content > .artists-page > .album-artists > a.textlink {
+    color: var(--font-color-tertiary);
 }
 
 /* Responsive */
@@ -1085,8 +1203,43 @@ body.lockscroll {
 }
 
 @media only screen and (pointer: coarse) {
+    /* Prevent page zoom for iOS devices */
+    html.iOS input {
+        font-size: 1rem !important;
+    }
+
+    html.iOS .music-app:not(:has(.login)) {
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+
+    .music-app:has(.login) {
+        padding-bottom: min(12px, env(safe-area-inset-bottom, 6px));
+    }
+
+    html.safeAreaFallback .music-app:has(.login) {
+        padding-bottom: 6px;
+    }
+
     .main > .main_footer > .playback > .progress {
-        height: 14px;
+        height: 18px;
+    }
+
+    .main > .main_footer > .playback > .container {
+        max-height: 90px;
+        padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
+    }
+
+    html.safeAreaFallback .main > .main_footer > .playback > .container {
+        padding-bottom: 20px;
+    }
+
+    .main > .main_footer > .playback > .container > .track-info > .track-name {
+        margin-bottom: 5px;
+    }
+
+    .main > .main_footer > .playback > .container > .track-info > .artist {
+        margin-bottom: 3px;
     }
 }
 
@@ -1094,7 +1247,7 @@ body.lockscroll {
     .dimmer {
         display: block;
         position: fixed;
-        z-index: 3;
+        z-index: 4;
         top: 0;
         left: 0;
         width: 100%;
@@ -1111,21 +1264,14 @@ body.lockscroll {
         visibility: visible;
     }
 
-    .dimmer.active ~ .sidenav {
-        filter: blur(8px);
-    }
-
     .dimmer.active ~ .main {
-        filter: blur(8px);
+        filter: blur(16px);
     }
 }
 
 @media only screen and (max-width: 700px) {
-    .dimmer.active ~ .sidenav {
-        filter: none;
-    }
-
-    body.lockscroll {
+    body.lockscroll,
+    body:has(.sidenav_wrapper.active) {
         overflow: hidden !important;
     }
 
@@ -1165,19 +1311,19 @@ body.lockscroll {
     }
 }
 
+@media only screen and (max-width: 480px), (pointer: coarse) {
+    .music-app:has(.dropdown.active) .dimmer {
+        z-index: 5;
+    }
+
+    .music-app:has(.dropdown.active) .dimmer.active ~ .sidenav > .sidenav_wrapper {
+        filter: blur(16px);
+    }
+}
+
 @media only screen and (max-width: 500px) {
     .main > .main_footer > .playback > .container > .track-info {
-        max-width: calc(100% - 190px);
-    }
-
-    .main > .main_footer > .playback > .container > .controls {
-        align-items: end;
-        flex-direction: column-reverse;
-    }
-
-    .main > .main_footer > .playback > .container > .controls > .knobs {
-        margin-top: 8px;
-        margin-right: -6px;
+        max-width: calc(100% - 248px);
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs > .primary {
@@ -1185,17 +1331,55 @@ body.lockscroll {
     }
 }
 
-@media only screen and (max-width: 390px) {
+@media only screen and (max-width: 420px) {
     .main > .main_footer > .playback > .container > .track-info {
-        max-width: calc(100% - 110px);
+        max-width: calc(100% - 170px);
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs {
-        margin-right: -1px;
+        margin-right: 6px;
     }
 
     .main > .main_footer > .playback > .container > .controls > .knobs > .shuffle,
     .main > .main_footer > .playback > .container > .controls > .knobs > .repeat {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 390px) {
+    .main > .main_header:has(.sorting > .sort):has(.sorting.links > .filter) > .primary {
+        max-width: calc(100% - 208px);
+    }
+
+    .main
+        > .main_header:has(.sorting > .sort):has(.sorting.links > .filter)
+        > .secondary
+        > .sorting.links
+        > .filter
+        > .responsive-icon {
+        position: absolute;
+        left: 6px;
+        display: block;
+        fill: var(--brand-color);
+    }
+
+    .main
+        > .main_header:has(.sorting > .sort):has(.sorting.links > .filter)
+        > .secondary
+        > .sorting.links
+        > .filter
+        > select {
+        opacity: 0;
+        width: 42px;
+    }
+}
+
+@media only screen and (max-width: 320px) {
+    .main > .main_footer > .playback > .container > .track-info {
+        max-width: calc(100% - 138px);
+    }
+
+    .main > .main_footer > .playback > .container > .controls > .knobs > .primary > .previous {
         display: none;
     }
 }

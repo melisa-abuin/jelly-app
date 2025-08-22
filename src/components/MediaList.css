@@ -52,6 +52,28 @@
     border-radius: 20px;
 }
 
+.media-list .media-item > .media-state > .fallback-thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: inherit;
+    background-color: var(--bg-color-tertiary);
+}
+
+.media-list .media-item.artist-item > .media-state > .fallback-thumbnail {
+    width: 36px;
+    height: 36px;
+    border-radius: 20px;
+}
+
+.media-list .media-item > .media-state > .fallback-thumbnail > svg {
+    fill: var(--font-color-tertiary);
+    opacity: 0.6;
+    margin-left: -4%;
+}
+
 /* Hide thumbnail overlay by default */
 .media-list .media-item > .media-state > .overlay {
     position: absolute;
@@ -353,4 +375,77 @@
 .media-list .media-item.playing > .media-indicators > .favorited,
 .media-list .media-item.paused > .media-indicators > .favorited {
     color: var(--font-color-secondary);
+}
+
+.media-list .media-item > .media-indicators > .draggable {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    width: 28px;
+    height: 28px;
+    padding: 6px;
+    touch-action: none;
+}
+
+.media-list .media-item > .media-indicators > .draggable > .grid {
+    display: grid;
+    grid-template: repeat(3, 3px) / repeat(3, 3px);
+    gap: 2px;
+    justify-content: center;
+    align-content: center;
+}
+
+.media-list .media-item > .media-indicators > .draggable > .grid > .dot {
+    width: 2px;
+    height: 2px;
+    /* Force pixel alignment, on some devices the dots are uneven... subpixel rendering */
+    will-change: transform;
+    transform: translateZ(0);
+    background-color: var(--font-color-tertiary);
+    transition: background-color 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot {
+    background-color: var(--font-color-secondary);
+}
+
+/* Top-left */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(1) {
+    transform: translate(-1px, -1px) translateZ(0);
+}
+
+/* Top-center */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(2) {
+    transform: translate(0, -1px) translateZ(0);
+}
+
+/* Top-right */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(3) {
+    transform: translate(1px, -1px) translateZ(0);
+}
+
+/* Middle-left */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(4) {
+    transform: translate(-1px, 0) translateZ(0);
+}
+
+/* Middle-right */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(6) {
+    transform: translate(1px, 0) translateZ(0);
+}
+
+/* Bottom-left */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(7) {
+    transform: translate(-1px, 1px) translateZ(0);
+}
+
+/* Bottom-center */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(8) {
+    transform: translate(0, 1px) translateZ(0);
+}
+
+/* Bottom-right */
+.media-list .media-item > .media-indicators > .draggable:hover > .grid > .dot:nth-child(9) {
+    transform: translate(1px, 1px) translateZ(0);
 }

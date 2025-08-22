@@ -12,10 +12,32 @@
     display: block;
     width: 100px;
     height: 100px;
-    object-fit: cover;
     border-radius: 8px;
     margin-right: 20px;
     background-color: var(--bg-color-secondary);
+}
+
+.playlist-page > .playlist-header > .thumbnail > .thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.playlist-page > .playlist-header > .thumbnail > .fallback-thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background-color: var(--bg-color-tertiary);
+}
+
+.playlist-page > .playlist-header > .thumbnail > .fallback-thumbnail > svg {
+    fill: var(--font-color-tertiary);
+    opacity: 0.6;
+    margin-left: -4%;
 }
 
 .playlist-page > .playlist-header > .playlist-details {
@@ -148,6 +170,7 @@
     fill: var(--brand-color);
 }
 
+/* Responsive */
 @media only screen and (max-width: 320px) {
     .playlist-page > .playlist-header {
         flex-direction: column;

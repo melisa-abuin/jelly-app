@@ -6,6 +6,7 @@ import { MediaItem } from '../api/jellyfin'
 import '../App.css'
 import { useDownloadContext } from '../context/DownloadContext/DownloadContext'
 import { useDropdownContext } from '../context/DropdownContext/DropdownContext'
+import { buildUrlWithSavedFilters } from '../context/FilterContext/FilterContext'
 import { useJellyfinContext } from '../context/JellyfinContext/JellyfinContext'
 import { usePlaybackContext } from '../context/PlaybackContext/PlaybackContext'
 import { useScrollContext } from '../context/ScrollContext/ScrollContext'
@@ -17,6 +18,7 @@ import {
     AlbumIcon,
     ArtistsIcon,
     DownloadingIcon,
+    LyricsIcon,
     PlaylistIcon,
     PlaystateAnimationSearch,
     SearchClearIcon,
@@ -111,8 +113,9 @@ export const Sidenav = (props: { username: string }) => {
             if (song.Id === playback.currentTrack?.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ playlist: [song], title: 'Sidenav Track' })
-                playback.playTrack(0)
+                if (playback.setCurrentPlaylistSimple({ playlist: [song], title: 'Sidenav Track', disableUrl: true })) {
+                    playback.playTrack(0)
+                }
             }
 
             closeSidenav()
@@ -144,22 +147,22 @@ export const Sidenav = (props: { username: string }) => {
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/tracks" onClick={closeSidenav}>
+                            <NavLink to={buildUrlWithSavedFilters('/tracks')} onClick={closeSidenav}>
                                 Tracks
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/albums" onClick={closeSidenav}>
+                            <NavLink to={buildUrlWithSavedFilters('/albums')} onClick={closeSidenav}>
                                 Albums
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/artists" onClick={closeSidenav}>
+                            <NavLink to={buildUrlWithSavedFilters('/artists')} onClick={closeSidenav}>
                                 Artists
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/favorites" onClick={closeSidenav}>
+                            <NavLink to={buildUrlWithSavedFilters('/favorites')} onClick={closeSidenav}>
                                 Favorites
                             </NavLink>
                         </li>
@@ -337,7 +340,9 @@ export const Sidenav = (props: { username: string }) => {
 
                     {!searchQuery && (
                         <div className="playlists">
-                            {loading && <div className="indicator loading">Loading playlists...</div>}
+                            {loading && playlists.length === 0 && (
+                                <div className="indicator loading">Loading playlists...</div>
+                            )}
                             {error && <div className="indicator error">{error}</div>}
                             {!loading && !error && playlists.length === 0 && (
                                 <div className="indicator info">No playlists found</div>
@@ -345,7 +350,7 @@ export const Sidenav = (props: { username: string }) => {
                             <div className="container noSelect">
                                 {playlists.map(playlist => (
                                     <NavLink
-                                        to={`/playlist/${playlist.Id}`}
+                                        to={buildUrlWithSavedFilters(`/playlist/${playlist.Id}`)}
                                         key={playlist.Id}
                                         onClick={closeSidenav}
                                         className={({ isActive }) => (isActive ? 'playlist active' : 'playlist')}
@@ -384,6 +389,12 @@ export const Sidenav = (props: { username: string }) => {
                             </div>
                         </div>
                         <div className="actions">
+                            {(playback.currentTrackLyrics?.Lyrics?.length || 0) > 0 && (
+                                <NavLink to="/lyrics" className="icon lyrics" title="Lyrics">
+                                    <LyricsIcon width={16} height={16} />
+                                </NavLink>
+                            )}
+
                             {storageStats.trackCount > 0 && (
                                 <NavLink to="/synced" className="icon synced" onClick={closeSidenav} title="Synced">
                                     <DownloadingIcon width={16} height={16} />

@@ -2,12 +2,13 @@ import { MediaList } from '../components/MediaList'
 import { useJellyfinAlbumsData } from '../hooks/Jellyfin/Infinite/useJellyfinAlbumsData'
 
 export const Albums = () => {
-    const { items, isLoading, error, reviver, loadMore } = useJellyfinAlbumsData()
+    const { items, infiniteData, isLoading, error, reviver, loadMore } = useJellyfinAlbumsData()
 
     return (
         <div className="albums-page">
             <MediaList
                 items={items}
+                infiniteData={infiniteData}
                 isLoading={isLoading}
                 type="album"
                 title={'Albums'}

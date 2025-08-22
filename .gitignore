@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 deploy.sh
+
+# Build files
+release/

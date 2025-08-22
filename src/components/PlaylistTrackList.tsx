@@ -1,4 +1,5 @@
 import { HeartFillIcon } from '@primer/octicons-react'
+import { InfiniteData } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
@@ -12,22 +13,27 @@ import { Loader } from './Loader'
 import { IReviver } from './PlaybackManager'
 import './PlaylistTrackList.css'
 import { Skeleton } from './Skeleton'
+import { Squircle } from './Squircle'
 import { DeletingIcon, DownloadedIcon, DownloadingIcon, PlaystateAnimationTracklist } from './SvgIcons'
 
 export const PlaylistTrackList = ({
     tracks,
+    infiniteData = { pageParams: [], pages: [] },
     isLoading,
     playlistId,
     showType,
     title,
+    disableUrl,
     reviver,
     loadMore,
 }: {
     tracks: MediaItem[]
+    infiniteData: InfiniteData<MediaItem[], unknown> | undefined
     isLoading: boolean
     playlistId?: string
     showType?: 'artist' | 'album'
     title: string
+    disableUrl?: boolean
     reviver?: IReviver
     loadMore?: () => void
 }) => {
@@ -42,11 +48,12 @@ export const PlaylistTrackList = ({
             if (playback.currentTrack?.Id === track.Id) {
                 playback.togglePlayPause()
             } else {
-                playback.setCurrentPlaylist({ playlist: tracks, title, reviver })
-                playback.playTrack(index)
+                if (playback.setCurrentPlaylist({ pages: infiniteData, title, disableUrl, reviver })) {
+                    playback.playTrack(index)
+                }
             }
         },
-        [playback, reviver, title, tracks]
+        [playback, infiniteData, title, disableUrl, reviver]
     )
 
     const renderTrack = (index: number, item: MediaItem | { isPlaceholder: true }) => {
@@ -81,7 +88,7 @@ export const PlaylistTrackList = ({
                 onTouchMove={dropdown.onTouchClear}
                 onTouchEnd={dropdown.onTouchClear}
             >
-                <div className="track-state">
+                <Squircle width={40} height={40} cornerRadius={6} className="track-state">
                     <JellyImg item={track} type={'Primary'} width={40} height={40} />
 
                     <div className="overlay">
@@ -97,7 +104,7 @@ export const PlaylistTrackList = ({
                             <PlaystateAnimationTracklist width={18} height={18} className="sound-bars" />
                         </div>
                     </div>
-                </div>
+                </Squircle>
                 <div className="track-details">
                     <span className="track-name">
                         <span className="track-number">{index + 1}.</span>

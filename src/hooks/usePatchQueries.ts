@@ -5,7 +5,7 @@ const isPages = (data: object): data is InfiniteData<MediaItem[], unknown> => {
     return 'pages' in data && !!data.pages
 }
 
-const isMediaItem = (data: object): data is MediaItem => {
+export const isMediaItem = (data: object): data is MediaItem => {
     return 'Id' in data && !!data.Id
 }
 

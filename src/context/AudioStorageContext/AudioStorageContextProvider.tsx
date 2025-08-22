@@ -1,18 +1,38 @@
-import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models'
+import { BaseItemKind, MediaSourceInfo } from '@jellyfin/sdk/lib/generated-client/models'
 import { ReactNode, useCallback, useRef } from 'react'
 import { MediaItem } from '../../api/jellyfin'
 import { AudioStorageContext } from './AudioStorageContext'
 
 export type IAudioStorageContext = ReturnType<typeof useInitialState>
 export type IStorageTrack =
-    | { type: 'container'; mediaItem: MediaItem; bitrate: number }
-    | { type: 'song'; mediaItem: MediaItem; bitrate: number; blob: Blob; containerId?: string }
-    | { type: 'm3u8'; mediaItem: MediaItem; bitrate: number; playlist: Blob; ts: Blob[]; containerId?: string }
+    | { type: 'container'; timestamp: number; mediaItem: MediaItem; bitrate: number; thumbnail?: Blob }
+    | {
+          type: 'song'
+          timestamp: number
+          mediaItem: MediaItem
+          bitrate: number
+          blob: Blob
+          containerId?: string
+          mediaSources?: MediaSourceInfo[]
+          thumbnail?: Blob
+      }
+    | {
+          type: 'm3u8'
+          timestamp: number
+          mediaItem: MediaItem
+          bitrate: number
+          playlist: Blob
+          ts: Blob[]
+          containerId?: string
+          thumbnail?: Blob
+      }
 
 const useInitialState = () => {
     const DB_NAME = 'OfflineAudioDB'
     const STORE_NAME = 'tracks'
-    const DB_VERSION = 3
+    const DB_VERSION = 4
+
+    const isInitialized = useRef(false)
 
     const dbRef = useRef(
         new Promise<IDBDatabase>((resolve, reject) => {
@@ -26,6 +46,7 @@ const useInitialState = () => {
                     const store = db.createObjectStore(STORE_NAME)
                     store.createIndex('by_kind', 'mediaItem.Type', { unique: false })
                     store.createIndex('by_containerId', 'containerId', { unique: false })
+                    store.createIndex('by_kind_timestamp', ['mediaItem.Type', 'timestamp'], { unique: false })
                 } else {
                     if (oldVersion < 2) {
                         const store = request.transaction!.objectStore(STORE_NAME)
@@ -36,10 +57,31 @@ const useInitialState = () => {
                         const store = request.transaction!.objectStore(STORE_NAME)
                         store.createIndex('by_containerId', 'containerId', { unique: false })
                     }
+
+                    if (oldVersion < 4) {
+                        const store = request.transaction!.objectStore(STORE_NAME)
+                        store.createIndex('by_kind_timestamp', ['mediaItem.Type', 'timestamp'], { unique: false })
+
+                        // Migrate existing records to include timestamp
+                        const cursorRequest = store.openCursor()
+                        cursorRequest.onsuccess = event => {
+                            const cursor: IDBCursorWithValue | null = (event.target as IDBRequest).result
+                            if (cursor) {
+                                const record = cursor.value as IStorageTrack
+                                if (!record.timestamp) {
+                                    // Set current timestamp for existing records
+                                    record.timestamp = Date.now()
+                                    store.put(record, cursor.primaryKey)
+                                }
+                                cursor.continue()
+                            }
+                        }
+                    }
                 }
             }
 
             request.onsuccess = () => {
+                isInitialized.current = true
                 resolve(request.result)
             }
 
@@ -164,20 +206,27 @@ const useInitialState = () => {
         })
     }, [])
 
-    const getPageFromIndexedDb = async (pageIndex: number, itemKind: BaseItemKind, itemsPerPage: number) => {
+    const getPageFromIndexedDb = async (
+        pageIndex: number,
+        itemKind: BaseItemKind,
+        itemsPerPage: number
+    ): Promise<MediaItem[]> => {
         if (!dbRef.current) throw new Error('Database not initialized')
         const db = await dbRef.current
         const tx = db.transaction(STORE_NAME, 'readonly')
         const store = tx.objectStore(STORE_NAME)
-        const index = store.index('by_kind')
-        const keyRange = IDBKeyRange.only(itemKind)
+        const index = store.index('by_kind_timestamp')
+        const lower: [BaseItemKind, number] = [itemKind, 0]
+        const upper: [BaseItemKind, number] = [itemKind, Number.MAX_SAFE_INTEGER]
+        const keyRange = IDBKeyRange.bound(lower, upper)
+        const direction: IDBCursorDirection = 'prev'
 
         return new Promise<MediaItem[]>((resolve, reject) => {
             const items: MediaItem[] = []
             let skipped = 0
             const needToSkip = pageIndex * itemsPerPage
 
-            const cursorRequest = index.openCursor(keyRange)
+            const cursorRequest = index.openCursor(keyRange, direction)
             cursorRequest.onerror = () => {
                 reject(cursorRequest.error)
             }
@@ -204,11 +253,18 @@ const useInitialState = () => {
                     return
                 }
 
-                // Collect this record’s mediaItem
-                const record = cursor.value as { mediaItem: MediaItem }
+                const record = cursor.value as Partial<IStorageTrack>
 
                 // Legacy did not have `mediaItem` field, so we check if it exists
                 if (record.mediaItem) {
+                    if (record.type === 'song' && record.mediaItem && record.mediaSources) {
+                        record.mediaItem.MediaSources = record.mediaSources
+                    }
+
+                    if (record.thumbnail) {
+                        record.mediaItem.downloadedImageUrl = URL.createObjectURL(record.thumbnail)
+                    }
+
                     items.push(record.mediaItem)
                 }
 
@@ -230,6 +286,7 @@ const useInitialState = () => {
         getTrackCount,
         clearAllDownloads,
         getPageFromIndexedDb,
+        isInitialized: () => isInitialized.current,
     }
 
     // We need the audioStorage in jellyfin API but we don't want to cause unnecessary re-renders since opening the IndexedDB shouldn't take long

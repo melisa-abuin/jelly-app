@@ -18,7 +18,7 @@
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     transform: translate(0);
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease;
 }
 
 /* Isolate volume scroll */
@@ -93,6 +93,8 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_content > ul {
+    position: relative;
+    z-index: 2;
     list-style: none;
 }
 
@@ -705,7 +707,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 .sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input {
     cursor: pointer;
     width: 150px;
-    height: 7px;
+    height: 8px;
     border-radius: 20px;
     background-color: var(--bg-color);
     border: 1px solid var(--border-color);
@@ -713,8 +715,8 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 13px;
-    height: 13px;
+    width: 14px;
+    height: 14px;
     border-radius: 100%;
     background-color: var(--volume-dot-color);
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.15);
@@ -722,6 +724,21 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input::-webkit-slider-thumb:active {
+    background-color: var(--volume-dot-color-active);
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input::-moz-range-thumb {
+    appearance: none;
+    border: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 100%;
+    background-color: var(--volume-dot-color);
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.2s ease-out;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .volume > .control > input::-moz-range-thumb:active {
     background-color: var(--volume-dot-color-active);
 }
 
@@ -753,6 +770,7 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions {
     display: flex;
     align-items: center;
+    margin-right: -6px;
 }
 
 .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon {
@@ -765,11 +783,30 @@ html.winOS .sidenav > .sidenav_wrapper > .sidenav_footer {
     background-color: var(--bg-color-tertiary);
 }
 
-.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon.settings {
-    margin-right: -6px;
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon > svg {
+    fill: var(--font-color);
+    transition: fill 0.2s ease-out;
+}
+
+.sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions > .icon.active > svg {
+    fill: var(--font-color-active);
 }
 
 /* Responsive */
+@media only screen and (pointer: coarse) {
+    .sidenav > .sidenav_wrapper > .sidenav_footer {
+        padding-bottom: min(24px, env(safe-area-inset-bottom, 12px));
+    }
+
+    html.safeAreaFallback .sidenav > .sidenav_wrapper > .sidenav_footer {
+        padding-bottom: 12px;
+    }
+
+    .sidenav > .sidenav_wrapper > .sidenav_footer > .account > .actions {
+        gap: 2px;
+    }
+}
+
 @media only screen and (max-width: 700px) {
     .sidenav {
         flex-basis: 0;

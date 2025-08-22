@@ -41,6 +41,22 @@
     background-color: var(--bg-color-secondary);
 }
 
+.playlist-tracklist .track-item > .track-state > .fallback-thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: inherit;
+    background-color: var(--bg-color-tertiary);
+}
+
+.playlist-tracklist .track-item > .track-state > .fallback-thumbnail > svg {
+    fill: var(--font-color-tertiary);
+    opacity: 0.6;
+    margin-left: -4%;
+}
+
 /* Hide thumbnail overlay by default */
 .playlist-tracklist .track-item > .track-state > .overlay {
     position: absolute;

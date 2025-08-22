@@ -129,6 +129,10 @@ export const SearchResults = () => {
                         <div className="title">Artists</div>
                         <MediaList
                             items={results.artists.map(artist => artist._mediaItem)}
+                            infiniteData={{
+                                pageParams: [1],
+                                pages: [results.artists.map(artist => artist._mediaItem)],
+                            }}
                             isLoading={loading}
                             type="artist"
                             title={`Artists for '${query}'`}
@@ -142,6 +146,7 @@ export const SearchResults = () => {
                         <div className="title">Albums</div>
                         <MediaList
                             items={results.albums.map(album => album._mediaItem)}
+                            infiniteData={{ pageParams: [1], pages: [results.albums.map(album => album._mediaItem)] }}
                             isLoading={loading}
                             type="album"
                             title={`Albums for '${query}'`}
@@ -156,6 +161,10 @@ export const SearchResults = () => {
                         <div className="title">Playlists</div>
                         <MediaList
                             items={results.playlists.map(playlist => playlist._mediaItem)}
+                            infiniteData={{
+                                pageParams: [1],
+                                pages: [results.playlists.map(playlist => playlist._mediaItem)],
+                            }}
                             isLoading={loading}
                             type="playlist"
                             title={`Playlists for '${query}'`}
