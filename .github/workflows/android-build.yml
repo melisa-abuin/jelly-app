@@ -1,0 +1,118 @@
+name: Build Android APK
+
+on:
+    workflow_dispatch:
+        inputs:
+            release_type:
+                description: 'Release type'
+                required: true
+                default: 'debug'
+                type: choice
+                options:
+                    - debug
+                    - release
+
+jobs:
+    build-android:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Java 17
+              uses: actions/setup-java@v4
+              with:
+                  java-version: '17'
+                  distribution: 'temurin'
+
+            - name: Setup Android SDK
+              uses: android-actions/setup-android@v3
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: 'yarn'
+
+            - name: Install Yarn
+              run: npm install --global yarn
+
+            - name: Install dependencies
+              run: yarn install --frozen-lockfile
+
+            - name: Setup Rust
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+            - name: Setup Rust cache
+              uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: src-tauri
+
+            - name: Install Android NDK
+              run: |
+                  ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "ndk;25.0.8775105"
+                  echo "ANDROID_NDK_HOME=${ANDROID_SDK_ROOT}/ndk/25.0.8775105" >> $GITHUB_ENV
+                  echo "NDK_HOME=${ANDROID_SDK_ROOT}/ndk/25.0.8775105" >> $GITHUB_ENV
+
+            - name: Initialize Tauri Android
+              run: |
+                  yarn tauri android init --ci
+              env:
+                  ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+
+            - name: Build frontend
+              run: yarn build
+
+            - name: Build Android APK (Debug)
+              if: ${{ github.event.inputs.release_type == 'debug' }}
+              run: |
+                  yarn tauri android build --apk
+              env:
+                  ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+                  ANDROID_NDK_HOME: ${{ env.NDK_HOME }}
+
+            - name: Build Android APK (Release)
+              if: ${{ github.event.inputs.release_type == 'release' }}
+              run: |
+                  yarn tauri android build --apk --release
+              env:
+                  ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+                  ANDROID_NDK_HOME: ${{ env.NDK_HOME }}
+
+            - name: Find APK files
+              id: find-apk
+              run: |
+                  if [ "${{ github.event.inputs.release_type }}" == "release" ]; then
+                    APK_PATH=$(find src-tauri/gen/android -name "*.apk" -path "*/release/*" | head -1)
+                  else
+                    APK_PATH=$(find src-tauri/gen/android -name "*.apk" -path "*/debug/*" | head -1)
+                  fi
+
+                  if [ -n "$APK_PATH" ]; then
+                    echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+                    echo "apk_name=$(basename $APK_PATH)" >> $GITHUB_OUTPUT
+                    echo "Found APK: $APK_PATH"
+                  else
+                    echo "No APK found!"
+                    exit 1
+                  fi
+
+            - name: Upload APK as artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: jelly-music-app-android-${{ github.event.inputs.release_type }}-${{ github.run_number }}
+                  path: ${{ steps.find-apk.outputs.apk_path }}
+                  if-no-files-found: error
+
+            - name: Set output summary
+              run: |
+                  echo "## 🤖 Android Build Complete!" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "**Build Type:** ${{ github.event.inputs.release_type }}" >> $GITHUB_STEP_SUMMARY
+                  echo "**APK Name:** ${{ steps.find-apk.outputs.apk_name }}" >> $GITHUB_STEP_SUMMARY
+                  echo "**Artifact Name:** jelly-music-app-android-${{ github.event.inputs.release_type }}-${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "The APK has been uploaded as a workflow artifact. You can download it from the 'Artifacts' section of this workflow run." >> $GITHUB_STEP_SUMMARY
